@@ -2,13 +2,11 @@ defmodule TypeCheck.Spec.Expander do
   @moduledoc false
   # Expands a typespec-AST to its symbolic nested-structs form
 
-  def expand(name, orig, env, top_level_def \\ nil) do
+  def expand(name, %{kind: kind, type: orig}, env, top_level_def \\ nil) do
     top_level_def = Macro.to_string(top_level_def || orig)
-    # res = do_expand(orig, env, Macro.to_string(orig))
     quoted_res = Macro.postwalk(orig, fn ast -> do_expand(ast, env, top_level_def) end)
-    # IO.inspect(quoted_res, label: :quoted_res)
     {res, _} = Code.eval_quoted(quoted_res)
-    Module.put_attribute(env.module, TypeCheck.Spec.Expanded, {name, res})
+    Module.put_attribute(env.module, TypeCheck.Spec.Expanded, {name, %{kind: kind, type: res}})
     res
   end
 
@@ -57,7 +55,7 @@ defmodule TypeCheck.Spec.Expander do
         raise "Expansion loop detected: Asked to expand #{name} while expanding #{top_level_def}"
       unexpanded = Module.get_attribute(env.module, TypeCheck.Spec.Unexpanded)[:"#{name}/#{arity}"] ->
         # TODO passing arguments
-        res = expand(name, unexpanded.type, env, top_level_def)
+        res = expand(name, unexpanded, env, top_level_def)
         {:ok, Macro.escape(res)}
       {name, arity} in TypeCheck.Spec.Builtin.__info__(:functions) ->
         # apply(TypeCheck.Spec.Builtin, name, expanded_args)
@@ -65,7 +63,6 @@ defmodule TypeCheck.Spec.Expander do
         {:ok, res}
       true ->
         # Leave as-is, Elixir will raise a descriptive error for us
-        # {name, meta, args}
         :error
     end
   end

@@ -22,11 +22,8 @@ defmodule TypeCheck.Spec do
     Enum.map(types, &eval_type(&1, env))
   end
 
-  defp eval_type({name, %{kind: kind, type: typedef}}, env) do
+  defp eval_type({name, typedef}, env) do
     TypeCheck.Spec.Expander.expand(name, typedef, env)
-    # import TypeCheck.Spec.Builtin
-    # # TODO referring to local types
-    # Code.eval_quoted(typedef, [], __ENV__)
   end
 
   defp eval_specs(specs) do
@@ -55,7 +52,7 @@ defmodule TypeCheck.Spec do
 
   # Shared between type, typep and opaque
   defp build_typedef_ast(args, call_kind) do
-    # TODO support higher-order types
+    # TODO support parameterized types
     {name, raw_type} = extract_type_name(args)
     arity = 0
     quote do
@@ -85,6 +82,9 @@ defmodule TypeCheck.Spec do
 
   defp extract_spec_name(ast = {:"::", _, [{function_name, _, arg_types}, return_type]}) when is_atom(function_name) and is_list(arg_types) do
     {function_name, arg_types, return_type}
+  end
+  defp extract_spec_name(other) do
+    raise "Expected a definition in the shape of `name(type1, type2, type3) :: return_type` but got `#{Macro.to_string(other)}`"
   end
 
   defp extract_var_name({name, _, module}) when is_atom(name) and is_atom(module), do: {:ok, name}
