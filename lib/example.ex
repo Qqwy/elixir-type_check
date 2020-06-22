@@ -4,6 +4,7 @@ defmodule Example do
   type myint :: integer()
   type str :: binary
   type myint2 :: myint
+  type num :: integer() | float()
 
   spec foo(myint) :: str
   def foo(x) do
