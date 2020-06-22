@@ -6,7 +6,7 @@ defmodule TypeCheck.Spec.Expander do
     top_level_def = Macro.to_string(top_level_def || orig)
     quoted_res = Macro.postwalk(orig, fn ast -> do_expand(ast, env, top_level_def) end)
     {res, _} = Code.eval_quoted(quoted_res)
-    Module.put_attribute(env.module, TypeCheck.Spec.Expanded, {name, %{kind: kind, type: res}})
+    Module.put_attribute(env.module, TypeCheck.Spec.Expanded, {name, %{name: name, kind: kind, type: res}})
     res
   end
 

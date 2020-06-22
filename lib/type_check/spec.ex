@@ -14,7 +14,13 @@ defmodule TypeCheck.Spec do
     type_res = eval_types(types, env)
     IO.inspect(type_res)
     spec_res = eval_specs(specs)
-    quote do
+    quote bind_quoted: [types: Macro.escape(type_res)] do
+      for {name, val} <- types do
+        # if val.kind in [:type, :opaque] do
+        name = name |> Atom.to_string() |> String.split("/") |> hd |> String.to_existing_atom()
+        def unquote(name)(), do: unquote(Macro.escape(val))
+        # end
+      end
     end
   end
 
@@ -23,7 +29,7 @@ defmodule TypeCheck.Spec do
   end
 
   defp eval_type({name, typedef}, env) do
-    TypeCheck.Spec.Expander.expand(name, typedef, env)
+    {name, TypeCheck.Spec.Expander.expand(name, typedef, env)}
   end
 
   defp eval_specs(specs) do
