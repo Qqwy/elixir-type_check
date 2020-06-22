@@ -1,7 +1,11 @@
 defmodule TypeCheck.Spec do
   defmacro __before_compile__(env) do
     IO.inspect(env)
-    typedefs = Module.get_attribute(env.module, TypeCheck.Spec.Raw)
+
+    # Used internally in by the expander; c.f. TypeCheck.Spec.Expander
+    Module.register_attribute(env.module, TypeCheck.Spec.BeingExpanded, accumulate: true, persist: true)
+    Module.register_attribute(env.module, TypeCheck.Spec.Expanded, accumulate: true, persist: true)
+    typedefs = Module.get_attribute(env.module, TypeCheck.Spec.Unexpanded)
 
     types = typedefs |> Enum.filter(fn {key, val} -> val.kind in [:type, :typep, :opaque] end)
     specs = typedefs |> Enum.filter(fn {key, val} -> val.kind == :spec end)
@@ -19,7 +23,7 @@ defmodule TypeCheck.Spec do
   end
 
   defp eval_type({name, %{kind: kind, type: typedef}}, env) do
-    TypeCheck.Spec.Expander.expand(typedef, %{}, %{})
+    TypeCheck.Spec.Expander.expand(name, typedef, env)
     # import TypeCheck.Spec.Builtin
     # # TODO referring to local types
     # Code.eval_quoted(typedef, [], __ENV__)
@@ -51,16 +55,19 @@ defmodule TypeCheck.Spec do
 
   # Shared between type, typep and opaque
   defp build_typedef_ast(args, call_kind) do
+    # TODO support higher-order types
     {name, raw_type} = extract_type_name(args)
+    arity = 0
     quote do
-      Module.put_attribute(__MODULE__, TypeCheck.Spec.Raw, {unquote(name), %{kind: unquote(call_kind), type: unquote(Macro.escape(raw_type))}})
+      Module.put_attribute(__MODULE__, TypeCheck.Spec.Unexpanded, {:"#{unquote(name)}/#{unquote(arity)}", %{kind: unquote(call_kind), type: unquote(Macro.escape(raw_type))}})
     end
   end
 
   defp build_spec_ast(args) do
     {name, arg_types, return_type} = extract_spec_name(args)
+    arity = length arg_types
     quote do
-      Module.put_attribute(__MODULE__, TypeCheck.Spec.Raw, {unquote(name), %{kind: :spec, arg_types: unquote(Macro.escape(arg_types)), type: unquote(Macro.escape(return_type))}})
+      Module.put_attribute(__MODULE__, TypeCheck.Spec.Unexpanded, {:"#{unquote(name)}/#{unquote(arity)}}", %{kind: :spec, arg_types: unquote(Macro.escape(arg_types)), type: unquote(Macro.escape(return_type))}})
     end
   end
 

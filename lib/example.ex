@@ -3,6 +3,7 @@ defmodule Example do
 
   type myint :: integer()
   type str :: binary
+  type myint2 :: myint
 
   spec foo(myint) :: str
   def foo(x) do
