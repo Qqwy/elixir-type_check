@@ -7,6 +7,9 @@ defmodule Example do
   type num :: integer() | float()
   type one :: 1
 
+  type char :: 0..255
+  type literal_range :: literal(0..255)
+
   type result :: :ok | :error
 
   spec foo(myint) :: str

@@ -3,6 +3,7 @@ defmodule TypeCheck.Spec.Expander do
   # Expands a typespec-AST to its symbolic nested-structs form
 
   def expand(name, %{kind: kind, type: orig}, env, top_level_def \\ nil) do
+    Module.put_attribute(env.module, TypeCheck.Spec.BeingExpanded, {name, true})
     top_level_def = Macro.to_string(top_level_def || orig)
     quoted_res = Macro.postwalk(orig, fn ast -> do_expand(ast, env, top_level_def) end)
     {res, _} = Code.eval_quoted(quoted_res)
@@ -56,7 +57,7 @@ defmodule TypeCheck.Spec.Expander do
         res = already_expanded.type
         {:ok, Macro.escape(res)}
       Module.get_attribute(env.module, TypeCheck.Spec.BeingExpanded)[:"#{name}/#{arity}"] ->
-        raise "Expansion loop detected: Asked to expand #{name} while expanding #{top_level_def}"
+        raise "Type Expansion loop detected: Asked to expand #{name} while expanding #{top_level_def}"
       unexpanded = Module.get_attribute(env.module, TypeCheck.Spec.Unexpanded)[:"#{name}/#{arity}"] ->
         # TODO passing arguments
         res = expand(name, unexpanded, env, top_level_def)
