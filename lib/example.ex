@@ -2,7 +2,7 @@ defmodule Example do
   use TypeCheck
 
   type myint :: integer()
-  type str :: binary()
+  type str :: binary
 
   spec foo(myint) :: str
   def foo(x) do

@@ -7,25 +7,29 @@ defmodule TypeCheck.Spec do
     specs = typedefs |> Enum.filter(fn {key, val} -> val.kind == :spec end)
     IO.inspect(types)
     IO.inspect(specs)
-    type_res = eval_types(types)
+    type_res = eval_types(types, env)
+    IO.inspect(type_res)
     spec_res = eval_specs(specs)
     quote do
     end
   end
 
-  defp eval_types(types) do
-    Enum.map(types, &eval_type/1)
+  defp eval_types(types, env) do
+    Enum.map(types, &eval_type(&1, env))
   end
 
-  defp eval_type(type) do
-    :ok
+  defp eval_type({name, %{kind: kind, type: typedef}}, env) do
+    TypeCheck.Spec.Expander.expand(typedef, %{}, %{})
+    # import TypeCheck.Spec.Builtin
+    # # TODO referring to local types
+    # Code.eval_quoted(typedef, [], __ENV__)
   end
 
   defp eval_specs(specs) do
     Enum.map(specs, &eval_spec/1)
   end
 
-  defp eval_spec(spec) do
+  defp eval_spec({name, spec}) do
     :ok
   end
 
