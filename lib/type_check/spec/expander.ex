@@ -14,6 +14,10 @@ defmodule TypeCheck.Spec.Expander do
     raise "Currently, TypeCheck does not support types with `->`. Support will hopefully be added in the future."
   end
 
+  def do_expand(literal, env, top_level_def) when is_number(literal) or is_binary(literal) or is_port(literal) or is_atom(literal) or is_reference(literal) or is_list(literal) do
+    do_expand({:"literal", [], [literal]}, env, top_level_def)
+  end
+
   # Variable name (or function call without parentheses)
   def do_expand(orig = {name, _, atom}, env, top_level_def) when is_atom(name) and is_atom(atom) do
     IO.inspect(orig, label: :expand_var)
