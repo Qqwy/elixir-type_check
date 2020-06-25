@@ -10,7 +10,7 @@ defmodule Example do
   type char :: 0..255
   type literal_range :: literal(0..255)
 
-  type result :: :ok | :error
+  type result :: :ok | :error | unknown
 
   spec foo(myint) :: str
   def foo(x) do
