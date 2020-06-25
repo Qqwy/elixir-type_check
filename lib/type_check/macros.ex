@@ -19,6 +19,7 @@ defmodule TypeCheck.Macros do
       foo = mylist5() |> Map.keys()
       def example_spec, do: unquote(foo)
     end
+    |> IO.inspect()
   end
 
   defmacro type(typedef) do
@@ -52,10 +53,9 @@ defmodule TypeCheck.Macros do
 
     macro_body =
       type
-      # |> wrap_params_with_unquote(params)
-      # |> manually_wrap_in_quote()
+      |> expand()
 
-    res = macro_definition(new_typedoc, typedef, name_with_maybe_params, macro_body)
+    res = type_fun_definition(new_typedoc, typedef, name_with_maybe_params, macro_body)
     IO.inspect(res)
     IO.puts(Macro.to_string(res))
     quote do
@@ -73,7 +73,7 @@ defmodule TypeCheck.Macros do
     newdoc
   end
 
-  defp macro_definition(typedoc, typedef, name_with_params, macro_body) do
+  defp type_fun_definition(typedoc, typedef, name_with_params, macro_body) do
     quote do
       @doc false
       def unquote(name_with_params) do
@@ -82,28 +82,62 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  # Given a list of parameters
-  # that each are Elixir ASTs like `{:a, _, Elixir}`
-  # will wrap all instances where that same AST is used in `type_ast`
-  # with calls to `unquote`.
-  defp wrap_params_with_unquote(type_ast, params) do
-    Macro.postwalk(type_ast, &wrap_param_with_unquote(&1, params))
-  end
+  # TODO
+  # replace AST that are Kernel.SpecialForms
+  # with alternatives
+  # that refer to functions in TypeCheck.Builtin
+  defp expand(type), do: type
 
-  defp wrap_param_with_unquote(type_ast_node, params) do
-    if type_ast_node in params do
-      # Note that we need to construct the `unquote` AST-node
-      # manually because we need to delay wrapping it in `quote`
-      # until later.
-      {:unquote, [], [type_ast_node]}
-      else
-        type_ast_node
+
+  defp define_spec(specdef = {:"::", _meta, [name_with_params, return_type]}, caller) do
+    {name, params} = Macro.decompose_call(name_with_params)
+    # TODO currently assumes the params are directly types
+    # rather than the possibility of named types like `x :: integer()`
+    IO.inspect({name, params}, label: :define_spec)
+    res = spec_fun_defunition(specdef, name, params, caller)
+    quote do
+      Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
     end
   end
 
-  # Required because writing the 'automatic' `quote do unquote(x) end`
-  # would result in `x`, rather than in a quote with x's contents.
-  defp manually_wrap_in_quote(x) do
-    {:quote, [], [[do: x]]}
+  defp spec_fun_defunition(specdef, name, params, caller) do
+    defname = :"__spec_for_#{name}__"
+    clean_params =
+      Macro.generate_arguments(length(params), caller.module)
+
+    # first_param = hd clean_params
+    code = params_to_with(params, clean_params, caller)
+
+    # code = TypeCheck.Protocols.ToCheck.to_check(TypeCheck.Builtin.integer(), first_param)
+
+    quote do
+      def unquote(defname)(unquote_splicing(clean_params)) do
+        unquote(code)
+      end
+    end
+  end
+
+  defp params_to_with(params, clean_params, caller) do
+    paired_params =
+      params
+      |> Enum.zip(clean_params)
+      |> Enum.with_index
+      |> Enum.map(fn {{param, clean_param}, index} ->
+        {param_type, []} = Code.eval_quoted(param, [], caller)
+        impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
+        quote do
+          {:ok, _index} <- {unquote(impl), unquote(index)}
+        end
+      end)
+    code =
+      quote do
+        with unquote_splicing(paired_params) do
+          :success!
+        else
+          any -> any
+        end
+      end
+    IO.puts(Macro.to_string(code))
+    code
   end
 end

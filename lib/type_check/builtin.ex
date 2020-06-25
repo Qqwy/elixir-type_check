@@ -1,6 +1,6 @@
 defmodule TypeCheck.Builtin do
   def integer() do
-    %{type: :integer}
+    %TypeCheck.Builtin.Integer{}
   end
 
   def list(a) do
