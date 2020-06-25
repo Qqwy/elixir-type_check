@@ -1,17 +1,19 @@
 defmodule TypeCheck.Macros do
   defmacro __before_compile__(env) do
-    # IO.puts("Before compile!")
-    # IO.inspect(env)
     defs =
       Module.get_attribute(env.module, TypeCheck.TypeDefs)
-    # IO.inspect(defs, label: :defs)
 
-    # This extra module is created
-    # so that we can already access the custom user types
-    # at compile-time
-    # _inside_ the module they will be part of
-    Module.create(Module.concat(env.module, TypeCheck), defs, env)
+    Module.create(Module.concat(env.module, TypeCheck), quote do
+      @moduledoc false
+      # This extra module is created
+      # so that we can already access the custom user types
+      # at compile-time
+      # _inside_ the module they will be part of
+      unquote(defs)
+    end, env)
 
+    # And now, override all specs:
+    # TODO
     quote unquote: false do
       import __MODULE__.TypeCheck
       foo = mylist5() |> Map.keys()
@@ -31,6 +33,10 @@ defmodule TypeCheck.Macros do
     define_type(typedef, :opaque, __CALLER__)
   end
 
+  defmacro spec(specdef) do
+    define_spec(specdef, __CALLER__)
+  end
+
   defp define_type(typedef = {:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
     {name, params} = Macro.decompose_call(name_with_maybe_params)
 
@@ -46,15 +52,17 @@ defmodule TypeCheck.Macros do
 
     macro_body =
       type
-      |> wrap_params_with_unquote(params)
-      |> manually_wrap_in_quote()
+      # |> wrap_params_with_unquote(params)
+      # |> manually_wrap_in_quote()
 
     res = macro_definition(new_typedoc, typedef, name_with_maybe_params, macro_body)
     IO.inspect(res)
     IO.puts(Macro.to_string(res))
     quote do
-      Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
+      @typedoc unquote(new_typedoc)
+      @type unquote(typedef)
       unquote(res)
+      Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
     end
   end
 
@@ -67,11 +75,8 @@ defmodule TypeCheck.Macros do
 
   defp macro_definition(typedoc, typedef, name_with_params, macro_body) do
     quote do
-      # @typedoc unquote(typedoc)
-      # @type unquote(typedef)
       @doc false
-      defmacro unquote(name_with_params) do
-        import TypeCheck.Builtin
+      def unquote(name_with_params) do
         unquote(macro_body)
       end
     end
