@@ -126,15 +126,18 @@ defmodule TypeCheck.Macros do
         {param_type, []} = Code.eval_quoted(param, [], caller)
         impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
         quote do
-          {:ok, _index} <- {unquote(impl), unquote(index)}
+          {:ok, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
         end
       end)
     code =
       quote do
         with unquote_splicing(paired_params) do
-          :success!
+          # Run actual code
         else
-          any -> any
+            # TODO transform into humanly-readable code
+            # and raise it as exception
+          error ->
+            raise ArgumentError, inspect(error)
         end
       end
     IO.puts(Macro.to_string(code))
