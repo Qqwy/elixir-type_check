@@ -1,6 +1,5 @@
 defmodule Example2 do
   use TypeCheck
-  require TypeCheck.Builtin
 
 
   type mylist :: list(integer())
@@ -10,11 +9,12 @@ defmodule Example2 do
   type mylist5 :: mylist3(integer())
 
   def example do
-    {mylist(), mylist2(), mylist3(10), mylist3(TypeCheck.Builtin.integer())}
+    :ok
+    # {mylist(), mylist2(), mylist3(10), mylist3(TypeCheck.Builtin.integer())}
     # {mylist(), mylist2(), mylist3(10), mylist3(mylist3(integer()))}
   end
 
-  spec wrap(list(any())) :: any() # list(integer())
+  spec wrap(list()) :: any() # list(integer())
   def wrap(int) do
     [int, int]
   end

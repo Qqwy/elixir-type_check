@@ -3,6 +3,10 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Integer{}
   end
 
+  def list() do
+    list(any())
+  end
+
   def list(a) do
     %TypeCheck.Builtin.List{element_type: a}
   end

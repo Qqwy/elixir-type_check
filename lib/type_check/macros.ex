@@ -2,7 +2,6 @@ defmodule TypeCheck.Macros do
   defmacro __using__(_options) do
     quote do
       import TypeCheck.Macros
-      import TypeCheck.Builtin
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true, persist: true)
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true, persist: true)
@@ -35,6 +34,8 @@ defmodule TypeCheck.Macros do
       quote line: line do
         defoverridable([{unquote(name), unquote(arity)}])
         def unquote(name)(unquote_splicing(clean_params)) do
+          import TypeCheck.Builtin
+
           unquote(params_spec_code)
           var!(super_result, nil) = super(unquote_splicing(clean_params))
           # TODO check result
@@ -110,6 +111,7 @@ defmodule TypeCheck.Macros do
     quote do
       @doc false
       def unquote(name_with_params) do
+        import TypeCheck.Builtin
         unquote(macro_body)
       end
     end
@@ -138,6 +140,7 @@ defmodule TypeCheck.Macros do
       Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(params_spec_code)), unquote(Macro.escape(return_spec_code))})
 
       def unquote(spec_fun_name)() do
+        import TypeCheck.Builtin
         %TypeCheck.Spec{name: unquote(name), param_types: unquote(params_ast), return_type: unquote(return_type_ast)}
       end
     end
@@ -164,7 +167,7 @@ defmodule TypeCheck.Macros do
   end
 
   defp return_check_code(return_type_ast, caller) do
-    {return_type, []} = Code.eval_quoted(return_type_ast, [], caller)
+    {return_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(return_type_ast) end, [], caller)
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
     return_code = quote do
       case unquote(return_code_check) do
@@ -182,7 +185,7 @@ defmodule TypeCheck.Macros do
       |> Enum.zip(clean_params)
       |> Enum.with_index
       |> Enum.map(fn {{param, clean_param}, index} ->
-        {param_type, []} = Code.eval_quoted(param, [], caller)
+      {param_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(param) end, [], caller)
         impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
         quote do
           {:ok, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
