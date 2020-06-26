@@ -1,6 +1,25 @@
 # TypeCheck
 
-**TODO: Add description**
+
+## Roadmap
+
+- [x] Proof and implementation of the basic concept
+- [x] Custom type definitions (type, typep, opaque)
+  - [x] Basic
+  - [x] Parameterized
+- [ ] Hide implementation of `opaque` from documentation
+- [x] Spec argument types checking
+- [ ] Spec return type checking
+- [ ] Spec possibly named arguments
+- [ ] Implementation of Elixir's builtin types
+  - [ ] Primitive types
+  - [ ] Compound types
+  - [ ] Overrides for builtin typedefs (`String.t`,`Enum.t`, etc.)
+- [ ] Creating generators from types
+- [ ] Creating generators from specs
+  - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
+- [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
+
 
 ## Installation
 

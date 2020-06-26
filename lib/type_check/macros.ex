@@ -131,13 +131,19 @@ defmodule TypeCheck.Macros do
     res = prepare_spec_fun_definition(specdef, name, params, clean_params, caller)
 
     # Module.put_attribute(caller.module, TypeCheck.TypeDefs, Macro.escape(res))
-    quote do
+    spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
+    res = quote do
       Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(res))})
+
+      def unquote(spec_fun_name)() do
+        %TypeCheck.Spec{name: unquote(name), param_types: unquote(params), return_type: unquote(return_type)}
+      end
     end
+    IO.puts(Macro.to_string(res))
+    res
   end
 
   defp prepare_spec_fun_definition(specdef, name, params, clean_params, caller) do
-    # defname = :"__spec_for_#{name}__"
 
     # first_param = hd clean_params
     code = params_to_with(params, clean_params, caller)
