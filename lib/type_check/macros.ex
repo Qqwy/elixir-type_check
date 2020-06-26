@@ -1,4 +1,15 @@
 defmodule TypeCheck.Macros do
+  defmacro __using__(_options) do
+    quote do
+      import TypeCheck.Macros
+      import TypeCheck.Builtin
+
+      Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true, persist: true)
+      Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true, persist: true)
+      @before_compile TypeCheck.Macros
+    end
+  end
+
   defmacro __before_compile__(env) do
     defs =
       Module.get_attribute(env.module, TypeCheck.TypeDefs)
@@ -13,13 +24,32 @@ defmodule TypeCheck.Macros do
     end, env)
 
     # And now, override all specs:
-    # TODO
-    quote unquote: false do
-      import __MODULE__.TypeCheck
-      foo = mylist5() |> Map.keys()
-      def example_spec, do: unquote(foo)
+    definitions = Module.definitions_in(env.module)
+    IO.inspect(definitions, label: :definitions)
+    specs = Module.get_attribute(env.module, TypeCheck.Specs)
+    spec_quotes = for {name, arity, clean_params, spec_code} <- specs do
+      unless {name, arity} in definitions do
+        raise ArgumentError, "spec for undefined function #{name}/#{arity}"
+      end
+
+      quote do
+        defoverridable([{unquote(name), unquote(arity)}])
+        def unquote(name)(unquote_splicing(clean_params)) do
+          unquote(spec_code)
+          super(unquote_splicing(clean_params))
+        end
+      end
     end
-    |> IO.inspect()
+
+    # Time to combine it all
+    res = quote do
+      import __MODULE__.TypeCheck
+
+      unquote(spec_quotes)
+    end
+
+    IO.puts(Macro.to_string(res))
+    res
   end
 
   defmacro type(typedef) do
@@ -91,30 +121,33 @@ defmodule TypeCheck.Macros do
 
   defp define_spec(specdef = {:"::", _meta, [name_with_params, return_type]}, caller) do
     {name, params} = Macro.decompose_call(name_with_params)
+    arity = length(params)
     # TODO currently assumes the params are directly types
     # rather than the possibility of named types like `x :: integer()`
     IO.inspect({name, params}, label: :define_spec)
-    res = spec_fun_defunition(specdef, name, params, caller)
+    clean_params =
+      Macro.generate_arguments(length(params), caller.module)
+    res = prepare_spec_fun_definition(specdef, name, params, clean_params, caller)
+
+    # Module.put_attribute(caller.module, TypeCheck.TypeDefs, Macro.escape(res))
     quote do
-      Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
+      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(res))})
     end
   end
 
-  defp spec_fun_defunition(specdef, name, params, caller) do
-    defname = :"__spec_for_#{name}__"
-    clean_params =
-      Macro.generate_arguments(length(params), caller.module)
+  defp prepare_spec_fun_definition(specdef, name, params, clean_params, caller) do
+    # defname = :"__spec_for_#{name}__"
 
     # first_param = hd clean_params
     code = params_to_with(params, clean_params, caller)
 
     # code = TypeCheck.Protocols.ToCheck.to_check(TypeCheck.Builtin.integer(), first_param)
 
-    quote do
-      def unquote(defname)(unquote_splicing(clean_params)) do
-        unquote(code)
-      end
-    end
+    # quote do
+    #   def unquote(defname)(unquote_splicing(clean_params)) do
+    #     unquote(code)
+    #   end
+    # end
   end
 
   defp params_to_with(params, clean_params, caller) do

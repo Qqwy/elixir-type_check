@@ -20,7 +20,7 @@ defmodule Example2 do
   end
 
 
-  spec wrap2(integer(), integer()) :: list(integer())
+  spec wrap(integer(), integer()) :: list(integer())
   def wrap(int1, int2) do
     [int1, int2]
   end
