@@ -1,6 +1,15 @@
 defmodule TypeCheck.Spec do
   defstruct [:name, :param_types, :return_type]
 
+  def spec_for(module, function, arity) do
+    spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
+    if function_exported?(module, spec_fun_name, 0) do
+      {:ok, apply(module, spec_fun_name, [])}
+    else
+      {:error, :not_found}
+    end
+  end
+
   defimpl Inspect do
     def inspect(struct, opts) do
       body =
