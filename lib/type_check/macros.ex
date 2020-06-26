@@ -27,16 +27,17 @@ defmodule TypeCheck.Macros do
     definitions = Module.definitions_in(env.module)
     IO.inspect(definitions, label: :definitions)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
-    spec_quotes = for {name, arity, clean_params, spec_code} <- specs do
+    spec_quotes = for {name, line, arity, clean_params, spec_code} <- specs do
       unless {name, arity} in definitions do
         raise ArgumentError, "spec for undefined function #{name}/#{arity}"
       end
 
-      quote do
+      quote line: line do
         defoverridable([{unquote(name), unquote(arity)}])
         def unquote(name)(unquote_splicing(clean_params)) do
           unquote(spec_code)
           super(unquote_splicing(clean_params))
+          # TODO check result
         end
       end
     end
@@ -131,7 +132,7 @@ defmodule TypeCheck.Macros do
 
     # Module.put_attribute(caller.module, TypeCheck.TypeDefs, Macro.escape(res))
     quote do
-      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(res))})
+      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(res))})
     end
   end
 
@@ -163,7 +164,7 @@ defmodule TypeCheck.Macros do
         end
       end)
     code =
-      quote do
+      quote line: caller.line do
         with unquote_splicing(paired_params) do
           # Run actual code
         else
