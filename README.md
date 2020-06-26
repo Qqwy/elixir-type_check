@@ -9,11 +9,12 @@
   - [x] Parameterized
 - [ ] Hide implementation of `opaque` from documentation
 - [x] Spec argument types checking
-- [ ] Spec return type checking
+- [x] Spec return type checking
 - [ ] Spec possibly named arguments
 - [ ] Implementation of Elixir's builtin types
   - [ ] Primitive types
   - [ ] Compound types
+  - [ ] special forms like `:;`, `|`, etc.
   - [ ] Overrides for builtin typedefs (`String.t`,`Enum.t`, etc.)
 - [ ] Creating generators from types
 - [ ] Creating generators from specs
