@@ -4,24 +4,33 @@ defmodule TypeCheck.Builtin.List do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(%{element_type: element_type}, param) do
-      element_check = TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, nil))
       quote do
         cond do
           !is_list(unquote(param)) ->
-            {:error, {TypeCheck.Builtin.List, :not_a_list}}
+            {:error, {TypeCheck.Builtin.List, :not_a_list, %{}, unquote(param)}}
           true ->
-            unquote(param)
-            |> Enum.with_index
-            |> Enum.find_value(:ok, fn {input, index} ->
-              var!(single_param) = input
-
-              case unquote(element_check) do
-                :ok ->
-                  false
-                {:error, problem} -> {:error, {TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index}}}
-              end
-            end)
+            unquote(build_element_check(element_type, param))
         end
+      end
+    end
+
+    defp build_element_check(%TypeCheck.Builtin.Any{}, _param) do
+      :ok
+    end
+    defp build_element_check(element_type, param) do
+      element_check = TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, nil))
+      quote do
+        unquote(param)
+        |> Enum.with_index
+        |> Enum.find_value(:ok, fn {input, index} ->
+          var!(single_param) = input
+
+          case unquote(element_check) do
+            :ok ->
+              false
+            {:error, problem} -> {:error, {TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index}, unquote(param)}}
+          end
+        end)
       end
     end
   end

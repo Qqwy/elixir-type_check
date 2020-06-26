@@ -27,7 +27,7 @@ defmodule TypeCheck.Macros do
     definitions = Module.definitions_in(env.module)
     IO.inspect(definitions, label: :definitions)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
-    spec_quotes = for {name, line, arity, clean_params, spec_code} <- specs do
+    spec_quotes = for {name, line, arity, clean_params, params_spec_code, return_spec_code} <- specs do
       unless {name, arity} in definitions do
         raise ArgumentError, "spec for undefined function #{name}/#{arity}"
       end
@@ -35,9 +35,11 @@ defmodule TypeCheck.Macros do
       quote line: line do
         defoverridable([{unquote(name), unquote(arity)}])
         def unquote(name)(unquote_splicing(clean_params)) do
-          unquote(spec_code)
-          super(unquote_splicing(clean_params))
+          unquote(params_spec_code)
+          var!(super_result, nil) = super(unquote_splicing(clean_params))
           # TODO check result
+          unquote(return_spec_code)
+          var!(super_result, nil)
         end
       end
     end
@@ -120,33 +122,37 @@ defmodule TypeCheck.Macros do
   defp expand(type), do: type
 
 
-  defp define_spec(specdef = {:"::", _meta, [name_with_params, return_type]}, caller) do
-    {name, params} = Macro.decompose_call(name_with_params)
-    arity = length(params)
+  defp define_spec(specdef = {:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
+    {name, params_ast} = Macro.decompose_call(name_with_params_ast)
+    arity = length(params_ast)
     # TODO currently assumes the params are directly types
     # rather than the possibility of named types like `x :: integer()`
-    IO.inspect({name, params}, label: :define_spec)
+    IO.inspect({name, params_ast}, label: :define_spec)
     clean_params =
-      Macro.generate_arguments(length(params), caller.module)
-    res = prepare_spec_fun_definition(specdef, name, params, clean_params, caller)
+      Macro.generate_arguments(arity, caller.module)
+    {params_spec_code, return_spec_code} = prepare_spec_wrapper_code(specdef, name, params_ast, clean_params, return_type_ast, caller)
 
     # Module.put_attribute(caller.module, TypeCheck.TypeDefs, Macro.escape(res))
     spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
     res = quote do
-      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(res))})
+      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(params_spec_code)), unquote(Macro.escape(return_spec_code))})
 
       def unquote(spec_fun_name)() do
-        %TypeCheck.Spec{name: unquote(name), param_types: unquote(params), return_type: unquote(return_type)}
+        %TypeCheck.Spec{name: unquote(name), param_types: unquote(params_ast), return_type: unquote(return_type_ast)}
       end
     end
     IO.puts(Macro.to_string(res))
     res
   end
 
-  defp prepare_spec_fun_definition(specdef, name, params, clean_params, caller) do
+  defp prepare_spec_wrapper_code(specdef, name, params_ast, clean_params, return_type_ast, caller) do
 
     # first_param = hd clean_params
-    code = params_to_with(params, clean_params, caller)
+    params_code = params_check_code(params_ast, clean_params, caller)
+    return_code = return_check_code(return_type_ast, caller)
+
+
+    {params_code, return_code}
 
     # code = TypeCheck.Protocols.ToCheck.to_check(TypeCheck.Builtin.integer(), first_param)
 
@@ -157,7 +163,20 @@ defmodule TypeCheck.Macros do
     # end
   end
 
-  defp params_to_with(params, clean_params, caller) do
+  defp return_check_code(return_type_ast, caller) do
+    {return_type, []} = Code.eval_quoted(return_type_ast, [], caller)
+    return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
+    return_code = quote do
+      case unquote(return_code_check) do
+        :ok ->
+          nil
+        error ->
+          raise ArgumentError, inspect(error)
+      end
+    end
+  end
+
+  defp params_check_code(params, clean_params, caller) do
     paired_params =
       params
       |> Enum.zip(clean_params)
