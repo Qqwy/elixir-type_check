@@ -25,4 +25,15 @@ defmodule TypeCheck.Builtin.List do
       end
     end
   end
+
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(list, opts) do
+      Inspect.Algebra.container_doc("list(", [TypeCheck.Protocols.Inspect.inspect(list.element_type, opts)], ")", opts, fn x, _ -> x end, [separator: "", break: :maybe])
+      # "list("
+      # |> Inspect.Algebra.glue("", TypeCheck.Protocols.Inspect.inspect(list.element_type, opts))
+      # |> Inspect.Algebra.glue("", ")")
+      # |> Inspect.Algebra.nest(1, :break)
+      # |> Inspect.Algebra.group
+    end
+  end
 end
