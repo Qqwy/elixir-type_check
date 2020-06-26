@@ -24,4 +24,9 @@ defmodule Example2 do
   def wrap(int1, int2) do
     [int1, int2]
   end
+
+  spec listwrap(list(integer())) :: any()
+  def listwrap(list) do
+    {:ok, list}
+  end
 end

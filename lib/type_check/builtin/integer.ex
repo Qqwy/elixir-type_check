@@ -7,7 +7,7 @@ defmodule TypeCheck.Builtin.Integer do
         if is_integer(unquote(param)) do
           :ok
         else
-          {:error, TypeCheck.Builtin.Integer}
+          {:error, {TypeCheck.Builtin.Integer, :not_an_integer, %{}}}
         end
       end
     end

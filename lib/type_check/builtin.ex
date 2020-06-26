@@ -4,6 +4,6 @@ defmodule TypeCheck.Builtin do
   end
 
   def list(a) do
-    %{type: :list, element_type: a}
+    %TypeCheck.Builtin.List{element_type: a}
   end
 end
