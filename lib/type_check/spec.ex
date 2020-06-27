@@ -16,12 +16,12 @@ defmodule TypeCheck.Spec do
         Inspect.Algebra.container_doc("(", struct.param_types, ")", opts, &TypeCheck.Protocols.Inspect.inspect/2, [separator: ", ", break: :maybe])
       |> Inspect.Algebra.group
 
-      "#TypeCheck.Spec<"
+      "#TypeCheck.Spec< "
       |> Inspect.Algebra.glue(to_string(struct.name))
       |> Inspect.Algebra.concat(body)
-      |> Inspect.Algebra.glue("::")
-      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
-      |> Inspect.Algebra.glue(">")
+      |> Inspect.Algebra.glue(" :: ")
+      |> Inspect.Algebra.concat(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
+      |> Inspect.Algebra.glue(" >")
       |> Inspect.Algebra.group
     end
   end

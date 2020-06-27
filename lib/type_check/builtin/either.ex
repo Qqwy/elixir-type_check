@@ -25,4 +25,12 @@ defmodule TypeCheck.Builtin.Either do
       end
     end
   end
+
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(either, opts) do
+      TypeCheck.Protocols.Inspect.inspect(either.left, opts)
+      |> Inspect.Algebra.glue("|")
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(either.right, opts))
+    end
+  end
 end

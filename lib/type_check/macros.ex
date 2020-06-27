@@ -87,7 +87,7 @@ defmodule TypeCheck.Macros do
 
     macro_body =
       type
-      |> expand()
+      |> TypeCheck.Internals.PreExpander.rewrite(caller)
 
     res = type_fun_definition(new_typedoc, typedef, name_with_maybe_params, macro_body)
     IO.inspect(res)
@@ -129,6 +129,10 @@ defmodule TypeCheck.Macros do
     arity = length(params_ast)
     # TODO currently assumes the params are directly types
     # rather than the possibility of named types like `x :: integer()`
+
+    param_ast = Enum.map(params_ast, &TypeCheck.Internals.PreExpander.rewrite(&1, caller))
+    return_type_ast = TypeCheck.Internals.PreExpander.rewrite(return_type_ast, caller)
+
     IO.inspect({name, params_ast}, label: :define_spec)
     clean_params =
       Macro.generate_arguments(arity, caller.module)
@@ -167,6 +171,8 @@ defmodule TypeCheck.Macros do
   end
 
   defp return_check_code(return_type_ast, caller) do
+    IO.puts(Macro.to_string(return_type_ast))
+
     {return_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(return_type_ast) end, [], caller)
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
     return_code = quote do
@@ -179,17 +185,13 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp params_check_code(params, clean_params, caller) do
+  defp params_check_code(params_ast, clean_params, caller) do
     paired_params =
-      params
+      params_ast
       |> Enum.zip(clean_params)
       |> Enum.with_index
-      |> Enum.map(fn {{param, clean_param}, index} ->
-      {param_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(param) end, [], caller)
-        impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
-        quote do
-          {:ok, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
-        end
+      |> Enum.map(fn {{param_ast, clean_param}, index} ->
+        param_check_code(param_ast, clean_param, index, caller)
       end)
     code =
       quote line: caller.line do
@@ -203,5 +205,14 @@ defmodule TypeCheck.Macros do
       end
     IO.puts(Macro.to_string(code))
     code
+  end
+
+  defp param_check_code(param_ast, clean_param, index, caller) do
+    {param_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(param_ast) end, [], caller)
+
+    impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
+    quote do
+      {:ok, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
+    end
   end
 end

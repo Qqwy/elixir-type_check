@@ -13,4 +13,10 @@ defmodule TypeCheck.Builtin.Literal do
       end
     end
   end
+
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(literal, opts) do
+      Inspect.Algebra.to_doc(literal.value, opts)
+    end
+  end
 end

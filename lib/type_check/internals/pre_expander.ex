@@ -29,14 +29,15 @@ defmodule TypeCheck.Internals.PreExpander do
       {left, right} ->
         rewrite_tuple([left, right], env)
 
-      # Fallback:
-      other ->
+        # Fallback:
+        other ->
         other
+    end
   end
 
   defp rewrite_tuple(tuple_elements, env) do
     rewritten_elements =
-      elements
+      tuple_elements
       |> Enum.map(&rewrite(&1, env))
 
     quote do
