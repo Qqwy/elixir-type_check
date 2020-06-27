@@ -1,18 +1,25 @@
 defmodule TypeCheck.Builtin.Range do
-  defstruct [:lower, :higher]
+  defstruct [:range]
 
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(%{lower: lower, higher: higher}, param) do
-      quote do
+    def to_check(%{range: range}, param) do
+      quote location: :keep do
         case unquote(param) do
-          x when x in range ->
-            :ok
+          x when not is_integer(x) ->
+            {:error, {TypeCheck.Builtin.Range, :not_an_integer, %{}, unquote(param)}}
+          x when x not in unquote(Macro.escape(range)) ->
+            {:error, {TypeCheck.Builtin.Range, :not_in_range, %{range: unquote(Macro.escape(range))}, unquote(param)}}
           _ ->
-            {:error, {TypeCheck.Builtin.Float, :not_a_float, %{}, unquote(param)}}
+            :ok
         end
       end
     end
   end
 
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(struct, opts) do
+      Inspect.Algebra.to_doc(struct.range, opts)
+    end
+  end
 end

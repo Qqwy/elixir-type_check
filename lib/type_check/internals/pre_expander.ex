@@ -49,7 +49,7 @@ defmodule TypeCheck.Internals.PreExpander do
     case struct_fields[:__struct__] do
       Range ->
         quote do
-          TypeCheck.Builtin.range(lower, higher)
+          TypeCheck.Builtin.range(unquote(orig_ast))
         end
       other ->
         # Unhandled maps and structs

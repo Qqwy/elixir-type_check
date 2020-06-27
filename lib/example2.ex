@@ -5,8 +5,8 @@ defmodule Example2 do
   type mylist :: list(integer())
   type mylist2 :: list(integer)
   type mylist3(a) :: list(a)
-  type mylist4 :: mylist2
-  type mylist5 :: mylist3(integer())
+  typep mylist4 :: mylist2
+  type mylist5 :: mylist3(integer()) | mylist4
 
   def example do
     :ok
@@ -40,6 +40,14 @@ defmodule Example2 do
         {:ok, div(a, b)}
       _ ->
         {:ok, a / b}
+    end
+  end
+
+  spec small(0..500) :: :ok | :error
+  def small(x) do
+    case x do
+      x when x in 0..255 -> :ok
+      _ -> :error
     end
   end
 end

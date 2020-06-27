@@ -19,7 +19,7 @@ for struct <- structs do
       def inspect(val, opts) do
         # ["#TypeCheck<", TypeCheck.Protocols.Inspect.inspect(val, opts), ">"]
         "#TypeCheck.Type<"
-        |> Inspect.Algebra.concat(TypeCheck.Protocols.Inspect.inspect(val, opts))
+        |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(val, opts))
         |> Inspect.Algebra.glue(">")
         |> Inspect.Algebra.group
       end

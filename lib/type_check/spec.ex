@@ -1,13 +1,23 @@
 defmodule TypeCheck.Spec do
   defstruct [:name, :param_types, :return_type]
 
-  def spec_for(module, function, arity) do
+  def lookup(module, function, arity) do
     spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
     if function_exported?(module, spec_fun_name, 0) do
       {:ok, apply(module, spec_fun_name, [])}
     else
       {:error, :not_found}
     end
+  end
+
+  def lookup!(module, function, arity) do
+    {:ok, res} = lookup(module, function, arity)
+    res
+  end
+
+  def defined?(module, function, arity) do
+    spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
+    function_exported?(module, spec_fun_name, 0)
   end
 
   defimpl Inspect do

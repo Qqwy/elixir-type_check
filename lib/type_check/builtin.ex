@@ -45,4 +45,12 @@ defmodule TypeCheck.Builtin do
   def left | right do
     either(left, right)
   end
+
+  def range(range = lower..higher) do
+    %TypeCheck.Builtin.Range{range: range}
+  end
+
+  def range(lower, higher) do
+    %TypeCheck.Builtin.Range{range: lower..higher}
+  end
 end

@@ -16,7 +16,14 @@ defmodule TypeCheck.Builtin.Literal do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(literal, opts) do
-      Inspect.Algebra.to_doc(literal.value, opts)
+      case literal.value do
+        %Range{} ->
+          "literal("
+          |> Inspect.Algebra.glue(Inspect.Algebra.to_doc(literal.value, opts))
+          |> Inspect.Algebra.glue(")")
+        _ ->
+          Inspect.Algebra.to_doc(literal.value, opts)
+      end
     end
   end
 end

@@ -80,21 +80,28 @@ defmodule TypeCheck.Macros do
         :typep -> false
         _ ->
           append_typedoc(caller, """
-          This type is managed by TypeCheck.
-          Original definition: #{Macro.to_string(typedef)}
+          This type is managed by `TypeCheck`,
+          which allows checking values against the type at runtime.
+
+          Full definition: #{type_definition_doc(name_with_maybe_params, type, kind, caller)}
           """)
       end
+    type = TypeCheck.Internals.PreExpander.rewrite(type, caller)
 
-    macro_body =
-      type
-      |> TypeCheck.Internals.PreExpander.rewrite(caller)
-
-    res = type_fun_definition(new_typedoc, typedef, name_with_maybe_params, macro_body)
+    res = type_fun_definition(new_typedoc, typedef, name_with_maybe_params, type)
     IO.inspect(res)
     IO.puts(Macro.to_string(res))
     quote do
-      @typedoc unquote(new_typedoc)
-      @type unquote(typedef)
+      case unquote(kind) do
+        :opaque ->
+          @typedoc unquote(new_typedoc)
+          @opaque unquote(typedef)
+        :type ->
+          @typedoc unquote(new_typedoc)
+          @type unquote(typedef)
+        :typep ->
+          @typep unquote(typedef)
+      end
       unquote(res)
       Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
     end
@@ -107,6 +114,19 @@ defmodule TypeCheck.Macros do
     newdoc
   end
 
+  defp type_definition_doc(name_with_maybe_params, type_ast, kind, caller) do
+    head = Macro.to_string(name_with_maybe_params)
+    if kind == :opaque do
+       """
+       `head` _(opaque type)_
+       """
+    else
+      """
+      `#{head} :: #{Macro.to_string(type_ast)}`
+      """
+    end
+  end
+
   defp type_fun_definition(typedoc, typedef, name_with_params, macro_body) do
     quote do
       @doc false
@@ -117,10 +137,6 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  # TODO
-  # replace AST that are Kernel.SpecialForms
-  # with alternatives
-  # that refer to functions in TypeCheck.Builtin
   defp expand(type), do: type
 
 
@@ -130,7 +146,7 @@ defmodule TypeCheck.Macros do
     # TODO currently assumes the params are directly types
     # rather than the possibility of named types like `x :: integer()`
 
-    param_ast = Enum.map(params_ast, &TypeCheck.Internals.PreExpander.rewrite(&1, caller))
+    params_ast = Enum.map(params_ast, &TypeCheck.Internals.PreExpander.rewrite(&1, caller))
     return_type_ast = TypeCheck.Internals.PreExpander.rewrite(return_type_ast, caller)
 
     IO.inspect({name, params_ast}, label: :define_spec)
@@ -153,21 +169,10 @@ defmodule TypeCheck.Macros do
   end
 
   defp prepare_spec_wrapper_code(specdef, name, params_ast, clean_params, return_type_ast, caller) do
-
-    # first_param = hd clean_params
     params_code = params_check_code(params_ast, clean_params, caller)
     return_code = return_check_code(return_type_ast, caller)
 
-
     {params_code, return_code}
-
-    # code = TypeCheck.Protocols.ToCheck.to_check(TypeCheck.Builtin.integer(), first_param)
-
-    # quote do
-    #   def unquote(defname)(unquote_splicing(clean_params)) do
-    #     unquote(code)
-    #   end
-    # end
   end
 
   defp return_check_code(return_type_ast, caller) do
@@ -198,7 +203,7 @@ defmodule TypeCheck.Macros do
         with unquote_splicing(paired_params) do
           # Run actual code
         else
-            # TODO transform into humanly-readable code
+            # TODO transform into humanly-readable error
           error ->
             raise ArgumentError, inspect(error)
         end
