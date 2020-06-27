@@ -60,7 +60,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      Elixir.Inspect.inspect(s.keypairs, %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+      Elixir.Inspect.inspect(Enum.into(s.keypairs, %{}), %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
     end
   end
 end
