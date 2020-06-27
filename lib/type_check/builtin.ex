@@ -63,6 +63,6 @@ defmodule TypeCheck.Builtin do
   end
 
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
-    %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, %{})}
+    %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
   end
 end

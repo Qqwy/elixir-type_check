@@ -25,6 +25,7 @@ defmodule TypeCheck.Builtin.FixedMap do
     defp build_keys_presence_ast(keypairs, param, s) do
       required_keys =
         s.keypairs
+        |> Enum.into(%{})
         |> Map.keys
       quote do
         actual_keys = unquote(param) |> Map.keys

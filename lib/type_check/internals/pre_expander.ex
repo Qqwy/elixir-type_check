@@ -78,7 +78,7 @@ defmodule TypeCheck.Internals.PreExpander do
       Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
     # TODO wrap in struct-checker
     quote do
-      %unquote(struct_name){unquote_splicing(field_types)}
+      TypeCheck.Builtin.fixed_map([__struct__: TypeCheck.Builtin.literal(unquote(struct_name))] ++ unquote(field_types))
     end
   end
 end
