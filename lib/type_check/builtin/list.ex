@@ -18,17 +18,18 @@ defmodule TypeCheck.Builtin.List do
       :ok
     end
     defp build_element_check(element_type, param) do
-      element_check = TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, nil))
+      element_check = TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
       quote do
-        unquote(param)
+        orig_param = unquote(param)
+        orig_param
         |> Enum.with_index
         |> Enum.find_value(:ok, fn {input, index} ->
-          var!(single_param) = input
+          var!(single_param, unquote(__MODULE__)) = input
 
           case unquote(element_check) do
             :ok ->
               false
-            {:error, problem} -> {:error, {TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index, element_type: unquote(Macro.escape(element_type))}, unquote(param)}}
+            {:error, problem} -> {:error, {TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index, element_type: unquote(Macro.escape(element_type))}, orig_param}}
           end
         end)
       end

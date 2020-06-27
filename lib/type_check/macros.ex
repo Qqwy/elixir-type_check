@@ -185,8 +185,8 @@ defmodule TypeCheck.Macros do
       case unquote(return_code_check) do
         :ok ->
           nil
-        error ->
-          raise ArgumentError, inspect(error)
+        {:error, error} ->
+          raise TypeCheck.TypeError, error
       end
     end
   end
@@ -204,9 +204,8 @@ defmodule TypeCheck.Macros do
         with unquote_splicing(paired_params) do
           # Run actual code
         else
-            # TODO transform into humanly-readable error
-          error ->
-            raise ArgumentError, inspect(error)
+          {:error, error} ->
+            raise TypeCheck.TypeError, error
         end
       end
     IO.puts(Macro.to_string(code))

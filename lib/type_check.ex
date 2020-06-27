@@ -30,7 +30,7 @@ defmodule TypeCheck do
     quote do
       case unquote(check) do
         :ok -> unquote(value)
-        other -> raise ArgumentError, inspect(other)
+        {:error, other} -> raise TypeCheck.TypeError, other
       end
     end
   end

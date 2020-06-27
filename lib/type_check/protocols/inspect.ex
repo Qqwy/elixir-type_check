@@ -25,3 +25,16 @@ for struct <- structs do
       end
     end
 end
+
+defmodule TypeCheck.Inspect do
+  def inspect(type, opts \\ %Inspect.Opts{}) do
+    type
+    |> TypeCheck.Protocols.Inspect.inspect(opts)
+    |> Inspect.Algebra.format(opts.width)
+  end
+
+  def inspect_binary(type, opts \\ %Inspect.Opts{}) do
+    TypeCheck.Inspect.inspect(type, opts)
+    |> IO.iodata_to_binary
+  end
+end
