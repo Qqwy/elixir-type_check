@@ -20,7 +20,7 @@
   - [ ] Maps with keys => types
   - [ ] Structs with keys => types
 - [ ] A `when` to add guards to typedefs for more power.
-- [ ] Make errors raised when types do not conform humanly readable
+- [x] Make errors raised when types do not conform humanly readable
 - [ ] Creating generators from types
 - [ ] Creating generators from specs
   - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
