@@ -54,6 +54,24 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "at index #{index}:\n", format(problem))
   end
 
+  def format({s = %TypeCheck.Builtin.FixedMap{}, :not_a_map, _, val}) do
+    problem = "`#{inspect(val)}` is not a map."
+    compound_check(val, s, problem)
+  end
+
+  def format({s = %TypeCheck.Builtin.FixedMap{}, :missing_keys, %{keys: keys}, val}) do
+    keys_str =
+      keys
+      |> Enum.map(&inspect/1)
+      |> Enum.join(", ")
+    problem = "`#{inspect(val)}` is missing the following required key(s): `#{keys_str}`."
+    compound_check(val, s, problem)
+  end
+
+  def format({s = %TypeCheck.Builtin.FixedMap{}, :value_error, %{problem: problem, key: key}, val}) do
+    compound_check(val, s, "under key `#{inspect(key)}`:\n", format(problem))
+  end
+
   defp compound_check(val, s, child_prefix \\ nil, child_problem) do
     child_str =
     if child_prefix do

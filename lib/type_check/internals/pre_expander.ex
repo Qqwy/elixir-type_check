@@ -51,13 +51,18 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.range(unquote(orig_ast))
         end
+      nil ->
+        # A map with fixed fields
+        quote location: :keep do
+          TypeCheck.Builtin.fixed_map(unquote(orig_ast))
+        end
       other ->
-        # Unhandled maps and structs
+        # Unhandled expanded structs
         quote location: :keep do
           # TODO we might want to treat maps/structs differently
           # than literals in certain cases
           # like allowing types to be specified for the keys?
-          TypeCheck.Builtin.literal(ast)
+          TypeCheck.Builtin.literal(unquote(orig_ast))
         end
     end
   end

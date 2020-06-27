@@ -13,11 +13,11 @@ defmodule TypeCheck.Builtin.FixedMap do
     end
 
     defp map_check(param, s) do
-      quote do
+      quote location: :keep do
         if is_map(unquote(param)) do
           :ok
         else
-          {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, x}}
+          {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, unquote(param)}}
         end
       end
     end
@@ -28,7 +28,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         |> Map.keys
       quote do
         actual_keys = unquote(param) |> Map.keys
-        case required_keys -- actual_keys do
+        case unquote(required_keys) -- actual_keys do
           [] -> :ok
           missing_keys ->
             {:error, {unquote(Macro.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
