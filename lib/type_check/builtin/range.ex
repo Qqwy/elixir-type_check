@@ -3,13 +3,13 @@ defmodule TypeCheck.Builtin.Range do
 
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(%{range: range}, param) do
+    def to_check(s = %{range: range}, param) do
       quote location: :keep do
         case unquote(param) do
           x when not is_integer(x) ->
-            {:error, {TypeCheck.Builtin.Range, :not_an_integer, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :not_an_integer, %{}, unquote(param)}}
           x when x not in unquote(Macro.escape(range)) ->
-            {:error, {TypeCheck.Builtin.Range, :not_in_range, %{range: unquote(Macro.escape(range))}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :not_in_range, %{}, unquote(param)}}
           _ ->
             :ok
         end

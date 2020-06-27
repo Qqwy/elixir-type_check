@@ -3,72 +3,65 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   def format_wrap(value = {_, _, _, input}) do
     """
-    #{inspect(input)} fails to typecheck.
-
     #{format(value)}
     """
+    # |> String.trim_trailing("\n")
   end
 
-  def format({TypeCheck.Builtin.Integer, :not_an_integer, _, val}) do
+  def format({%TypeCheck.Builtin.Integer{}, :not_an_integer, _, val}) do
     "#{inspect(val)} is not an integer."
   end
 
-  def format({TypeCheck.Builtin.Range, :not_an_integer, _, val}) do
-    "#{inspect(val)} is not an integer."
+  def format({s = %TypeCheck.Builtin.Range{}, :not_an_integer, _, val}) do
+    compound_check(val, s, "#{inspect(val)} is not an integer.")
   end
 
-  def format({TypeCheck.Builtin.Atom, :not_an_atom, _, val}) do
+  def format({%TypeCheck.Builtin.Atom{}, :not_an_atom, _, val}) do
     "#{inspect(val)} is not an atom."
   end
 
-  def format({TypeCheck.Builtin.Range, :not_in_range, %{range: range}, val}) do
-    "#{inspect(val)} falls outside the range #{inspect(range)}."
+  def format({s = %TypeCheck.Builtin.Range{range: range}, :not_in_range, _, val}) do
+    compound_check(val, s, "#{inspect(val)} falls outside the range #{inspect(range)}.")
   end
 
-  def format({TypeCheck.Builtin.Float, :not_a_float, _, val}) do
+  def format({%TypeCheck.Builtin.Float{}, :not_a_float, _, val}) do
     "#{inspect(val)} is not a float."
   end
 
-  def format({TypeCheck.Builtin.List, :not_a_list, _, val}) do
-    "#{inspect(val)} is not a list."
+  def format({s = %TypeCheck.Builtin.List{}, :not_a_list, _, val}) do
+    compound_check(val, s, "#{inspect(val)} is not a list.")
   end
 
-  def format({TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index, element_type: element_type}, val}) do
-    child_problem = """
-    at index #{index}:
-    #{indent(format(problem))}
-    """
-
-    """
-    #{inspect(val)} is not a list(#{TypeCheck.Inspect.inspect_binary(element_type)}). Reason:
-    #{indent(child_problem)}
-    """
+  def format({s = %TypeCheck.Builtin.List{}, :element_error, %{problem: problem, index: index}, val}) do
+    compound_check(val, s, "at index #{index}\n", format(problem))
   end
 
-  def format({TypeCheck.Builtin.Literal, :not_same_value, %{value: expected_value}, val}) do
+  def format({%TypeCheck.Builtin.Literal{value: expected_value}, :not_same_value, %{}, val}) do
     "`#{inspect(val)}` is not the same value as `#{inspect(expected_value)}`."
   end
 
-  def format({TypeCheck.Builtin.Tuple, :not_a_tuple, _, val}) do
-    "`#{inspect(val)}` is not a tuple."
+  def format({s = %TypeCheck.Builtin.Tuple{}, :not_a_tuple, _, val}) do
+    problem = "`#{inspect(val)} is not a tuple.`"
+    compound_check(val, s, problem)
   end
 
-  def format({TypeCheck.Builtin.Tuple, :different_size, %{expected_size: expected_size}, val}) do
-    "#{inspect(val)} has #{tuple_size(val)} elements rather than #{expected_size}."
+  def format({s = %TypeCheck.Builtin.Tuple{}, :different_size, %{expected_size: expected_size}, val}) do
+    problem = "#{inspect(val)} has #{tuple_size(val)} elements but should have #{expected_size}."
+    compound_check(val, s, problem)
   end
 
-  def format({TypeCheck.Builtin.Tuple, :element_error, %{problem: problem, index: index, element_type: element_type}, val}) do
-    child_problem = """
-    at index #{index}:
-    #{indent(format(problem))}
-    """
-
-    """
-    #{inspect(val)} is not a tuple(#{TypeCheck.Inspect.inspect_binary(element_type)}). Reason:
-    #{indent(child_problem)}
-    """
+  def format({s = %TypeCheck.Builtin.Tuple{}, :element_error, %{problem: problem, index: index}, val}) do
+    compound_check(val, s, "at index #{index}:\n", format(problem))
   end
 
+  defp compound_check(val, s, child_prefix \\ "", child_problem) do
+    child_str = child_prefix <> indent(child_problem) |> indent
+
+    """
+    #{inspect(val)} does not check #{TypeCheck.Inspect.inspect_binary(s)}. Reason:
+    #{child_str}
+    """
+  end
 
   defp indent(str) do
     String.replace("  " <> str, "\n", "\n  ")

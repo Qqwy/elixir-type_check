@@ -10,16 +10,16 @@ defmodule TypeCheck.Internals.PreExpander do
         # Do not expand internals of `literal`.
         # Even if it contains fancy syntax
         # like ranges
-        quote do
-          TypeCheck.Builtin.literal(value)
+        quote location: :keep do
+          TypeCheck.Builtin.literal(unquote(value))
         end
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) or is_list(x) ->
-        quote do
+        quote location: :keep do
           TypeCheck.Builtin.literal(unquote(x))
         end
 
       {:|, _, [lhs, rhs]} ->
-        quote do
+        quote location: :keep do
           TypeCheck.Builtin.either(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
         end
       ast = {:%{}, _, fields} ->
@@ -40,7 +40,7 @@ defmodule TypeCheck.Internals.PreExpander do
       tuple_elements
       |> Enum.map(&rewrite(&1, env))
 
-    quote do
+    quote location: :keep do
       TypeCheck.Builtin.tuple(unquote(rewritten_elements))
     end
   end
@@ -48,12 +48,12 @@ defmodule TypeCheck.Internals.PreExpander do
   def rewrite_map_and_struct(struct_fields, orig_ast) do
     case struct_fields[:__struct__] do
       Range ->
-        quote do
+        quote location: :keep do
           TypeCheck.Builtin.range(unquote(orig_ast))
         end
       other ->
         # Unhandled maps and structs
-        quote do
+        quote location: :keep do
           # TODO we might want to treat maps/structs differently
           # than literals in certain cases
           # like allowing types to be specified for the keys?

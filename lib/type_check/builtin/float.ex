@@ -2,13 +2,13 @@ defmodule TypeCheck.Builtin.Float do
   defstruct []
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(_, param) do
+    def to_check(s, param) do
       quote do
         case unquote(param) do
           x when is_float(x) ->
             :ok
           _ ->
-            {:error, {TypeCheck.Builtin.Float, :not_a_float, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :not_a_float, %{}, unquote(param)}}
         end
       end
     end

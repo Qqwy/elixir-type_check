@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.Either do
   defstruct [:left, :right]
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(%{left: left, right: right}, param) do
+    def to_check(x = %{left: left, right: right}, param) do
       left_check = TypeCheck.Protocols.ToCheck.to_check(left, param)
       right_check = TypeCheck.Protocols.ToCheck.to_check(right, param)
       quote do
@@ -12,7 +12,7 @@ defmodule TypeCheck.Builtin.Either do
             case unquote(right_check) do
               :ok -> :ok
               {:error, right_error} ->
-                {:error, {TypeCheck.Builtin.Either, :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
+                {:error, {unquote(Macro.escape(x)), :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
             end
         end
         # with {:error, left_error} <- unquote(left_check),

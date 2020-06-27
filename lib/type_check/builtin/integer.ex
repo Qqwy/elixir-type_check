@@ -2,13 +2,13 @@ defmodule TypeCheck.Builtin.Integer do
   defstruct []
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(_integer, param) do
+    def to_check(s, param) do
       quote do
         case unquote(param) do
           x when is_integer(x) ->
             :ok
           _ ->
-          {:error, {TypeCheck.Builtin.Integer, :not_an_integer, %{}, unquote(param)}}
+          {:error, {unquote(Macro.escape(s)), :not_an_integer, %{}, unquote(param)}}
         end
       end
     end
