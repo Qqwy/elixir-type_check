@@ -40,7 +40,7 @@ defmodule TypeCheck.Builtin.FixedMap do
       keypair_checks =
         keypairs
         |> Enum.map(fn {key, value_type} ->
-        value_check = TypeCheck.Protocols.ToCheck.to_check(value_type, quote do unquote(param)[unquote(key)] end)
+        value_check = TypeCheck.Protocols.ToCheck.to_check(value_type, quote do Map.fetch!(unquote(param), unquote(key)) end)
         quote do
           {:ok, _key, _element_type} <- {unquote(value_check), unquote(key), unquote(Macro.escape(value_type))}
         end

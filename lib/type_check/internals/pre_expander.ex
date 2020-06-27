@@ -23,7 +23,9 @@ defmodule TypeCheck.Internals.PreExpander do
           TypeCheck.Builtin.either(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
         end
       ast = {:%{}, _, fields} ->
-        rewrite_map_and_struct(fields, ast)
+        rewrite_map_and_struct(fields, ast, env)
+      {:%, _, [struct_name, {:%{}, _, fields}]} ->
+        rewrite_struct(struct_name, fields, env)
       {:{}, _, elements} ->
         rewrite_tuple(elements, env)
       {left, right} ->
@@ -45,7 +47,7 @@ defmodule TypeCheck.Internals.PreExpander do
     end
   end
 
-  def rewrite_map_and_struct(struct_fields, orig_ast) do
+  defp rewrite_map_and_struct(struct_fields, orig_ast, env) do
     case struct_fields[:__struct__] do
       Range ->
         quote location: :keep do
@@ -53,8 +55,12 @@ defmodule TypeCheck.Internals.PreExpander do
         end
       nil ->
         # A map with fixed fields
+        field_types =
+          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
+
         quote location: :keep do
-          TypeCheck.Builtin.fixed_map(unquote(orig_ast))
+          # TODO correctly recurse over keys
+          TypeCheck.Builtin.fixed_map(unquote(field_types))
         end
       other ->
         # Unhandled expanded structs
@@ -64,6 +70,15 @@ defmodule TypeCheck.Internals.PreExpander do
           # like allowing types to be specified for the keys?
           TypeCheck.Builtin.literal(unquote(orig_ast))
         end
+    end
+  end
+
+  defp rewrite_struct(struct_name, fields, env) do
+    field_types =
+      Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
+    # TODO wrap in struct-checker
+    quote do
+      %unquote(struct_name){unquote_splicing(field_types)}
     end
   end
 end
