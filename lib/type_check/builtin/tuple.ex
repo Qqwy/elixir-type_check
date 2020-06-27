@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.Tuple do
           x when not is_tuple(x) ->
             {:error, {TypeCheck.Builtin.Tuple, :not_a_tuple, %{}, x}}
           x when tuple_size(x) != unquote(expected_size) ->
-            {:error, {TypeCheck.Builtin.Tuple, :different_size, %{}, x}}
+            {:error, {TypeCheck.Builtin.Tuple, :different_size, %{expected_size: unquote(expected_size)}, x}}
           _ ->
             unquote(element_checks_ast)
         end
@@ -32,8 +32,8 @@ defmodule TypeCheck.Builtin.Tuple do
           with unquote_splicing(element_checks) do
             :ok
           else
-            {error, index, element_type} ->
-              {:error, {TypeCheck.Builtin.Tuple, :element_error, %{problem: error, index: index, element_type: Macro.escape(element_type)}, unquote(param)}}
+            {{:error, error}, index, element_type} ->
+              {:error, {TypeCheck.Builtin.Tuple, :element_error, %{problem: error, index: index, element_type: element_type}, unquote(param)}}
           end
         end
     end
