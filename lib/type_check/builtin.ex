@@ -39,7 +39,7 @@ defmodule TypeCheck.Builtin do
   end
 
   def either(left, right) do
-    %TypeCheck.Builtin.Or{left: left, right: right}
+    %TypeCheck.Builtin.Either{left: left, right: right}
   end
 
   def left | right do

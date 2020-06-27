@@ -1,4 +1,4 @@
-defmodule TypeCheck.Builtin.Or do
+defmodule TypeCheck.Builtin.Either do
   defstruct [:left, :right]
 
   defimpl TypeCheck.Protocols.ToCheck do
@@ -12,7 +12,7 @@ defmodule TypeCheck.Builtin.Or do
             case unquote(right_check) do
               :ok -> :ok
               {:error, right_error} ->
-                {:error, {TypeCheck.Builtin.Or, :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
+                {:error, {TypeCheck.Builtin.Either, :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
             end
         end
         # with {:error, left_error} <- unquote(left_check),
