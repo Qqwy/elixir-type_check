@@ -54,7 +54,15 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Range{range: lower..higher}
   end
 
-  def type() do
-    any()
+  def map() do
+    %TypeCheck.Builtin.Map{key_type: any(), value_type: any()}
+  end
+
+  def map(key_type, value_type) do
+    %TypeCheck.Builtin.Map{key_type: key_type, value_type: element_type}
+  end
+
+  def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
+    %TypeCheck.Builtin.FixedMap{key_vals: keywords}
   end
 end
