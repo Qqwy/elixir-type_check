@@ -178,7 +178,8 @@ defmodule TypeCheck.Macros do
   defp return_check_code(return_type_ast, caller) do
     IO.puts(Macro.to_string(return_type_ast))
 
-    {return_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(return_type_ast) end, [], caller)
+    return_type = eval_type(return_type_ast, caller)
+
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
     return_code = quote do
       case unquote(return_code_check) do
@@ -213,11 +214,16 @@ defmodule TypeCheck.Macros do
   end
 
   defp param_check_code(param_ast, clean_param, index, caller) do
-    {param_type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(param_ast) end, [], caller)
+    param_type = eval_type(param_ast, caller)
 
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
     quote do
       {:ok, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
+  end
+
+  defp eval_type(type_ast, caller) do
+    {type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(type_ast) end, [], caller)
+    type
   end
 end

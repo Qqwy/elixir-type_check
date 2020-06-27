@@ -53,4 +53,8 @@ defmodule TypeCheck.Builtin do
   def range(lower, higher) do
     %TypeCheck.Builtin.Range{range: lower..higher}
   end
+
+  def type() do
+    any()
+  end
 end
