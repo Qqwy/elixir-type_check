@@ -5,10 +5,10 @@ defmodule TypeCheck.Builtin.List do
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(%{element_type: element_type}, param) do
       quote do
-        cond do
-          !is_list(unquote(param)) ->
+        case unquote(param) do
+          x when not is_list(x) ->
             {:error, {TypeCheck.Builtin.List, :not_a_list, %{}, unquote(param)}}
-          true ->
+          _ ->
             unquote(build_element_check(element_type, param))
         end
       end
@@ -28,7 +28,7 @@ defmodule TypeCheck.Builtin.List do
           case unquote(element_check) do
             :ok ->
               false
-            {:error, problem} -> {:error, {TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index}, unquote(param)}}
+            {:error, problem} -> {:error, {TypeCheck.Builtin.List, :element_error, %{problem: problem, index: index, element_type: unquote(Macro.escape(element_type))}, unquote(param)}}
           end
         end)
       end

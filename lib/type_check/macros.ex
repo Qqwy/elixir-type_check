@@ -197,7 +197,6 @@ defmodule TypeCheck.Macros do
           # Run actual code
         else
             # TODO transform into humanly-readable code
-            # and raise it as exception
           error ->
             raise ArgumentError, inspect(error)
         end

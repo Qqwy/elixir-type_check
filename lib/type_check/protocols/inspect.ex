@@ -2,7 +2,14 @@ defprotocol TypeCheck.Protocols.Inspect do
   def inspect(struct, opts)
 end
 
-structs = [TypeCheck.Builtin.Integer, TypeCheck.Builtin.List, TypeCheck.Builtin.Any]
+structs = [
+  TypeCheck.Builtin.Any,
+  TypeCheck.Builtin.Integer,
+  TypeCheck.Builtin.Float,
+  TypeCheck.Builtin.List,
+  TypeCheck.Builtin.Tuple,
+]
+
 for struct <- structs do
     defimpl Inspect, for: struct do
       def inspect(val, opts) do

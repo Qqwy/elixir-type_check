@@ -1,14 +1,14 @@
-defmodule TypeCheck.Builtin.Integer do
+defmodule TypeCheck.Builtin.Atom do
   defstruct []
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(_integer, param) do
+    def to_check(_, param) do
       quote do
         case unquote(param) do
-          x when is_integer(x) ->
+          x when is_atom(x) ->
             :ok
           _ ->
-          {:error, {TypeCheck.Builtin.Integer, :not_an_integer, %{}, unquote(param)}}
+            {:error, {TypeCheck.Builtin.Atom, :not_an_atom, %{}, unquote(param)}}
         end
       end
     end
@@ -16,7 +16,7 @@ defmodule TypeCheck.Builtin.Integer do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, _opts) do
-      "integer()"
+      "atom()"
     end
   end
 end
