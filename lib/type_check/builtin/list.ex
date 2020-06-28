@@ -44,4 +44,14 @@ defmodule TypeCheck.Builtin.List do
       Inspect.Algebra.container_doc("list(", [TypeCheck.Protocols.Inspect.inspect(list.element_type, opts)], ")", opts, fn x, _ -> x end, [separator: "", break: :maybe])
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        s.element_type
+        |> TypeCheck.Protocols.ToStreamData.to_gen()
+        |> StreamData.list_of()
+      end
+    end
+  end
 end

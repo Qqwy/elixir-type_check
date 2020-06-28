@@ -12,7 +12,7 @@ defmodule TypeCheck do
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
     quote do
       case unquote(check) do
-        {:ok, bindings} -> {:ok, unquote(value), bindings}
+        {:ok, bindings} -> {:ok, unquote(value)}
         other -> other
       end
     end

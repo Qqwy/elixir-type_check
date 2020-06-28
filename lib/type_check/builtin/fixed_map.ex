@@ -75,4 +75,14 @@ defmodule TypeCheck.Builtin.FixedMap do
       end
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        s.keypairs
+        |> Enum.map(fn {key, value} -> {key, TypeCheck.Protocols.ToStreamData.to_gen(value)} end)
+        |> StreamData.fixed_map()
+      end
+    end
+  end
 end

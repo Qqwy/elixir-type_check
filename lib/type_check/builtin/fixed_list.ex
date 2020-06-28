@@ -48,4 +48,14 @@ defmodule TypeCheck.Builtin.FixedList do
       |> Elixir.Inspect.inspect(%Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        s.element_types
+        |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
+        |> StreamData.fixed_list()
+      end
+    end
+  end
 end

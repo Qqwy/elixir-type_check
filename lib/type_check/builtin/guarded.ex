@@ -66,4 +66,20 @@ defmodule TypeCheck.Builtin.Guarded do
       |> Inspect.Algebra.group()
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        check_code = TypeCheck.Protocols.ToCheck.to_check(s, Macro.var(:value, nil))
+        TypeCheck.Protocols.ToStreamData.to_gen(s.type)
+        |> StreamData.filter(fn value ->
+          res = Code.eval_quoted(check_code, [value: value])
+          case res do
+            {{:ok, _}, _} -> true
+            _other -> false
+          end
+        end)
+      end
+    end
+  end
 end
