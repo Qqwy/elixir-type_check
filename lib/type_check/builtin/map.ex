@@ -50,4 +50,14 @@ defmodule TypeCheck.Builtin.Map do
       Inspect.Algebra.container_doc("map(", [TypeCheck.Protocols.Inspect.inspect(list.element_type, opts)], ")", opts, fn x, _ -> x end, [separator: "", break: :maybe])
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+         key_gen = to_gen(s.key_type)
+         value_gen = to_gen(s.value_type)
+         StreamData.map_of(key_gen, value_gen)
+      end
+    end
+  end
 end

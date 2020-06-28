@@ -19,4 +19,12 @@ defmodule TypeCheck.Builtin.Integer do
       "integer()"
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        StreamData.integer()
+      end
+    end
+  end
 end

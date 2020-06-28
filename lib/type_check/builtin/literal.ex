@@ -26,4 +26,12 @@ defmodule TypeCheck.Builtin.Literal do
       end
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        StreamData.constant(s.value)
+      end
+    end
+  end
 end

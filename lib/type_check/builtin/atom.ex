@@ -19,4 +19,12 @@ defmodule TypeCheck.Builtin.Atom do
       "atom()"
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        StreamData.atom(:alphanumeric)
+      end
+    end
+  end
 end

@@ -26,4 +26,12 @@ defmodule TypeCheck.Builtin.NamedType do
       |> Inspect.Algebra.group
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        to_gen(s.type)
+      end
+    end
+  end
 end

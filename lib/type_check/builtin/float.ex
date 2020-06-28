@@ -19,4 +19,12 @@ defmodule TypeCheck.Builtin.Float do
       "float()"
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        StreamData.float()
+      end
+    end
+  end
 end

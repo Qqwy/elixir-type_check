@@ -22,4 +22,12 @@ defmodule TypeCheck.Builtin.Range do
       Inspect.Algebra.to_doc(struct.range, opts)
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        StreamData.integer(s.range)
+      end
+    end
+  end
 end
