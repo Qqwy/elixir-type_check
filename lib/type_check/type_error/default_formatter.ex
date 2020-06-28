@@ -102,6 +102,17 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "type guard:\n", problem)
   end
 
+
+  def format({s = %TypeCheck.Builtin.Either{}, :both_failed, %{left: left, right: right}, val}) do
+    left_str = "a)\n" <> indent(format(left))
+    right_str = "b)\n" <> indent(format(right))
+    problem = """
+    #{left_str}
+    #{right_str}
+    """
+    compound_check(val, s, "both possibilities failed:\n", problem)
+  end
+
   defp compound_check(val, s, child_prefix \\ nil, child_problem) do
     child_str =
     if child_prefix do
