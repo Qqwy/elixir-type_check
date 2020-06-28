@@ -15,7 +15,9 @@ defmodule TypeCheck.Builtin.List do
     end
 
     defp build_element_check(%TypeCheck.Builtin.Any{}, _param, _s) do
-      :ok
+      quote location: :keep do
+        {:ok, []}
+      end
     end
     defp build_element_check(element_type, param, s) do
       element_check = TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))

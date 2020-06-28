@@ -3,8 +3,8 @@ defmodule TypeCheck.Macros do
     quote do
       import TypeCheck.Macros
 
-      Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true, persist: true)
-      Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true, persist: true)
+      Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
+      Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
       @before_compile TypeCheck.Macros
     end
   end
@@ -182,7 +182,7 @@ defmodule TypeCheck.Macros do
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
     return_code = quote do
       case unquote(return_code_check) do
-        :ok ->
+        {:ok, _bindings} ->
           nil
         {:error, error} ->
           raise TypeCheck.TypeError, error
@@ -203,7 +203,7 @@ defmodule TypeCheck.Macros do
         with unquote_splicing(paired_params) do
           # Run actual code
         else
-          {:error, error} ->
+          {{:error, error}, _index, _param_type} ->
             raise TypeCheck.TypeError, error
         end
       end
@@ -215,7 +215,7 @@ defmodule TypeCheck.Macros do
 
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
     quote do
-      {:ok, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
+      {{:ok, _bindings}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
   end
 
