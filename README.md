@@ -7,19 +7,19 @@
 - [x] Custom type definitions (type, typep, opaque)
   - [x] Basic
   - [x] Parameterized
-- [ ] Hide implementation of `opaque` from documentation
+- [x] Hide implementation of `opaque` from documentation
 - [x] Spec argument types checking
 - [x] Spec return type checking
-- [ ] Spec possibly named arguments
-- [ ] Implementation of Elixir's builtin types
+- [x] Spec possibly named arguments
+- [x] Implementation of Elixir's builtin types
   - [x] Primitive types
   - [x] Compound types
   - [x] special forms like `|`, `a..b` etc.
   - [ ] Overrides for builtin typedefs (`String.t`,`Enum.t`, etc.)
-  - [ ] Literal lists
-  - [ ] Maps with keys => types
-  - [ ] Structs with keys => types
-- [ ] A `when` to add guards to typedefs for more power.
+  - [x] Literal lists
+  - [x] Maps with keys => types
+  - [x] Structs with keys => types
+- [x] A `when` to add guards to typedefs for more power.
 - [x] Make errors raised when types do not conform humanly readable
 - [ ] Creating generators from types
 - [ ] Creating generators from specs
