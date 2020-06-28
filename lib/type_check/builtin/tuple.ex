@@ -21,16 +21,20 @@ defmodule TypeCheck.Builtin.Tuple do
       element_checks =
         types_list
         |> Enum.with_index
-        |> Enum.map(fn {element_type, index} ->
+        |> Enum.flat_map(fn {element_type, index} ->
         impl = TypeCheck.Protocols.ToCheck.to_check(element_type, quote do elem(unquote(param), unquote(index)) end)
-        quote do
-          {:ok, _index, _element_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(element_type))}
+        quote location: :keep do
+          [
+            {{:ok, element_bindings}, _index, _element_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(element_type))},
+           bindings = element_bindings ++ bindings,
+           ]
         end
       end)
 
-        quote do
+        quote location: :keep do
+          bindings = []
           with unquote_splicing(element_checks) do
-            :ok
+            {:ok, bindings}
           else
             {{:error, error}, index, element_type} ->
               {:error, {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index, element_type: element_type}, unquote(param)}}

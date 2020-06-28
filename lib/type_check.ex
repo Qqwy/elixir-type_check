@@ -12,7 +12,7 @@ defmodule TypeCheck do
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
     quote do
       case unquote(check) do
-        :ok -> {:ok, unquote(value)}
+        {:ok, bindings} -> {:ok, unquote(value), bindings}
         other -> other
       end
     end
@@ -22,7 +22,7 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
     quote do
-      unquote(check) == :ok
+      match?({:ok, _}, unquote(check))
     end
   end
 
@@ -31,7 +31,7 @@ defmodule TypeCheck do
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
     quote do
       case unquote(check) do
-        :ok -> unquote(value)
+        {:ok, _bindings} -> unquote(value)
         {:error, other} -> raise TypeCheck.TypeError, other
       end
     end

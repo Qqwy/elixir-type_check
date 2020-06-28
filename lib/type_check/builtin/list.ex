@@ -23,18 +23,21 @@ defmodule TypeCheck.Builtin.List do
         orig_param = unquote(param)
         orig_param
         |> Enum.with_index
-        |> Enum.find_value(:ok, fn {input, index} ->
+        |> Enum.reduce_while({:ok, []}, fn {input, index}, {:ok, bindings} ->
           var!(single_param, unquote(__MODULE__)) = input
 
           case unquote(element_check) do
-            :ok ->
-              false
-            {:error, problem} -> {:error, {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index}, orig_param}}
+            {:ok, element_bindings} ->
+              {:cont, {:ok, element_bindings ++ bindings}}
+            {:error, problem} ->
+              problem = {:error, {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index}, orig_param}}
+              {:halt, problem}
           end
         end)
       end
     end
   end
+
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do

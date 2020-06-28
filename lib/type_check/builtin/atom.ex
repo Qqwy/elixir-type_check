@@ -6,7 +6,7 @@ defmodule TypeCheck.Builtin.Atom do
       quote do
         case unquote(param) do
           x when is_atom(x) ->
-            :ok
+            {:ok, []}
           _ ->
             {:error, {unquote(x), :not_an_atom, %{}, unquote(param)}}
         end

@@ -6,7 +6,7 @@ defmodule TypeCheck.Builtin.Literal do
       quote location: :keep do
         case unquote(param) do
           x when x === unquote(Macro.escape(value)) ->
-            :ok
+            {:ok, []}
           _ ->
             {:error, {unquote(Macro.escape(s)), :not_same_value, %{}, unquote(param)}}
         end

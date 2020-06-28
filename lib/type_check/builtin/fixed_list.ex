@@ -22,16 +22,18 @@ defmodule TypeCheck.Builtin.FixedList do
       element_checks =
         element_types
         |> Enum.with_index
-        |> Enum.map(fn {element_type, index} ->
+        |> Enum.flat_map(fn {element_type, index} ->
           impl = TypeCheck.Protocols.ToCheck.to_check(element_type, quote do hd(var!(rest, unquote(__MODULE__))) end)
           quote location: :keep do
-            {:ok, index, element_type, var!(rest, unquote(__MODULE__))} <- {unquote(impl), unquote(index), unquote(Macro.escape(element_type)), tl(var!(rest, unquote(__MODULE__)))}
+            [{{:ok, element_bindings}, index, element_type, var!(rest, unquote(__MODULE__))} <- {unquote(impl), unquote(index), unquote(Macro.escape(element_type)), tl(var!(rest, unquote(__MODULE__)))},
+            bindings = element_bindings ++ bindings]
           end
         end)
 
         quote location: :keep do
+          bindings = []
           with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do
-            :ok
+            {:ok, bindings}
           else
             {{:error, error}, index, element_type, _rest} ->
               {:error, {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index, element_type: element_type}, unquote(param)}}
@@ -46,5 +48,4 @@ defmodule TypeCheck.Builtin.FixedList do
       |> Elixir.Inspect.inspect(%Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
     end
   end
-
 end

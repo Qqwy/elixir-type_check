@@ -25,17 +25,20 @@ defmodule TypeCheck.Builtin.Map do
         orig_param = unquote(param)
 
         orig_param
-        |> Enum.find_value(:ok, fn {key, value} ->
+        |> Enum.reduce_while({:ok, []}, fn {key, value}, {:ok, bindings} ->
           var!(single_field_key, unquote(__MODULE__)) = key
           var!(single_field_value, unquote(__MODULE__)) = value
 
           case {unquote(key_check), unquote(value_check)} do
-            {:ok, :ok} ->
-              false
+            {{:ok, key_bindings}, {:ok, value_bindings}} ->
+              res = {:ok, value_bindings ++ key_bindings ++ bindings}
+              {:cont, res}
             {{:error, problem}, _} ->
-              {:error, {unquote(Macro.escape(s)), :key_error, %{problem: problem}, orig_param}}
+              res = {:error, {unquote(Macro.escape(s)), :key_error, %{problem: problem}, orig_param}}
+              {:halt, res}
             {_, {:error, problem}} ->
-              {:error, {unquote(Macro.escape(s)), :value_error, %{problem: problem}, orig_param}}
+              res = {:error, {unquote(Macro.escape(s)), :value_error, %{problem: problem}, orig_param}}
+              {:halt, res}
           end
         end)
       end

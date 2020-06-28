@@ -7,10 +7,10 @@ defmodule TypeCheck.Builtin.Either do
       right_check = TypeCheck.Protocols.ToCheck.to_check(right, param)
       quote do
         case unquote(left_check) do
-          :ok -> :ok
+          {:ok, bindings} -> {:ok, bindings}
           {:error, left_error} ->
             case unquote(right_check) do
-              :ok -> :ok
+              {:ok, bindings} -> {:ok, bindings}
               {:error, right_error} ->
                 {:error, {unquote(Macro.escape(x)), :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
             end

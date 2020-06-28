@@ -4,7 +4,7 @@ defmodule TypeCheck.Builtin.Any do
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(_, _param) do
       quote do
-        :ok
+        {:ok, []}
       end
     end
   end
