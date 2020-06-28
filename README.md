@@ -21,7 +21,7 @@
   - [x] Structs with keys => types
 - [x] A `when` to add guards to typedefs for more power.
 - [x] Make errors raised when types do not conform humanly readable
-- [ ] Creating generators from types
+- [x] Creating generators from types
 - [ ] Creating generators from specs
   - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
