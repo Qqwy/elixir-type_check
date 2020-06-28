@@ -54,9 +54,9 @@ defmodule TypeCheck.Builtin.Map do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-         key_gen = to_gen(s.key_type)
-         value_gen = to_gen(s.value_type)
-         StreamData.map_of(key_gen, value_gen)
+        key_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.key_type)
+        value_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.value_type)
+        StreamData.map_of(key_gen, value_gen)
       end
     end
   end

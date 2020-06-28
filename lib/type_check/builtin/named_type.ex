@@ -30,7 +30,7 @@ defmodule TypeCheck.Builtin.NamedType do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-        to_gen(s.type)
+        TypeCheck.Protocols.ToStreamData.to_gen(s.type)
       end
     end
   end

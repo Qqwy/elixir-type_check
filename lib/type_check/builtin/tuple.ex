@@ -55,7 +55,8 @@ defmodule TypeCheck.Builtin.Tuple do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
         s.element_types
-        |> Enum.map(&to_gen/1)
+        |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
+        |> List.to_tuple
         |> StreamData.tuple()
       end
     end

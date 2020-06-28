@@ -37,8 +37,8 @@ defmodule TypeCheck.Builtin.Either do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-        left_gen = to_gen(s.left)
-        right_gen = to_gen(s.right)
+        left_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.left)
+        right_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.right)
         StreamData.one_of([left_gen, right_gen])
       end
     end
