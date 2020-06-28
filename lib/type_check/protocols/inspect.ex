@@ -13,6 +13,7 @@ structs = [
   TypeCheck.Builtin.List,
   TypeCheck.Builtin.Literal,
   TypeCheck.Builtin.Map,
+  TypeCheck.Builtin.NamedType,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
 ]

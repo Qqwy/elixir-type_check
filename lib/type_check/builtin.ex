@@ -65,4 +65,12 @@ defmodule TypeCheck.Builtin do
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
     %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
   end
+
+  def fixed_list(element_types) when is_list(element_types) do
+    %TypeCheck.Builtin.FixedList{element_types: element_types}
+  end
+
+  def named_type(name, type) do
+    %TypeCheck.Builtin.NamedType{name: name, type: type}
+  end
 end

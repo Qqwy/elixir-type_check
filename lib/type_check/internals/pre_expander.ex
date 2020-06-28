@@ -13,11 +13,17 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.literal(unquote(value))
         end
-      x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) or is_list(x) ->
+      x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->
         quote location: :keep do
           TypeCheck.Builtin.literal(unquote(x))
         end
-
+      list when is_list(list) ->
+        rewritten_values =
+          list
+          |> Enum.map(&rewrite(&1, env))
+        quote location: :keep do
+          TypeCheck.Builtin.fixed_list(unquote(rewritten_values))
+        end
       {:|, _, [lhs, rhs]} ->
         quote location: :keep do
           TypeCheck.Builtin.either(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
@@ -26,13 +32,20 @@ defmodule TypeCheck.Internals.PreExpander do
         rewrite_map_and_struct(fields, ast, env)
       {:%, _, [struct_name, {:%{}, _, fields}]} ->
         rewrite_struct(struct_name, fields, env)
+      {:"::", _, [{name, _, atom}, type_ast]} when is_atom(atom) ->
+        quote location: :keep do
+          TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env)))
+        end
       {:{}, _, elements} ->
         rewrite_tuple(elements, env)
       {left, right} ->
         rewrite_tuple([left, right], env)
 
-        # Fallback:
-        other ->
+      {other_fun, meta, args} when is_list(args) ->
+        # Make sure arguments of any function are expanded
+        {other_fun, meta, Enum.map(args, &rewrite(&1, env))}
+      other ->
+        # Fallback
         other
     end
   end
