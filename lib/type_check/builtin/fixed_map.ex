@@ -60,7 +60,15 @@ defmodule TypeCheck.Builtin.FixedMap do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      Elixir.Inspect.inspect(Enum.into(s.keypairs, %{}), %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+      map = Enum.into(s.keypairs, %{})
+      case Map.get(map, :__struct__) do
+        %TypeCheck.Builtin.Literal{value: value} ->
+          # Make sure we render structs as structs
+          map = Map.put(map, :__struct__, value)
+          Elixir.Inspect.inspect(map, %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+        _ ->
+          Elixir.Inspect.inspect(map, %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+      end
     end
   end
 end

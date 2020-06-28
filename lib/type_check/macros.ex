@@ -146,13 +146,14 @@ defmodule TypeCheck.Macros do
     # TODO currently assumes the params are directly types
     # rather than the possibility of named types like `x :: integer()`
 
-    params_ast = Enum.map(params_ast, &TypeCheck.Internals.PreExpander.rewrite(&1, caller))
-    return_type_ast = TypeCheck.Internals.PreExpander.rewrite(return_type_ast, caller)
+    require TypeCheck.Type
+    param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller))
+    return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller)
 
     IO.inspect({name, params_ast}, label: :define_spec)
     clean_params =
       Macro.generate_arguments(arity, caller.module)
-    {params_spec_code, return_spec_code} = prepare_spec_wrapper_code(specdef, name, params_ast, clean_params, return_type_ast, caller)
+    {params_spec_code, return_spec_code} = prepare_spec_wrapper_code(specdef, name, param_types, clean_params, return_type, caller)
 
     # Module.put_attribute(caller.module, TypeCheck.TypeDefs, Macro.escape(res))
     spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
@@ -168,17 +169,15 @@ defmodule TypeCheck.Macros do
     res
   end
 
-  defp prepare_spec_wrapper_code(specdef, name, params_ast, clean_params, return_type_ast, caller) do
-    params_code = params_check_code(params_ast, clean_params, caller)
-    return_code = return_check_code(return_type_ast, caller)
+  defp prepare_spec_wrapper_code(specdef, name, param_types, clean_params, return_type, caller) do
+    params_code = params_check_code(param_types, clean_params, caller)
+    return_code = return_check_code(return_type, caller)
 
     {params_code, return_code}
   end
 
-  defp return_check_code(return_type_ast, caller) do
-    IO.puts(Macro.to_string(return_type_ast))
-
-    return_type = eval_type(return_type_ast, caller)
+  defp return_check_code(return_type, caller) do
+    IO.puts(Macro.to_string(return_type))
 
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
     return_code = quote do
@@ -191,13 +190,13 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp params_check_code(params_ast, clean_params, caller) do
+  defp params_check_code(param_types, clean_params, caller) do
     paired_params =
-      params_ast
+      param_types
       |> Enum.zip(clean_params)
       |> Enum.with_index
-      |> Enum.map(fn {{param_ast, clean_param}, index} ->
-        param_check_code(param_ast, clean_param, index, caller)
+      |> Enum.map(fn {{param_type, clean_param}, index} ->
+        param_check_code(param_type, clean_param, index, caller)
       end)
     code =
       quote line: caller.line do
@@ -212,8 +211,7 @@ defmodule TypeCheck.Macros do
     code
   end
 
-  defp param_check_code(param_ast, clean_param, index, caller) do
-    param_type = eval_type(param_ast, caller)
+  defp param_check_code(param_type, clean_param, index, caller) do
 
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
     quote do
