@@ -36,4 +36,26 @@ defmodule TypeCheck do
       end
     end
   end
+
+  def dynamic_conforms(value, type) do
+    check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
+    case Code.eval_quoted(check_code, [value: value]) do
+      {{:ok, _}, _} -> {:ok, value}
+      {other, _} -> other
+    end
+  end
+
+  def dynamic_conforms?(value, type) do
+    case dynamic_conforms(value, type) do
+      {:ok, value} -> true
+      other -> false
+    end
+  end
+
+  def dynamic_conforms!(value, type) do
+    case dynamic_conforms(value, type) do
+      {:ok, value} -> value
+      {:error, other} -> raise TypeCheck.TypeError, other
+    end
+  end
 end

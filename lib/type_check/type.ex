@@ -21,4 +21,11 @@ defmodule TypeCheck.Type do
     {type, []} = Code.eval_quoted(quote do import TypeCheck.Builtin; unquote(type_ast) end, [], caller)
     type
   end
+
+
+  if Code.ensure_loaded?(StreamData) do
+    def stream_data_gen(type) do
+      TypeCheck.Protocols.ToStreamData.to_gen(type)
+    end
+  end
 end

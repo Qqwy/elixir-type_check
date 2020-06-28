@@ -14,4 +14,12 @@ defmodule TypeCheck.Builtin.Any do
       "any()"
     end
   end
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        StreamData.term()
+      end
+    end
+  end
 end
