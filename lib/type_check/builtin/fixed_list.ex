@@ -39,4 +39,12 @@ defmodule TypeCheck.Builtin.FixedList do
         end
     end
   end
+
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(s, opts) do
+      s.element_types
+      |> Elixir.Inspect.inspect(%Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+    end
+  end
+
 end

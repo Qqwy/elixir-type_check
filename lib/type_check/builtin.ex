@@ -62,10 +62,12 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Map{key_type: key_type, value_type: value_type}
   end
 
+  # TODO prevent double-nesting
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
     %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
   end
 
+  # TODO prevent double-nesting
   def fixed_list(element_types) when is_list(element_types) do
     %TypeCheck.Builtin.FixedList{element_types: element_types}
   end

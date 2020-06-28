@@ -72,6 +72,20 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "under key `#{inspect(key)}`:\n", format(problem))
   end
 
+  def format({s = %TypeCheck.Builtin.FixedList{}, :not_a_list, _, val}) do
+    problem = "`#{inspect(val)}` is not a list."
+    compound_check(val, s, problem)
+  end
+
+  def format({s = %TypeCheck.Builtin.FixedList{}, :different_length, %{expected_length: expected_length}, val}) do
+    problem = "`#{inspect(val)}` has #{length(val)} elements rather than #{expected_length}."
+    compound_check(val, s, problem)
+  end
+
+  def format({s = %TypeCheck.Builtin.FixedList{}, :element_error, %{problem: problem, index: index}, val}) do
+    compound_check(val, s, "at index #{index}:\n", format(problem))
+  end
+
   def format({s = %TypeCheck.Builtin.NamedType{}, :named_type, %{problem: problem}, val}) do
     compound_check(val, s, format(problem))
   end

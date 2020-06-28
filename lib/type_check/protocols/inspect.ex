@@ -8,6 +8,7 @@ structs = [
   TypeCheck.Builtin.Atom,
   TypeCheck.Builtin.Either,
   TypeCheck.Builtin.FixedMap,
+  TypeCheck.Builtin.FixedList,
   TypeCheck.Builtin.Float,
   TypeCheck.Builtin.Integer,
   TypeCheck.Builtin.List,
