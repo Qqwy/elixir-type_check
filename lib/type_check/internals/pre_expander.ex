@@ -36,6 +36,22 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env)))
         end
+      ast = {:when, _, [type, list]} when is_list(list) ->
+        raise ArgumentError, """
+        Unsupported `when` with keyword arguments in the type description `#{Macro.to_string(ast)}`
+
+        TypeCheck currently does not allow the `function(foo, bar) :: foo | bar when foo: some_type(), bar: other_type()` syntax.
+        Instead, define `foo` and `bar` as separate types and refer to those definitions.
+
+        For instance:
+
+        ```
+        type foo :: some_type()
+        type bar :: other_type()
+        spec function(foo, bar) :: foo | bar
+        ```
+
+        """
       {:when, _, [type, guard]} ->
         quote location: :keep do
           TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env)), unquote(Macro.escape(guard)))
