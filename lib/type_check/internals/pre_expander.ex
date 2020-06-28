@@ -36,6 +36,10 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env)))
         end
+      {:when, _, [type, guard]} ->
+        quote location: :keep do
+          TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env)), unquote(Macro.escape(guard)))
+        end
       {:{}, _, elements} ->
         rewrite_tuple(elements, env)
       {left, right} ->

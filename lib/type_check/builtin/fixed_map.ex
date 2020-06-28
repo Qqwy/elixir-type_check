@@ -4,10 +4,10 @@ defmodule TypeCheck.Builtin.FixedMap do
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote location: :keep do
-        with {:ok, bindings1} <- unquote(map_check(param, s)),
-             {:ok, bindings2} <- unquote(build_keys_presence_ast(s.keypairs, param, s)),
+        with {:ok, []} <- unquote(map_check(param, s)),
+             {:ok, []} <- unquote(build_keys_presence_ast(s.keypairs, param, s)),
              {:ok, bindings3} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
-          {:ok, bindings3 ++ bindings2 ++ bindings1}
+          {:ok, bindings3}
         end
       end
     end

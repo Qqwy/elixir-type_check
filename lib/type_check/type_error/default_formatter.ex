@@ -90,6 +90,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, format(problem))
   end
 
+  def format({s = %TypeCheck.Builtin.Guarded{}, :type_failed, %{problem: problem}, val}) do
+    compound_check(val, s, format(problem))
+  end
+
+  def format({s = %TypeCheck.Builtin.Guarded{}, :guard_failed, %{bindings: bindings}, val}) do
+    problem = """
+    `#{Macro.to_string(s.guard)}` evaluated to false or nil.
+    bound values: #{inspect(bindings)}
+    """
+    compound_check(val, s, "type guard:\n", problem)
+  end
+
   defp compound_check(val, s, child_prefix \\ nil, child_problem) do
     child_str =
     if child_prefix do
