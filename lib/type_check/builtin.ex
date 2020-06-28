@@ -96,4 +96,7 @@ defmodule TypeCheck.Builtin do
   def named_type(name, type) do
     %TypeCheck.Builtin.NamedType{name: name, type: type}
   end
+
+  def guarded_by(type, guard_ast) do
+  end
 end
