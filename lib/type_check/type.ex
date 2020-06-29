@@ -38,6 +38,10 @@ defmodule TypeCheck.Type do
     type
   end
 
+  def to_typespec(type) do
+    TypeCheck.Protocols.ToTypespec.to_typespec(type)
+  end
+
 
   if Code.ensure_loaded?(StreamData) do
     def stream_data_gen(type) do

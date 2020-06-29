@@ -26,6 +26,14 @@ defmodule TypeCheck.Builtin.Either do
     end
   end
 
+  defimpl TypeCheck.Protocols.ToTypespec do
+    def to_typespec(s) do
+      quote do
+        unquote(TypeCheck.Protocols.ToTypespec.to_typespec(s.left)) | unquote(TypeCheck.Protocols.ToTypespec.to_typespec(s.right))
+      end
+    end
+  end
+
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(either, opts) do
       TypeCheck.Protocols.Inspect.inspect(either.left, opts)

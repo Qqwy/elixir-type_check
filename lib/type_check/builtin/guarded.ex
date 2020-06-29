@@ -56,6 +56,15 @@ defmodule TypeCheck.Builtin.Guarded do
     end
   end
 
+  defimpl TypeCheck.Protocols.ToTypespec do
+    def to_typespec(s) do
+      # NOTE this indeed throws away the guard!
+      quote do
+        unquote(TypeCheck.Protocols.ToTypespec.to_typespec(s.type))
+      end
+    end
+  end
+
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       "("

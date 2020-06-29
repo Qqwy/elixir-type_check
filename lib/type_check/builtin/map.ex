@@ -45,6 +45,18 @@ defmodule TypeCheck.Builtin.Map do
     end
   end
 
+  defimpl TypeCheck.Protocols.ToTypespec do
+    def to_typespec(s) do
+      quote do
+        %{optional(
+             unquote(TypeCheck.Protocols.ToTypespec.to_typespec(s.key_type))
+           ) =>
+          unquote(TypeCheck.Protocols.ToTypespec.to_typespec(s.value_type))
+        }
+      end
+    end
+  end
+
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do
       Inspect.Algebra.container_doc("map(", [TypeCheck.Protocols.Inspect.inspect(list.element_type, opts)], ")", opts, fn x, _ -> x end, [separator: "", break: :maybe])

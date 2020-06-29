@@ -42,6 +42,16 @@ defmodule TypeCheck.Builtin.FixedList do
     end
   end
 
+
+  defimpl TypeCheck.Protocols.ToTypespec do
+    def to_typespec(s) do
+      element_typespecs = Enum.map(s.element_types, &TypeCheck.Protocols.ToTypespec.to_typespec/1)
+      quote do
+        [unquote_splicing(element_typespecs)]
+      end
+    end
+  end
+
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       s.element_types
