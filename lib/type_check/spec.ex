@@ -22,29 +22,6 @@ defmodule TypeCheck.Spec do
     function_exported?(module, spec_fun_name(function, arity), 0)
   end
 
-  defimpl TypeCheck.Protocols.Inspect do
-    def inspect(struct, opts) do
-      body =
-        Inspect.Algebra.container_doc("(", struct.param_types, ")", opts, &TypeCheck.Protocols.Inspect.inspect/2, [separator: ", ", break: :maybe])
-      |> Inspect.Algebra.group
-
-      to_string(struct.name)
-      |> Inspect.Algebra.concat(body)
-      |> Inspect.Algebra.glue("::")
-      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
-      |> Inspect.Algebra.group
-    end
-  end
-
-  defimpl Elixir.Inspect do
-    def inspect(struct, opts) do
-      "#TypeCheck.Spec< "
-      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct, opts))
-      |> Inspect.Algebra.glue(">")
-      |> Inspect.Algebra.group
-    end
-  end
-
   @doc false
   def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
     quote line: line do
@@ -107,6 +84,29 @@ defmodule TypeCheck.Spec do
         {:error, problem} ->
           raise TypeCheck.TypeError, {unquote(spec_fun_name(name, arity))(), :return_error, %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
       end
+    end
+  end
+
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(struct, opts) do
+      body =
+        Inspect.Algebra.container_doc("(", struct.param_types, ")", opts, &TypeCheck.Protocols.Inspect.inspect/2, [separator: ", ", break: :maybe])
+        |> Inspect.Algebra.group
+
+      to_string(struct.name)
+      |> Inspect.Algebra.concat(body)
+      |> Inspect.Algebra.glue("::")
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
+      |> Inspect.Algebra.group
+    end
+  end
+
+  defimpl Elixir.Inspect do
+    def inspect(struct, opts) do
+      "#TypeCheck.Spec< "
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct, opts))
+      |> Inspect.Algebra.glue(">")
+      |> Inspect.Algebra.group
     end
   end
 end
