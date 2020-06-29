@@ -14,7 +14,7 @@ defmodule Example2 do
     # {mylist(), mylist2(), mylist3(10), mylist3(mylist3(integer()))}
   end
 
-  spec wrap(list()) :: any() # list(integer())
+  spec wrap(mylist()) :: any() # list(integer())
   def wrap(int) do
     [int, int]
   end

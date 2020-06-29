@@ -1,6 +1,6 @@
 defmodule TypeCheck.Macros do
   defmacro __using__(_options) do
-    quote do
+    quote location: :keep do
       import TypeCheck.Macros
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
@@ -25,7 +25,7 @@ defmodule TypeCheck.Macros do
     # And now, override all specs:
     definitions = Module.definitions_in(env.module)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
-    spec_quotes = wrap_functions_with_specs(specs, definitions)
+    spec_quotes = wrap_functions_with_specs(specs, definitions, env)
 
     # Time to combine it all
     quote do
@@ -35,11 +35,17 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp wrap_functions_with_specs(specs, definitions) do
-    for {name, line, arity, clean_params, params_spec_code, return_spec_code} <- specs do
+  defp wrap_functions_with_specs(specs, definitions, caller) do
+    for {name, line, arity, clean_params, params_ast, return_type_ast} <- specs do
       unless {name, arity} in definitions do
         raise ArgumentError, "spec for undefined function #{name}/#{arity}"
       end
+
+      require TypeCheck.Type
+      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller))
+      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller)
+
+      {params_spec_code, return_spec_code} = TypeCheck.Spec.prepare_spec_wrapper_code( name, params_ast, clean_params, return_type_ast, caller)
 
       TypeCheck.Spec.wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code)
     end
@@ -76,7 +82,7 @@ defmodule TypeCheck.Macros do
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller)
 
     res = type_fun_definition(name_with_maybe_params, type)
-    quote do
+    quote location: :keep do
       case unquote(kind) do
         :opaque ->
           @typedoc unquote(new_typedoc)
@@ -113,7 +119,7 @@ defmodule TypeCheck.Macros do
   end
 
   defp type_fun_definition(name_with_params, type) do
-    quote do
+    quote location: :keep do
       @doc false
       def unquote(name_with_params) do
         import TypeCheck.Builtin
@@ -125,20 +131,16 @@ defmodule TypeCheck.Macros do
   defp define_spec(specdef = {:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
     {name, params_ast} = Macro.decompose_call(name_with_params_ast)
     arity = length(params_ast)
-    # TODO currently assumes the params are directly types
-    # rather than the possibility of named types like `x :: integer()`
 
-    require TypeCheck.Type
-    param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller))
-    return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller)
+    # require TypeCheck.Type
+    # param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller))
+    # return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller)
 
-    clean_params =
-      Macro.generate_arguments(arity, caller.module)
-    {params_spec_code, return_spec_code} = TypeCheck.Spec.prepare_spec_wrapper_code(specdef, name, param_types, clean_params, return_type, caller)
+    clean_params = Macro.generate_arguments(arity, caller.module)
 
     spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
     quote location: :keep do
-      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(params_spec_code)), unquote(Macro.escape(return_spec_code))})
+      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(params_ast), unquote(return_type_ast)})
 
       def unquote(spec_fun_name)() do
         import TypeCheck.Builtin

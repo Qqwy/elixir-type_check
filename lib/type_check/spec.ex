@@ -61,7 +61,7 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def prepare_spec_wrapper_code(specdef, name, param_types, clean_params, return_type, caller) do
+  def prepare_spec_wrapper_code(name, param_types, clean_params, return_type, caller) do
     arity = length(clean_params)
     params_code = params_check_code(name, arity, param_types, clean_params, caller)
     return_code = return_check_code(name, arity, clean_params, return_type, caller)

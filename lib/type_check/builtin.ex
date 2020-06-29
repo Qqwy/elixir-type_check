@@ -1,4 +1,5 @@
 defmodule TypeCheck.Builtin do
+
   def any() do
     %TypeCheck.Builtin.Any{}
   end

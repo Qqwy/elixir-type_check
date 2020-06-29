@@ -1,19 +1,21 @@
 defmodule Example do
   use TypeCheck
 
+  @type literal(t) :: t
+
   type myint :: integer()
-  type str :: binary
   type myint2 :: myint
   type num :: integer() | float()
   type one :: 1
 
-  type char :: 0..255
-  type literal_range :: literal(0..255)
+  # type char :: 0..255
+  # type literal_range :: literal(0..255)
+  type foo :: literal(10)
 
-  type result :: :ok | :error | unknown
+  type result :: :ok | :error | any()
 
-  spec foo(myint) :: str
+  # spec foo(integer()) :: float()
   def foo(x) do
-    to_string(x)
+    x + 0.0
   end
 end
