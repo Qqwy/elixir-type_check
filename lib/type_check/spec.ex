@@ -48,6 +48,7 @@ defmodule TypeCheck.Spec do
   @doc false
   def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
     quote line: line do
+
       defoverridable([{unquote(name), unquote(arity)}])
       def unquote(name)(unquote_splicing(clean_params)) do
         import TypeCheck.Builtin

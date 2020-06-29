@@ -42,10 +42,10 @@ defmodule TypeCheck.Macros do
       end
 
       require TypeCheck.Type
-      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller))
-      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller)
+      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
+      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
 
-      {params_spec_code, return_spec_code} = TypeCheck.Spec.prepare_spec_wrapper_code( name, params_ast, clean_params, return_type_ast, caller)
+      {params_spec_code, return_spec_code} = TypeCheck.Spec.prepare_spec_wrapper_code(name, param_types, clean_params, return_type, caller)
 
       TypeCheck.Spec.wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code)
     end
@@ -140,7 +140,7 @@ defmodule TypeCheck.Macros do
 
     spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
     quote location: :keep do
-      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(params_ast), unquote(return_type_ast)})
+      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))})
 
       def unquote(spec_fun_name)() do
         import TypeCheck.Builtin
