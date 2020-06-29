@@ -124,7 +124,6 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     """
   end
 
-
   def format({s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}) do
     arguments_str = arguments |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments_str})"
