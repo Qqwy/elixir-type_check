@@ -1,98 +1,111 @@
 defmodule TypeCheck.Spec do
-  defmacro __before_compile__(env) do
-    IO.inspect(env)
+  defstruct [:name, :param_types, :return_type]
 
-    # Used internally in by the expander; c.f. TypeCheck.Spec.Expander
-    Module.register_attribute(env.module, TypeCheck.Spec.BeingExpanded, accumulate: true, persist: true)
-    Module.register_attribute(env.module, TypeCheck.Spec.Expanded, accumulate: true, persist: true)
-    typedefs = Module.get_attribute(env.module, TypeCheck.Spec.Unexpanded)
+  defp spec_fun_name(function, arity) do
+    spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
+  end
 
-    types = typedefs |> Enum.filter(fn {key, val} -> val.kind in [:type, :typep, :opaque] end)
-    specs = typedefs |> Enum.filter(fn {key, val} -> val.kind == :spec end)
-    IO.inspect(types)
-    IO.inspect(specs)
-    type_res = eval_types(types, env)
-    IO.inspect(type_res)
-    spec_res = eval_specs(specs)
-    quote bind_quoted: [types: Macro.escape(type_res)] do
-      for {name, val} <- types do
-        # if val.kind in [:type, :opaque] do
-        name = name |> Atom.to_string() |> String.split("/") |> hd |> String.to_existing_atom()
-        def unquote(name)(), do: unquote(Macro.escape(val))
-        # end
+  def lookup(module, function, arity) do
+    if function_exported?(module, spec_fun_name(function, arity), 0) do
+      {:ok, apply(module, spec_fun_name(function, arity), [])}
+    else
+      {:error, :not_found}
+    end
+  end
+
+  def lookup!(module, function, arity) do
+    {:ok, res} = lookup(module, function, arity)
+    res
+  end
+
+  def defined?(module, function, arity) do
+    function_exported?(module, spec_fun_name(function, arity), 0)
+  end
+
+  defimpl TypeCheck.Protocols.Inspect do
+    def inspect(struct, opts) do
+      body =
+        Inspect.Algebra.container_doc("(", struct.param_types, ")", opts, &TypeCheck.Protocols.Inspect.inspect/2, [separator: ", ", break: :maybe])
+      |> Inspect.Algebra.group
+
+      to_string(struct.name)
+      |> Inspect.Algebra.concat(body)
+      |> Inspect.Algebra.glue("::")
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
+      |> Inspect.Algebra.group
+    end
+  end
+
+  defimpl Elixir.Inspect do
+    def inspect(struct, opts) do
+      "#TypeCheck.Spec< "
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct, opts))
+      |> Inspect.Algebra.glue(">")
+      |> Inspect.Algebra.group
+    end
+  end
+
+  @doc false
+  def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
+    quote line: line do
+      defoverridable([{unquote(name), unquote(arity)}])
+      def unquote(name)(unquote_splicing(clean_params)) do
+        import TypeCheck.Builtin
+
+        unquote(params_spec_code)
+        var!(super_result, nil) = super(unquote_splicing(clean_params))
+        unquote(return_spec_code)
+        var!(super_result, nil)
       end
     end
   end
 
-  defp eval_types(types, env) do
-    Enum.map(types, &eval_type(&1, env))
+  @doc false
+  def prepare_spec_wrapper_code(specdef, name, param_types, clean_params, return_type, caller) do
+    arity = length(clean_params)
+    params_code = params_check_code(name, arity, param_types, clean_params, caller)
+    return_code = return_check_code(name, arity, clean_params, return_type, caller)
+
+    {params_code, return_code}
   end
 
-  defp eval_type({name, typedef}, env) do
-    {name, TypeCheck.Spec.Expander.expand(name, typedef, env)}
+  defp params_check_code(name, arity, param_types, clean_params, caller) do
+
+    paired_params =
+      param_types
+      |> Enum.zip(clean_params)
+      |> Enum.with_index
+      |> Enum.map(fn {{param_type, clean_param}, index} ->
+      param_check_code(param_type, clean_param, index, caller)
+    end)
+
+        quote line: caller.line do
+        with unquote_splicing(paired_params) do
+          # Run actual code
+        else
+          {{:error, problem}, index, param_type} ->
+            raise TypeCheck.TypeError, {unquote(spec_fun_name(name, arity))(), :param_error, %{index: index, problem: problem}, unquote(clean_params)}
+        end
+      end
   end
 
-  defp eval_specs(specs) do
-    Enum.map(specs, &eval_spec/1)
-  end
+  defp param_check_code(param_type, clean_param, index, caller) do
 
-  defp eval_spec({name, spec}) do
-    :ok
-  end
-
-  defmacro type(args) do
-    build_typedef_ast(args, :type)
-  end
-
-  defmacro typep(args) do
-    build_typedef_ast(args, :typep)
-  end
-
-  defmacro opaque(args) do
-    build_typedef_ast(args, :opaque)
-  end
-
-  defmacro spec(args) do
-    build_spec_ast(args)
-  end
-
-  # Shared between type, typep and opaque
-  defp build_typedef_ast(args, call_kind) do
-    # TODO support parameterized types
-    {name, raw_type} = extract_type_name(args)
-    arity = 0
+    impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
     quote do
-      Module.put_attribute(__MODULE__, TypeCheck.Spec.Unexpanded, {:"#{unquote(name)}/#{unquote(arity)}", %{kind: unquote(call_kind), type: unquote(Macro.escape(raw_type))}})
+      {{:ok, _bindings}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
   end
 
-  defp build_spec_ast(args) do
-    {name, arg_types, return_type} = extract_spec_name(args)
-    arity = length arg_types
-    quote do
-      Module.put_attribute(__MODULE__, TypeCheck.Spec.Unexpanded, {:"#{unquote(name)}/#{unquote(arity)}}", %{kind: :spec, arg_types: unquote(Macro.escape(arg_types)), type: unquote(Macro.escape(return_type))}})
+  defp return_check_code(name, arity, clean_params, return_type, caller) do
+    return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
+    return_code = quote do
+      case unquote(return_code_check) do
+        {:ok, _bindings} ->
+          nil
+        {:error, problem} ->
+          raise TypeCheck.TypeError, {unquote(spec_fun_name(name, arity))(), :return_error, %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
+      end
     end
   end
-
-  defp extract_type_name(ast = {:"::", _, [name, type]}) do
-    case extract_var_name(name) do
-      {:ok, var} ->
-        {var, type}
-      :error ->
-        raise "Expected type name to be a variable, but got `#{Macro.to_string(name)}` while parsing #{Macro.to_string(ast)}"
-    end
-  end
-  defp extract_type_name(other) do
-    raise "Expected a definition in the shape of `name :: type` but got `#{Macro.to_string(other)}`"
-  end
-
-  defp extract_spec_name(ast = {:"::", _, [{function_name, _, arg_types}, return_type]}) when is_atom(function_name) and is_list(arg_types) do
-    {function_name, arg_types, return_type}
-  end
-  defp extract_spec_name(other) do
-    raise "Expected a definition in the shape of `name(type1, type2, type3) :: return_type` but got `#{Macro.to_string(other)}`"
-  end
-
-  defp extract_var_name({name, _, module}) when is_atom(name) and is_atom(module), do: {:ok, name}
-  defp extract_var_name(_), do: :error
 end
