@@ -1,10 +1,13 @@
 defmodule TypeCheck.Spec do
   defstruct [:name, :param_types, :return_type]
 
-  def lookup(module, function, arity) do
+  defp spec_fun_name(function, arity) do
     spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
-    if function_exported?(module, spec_fun_name, 0) do
-      {:ok, apply(module, spec_fun_name, [])}
+  end
+
+  def lookup(module, function, arity) do
+    if function_exported?(module, spec_fun_name(function, arity), 0) do
+      {:ok, apply(module, spec_fun_name(function, arity), [])}
     else
       {:error, :not_found}
     end
@@ -16,22 +19,28 @@ defmodule TypeCheck.Spec do
   end
 
   def defined?(module, function, arity) do
-    spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
-    function_exported?(module, spec_fun_name, 0)
+    function_exported?(module, spec_fun_name(function, arity), 0)
   end
 
-  defimpl Inspect do
+  defimpl TypeCheck.Protocols.Inspect do
     def inspect(struct, opts) do
       body =
         Inspect.Algebra.container_doc("(", struct.param_types, ")", opts, &TypeCheck.Protocols.Inspect.inspect/2, [separator: ", ", break: :maybe])
       |> Inspect.Algebra.group
 
-      "#TypeCheck.Spec< "
-      |> Inspect.Algebra.glue(to_string(struct.name))
+      to_string(struct.name)
       |> Inspect.Algebra.concat(body)
-      |> Inspect.Algebra.glue(" :: ")
-      |> Inspect.Algebra.concat(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
-      |> Inspect.Algebra.glue(" >")
+      |> Inspect.Algebra.glue("::")
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
+      |> Inspect.Algebra.group
+    end
+  end
+
+  defimpl Elixir.Inspect do
+    def inspect(struct, opts) do
+      "#TypeCheck.Spec< "
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct, opts))
+      |> Inspect.Algebra.glue(">")
       |> Inspect.Algebra.group
     end
   end
@@ -53,13 +62,15 @@ defmodule TypeCheck.Spec do
 
   @doc false
   def prepare_spec_wrapper_code(specdef, name, param_types, clean_params, return_type, caller) do
-    params_code = params_check_code(param_types, clean_params, caller)
-    return_code = return_check_code(return_type, caller)
+    arity = length(clean_params)
+    params_code = params_check_code(name, arity, param_types, clean_params, caller)
+    return_code = return_check_code(name, arity, clean_params, return_type, caller)
 
     {params_code, return_code}
   end
 
-  defp params_check_code(param_types, clean_params, caller) do
+  defp params_check_code(name, arity, param_types, clean_params, caller) do
+
     paired_params =
       param_types
       |> Enum.zip(clean_params)
@@ -67,12 +78,13 @@ defmodule TypeCheck.Spec do
       |> Enum.map(fn {{param_type, clean_param}, index} ->
       param_check_code(param_type, clean_param, index, caller)
     end)
+
         quote line: caller.line do
         with unquote_splicing(paired_params) do
           # Run actual code
         else
-          {{:error, error}, _index, _param_type} ->
-            raise TypeCheck.TypeError, error
+          {{:error, problem}, index, param_type} ->
+            raise TypeCheck.TypeError, {unquote(spec_fun_name(name, arity))(), :param_error, %{index: index, problem: problem}, unquote(clean_params)}
         end
       end
   end
@@ -85,14 +97,14 @@ defmodule TypeCheck.Spec do
     end
   end
 
-  defp return_check_code(return_type, caller) do
+  defp return_check_code(name, arity, clean_params, return_type, caller) do
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
     return_code = quote do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
           nil
-        {:error, error} ->
-          raise TypeCheck.TypeError, error
+        {:error, problem} ->
+          raise TypeCheck.TypeError, {unquote(spec_fun_name(name, arity))(), :return_error, %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
       end
     end
   end

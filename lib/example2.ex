@@ -45,7 +45,7 @@ defmodule Example2 do
     end
   end
 
-  spec small(0..500) :: :ok | :error
+  spec small(0..500) :: :foo | :bar | :baz
   def small(x) do
     case x do
       x when x in 0..255 -> :ok

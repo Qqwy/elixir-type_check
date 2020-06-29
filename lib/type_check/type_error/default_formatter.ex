@@ -113,6 +113,28 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "both possibilities failed:\n", problem)
   end
 
+  def format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
+    # compound_check(val, s, "at parameter no. #{index + 1}:\n", format(problem))
+    arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
+    call = "#{s.name}(#{arguments})"
+    message = """
+    The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+      parameter no. #{index + 1}:
+    #{indent(indent(format(problem)))}
+    """
+  end
+
+
+  def format({s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}) do
+    arguments_str = arguments |> Enum.map(&inspect/1) |> Enum.join(", ")
+    call = "#{s.name}(#{arguments_str})"
+    """
+    The result of calling `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+      Returned result:
+    #{indent(indent(format(problem)))}
+    """
+  end
+
   defp compound_check(val, s, child_prefix \\ nil, child_problem) do
     child_str =
     if child_prefix do
