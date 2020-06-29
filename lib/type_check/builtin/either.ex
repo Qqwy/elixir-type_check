@@ -31,6 +31,7 @@ defmodule TypeCheck.Builtin.Either do
       TypeCheck.Protocols.Inspect.inspect(either.left, opts)
       |> Inspect.Algebra.glue("|")
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(either.right, opts))
+      |> Inspect.Algebra.group
     end
   end
 

@@ -31,7 +31,9 @@ defmodule Example2 do
   end
 
   # spec maybe_div(either(integer(), float()), either(integer(), float())) :: either(tuple([literal(:ok), either(integer(), float())]), tuple([literal(:error), atom()]))
-  spec maybe_div(integer() | float(), integer() | float()) :: {:ok, integer() | float()}
+  type res :: {:ok, integer() | float()} | {:error, atom()}
+  spec maybe_div(integer() | float(), integer() | float()) :: {:ok, integer() | float()} | {:error, atom()}
+  # spec maybe_div(integer() | float(), integer() | float()) :: {:ok, integer() | float()}
   def maybe_div(a, b) do
     case {a, b} do
       {_, b} when b == 0 ->
