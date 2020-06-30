@@ -1,5 +1,4 @@
 defmodule TypeCheck.Builtin do
-
   def any() do
     %TypeCheck.Builtin.Any{}
   end
@@ -21,6 +20,7 @@ defmodule TypeCheck.Builtin do
   end
 
   def list(a) do
+    TypeCheck.Type.ensure_type!(a)
     %TypeCheck.Builtin.List{element_type: a}
   end
 
@@ -31,6 +31,8 @@ defmodule TypeCheck.Builtin do
   end
 
   def tuple(element_types_list) when is_list(element_types_list) do
+    Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
+
     %TypeCheck.Builtin.Tuple{element_types: element_types_list}
   end
 
@@ -46,6 +48,9 @@ defmodule TypeCheck.Builtin do
   end
 
   def either(left, right) do
+    TypeCheck.Type.ensure_type!(left)
+    TypeCheck.Type.ensure_type!(right)
+
     %TypeCheck.Builtin.Either{left: left, right: right}
   end
 
@@ -66,6 +71,9 @@ defmodule TypeCheck.Builtin do
   end
 
   def map(key_type, value_type) do
+    TypeCheck.Type.ensure_type!(key_type)
+    TypeCheck.Type.ensure_type!(value_type)
+
     %TypeCheck.Builtin.Map{key_type: key_type, value_type: value_type}
   end
 
@@ -78,6 +86,8 @@ defmodule TypeCheck.Builtin do
   end
 
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
+    Enum.map(keywords, &TypeCheck.Type.ensure_type!(elem(&1, 1)))
+
     %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
   end
 
@@ -91,16 +101,22 @@ defmodule TypeCheck.Builtin do
   end
 
   def fixed_list(element_types) when is_list(element_types) do
+    Enum.map(element_types, &TypeCheck.Type.ensure_type!/1)
+
     %TypeCheck.Builtin.FixedList{element_types: element_types}
   end
 
   def named_type(name, type) do
+    TypeCheck.Type.ensure_type!(type)
+
     %TypeCheck.Builtin.NamedType{name: name, type: type}
   end
 
   # TODO maybe add a check to make it work correctly
   # when someone calls it manually?
   def guarded_by(type, guard_ast) do
+    TypeCheck.Type.ensure_type!(type)
+
     %TypeCheck.Builtin.Guarded{type: type, guard: guard_ast}
   end
 end

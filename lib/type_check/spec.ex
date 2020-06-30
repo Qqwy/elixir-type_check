@@ -28,7 +28,7 @@ defmodule TypeCheck.Spec do
 
       defoverridable([{unquote(name), unquote(arity)}])
       def unquote(name)(unquote_splicing(clean_params)) do
-        import TypeCheck.Builtin
+        # import TypeCheck.Builtin
 
         unquote(params_spec_code)
         var!(super_result, nil) = super(unquote_splicing(clean_params))

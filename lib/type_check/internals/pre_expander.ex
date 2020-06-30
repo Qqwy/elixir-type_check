@@ -50,7 +50,6 @@ defmodule TypeCheck.Internals.PreExpander do
         type bar :: other_type()
         spec function(foo, bar) :: foo | bar
         ```
-
         """
       {:when, _, [type, guard]} ->
         quote location: :keep do

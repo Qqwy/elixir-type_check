@@ -1,6 +1,8 @@
 defmodule Example2 do
   use TypeCheck
+  import TypeCheck.Builtin
 
+  # type integer :: TypeCheck.Builtin.any()
   type mylist :: list(integer())
   type mylist2 :: list(integer())
   type mylist3(a) :: list(a)

@@ -1,5 +1,6 @@
 defmodule Example do
   use TypeCheck
+  import TypeCheck.Builtin
 
   @type literal(t) :: t
 
