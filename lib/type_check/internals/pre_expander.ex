@@ -6,13 +6,13 @@ defmodule TypeCheck.Internals.PreExpander do
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env) do
     case Macro.expand(ast, env) do
-      # {:literal, _, [value]} ->
-      #   # Do not expand internals of `literal`.
-      #   # Even if it contains fancy syntax
-      #   # like ranges
-      #   quote location: :keep do
-      #     TypeCheck.Builtin.literal(unquote(value))
-      #   end
+      {:literal, _, [value]} ->
+        # Do not expand internals of `literal`.
+        # Even if it contains fancy syntax
+        # like ranges
+        quote location: :keep do
+          TypeCheck.Builtin.literal(unquote(value))
+        end
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->
         quote location: :keep do
           TypeCheck.Builtin.literal(unquote(x))

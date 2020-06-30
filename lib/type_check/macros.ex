@@ -119,9 +119,29 @@ defmodule TypeCheck.Macros do
   end
 
   defp type_fun_definition(name_with_params, type) do
+    {name, params} = Macro.decompose_call(name_with_params)
+    params_check_code =
+      params
+      |> Enum.map(fn param ->
+      quote do
+        case TypeCheck.Protocols.ToCheck.impl_for(unquote(param)) do
+          nil ->
+            raise """
+            Invalid value passed to #{unquote(name)}/#{unquote(length(params))}!
+            `#{unquote(param)}` is not a valid TypeCheck type.
+            You probably tried to use the TypeCheck type as a function directly.
+
+            Instead, either implement named types using the `type`, `typep`, `opaque` macros,
+            or use TypeCheck.Type.build/1 to construct a one-off type.
+            """
+            _other -> :ok
+        end
+      end
+    end)
     quote location: :keep do
       @doc false
       def unquote(name_with_params) do
+        unquote_splicing(params_check_code)
         import TypeCheck.Builtin
         unquote(type)
       end
