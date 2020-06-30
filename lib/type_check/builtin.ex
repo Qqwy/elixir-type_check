@@ -2,9 +2,52 @@ defmodule TypeCheck.Builtin do
   def any() do
     %TypeCheck.Builtin.Any{}
   end
+  def term(), do: any()
 
   def atom() do
     %TypeCheck.Builtin.Atom{}
+  end
+  def module(), do: atom()
+
+  def as_boolean(type) do
+    TypeCheck.Type.ensure_type!(type)
+    type
+  end
+
+  def arity() do
+    range(0..255)
+  end
+
+  def binary() do
+    %TypeCheck.Builtin.Binary{}
+  end
+
+  def bitstring() do
+    %TypeCheck.Builtin.Bitstring{}
+  end
+
+  def boolean() do
+    %TypeCheck.Builtin.Boolean{}
+  end
+
+  def byte() do
+    range(0..255)
+  end
+
+  def char() do
+    range(0..0x10FFFF)
+  end
+
+  def charlist() do
+    list(char())
+  end
+
+  def function() do
+    %TypeCheck.Builtin.Function{}
+  end
+
+  def fun() do
+    function()
   end
 
   def integer() do
@@ -22,6 +65,10 @@ defmodule TypeCheck.Builtin do
   def list(a) do
     TypeCheck.Type.ensure_type!(a)
     %TypeCheck.Builtin.List{element_type: a}
+  end
+
+  def mfa() do
+    tuple([module(), atom(), arity()])
   end
 
   # prevents double-expanding
@@ -90,7 +137,6 @@ defmodule TypeCheck.Builtin do
 
     %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
   end
-
 
   def fixed_list(element_types)
 

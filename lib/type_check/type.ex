@@ -42,6 +42,10 @@ defmodule TypeCheck.Type do
     TypeCheck.Protocols.ToTypespec.to_typespec(type)
   end
 
+  def is_type?(possibly_a_type) do
+    TypeCheck.Protocols.ToCheck.impl_for(possibly_a_type) != nil
+  end
+
   @doc false
   def ensure_type!(possibly_a_type) do
     case TypeCheck.Protocols.ToCheck.impl_for(possibly_a_type) do
