@@ -133,6 +133,7 @@ boolean()`. Reason:
 
 - [ ] Detailed documentation.
 - [ ] Rigorous tests.
+- [ ] Hide structure of `opaque` and `typep` from formatted error messages.
 - [ ] Make sure to handle recursive (and mutually recursive) types without hanging.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
