@@ -18,28 +18,22 @@ defmodule TypeCheck.Type do
   # assuming that you'd want to do further compile-time work with the type.
   def build_unescaped(type_ast, caller, add_typecheck_module \\ false) do
     type_ast = TypeCheck.Internals.PreExpander.rewrite(type_ast, caller)
-    {type, []} = if add_typecheck_module do
-        Code.eval_quoted(
-          quote do
-            # import TypeCheck.Builtin
-            import __MODULE__.TypeCheck
-            unquote(type_ast)
-          end,
-          [], caller)
-    else
-      {type, []} =
-        Code.eval_quoted(
-          quote do
-            # import TypeCheck.Builtin;
-            unquote(type_ast)
-          end,
-          [], caller)
-    end
+    code =
+      if add_typecheck_module do
+        quote do
+          import __MODULE__.TypeCheck
+          unquote(type_ast)
+        end
+      else
+        type_ast
+      end
+
+    {type, []} = Code.eval_quoted(code, [], caller)
     type
   end
 
-  def to_typespec(type) do
-    TypeCheck.Protocols.ToTypespec.to_typespec(type)
+  defmacro to_typespec(type) do
+    TypeCheck.Internals.ToTypespec.rewrite(type, __CALLER__)
   end
 
   def is_type?(possibly_a_type) do

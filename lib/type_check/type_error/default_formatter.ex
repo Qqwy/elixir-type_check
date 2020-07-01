@@ -1,11 +1,10 @@
 defmodule TypeCheck.TypeError.DefaultFormatter do
   @behaviour TypeCheck.TypeError.Formatter
 
-  def format_wrap(value = {_, _, _, input}) do
+  def format_wrap(value = {_, _, _, _}) do
     """
     #{format(value)}
     """
-    # |> String.trim_trailing("\n")
   end
 
   def format({%TypeCheck.Builtin.Integer{}, :not_an_integer, _, val}) do
@@ -121,14 +120,14 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", format(problem))
     arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments})"
-    message = """
+    """
     The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
       parameter no. #{index + 1}:
     #{indent(indent(format(problem)))}
     """
   end
 
-  def format({s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}) do
+  def format({s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, _val}) do
     arguments_str = arguments |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments_str})"
     """

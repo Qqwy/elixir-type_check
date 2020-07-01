@@ -73,7 +73,7 @@ defmodule TypeCheck.Macros do
     define_type({:"::", [], [name_with_maybe_params, {:when, [], [type, guard_ast]}]}, kind, caller)
   end
 
-  defp define_type(typedef = {:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
+  defp define_type({:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
     clean_typedef = TypeCheck.Internals.ToTypespec.full_rewrite(type, caller)
     new_typedoc =
       case kind do
@@ -126,7 +126,7 @@ defmodule TypeCheck.Macros do
   end
 
   defp type_fun_definition(name_with_params, type) do
-    {name, params} = Macro.decompose_call(name_with_params)
+    {_name, params} = Macro.decompose_call(name_with_params)
     params_check_code =
       params
       |> Enum.map(fn param ->
@@ -144,7 +144,7 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp define_spec(specdef = {:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
+  defp define_spec({:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
     {name, params_ast} = Macro.decompose_call(name_with_params_ast)
     arity = length(params_ast)
 

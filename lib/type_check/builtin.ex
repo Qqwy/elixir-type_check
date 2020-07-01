@@ -133,7 +133,7 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
   end
 
-  def range(range = lower..higher) do
+  def range(range = _lower.._higher) do
     %TypeCheck.Builtin.Range{range: range}
   end
 

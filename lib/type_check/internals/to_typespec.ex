@@ -47,7 +47,7 @@ defmodule TypeCheck.Internals.ToTypespec do
       {:"::", _, [_name, type_ast]} ->
         # Hide inner named types from the typespec.
         type_ast
-      {:"named_type", _, [_name, type_ast]} ->
+      {:named_type, _, [_name, type_ast]} ->
         # Hide inner named types from the typespec.
         type_ast
       {:one_of, _, types} ->
@@ -61,13 +61,13 @@ defmodule TypeCheck.Internals.ToTypespec do
       {:tuple, meta, [size]} ->
         elems = 0..size |> Enum.map(fn _ -> quote do any() end end)
         {:{}, meta, elems}
-      {:fixed_list, meta, [elem_types]} ->
+      {:fixed_list, _meta, [elem_types]} ->
         elem_types
-      {:range, meta, [lower, higher]} ->
+      {:range, _meta, [lower, higher]} ->
         quote do
           unquote(lower)..unquote(higher)
         end
-      {:range, meta, [range]} ->
+      {:range, _meta, [range]} ->
         quote do
           unquote(range)
         end

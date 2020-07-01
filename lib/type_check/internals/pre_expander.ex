@@ -36,7 +36,7 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env)))
         end
-      ast = {:when, _, [type, list]} when is_list(list) ->
+      ast = {:when, _, [_type, list]} when is_list(list) ->
         raise ArgumentError, """
         Unsupported `when` with keyword arguments in the type description `#{Macro.to_string(ast)}`
 
@@ -94,7 +94,7 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.fixed_map(unquote(field_types))
         end
-      other ->
+      _other ->
         # Unhandled already-expanded structs
         # Treat them as literal values
         quote location: :keep do
