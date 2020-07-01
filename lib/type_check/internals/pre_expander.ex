@@ -75,7 +75,7 @@ defmodule TypeCheck.Internals.PreExpander do
       |> Enum.map(&rewrite(&1, env))
 
     quote location: :keep do
-      TypeCheck.Builtin.tuple(unquote(rewritten_elements))
+      TypeCheck.Builtin.tuple_of(unquote(rewritten_elements))
     end
   end
 

@@ -31,6 +31,8 @@ defmodule TypeCheck.Macros do
     quote do
       import __MODULE__.TypeCheck
 
+      # unquote(TypeCheck.Internals.ToTypespec.define_extra_builtin_types(env, Module.definitions_in(env.module)))
+
       unquote(spec_quotes)
     end
   end
@@ -68,6 +70,7 @@ defmodule TypeCheck.Macros do
   end
 
   defp define_type(typedef = {:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
+    clean_typedef = TypeCheck.Internals.ToTypespec.full_rewrite(type, caller)
     new_typedoc =
       case kind do
         :typep -> false
@@ -86,12 +89,12 @@ defmodule TypeCheck.Macros do
       case unquote(kind) do
         :opaque ->
           @typedoc unquote(new_typedoc)
-          @opaque unquote(typedef)
+          @opaque unquote(name_with_maybe_params) :: unquote(clean_typedef)
         :type ->
           @typedoc unquote(new_typedoc)
-          @type unquote(typedef)
+          @type unquote(name_with_maybe_params) :: unquote(clean_typedef)
         :typep ->
-          @typep unquote(typedef)
+          @typep unquote(name_with_maybe_params) :: unquote(clean_typedef)
       end
       unquote(res)
       Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))

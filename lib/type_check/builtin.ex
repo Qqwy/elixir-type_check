@@ -1,4 +1,7 @@
 defmodule TypeCheck.Builtin do
+  require TypeCheck.Internals.ToTypespec
+  # TypeCheck.Internals.ToTypespec.define_all()
+
   def any() do
     %TypeCheck.Builtin.Any{}
   end
@@ -68,16 +71,19 @@ defmodule TypeCheck.Builtin do
   end
 
   def mfa() do
-    tuple([module(), atom(), arity()])
+    tuple_of([module(), atom(), arity()])
   end
 
+  @type tuple_of(_list_of_elements) :: tuple()
+
+  def tuple_of(list_of_element_types)
   # prevents double-expanding
-  # when called as `tuple([1,2,3])` by the user.
-  def tuple(list = %TypeCheck.Builtin.FixedList{}) do
-    tuple(list.element_types)
+  # when called as `tuple_of([1,2,3])` by the user.
+  def tuple_of(list = %TypeCheck.Builtin.FixedList{}) do
+    tuple_of(list.element_types)
   end
 
-  def tuple(element_types_list) when is_list(element_types_list) do
+  def tuple_of(element_types_list) when is_list(element_types_list) do
     Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
 
     %TypeCheck.Builtin.Tuple{element_types: element_types_list}
@@ -87,7 +93,7 @@ defmodule TypeCheck.Builtin do
     elems =
       0..size
       |> Enum.map(fn -> any() end)
-    tuple(elems)
+    tuple_of(elems)
   end
 
   def literal(value) do
@@ -130,6 +136,19 @@ defmodule TypeCheck.Builtin do
   # when called as `fixed_map(%{a: 1, b: 2})` by the user.
   def fixed_map(map = %TypeCheck.Builtin.FixedMap{}) do
     map
+  end
+
+  def fixed_map(list = %TypeCheck.Builtin.FixedList{}) do
+    list.element_types
+    |> Enum.map(fn
+      %TypeCheck.Builtin.Tuple{element_types: element_types} when length(element_types) == 2 ->
+        {hd(element_types), hd(tl(element_types))}
+      tuple = %TypeCheck.Builtin.Tuple{element_types: element_types} when length(element_types) != 2 ->
+        raise "Improper thing passed to `fixed_list` #{inspect(tuple)}"
+      thing ->
+        TypeCheck.Type.ensure_type!(thing)
+    end)
+    |> fixed_map()
   end
 
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do

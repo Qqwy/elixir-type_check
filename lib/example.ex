@@ -2,7 +2,7 @@ defmodule Example do
   use TypeCheck
   import TypeCheck.Builtin
 
-  @type literal(t) :: t
+  # type literal(t) :: t
 
   type myint :: integer()
   type myint2 :: myint
@@ -15,8 +15,16 @@ defmodule Example do
 
   type result :: :ok | :error | any()
 
+  type example :: tuple(3)
+
+  type z :: tuple_of([3, 4, 5])
+
+  type blar :: map(atom(), integer())
+  type blaz :: fixed_map(a: integer(), b: float(), c: blar())
+
   # spec foo(integer()) :: float()
   def foo(x) do
     x + 0.0
   end
 end
+
