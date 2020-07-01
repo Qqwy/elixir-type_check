@@ -17,7 +17,6 @@ defmodule TypeCheck.Builtin.Guarded do
       %TypeCheck.Builtin.Map{} ->
         extract_names(type.key_type) ++ extract_names(type.value_type)
       %TypeCheck.Builtin.OneOf{} ->
-        # NOTE this means that sometimes certain names are not set?!
         names =
           type.choices
           |> Enum.map(&extract_names/1)
@@ -47,34 +46,23 @@ defmodule TypeCheck.Builtin.Guarded do
         |> Enum.map(fn name -> {name, {:unquote, [], [Macro.var(name, nil)]}} end)
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)
-      IO.inspect(names_map)
-      res = quote location: :keep do
+      quote location: :keep do
         case unquote(type_check) do
           {:ok, bindings} ->
             # Shadows all but the most recently-bound value for each name
             bindings_map = Enum.into(bindings, %{})
 
-            # Brings bindings in scope:
-            # If some bindings do not exist,
-            # then the guard automatically fails
-            if !match?(unquote(names_map), bindings_map) do
-              {:error, {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map}, unquote(param)}}
-            else
-              unquote(names_map) = bindings_map
+            unquote(names_map) = bindings_map
 
-              if unquote(s.guard) do
-                {:ok, bindings}
-              else
-                {:error, {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map}, unquote(param)}}
-              end
+            if unquote(s.guard) do
+              {:ok, bindings}
+            else
+              {:error, {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map}, unquote(param)}}
             end
           {:error, problem} ->
             {:error, {unquote(Macro.escape(s)), :type_failed, %{problem: problem}, unquote(param)}}
         end
       end
-
-      IO.puts(Macro.to_string(res))
-      res
     end
 
   end

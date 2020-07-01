@@ -205,8 +205,6 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.NamedType{name: name, type: type}
   end
 
-  # TODO maybe add a check to make it work correctly
-  # when someone calls it manually?
   def guarded_by(type, guard_ast) do
     TypeCheck.Type.ensure_type!(type)
 
