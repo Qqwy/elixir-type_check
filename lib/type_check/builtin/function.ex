@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Function do
           x when is_function(x) ->
             {:ok, []}
           _ ->
-            {:error, {unquote(Macro.escape(s)), :not_a_function, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end

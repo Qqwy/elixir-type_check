@@ -56,7 +56,7 @@ defmodule TypeCheck do
   def dynamic_conforms!(value, type) do
     case dynamic_conforms(value, type) do
       {:ok, value} -> value
-      {:error, other} -> raise TypeCheck.TypeError, other
+      {:error, exception} -> raise exception
     end
   end
 end

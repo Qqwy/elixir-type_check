@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Number do
           x when is_number(x) ->
             {:ok, []}
           _ ->
-            {:error, {unquote(Macro.escape(s)), :not_a_number, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end

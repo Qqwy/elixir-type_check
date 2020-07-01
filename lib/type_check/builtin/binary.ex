@@ -8,11 +8,17 @@ defmodule TypeCheck.Builtin.Binary do
           x when is_binary(x) ->
             {:ok, []}
           _ ->
-            {:error, {unquote(Macro.escape(s)), :not_a_binary, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end
   end
+
+  # def error_response_type() do
+  #   require TypeCheck.Type
+  #   import TypeCheck.Builtin
+  #   TypeCheck.Type.build({%__MODULE__{}, :no_match, %{}, any()})
+  # end
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, _opts) do

@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Integer do
           x when is_integer(x) ->
             {:ok, []}
           _ ->
-          {:error, {unquote(Macro.escape(s)), :not_an_integer, %{}, unquote(param)}}
+          {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end

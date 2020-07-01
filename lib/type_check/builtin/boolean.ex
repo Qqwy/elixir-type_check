@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Boolean do
           x when is_boolean(x) ->
             {:ok, []}
           _ ->
-            {:error, {unquote(Macro.escape(s)), :not_a_boolean, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end

@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Bitstring do
           x when is_bitstring(x) ->
             {:ok, []}
           _ ->
-            {:error, {unquote(Macro.escape(s)), :not_a_bitstring, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end
