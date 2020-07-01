@@ -59,7 +59,14 @@ defmodule TypeCheck.Internals.PreExpander do
         rewrite_tuple(elements, env)
       {left, right} ->
         rewrite_tuple([left, right], env)
-
+      orig = {variable, meta, atom} when is_atom(atom) ->
+        # Ensures we'll get no pesky warnings when zero-arity types
+        # are used without parentheses (just like 'normal' types)
+        if variable_refers_to_function?(variable, env) do
+          {variable, meta, []}
+        else
+          orig
+        end
       {other_fun, meta, args} when is_list(args) ->
         # Make sure arguments of any function are expanded
         {other_fun, meta, Enum.map(args, &rewrite(&1, env))}
@@ -67,6 +74,14 @@ defmodule TypeCheck.Internals.PreExpander do
         # Fallback
         other
     end
+  end
+
+  defp variable_refers_to_function?(name, env) do
+    definitions =
+      env.functions
+      |> Enum.flat_map(fn {_module, definitions} -> definitions end)
+
+    {name, 0} in definitions
   end
 
   defp rewrite_tuple(tuple_elements, env) do

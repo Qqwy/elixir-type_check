@@ -69,6 +69,8 @@ end
 
 - [ ] Detailed documentation.
 - [ ] Rigorous tests.
+- [ ] referring to variables in outer scope using pin operator (?)
+- [ ] No longer warn on zero-arity types used without parentheses.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.

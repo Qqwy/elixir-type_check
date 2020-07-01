@@ -13,6 +13,8 @@ defmodule TypeCheck.TypeError do
   """
   defexception [:message, :raw]
 
+  @type t() :: %__MODULE__{message: String.t(), raw: problem_tuple()}
+
   @typedoc """
   Any built-in TypeCheck struct (c.f. `TypeCheck.Builtin.*`), whose check(s) failed.
   """
@@ -46,9 +48,9 @@ defmodule TypeCheck.TypeError do
   @type problem_tuple :: {type_checked_against(), check_name(), extra_information(), problematic_value()}
 
   @impl true
-  def exception(value) do
-    message = TypeCheck.TypeError.DefaultFormatter.format(value)
+  def exception(problem_tuple) do
+    message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple)
 
-    %__MODULE__{message: message, raw: value}
+    %__MODULE__{message: message, raw: problem_tuple}
   end
 end

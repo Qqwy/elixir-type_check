@@ -1,41 +1,11 @@
 defmodule TypeCheck.Internals.ToTypespec do
-  # defmacro define_all() do
-  #   define_extra_builtin_types(__CALLER__, [], :opaque)
-  # end
-
-  # def define_extra_builtin_types(caller_env, except, kind \\ :typep) do
-  #   extra_builtin_types = %{
-  #     {:literal, 1} => quote do literal(t) :: t end,
-  #     {:tuple, 1} => quote do tuple(_integer_size) :: tuple() end, # Untypeable in Elixir Typespecs
-  #     {:tuple_of, 1} => quote do tuple_of(_list_of_element_types) :: tuple() end # Untypeable in Elixir Typespecs
-  #   }
-  #   extra_builtin_type_signatures = extra_builtin_types |> Map.keys
-  #   non_overridden_type_signatures = extra_builtin_type_signatures -- except
-
-  #   extra_typedefs =
-  #     non_overridden_type_signatures
-  #     |> Enum.map(fn {name, arity} ->
-  #       case kind do
-  #         :opaque ->
-  #           quote generated: true do
-  #             @opaque unquote(extra_builtin_types[{name, arity}])
-  #           end
-  #         :typep ->
-  #           quote generated: true do
-  #             @typep unquote(extra_builtin_types[{name, arity}])
-  #           end
-  #       end
-  #     end)
-
-  #     quote generated: true do
-  #       unquote_splicing(extra_typedefs)
-  #     end
-  # end
-
   def full_rewrite(ast, env) do
     Macro.prewalk(ast, &rewrite(&1, env))
   end
 
+  # TODO incorporate %Macro.Env{}.functions
+  # to check whether TypeCheck.Builtin was imported
+  # to see what kind of rewrite we should do.
   def rewrite(ast, env) do
     case Macro.expand(ast, env) do
       {:when, _, [type, _]} ->

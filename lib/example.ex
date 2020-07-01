@@ -4,7 +4,7 @@ defmodule Example do
 
   # type literal(t) :: t
 
-  type myint :: integer()
+  type myint :: integer
   type myint2 :: myint()
   type num :: integer() | float()
   type one :: 1
