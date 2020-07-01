@@ -69,6 +69,10 @@ defmodule TypeCheck.Macros do
     define_spec(specdef, __CALLER__)
   end
 
+  defp define_type({:when, _, [{:"::", _, [name_with_maybe_params, type]}, guard_ast]}, kind, caller) do
+    define_type({:"::", [], [name_with_maybe_params, {:when, [], [type, guard_ast]}]}, kind, caller)
+  end
+
   defp define_type(typedef = {:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
     clean_typedef = TypeCheck.Internals.ToTypespec.full_rewrite(type, caller)
     new_typedoc =

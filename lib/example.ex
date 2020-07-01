@@ -22,6 +22,8 @@ defmodule Example do
   type blar :: map(atom(), integer())
   type blaz :: fixed_map(a: integer(), b: float(), c: blar())
 
+  type sorted_pair(a, b) :: {first :: a, second :: b} when first <= second
+
   # spec foo(integer()) :: float()
   def foo(x) do
     x + 0.0
