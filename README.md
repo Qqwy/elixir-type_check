@@ -79,7 +79,7 @@ boolean()`. Reason:
 
 And if we were to introduce an error in the function definition:
 
-```
+```elixir
 defmodule AgeCheck do
   use TypeCheck
 
