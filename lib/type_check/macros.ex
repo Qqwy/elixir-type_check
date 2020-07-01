@@ -86,6 +86,37 @@ defmodule TypeCheck.Macros do
     - definitions of function-specifications (in the same or different modules).
     - `TypeCheck.conforms/2` and variants,
     - `TypeCheck.Type.build/1`
+
+  ## Usage
+
+  The syntax is essentially the same as for the built-in `@type` attribute:
+
+  ```
+  type type_name :: type_description
+  ```
+
+  It is possible to create parameterized types as well:
+
+  ```
+  type dict(key, value) :: [{key, value}]
+  ```
+
+  ### Named types
+
+  You can also introduce named types:
+
+  ```
+  type color :: {red :: integer, green :: integer, blue :: integer}
+  ```
+  Not only is this nice to document that the same type
+  is being used for different purposes,
+  it can also be used with a 'type guard' to add custom checks
+  to your type specifications:
+
+  ```
+  type sorted_pair(a, b) :: {first :: a, second :: b} when first <= second
+  ```
+
   """
   defmacro type(typedef) do
     define_type(typedef, :type, __CALLER__)
@@ -95,7 +126,7 @@ defmodule TypeCheck.Macros do
   Define a private type specification.
 
   This behaves similarly to Elixir's builtin `@typep` attribute,
-  and will create a type whose name and definition is private
+  and will create a type whose name and structure is private
   (therefore only usable in the current module).
 
   - Fill the `@typep`-attribute with a Typespec-friendly
@@ -107,6 +138,8 @@ defmodule TypeCheck.Macros do
       - definitions of function-specifications
       - `TypeCheck.conforms/2` and variants,
       - `TypeCheck.Type.build/1`
+
+  `typep/1` accepts the same typedef expression as `type/1`.
   """
   defmacro typep(typedef) do
     define_type(typedef, :typep, __CALLER__)
@@ -118,7 +151,7 @@ defmodule TypeCheck.Macros do
 
   This behaves similarly to Elixir's builtin `@opaque` attribute,
   and will create a type whose name is public
-  but whose definition is private.
+  but whose structure is private.
 
 
   Calling this macro will:
@@ -136,6 +169,7 @@ defmodule TypeCheck.Macros do
     - `TypeCheck.conforms/2` and variants,
     - `TypeCheck.Type.build/1`
 
+  `opaque/1` accepts the same typedef expression as `type/1`.
   """
   defmacro opaque(typedef) do
     define_type(typedef, :opaque, __CALLER__)
@@ -147,6 +181,30 @@ defmodule TypeCheck.Macros do
   A function specification will wrap the function
   with checks that each of its parameters are of the types it expects.
   as well as checking that the return type is as expected.
+
+  ## Usage
+
+  The syntax is essentially the same as for built-in `@spec` attributes:
+
+  ```
+  spec function_name(type1, type2) :: return_type
+  ```
+
+  It is also allowed to introduce named types:
+
+  ```
+  spec days_since_epoch(year :: integer, month :: integer, day :: integer) :: integer
+  ```
+
+  Note that `TypeCheck` does _not_ allow the `when` keyword to be used
+  to restrict the types of recurring type variables (which Elixir's
+  builtin Typespecs allow). This is because:
+
+  - Usually it is more clear to give a recurring type
+    an explicit name.
+  - The `when` keyword is used instead for TypeCheck's type guards'.
+    (See `TypeCheck.Builtin.guarded_by/2` for more information.)
+
   """
   defmacro spec(specdef) do
     define_spec(specdef, __CALLER__)
