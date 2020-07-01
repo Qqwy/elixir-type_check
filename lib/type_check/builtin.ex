@@ -349,11 +349,13 @@ defmodule TypeCheck.Builtin do
   where all keys are required to be literal values,
   and the values are a type specification.
 
-  Desugaring of `%{key: value_type, "other_key" => value_type2}`.
+  Desugaring of literal maps like `%{a_key: value_type, "other_key" => value_type2}`.
 
   Represented in Elixir's builtin Typespecs as
-  `%{required(:key1) => value_type1, required("other key") => value_type2}`.
-  (for e.g. a call to `fixed_map([key1: value_type1, {"other key", value_type2}])`)
+  ```
+  %{required(:a_key) => value_type1, required("other key") => value_type2}
+  ```.
+  (for e.g. a call to `fixed_map([a_key: value_type1, {"other key", value_type2}])`)
   """
   def fixed_map(keywords)
 
@@ -384,7 +386,16 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
   end
 
+  @doc typekind: :extension
+  @doc """
+  A list of fixed size where `element_types` dictates the types
+  of each of the respective elements.
 
+  Desugaring of literal lists like `[:a, 10, "foo"]`.
+
+  Cannot directly be represented in Elixir's builtin Typespecs,
+  and is thus represented as `[any()]` instead.
+  """
   def fixed_list(element_types)
 
   # prevents double-expanding
@@ -399,12 +410,44 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.FixedList{element_types: element_types}
   end
 
+  @doc typekind: :extension
+  @doc """
+  A type with a local name.
+
+  This name can be used in 'type guards'.
+  See the module documentation and `guarded_by/2` for more information.
+
+  Desugaring of `name :: type` (when `::` is used _inside_ a type.).
+
+  Cannot directly be represented in Elixir's builtin Typespecs,
+  and is thus represented as `type` (without the name) instead.
+  """
   def named_type(name, type) do
     TypeCheck.Type.ensure_type!(type)
 
     %TypeCheck.Builtin.NamedType{name: name, type: type}
   end
 
+  @doc typekind: :extension
+  @doc """
+  Adds a 'type guard' to the type.
+
+  Desugaring of `some_type when guard_code`.
+
+  The type guard is a check written using any Elixir code,
+  which may refer to names set in the type using `named_type/2`.
+
+  If this type guard fails (by returning a non-truthy value),
+  the type will not check.
+
+  For user-friendly error-handling, don't let your type guards
+  throw exceptions.
+
+  C.f. `TypeCheck.Builtin.Guarded`
+
+  Cannot be represented in Elixir's builtin Typespecs,
+  and is thus represented as `type` (without the guard) instead.
+  """
   def guarded_by(type, guard_ast) do
     TypeCheck.Type.ensure_type!(type)
 
