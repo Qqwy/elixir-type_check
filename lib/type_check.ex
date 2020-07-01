@@ -29,7 +29,7 @@ defmodule TypeCheck do
   Because these have to evaluate the type-checking code at runtime,
   these checks be optimized by the compiler.
 
-  ## I get naming conflicts with TypeCheck.Builtin
+  ### Avoiding naming conflicts with TypeCheck.Builtin
 
   If you want to define a type with the same name as one in TypeCheck.Builtin,
   you should hide those particular functions from TypeCheck.Builtin by adding
@@ -56,6 +56,10 @@ defmodule TypeCheck do
 
   C.f. `TypeCheck.Type.build/1` for more information on what type-expressions
   are allowed as `type` parameter.
+
+  Note: _usually_ you'll want to `import TypeCheck.Builtin` in the context where you use `conforms`,
+  which will bring Elixir's builtin types into scope.
+  (Calling `use TypeCheck` will already do this; see the module documentation of `TypeCheck` for more information))
   """
   @type value :: any()
   @spec conforms(value, TypeCheck.Type.expandable_type()) :: {:ok, value} | {:error, TypeCheck.TypeError.t()}
@@ -71,7 +75,7 @@ defmodule TypeCheck do
   end
 
   @doc """
-  Similar to `conforms`, but returns `true` if the value typechecked and `false` if it did not.
+  Similar to `conforms/2`, but returns `true` if the value typechecked and `false` if it did not.
 
   The same features and restrictions apply to this function as to `conforms/2`.
   """
@@ -85,7 +89,7 @@ defmodule TypeCheck do
   end
 
   @doc """
-  Similar to `conforms`, but returns `value` if the value typechecked and raises TypeCheck.TypeError if it did not.
+  Similar to `conforms/2`, but returns `value` if the value typechecked and raises TypeCheck.TypeError if it did not.
 
   The same features and restrictions apply to this function as to `conforms/2`.
   """
@@ -105,7 +109,7 @@ defmodule TypeCheck do
 
   Makes sure `value` typechecks the type `type`. Evaluated _at runtime_.
 
-  Because `dynamic_conforms` is evaluated at runtime:
+  Because `dynamic_conforms/2` is evaluated at runtime:
 
   1. The typecheck cannot be optimized by the compiler, which makes it slower.
 
@@ -113,7 +117,7 @@ defmodule TypeCheck do
      This can be done by using one of your custom types directly (e.g. `YourModule.typename()`),
      or by calling `TypeCheck.Type.build`.
 
-  Use `dynamic_conforms` only when you cannot use the normal `conforms`,
+  Use `dynamic_conforms` only when you cannot use the normal `conforms/2`,
   for instance when you're only able to construct the type to check against at runtime.
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t) :: {:ok, value} | {:error, TypeCheck.TypeError.t}
@@ -126,7 +130,7 @@ defmodule TypeCheck do
   end
 
   @doc """
-  Similar to `dynamic_conforms`, but returns `true` if the value typechecked and `false` if it did not.
+  Similar to `dynamic_conforms/2`, but returns `true` if the value typechecked and `false` if it did not.
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
   """
@@ -139,7 +143,7 @@ defmodule TypeCheck do
   end
 
   @doc """
-  Similar to `dynamic_conforms`, but returns `value` if the value typechecked and raises TypeCheck.TypeError if it did not.
+  Similar to `dynamic_conforms/2`, but returns `value` if the value typechecked and raises TypeCheck.TypeError if it did not.
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
   """

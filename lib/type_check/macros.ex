@@ -1,4 +1,20 @@
 defmodule TypeCheck.Macros do
+  @moduledoc """
+  Contains the `spec`, `type`, `typep`, `opaque` macros to define runtime-checked function- and type-specifications.
+
+  ## Usage
+
+  This module is included by calling `use TypeCheck`.
+  This will set up the module to use the special macros.
+
+
+  ### Avoiding naming conflicts with TypeCheck.Builtin
+
+  If you want to define a type with the same name as one in TypeCheck.Builtin,
+  you should hide those particular functions from TypeCheck.Builtin by adding
+  an `import TypeCheck.Builtin, except: [...]`-statement
+  below the `use TypeCheck` manually.
+  """
   defmacro __using__(_options) do
     quote location: :keep do
       import TypeCheck.Macros
@@ -22,16 +38,14 @@ defmodule TypeCheck.Macros do
       unquote(defs)
     end, env)
 
-    # And now, override all specs:
+    # And now, define all specs:
     definitions = Module.definitions_in(env.module)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
     spec_quotes = wrap_functions_with_specs(specs, definitions, env)
 
-    # Time to combine it all
+    # And now for the tricky bit ;-)
     quote do
       import __MODULE__.TypeCheck
-
-      # unquote(TypeCheck.Internals.ToTypespec.define_extra_builtin_types(env, Module.definitions_in(env.module)))
 
       unquote(spec_quotes)
     end
@@ -53,18 +67,87 @@ defmodule TypeCheck.Macros do
     end
   end
 
+  @doc """
+  Define a public type specification.
+
+  This behaves similarly to Elixir's builtin `@type` attribute,
+  and will create a type whose name and definition are public.
+
+  Calling this macro will:
+
+  - Fill the `@type`-attribute with a Typespec-friendly
+    representation of the TypeCheck type.
+  - Add a (or append to an already existing) `@typedoc` detailing that the type is
+    managed by TypeCheck, and containing the full definition of the TypeCheck type.
+  - Define a (hidden) public function with the same name (and arity) as the type
+    that returns the TypeCheck.Type as a datastructure when called.
+    This makes the type usable in calls to:
+    - definitions of other type-specifications (in the same or different modules).
+    - definitions of function-specifications (in the same or different modules).
+    - `TypeCheck.conforms/2` and variants,
+    - `TypeCheck.Type.build/1`
+  """
   defmacro type(typedef) do
     define_type(typedef, :type, __CALLER__)
   end
 
+  @doc """
+  Define a private type specification.
+
+  This behaves similarly to Elixir's builtin `@typep` attribute,
+  and will create a type whose name and definition is private
+  (therefore only usable in the current module).
+
+  - Fill the `@typep`-attribute with a Typespec-friendly
+    representation of the TypeCheck type.
+  - Define a private function with the same name (and arity) as the type
+    that returns the TypeCheck.Type as a datastructure when called.
+    This makes the type usable in calls (in the same module) to:
+      - definitions of other type-specifications
+      - definitions of function-specifications
+      - `TypeCheck.conforms/2` and variants,
+      - `TypeCheck.Type.build/1`
+  """
   defmacro typep(typedef) do
     define_type(typedef, :typep, __CALLER__)
   end
 
+  @doc """
+  Define a opaque type specification.
+
+
+  This behaves similarly to Elixir's builtin `@opaque` attribute,
+  and will create a type whose name is public
+  but whose definition is private.
+
+
+  Calling this macro will:
+
+  - Fill the `@opaque`-attribute with a Typespec-friendly
+    representation of the TypeCheck type.
+  - Add a (or append to an already existing) `@typedoc` detailing that the type is
+    managed by TypeCheck, and containing the name of the TypeCheck type.
+    (not the definition, since it is an opaque type).
+  - Define a (hidden) public function with the same name (and arity) as the type
+    that returns the TypeCheck.Type as a datastructure when called.
+    This makes the type usable in calls to:
+    - definitions of other type-specifications (in the same or different modules).
+    - definitions of function-specifications (in the same or different modules).
+    - `TypeCheck.conforms/2` and variants,
+    - `TypeCheck.Type.build/1`
+
+  """
   defmacro opaque(typedef) do
     define_type(typedef, :opaque, __CALLER__)
   end
 
+  @doc """
+  Define a function specification.
+
+  A function specification will wrap the function
+  with checks that each of its parameters are of the types it expects.
+  as well as checking that the return type is as expected.
+  """
   defmacro spec(specdef) do
     define_spec(specdef, __CALLER__)
   end
