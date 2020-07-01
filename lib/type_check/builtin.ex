@@ -100,13 +100,6 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Literal{value: value}
   end
 
-  def either(left, right) do
-    TypeCheck.Type.ensure_type!(left)
-    TypeCheck.Type.ensure_type!(right)
-
-    %TypeCheck.Builtin.Either{left: left, right: right}
-  end
-
   def left | right do
     one_of(left, right)
   end
@@ -216,6 +209,9 @@ defmodule TypeCheck.Builtin do
   # when someone calls it manually?
   def guarded_by(type, guard_ast) do
     TypeCheck.Type.ensure_type!(type)
+
+    # Make sure the type contains coherent names.
+    TypeCheck.Builtin.Guarded.extract_names(type)
 
     %TypeCheck.Builtin.Guarded{type: type, guard: guard_ast}
   end

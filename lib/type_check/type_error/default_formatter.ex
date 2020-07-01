@@ -102,17 +102,6 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "type guard:\n", problem)
   end
 
-
-  def format({s = %TypeCheck.Builtin.Either{}, :both_failed, %{left: left, right: right}, val}) do
-    left_str = "a)\n" <> indent(format(left))
-    right_str = "b)\n" <> indent(format(right))
-    problem = """
-    #{left_str}
-    #{right_str}
-    """
-    compound_check(val, s, "both possibilities failed:\n", problem)
-  end
-
   def format({s = %TypeCheck.Builtin.OneOf{}, :all_failed, %{problems: problems}, val}) do
     message =
       problems
@@ -124,12 +113,6 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       """
       end)
       |> Enum.join("\n")
-    # left_str = "a)\n" <> indent(format(left))
-    # right_str = "b)\n" <> indent(format(right))
-    # problem = """
-    # #{left_str}
-    # #{right_str}
-    # """
     compound_check(val, s, "all possibilities failed:\n", message)
   end
 

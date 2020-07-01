@@ -50,10 +50,12 @@ defmodule TypeCheck.Internals.ToTypespec do
       {:"named_type", _, [_name, type_ast]} ->
         # Hide inner named types from the typespec.
         type_ast
-      {:either, _, [left, right]} ->
-        quote do
-          left | right
-        end
+      {:one_of, _, types} ->
+        Enum.reduce(types, fn type, snippet ->
+          quote do
+            unquote(snippet) | unquote(type)
+          end
+        end)
       {:tuple_of, meta, [elem_types]} ->
         {:{}, meta, elem_types}
       {:tuple, meta, [size]} ->
