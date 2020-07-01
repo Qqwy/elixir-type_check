@@ -11,9 +11,10 @@ defmodule TypeCheck.Macros do
   ### Avoiding naming conflicts with TypeCheck.Builtin
 
   If you want to define a type with the same name as one in TypeCheck.Builtin,
+  _(which is not particularly recommended)_,
   you should hide those particular functions from TypeCheck.Builtin by adding
-  an `import TypeCheck.Builtin, except: [...]`-statement
-  below the `use TypeCheck` manually.
+  `import TypeCheck.Builtin, except: [...]`
+  below `use TypeCheck` manually.
   """
   defmacro __using__(_options) do
     quote location: :keep do
@@ -91,7 +92,7 @@ defmodule TypeCheck.Macros do
 
   The syntax is essentially the same as for the built-in `@type` attribute:
 
-  ```
+  ```elixir
   type type_name :: type_description
   ```
 

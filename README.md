@@ -133,13 +133,14 @@ boolean()`. Reason:
 
 - [ ] Detailed documentation.
 - [ ] Rigorous tests.
-- [ ] referring to variables in outer scope using pin operator (?)
+- [ ] Make sure to handle recursive (and mutually recursive) types without hanging.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
 - [ ] Manually overriding generators for user-specified types if so desired.
+- [ ] referring to variables in outer scope using pin operator (?)
 
 ### Longer-term future ideas
 
