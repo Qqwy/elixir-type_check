@@ -108,8 +108,41 @@ defmodule TypeCheck.Builtin do
   end
 
   def left | right do
-    either(left, right)
+    one_of(left, right)
   end
+
+  def one_of(left, right)
+
+  # Prevents nesting
+  # for nicer error messages on failure.
+  def one_of(left = %TypeCheck.Builtin.OneOf{}, right = %TypeCheck.Builtin.OneOf{}) do
+    one_of(left.choices ++ right.choices)
+  end
+
+  def one_of(left = %TypeCheck.Builtin.OneOf{}, right) do
+    one_of(left.choices ++ [right])
+  end
+
+  def one_of(left, right = %TypeCheck.Builtin.OneOf{}) do
+    one_of([left] ++ right.choices)
+  end
+  def one_of(left, right) do
+    one_of([left, right])
+  end
+
+  def one_of(list_of_possibilities)
+
+  def one_of(list = %TypeCheck.Builtin.FixedList{}) do
+    one_of(list.element_types)
+  end
+
+  def one_of(list_of_possibilities) when is_list(list_of_possibilities) do
+    # IO.inspect(list_of_possibilities, label: :asd, structs: false)
+    # Enum.map(list_of_possibilities, &TypeCheck.Type.ensure_type!/1)
+
+    %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
+  end
+
 
   def range(range = lower..higher) do
     %TypeCheck.Builtin.Range{range: range}

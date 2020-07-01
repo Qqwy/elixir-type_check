@@ -52,7 +52,7 @@ defmodule TypeCheck.Type do
       nil ->
         raise """
         Invalid value passed to a function expecting a type!
-        `#{possibly_a_type}` is not a valid TypeCheck type.
+        `#{inspect(possibly_a_type)}` is not a valid TypeCheck type.
         You probably tried to use a TypeCheck type as a function directly.
 
         Instead, either implement named types using the `type`, `typep`, `opaque` macros,

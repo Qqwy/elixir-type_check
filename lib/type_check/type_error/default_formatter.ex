@@ -113,6 +113,27 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "both possibilities failed:\n", problem)
   end
 
+  def format({s = %TypeCheck.Builtin.OneOf{}, :all_failed, %{problems: problems}, val}) do
+    message =
+      problems
+      |> Enum.with_index()
+      |> Enum.map(fn {problem, index} ->
+      """
+      #{index})
+      #{indent(format(problem))}
+      """
+      end)
+      |> Enum.join("\n")
+    # left_str = "a)\n" <> indent(format(left))
+    # right_str = "b)\n" <> indent(format(right))
+    # problem = """
+    # #{left_str}
+    # #{right_str}
+    # """
+    compound_check(val, s, "all possibilities failed:\n", message)
+  end
+
+
   def format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", format(problem))
     arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")

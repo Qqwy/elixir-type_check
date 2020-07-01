@@ -26,7 +26,7 @@ defmodule TypeCheck.Internals.PreExpander do
         end
       {:|, _, [lhs, rhs]} ->
         quote location: :keep do
-          TypeCheck.Builtin.either(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
+          TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
         end
       ast = {:%{}, _, fields} ->
         rewrite_map_and_struct(fields, ast, env)

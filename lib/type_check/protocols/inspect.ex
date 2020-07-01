@@ -16,6 +16,7 @@ structs = [
   TypeCheck.Builtin.Literal,
   TypeCheck.Builtin.Map,
   TypeCheck.Builtin.NamedType,
+  TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
 ]

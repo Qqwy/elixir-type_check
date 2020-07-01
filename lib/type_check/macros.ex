@@ -46,6 +46,7 @@ defmodule TypeCheck.Macros do
       require TypeCheck.Type
       param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
       return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
+      IO.inspect(return_type, label: :return_type, structs: false)
 
       {params_spec_code, return_spec_code} = TypeCheck.Spec.prepare_spec_wrapper_code(name, param_types, clean_params, return_type, caller)
 
