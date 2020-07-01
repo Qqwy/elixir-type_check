@@ -138,13 +138,15 @@ defmodule TypeCheck.Builtin do
     map
   end
 
+  # prevents double-expanding
+  # when called as `fixed_map([a: 1, b: 2])` by the user.
   def fixed_map(list = %TypeCheck.Builtin.FixedList{}) do
     list.element_types
     |> Enum.map(fn
       %TypeCheck.Builtin.Tuple{element_types: element_types} when length(element_types) == 2 ->
         {hd(element_types), hd(tl(element_types))}
       tuple = %TypeCheck.Builtin.Tuple{element_types: element_types} when length(element_types) != 2 ->
-        raise "Improper thing passed to `fixed_list` #{inspect(tuple)}"
+        raise "Improper type passed to `fixed_map/1` #{inspect(tuple)}"
       thing ->
         TypeCheck.Type.ensure_type!(thing)
     end)

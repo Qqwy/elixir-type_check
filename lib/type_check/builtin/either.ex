@@ -15,13 +15,6 @@ defmodule TypeCheck.Builtin.Either do
                 {:error, {unquote(Macro.escape(x)), :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
             end
         end
-        # with {:error, left_error} <- unquote(left_check),
-        #      {:error, right_error} <- unquote(right_check) do
-        #   {:error, {TypeCheck.Builtin.Or, :both_failed, %{left: left_error, right: right_error}, unquote(param)}}
-        # else
-        #   :ok ->
-        #     :ok
-        # end
       end
     end
   end
