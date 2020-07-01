@@ -20,7 +20,11 @@ defmodule TypeCheck.MixProject do
           "Builtin Types": ~r"^TypeCheck.Builtin",
           "Other": ~r"^.*"
         ],
-        nest_modules_by_prefix: [TypeCheck.Builtin, TypeCheck.TypeError]
+        nest_modules_by_prefix: [TypeCheck.Builtin, TypeCheck.TypeError],
+        groups_for_functions: [
+          "Builtin Elixir types": &(&1[:typekind] == :builtin),
+          "Extensions to the builtin types": &(&1[:typekind] == :extension),
+        ]
       ]
     ]
   end

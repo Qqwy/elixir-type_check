@@ -2,6 +2,11 @@ defmodule TypeCheck.Builtin do
   require TypeCheck.Internals.ToTypespec
   # TypeCheck.Internals.ToTypespec.define_all()
 
+  @moduledoc """
+  """
+
+  @doc typekind: :builtin
+  @doc "test"
   def any() do
     %TypeCheck.Builtin.Any{}
   end
@@ -76,6 +81,8 @@ defmodule TypeCheck.Builtin do
 
   @type tuple_of(_list_of_elements) :: tuple()
 
+  @doc typekind: :extension
+  @doc "bla"
   def tuple_of(list_of_element_types)
   # prevents double-expanding
   # when called as `tuple_of([1,2,3])` by the user.
