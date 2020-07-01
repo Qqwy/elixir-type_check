@@ -3,12 +3,8 @@ defmodule TypeCheck.TypeError.Formatter do
   Behaviour to format your own type errors
   """
 
-  @doc """
-  Takes an 'explanation tuple' as input
-
-  and is expected to return a string.
-
-  An `explanation tuple` contains four fields:
+  @typedoc """
+  A `problem tuple` contains four fields:
 
   1. the module of the type for which a check did not pass
   2. an atom describing the exact error;
@@ -20,7 +16,13 @@ defmodule TypeCheck.TypeError.Formatter do
 
 
   See the module documentation of all `TypeCheck.Builtin.*` modules
-  for more information about the checks that they perform and the explanation tuples they might return.
+  for more information about the checks that they perform and the problem tuples they might return.
   """
-  @callback format(explanation_tuple :: {module(), atom(), map(), any()}) :: String.t()
+  @type problem_tuple :: {module(), atom(), map(), any()}
+
+  @doc """
+  A formatter is expected to turn a `problem_tuple` into a string
+  that can be used as `:message` of the TypeCheck.TypeError exception.
+  """
+  @callback format(problem_tuple) :: String.t()
 end
