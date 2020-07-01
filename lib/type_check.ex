@@ -14,7 +14,7 @@ defmodule TypeCheck do
     quote do
       case unquote(check) do
         {:ok, bindings} -> {:ok, unquote(value)}
-        other -> other
+        {:error, problem} -> {:error, TypeCheck.TypeError.exception(problem)}
       end
     end
   end
@@ -42,7 +42,7 @@ defmodule TypeCheck do
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
     case Code.eval_quoted(check_code, [value: value]) do
       {{:ok, _}, _} -> {:ok, value}
-      {other, _} -> other
+      {{:error, problem}, _} -> {:error, TypeCheck.TypeError.exception(problem)}
     end
   end
 
