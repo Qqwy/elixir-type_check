@@ -5,7 +5,7 @@ defmodule TypeCheck.Builtin.FixedMap do
     def to_check(s, param) do
       quote location: :keep do
         with {:ok, []} <- unquote(map_check(param, s)),
-             {:ok, []} <- unquote(build_keys_presence_ast(s.keypairs, param, s)),
+             {:ok, []} <- unquote(build_keys_presence_ast(s, param)),
              {:ok, bindings3} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
           {:ok, bindings3}
         end
@@ -22,7 +22,7 @@ defmodule TypeCheck.Builtin.FixedMap do
       end
     end
 
-    defp build_keys_presence_ast(keypairs, param, s) do
+    defp build_keys_presence_ast(s, param) do
       required_keys =
         s.keypairs
         |> Enum.into(%{})

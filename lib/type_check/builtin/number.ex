@@ -22,7 +22,7 @@ defmodule TypeCheck.Builtin.Number do
 
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
-      def to_gen(s) do
+      def to_gen(_s) do
         StreamData.one_of([StreamData.integer(), StreamData.float()])
       end
     end

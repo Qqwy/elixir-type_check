@@ -2,7 +2,7 @@ defmodule TypeCheck.Spec do
   defstruct [:name, :param_types, :return_type]
 
   defp spec_fun_name(function, arity) do
-    spec_fun_name = :"__type_check_spec_for_#{function}/#{arity}__"
+    :"__type_check_spec_for_#{function}/#{arity}__"
   end
 
   def lookup(module, function, arity) do
@@ -67,7 +67,7 @@ defmodule TypeCheck.Spec do
       end
   end
 
-  defp param_check_code(param_type, clean_param, index, caller) do
+  defp param_check_code(param_type, clean_param, index, _caller) do
 
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
     quote do
@@ -75,9 +75,9 @@ defmodule TypeCheck.Spec do
     end
   end
 
-  defp return_check_code(name, arity, clean_params, return_type, caller) do
+  defp return_check_code(name, arity, clean_params, return_type, _caller) do
     return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
-    return_code = quote do
+    quote do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
           nil

@@ -22,7 +22,7 @@ defmodule TypeCheck.Builtin.Function do
 
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
-      def to_gen(s) do
+      def to_gen(_s) do
         raise "Not implemented yet. PRs are welcome!"
       end
     end

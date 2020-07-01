@@ -6,8 +6,8 @@ defmodule Example2 do
   type mylist :: list(integer())
   type mylist2 :: list(integer())
   type mylist3(a) :: list(a)
-  typep mylist4 :: mylist2
-  type mylist5 :: mylist3(integer()) | mylist4
+  typep mylist4 :: mylist2()
+  type mylist5 :: mylist3(integer()) | mylist4()
 
   def example do
     :ok

@@ -11,7 +11,7 @@ defmodule TypeCheck.Builtin.Guarded do
       %TypeCheck.Builtin.Tuple{} ->
         Enum.flat_map(type.element_types, &extract_names/1)
       %TypeCheck.Builtin.FixedMap{} ->
-        Enum.flat_map(type.keypairs, fn {key, value} -> extract_names(value) end)
+        Enum.flat_map(type.keypairs, fn {_key, value} -> extract_names(value) end)
       %TypeCheck.Builtin.List{} ->
         extract_names(type.element_type)
       %TypeCheck.Builtin.Map{} ->
@@ -34,7 +34,7 @@ defmodule TypeCheck.Builtin.Guarded do
       %TypeCheck.Builtin.Guarded{} ->
         # Recurse :-)
         extract_names(type.type)
-      other -> []
+      _other -> []
     end
   end
 
