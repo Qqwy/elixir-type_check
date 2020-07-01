@@ -22,8 +22,8 @@ defmodule TypeCheck.MixProject do
         ],
         nest_modules_by_prefix: [TypeCheck.Builtin, TypeCheck.TypeError],
         groups_for_functions: [
-          "Builtin Elixir types": &(&1[:typekind] == :builtin),
-          "Extensions to the builtin types": &(&1[:typekind] == :extension),
+          "Built-in Elixir types": &(&1[:typekind] == :builtin),
+          "Extensions": &(&1[:typekind] == :extension),
         ]
       ]
     ]

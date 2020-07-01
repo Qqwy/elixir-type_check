@@ -198,8 +198,6 @@ defmodule TypeCheck.Builtin do
     tuple_of([module(), atom(), arity()])
   end
 
-  @type tuple_of(_list_of_elements) :: tuple()
-
   @doc typekind: :builtin
   @doc """
   A tuple whose elements are of the types given by `list_of_element_types`.
@@ -225,6 +223,17 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Tuple{element_types: element_types_list}
   end
 
+  @doc typekind: :extension
+  @doc """
+  A tuple whose elements have any types,
+  but which has exactly `size` elements.
+
+  Represented in Elixir's builtin Typespecs as a plain tuple,
+  with `size` elements, where each of the element types
+  is `any()`.
+
+  For instance, `tuple(3)` is represented as `{any(), any(), any()}`.
+  """
   def tuple(size) when is_integer(size) do
     elems =
       0..size
@@ -281,6 +290,13 @@ defmodule TypeCheck.Builtin do
     one_of([left, right])
   end
 
+  @doc typekind: :builtin
+  @doc """
+  Version of `one_of` that allows passing many possibilities
+  at once.
+
+  c.f. `one_of/2`.
+  """
   def one_of(list_of_possibilities)
 
   def one_of(list = %TypeCheck.Builtin.FixedList{}) do
@@ -412,7 +428,7 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
-  A type with a local name.
+  A type with a local name, which can be referred to from a 'type guard'.
 
   This name can be used in 'type guards'.
   See the module documentation and `guarded_by/2` for more information.
@@ -430,7 +446,8 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
-  Adds a 'type guard' to the type.
+  Adds a 'type guard' to the type, which is an extra check
+  written using arbitrary Elixir code.
 
   Desugaring of `some_type when guard_code`.
 
