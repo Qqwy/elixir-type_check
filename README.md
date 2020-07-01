@@ -63,6 +63,7 @@ end
 - [x] Make errors raised when types do not match humanly readable
   - [x] Improve readability of spec-errors by repeating spec and which parameter did not match.
 - [x] Creating generators from types
+- [x] Don't warn on zero-arity types used without parentheses.
 
 
 ### Pre-stable
@@ -70,7 +71,6 @@ end
 - [ ] Detailed documentation.
 - [ ] Rigorous tests.
 - [ ] referring to variables in outer scope using pin operator (?)
-- [ ] No longer warn on zero-arity types used without parentheses.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.

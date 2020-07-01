@@ -3,6 +3,24 @@ defmodule TypeCheck.Type do
   TODO
   """
 
+  @typedoc """
+  Something is a TypeCheck.Type if it implements the TypeCheck.Protocols.ToCheck protocol.
+
+  It is also expected to implement the TypeCheck.Protocols.Inspect protocol (although that has an `Any` fallback).
+
+  In practice, this type means 'any of the' structs in the `TypeCheck.Builtin.*` modules.
+  """
+  @type t() :: any()
+
+  @typedoc """
+  Indicates that we expect a 'type AST' that will be expanded
+  to a proper type. This means that it might contain essentially the full syntax that Elixir Typespecs
+  allow, which will be rewritten to calls to the functions in `TypeCheck.Builtin`.
+
+  See `TypeCheck.Builtin` for the precise syntax you are allowed to use.
+  """
+  @type expandable_type() :: any()
+
 
   defmacro build(type_ast) do
     type_ast
