@@ -74,6 +74,7 @@ end
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
+- [ ] Manually overriding generators for user-specified types if so desired.
 
 ### Longer-term future ideas
 
