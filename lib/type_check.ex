@@ -28,13 +28,6 @@ defmodule TypeCheck do
   `dynamic_conforms` and variants.
   Because these have to evaluate the type-checking code at runtime,
   these checks be optimized by the compiler.
-
-  ### Avoiding naming conflicts with TypeCheck.Builtin
-
-  If you want to define a type with the same name as one in TypeCheck.Builtin,
-  you should hide those particular functions from TypeCheck.Builtin by adding
-  an `import TypeCheck.Builtin, except: [...]`-statement
-  below the `use TypeCheck` manually.
   """
 
   defmacro __using__(_options) do

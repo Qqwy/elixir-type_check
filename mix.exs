@@ -14,12 +14,13 @@ defmodule TypeCheck.MixProject do
       docs: [
         main: "TypeCheck",
         groups_for_modules: [
-          "Main": [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec, TypeCheck.Builtin],
+          "Main": [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec],
           "Errors and Formatting them": ~r"^TypeCheck.TypeError",
           "Property Testing": ~r"^TypeCheck.Type.StreamData",
-          "Builtin Types": ~r"^TypeCheck.Builtin.",
+          "Builtin Types": ~r"^TypeCheck.Builtin",
           "Other": ~r"^.*"
-        ]
+        ],
+        nest_modules_by_prefix: [TypeCheck.Builtin, TypeCheck.TypeError]
       ]
     ]
   end
