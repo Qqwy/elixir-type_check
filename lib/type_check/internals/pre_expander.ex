@@ -87,8 +87,9 @@ defmodule TypeCheck.Internals.PreExpander do
         end
       nil ->
         # A map with fixed fields
+        # Keys are expected to be literal values
         field_types =
-          Enum.map(struct_fields, fn {key, value_type} -> {rewrite(key, env), rewrite(value_type, env)} end)
+          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
 
         quote location: :keep do
           TypeCheck.Builtin.fixed_map(unquote(field_types))

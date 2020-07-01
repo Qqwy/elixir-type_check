@@ -14,14 +14,6 @@ defmodule TypeCheck.Builtin.Function do
     end
   end
 
-  defimpl TypeCheck.Protocols.ToTypespec do
-    def to_typespec(s) do
-      quote do
-        function()
-      end
-    end
-  end
-
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, _opts) do
       "function()"

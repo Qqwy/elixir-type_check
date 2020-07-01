@@ -23,14 +23,6 @@ defmodule TypeCheck.Builtin.Range do
     end
   end
 
-  defimpl TypeCheck.Protocols.ToTypespec do
-    def to_typespec(s) do
-      quote do
-        unquote(s.range)
-      end
-    end
-  end
-
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do

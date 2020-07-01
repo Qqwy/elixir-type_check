@@ -40,14 +40,6 @@ defmodule TypeCheck.Builtin.List do
     end
   end
 
-  defimpl TypeCheck.Protocols.ToTypespec do
-    def to_typespec(s) do
-      quote do
-        list(unquote(TypeCheck.Protocols.ToTypespec.to_typespec(s.element_type)))
-      end
-    end
-  end
-
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do
       Inspect.Algebra.container_doc("list(", [TypeCheck.Protocols.Inspect.inspect(list.element_type, opts)], ")", opts, fn x, _ -> x end, [separator: "", break: :maybe])
