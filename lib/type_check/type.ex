@@ -64,10 +64,23 @@ defmodule TypeCheck.Type do
     end
   end
 
-  # TODO move to dedicated module
   if Code.ensure_loaded?(StreamData) do
-    def stream_data_gen(type) do
-      TypeCheck.Protocols.ToStreamData.to_gen(type)
+    defmodule StreamData do
+      @moduledoc """
+      Transforms types to generators.
+
+      This module is only included when the optional dependency
+      `:stream_data` is added to your project's dependencies.
+      """
+
+      @doc """
+      When given a type, it is transformed to a StreamData generator
+      that can be used in a property test.
+
+      """
+      def gen(type) do
+        TypeCheck.Protocols.ToStreamData.to_gen(type)
+      end
     end
   end
 end

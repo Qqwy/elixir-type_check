@@ -29,7 +29,7 @@ defmodule TypeCheck.Internals.PreExpander do
           TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
         end
       ast = {:%{}, _, fields} ->
-        rewrite_map_and_struct(fields, ast, env)
+        rewrite_map_or_struct(fields, ast, env)
       {:%, _, [struct_name, {:%{}, _, fields}]} ->
         rewrite_struct(struct_name, fields, env)
       {:"::", _, [{name, _, atom}, type_ast]} when is_atom(atom) ->
@@ -79,7 +79,7 @@ defmodule TypeCheck.Internals.PreExpander do
     end
   end
 
-  defp rewrite_map_and_struct(struct_fields, orig_ast, env) do
+  defp rewrite_map_or_struct(struct_fields, orig_ast, env) do
     case struct_fields[:__struct__] do
       Range ->
         quote location: :keep do
@@ -88,18 +88,15 @@ defmodule TypeCheck.Internals.PreExpander do
       nil ->
         # A map with fixed fields
         field_types =
-          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
+          Enum.map(struct_fields, fn {key, value_type} -> {rewrite(key, env), rewrite(value_type, env)} end)
 
         quote location: :keep do
-          # TODO correctly recurse over keys
           TypeCheck.Builtin.fixed_map(unquote(field_types))
         end
       other ->
-        # Unhandled expanded structs
+        # Unhandled already-expanded structs
+        # Treat them as literal values
         quote location: :keep do
-          # TODO we might want to treat maps/structs differently
-          # than literals in certain cases
-          # like allowing types to be specified for the keys?
           TypeCheck.Builtin.literal(unquote(orig_ast))
         end
     end

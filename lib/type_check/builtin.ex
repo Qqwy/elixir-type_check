@@ -130,12 +130,8 @@ defmodule TypeCheck.Builtin do
   end
 
   def one_of(list_of_possibilities) when is_list(list_of_possibilities) do
-    # IO.inspect(list_of_possibilities, label: :asd, structs: false)
-    # Enum.map(list_of_possibilities, &TypeCheck.Type.ensure_type!/1)
-
     %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
   end
-
 
   def range(range = lower..higher) do
     %TypeCheck.Builtin.Range{range: range}
