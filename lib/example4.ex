@@ -5,8 +5,8 @@ defmodule Example4 do
   ## of a mutually-recursive type
   ## that will currently make TypeCheck hang
   type empty :: nil
-  type cons() :: {integer(), lazy(mylist())}
-  type mylist() :: empty() | lazy(cons())
+  type cons() :: {integer(), lazy(Example4.mylist())}
+  type mylist() :: empty() | lazy(Example4.cons())
 
   spec new_list() :: mylist()
   def new_list() do

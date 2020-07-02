@@ -11,6 +11,10 @@ defmodule TypeCheck.Internals.ToTypespec do
       {:when, _, [type, _]} ->
         # Hide `when` that might contain code from the typespec
         type
+      {:lazy, _, [type, _]} ->
+        # Hide `when` that might contain code from the typespec
+        # type
+        quote do any() end
       {:guarded_by, _, [type, _]} ->
         # Hide `when` that might contain code from the typespec
         type

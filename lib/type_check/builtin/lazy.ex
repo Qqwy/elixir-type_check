@@ -3,15 +3,19 @@ defmodule TypeCheck.Builtin.Lazy do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
+      IO.inspect(s)
 
       snippet =
         quote location: :keep do
-          TypeCheck.Type.build_unescaped(unquote(Macro.escape(s.type_ast)), __ENV__)
+        IO.inspect(unquote(Macro.escape(s.caller)), label: :inner)
+        import unquote(Module.concat(s.caller.module, TypeCheck))
+        check =
+          unquote(Macro.escape(s.type_ast))
+          |> TypeCheck.Type.build_unescaped(unquote(Macro.escape(s.caller)))
           |> TypeCheck.Protocols.ToCheck.to_check(Macro.var(:value, nil))
-        end
 
-      quote do
-        {res, _} = Code.eval_quoted(unquote(snippet), [value: unquote(param)])
+        IO.inspect(unquote(Macro.escape(s.caller)), label: :outer)
+        {res, _} = Code.eval_quoted(check, [value: unquote(param)], unquote(Macro.escape(s.caller)))
         IO.inspect(res, label: :res)
         res
       end

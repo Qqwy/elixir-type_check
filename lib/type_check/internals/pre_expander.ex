@@ -5,7 +5,7 @@ defmodule TypeCheck.Internals.PreExpander do
   # with alternatives that are not 'special'
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env) do
-    IO.inspect(ast, label: :pre_expander)
+    # IO.inspect(ast, label: :pre_expander)
     case Macro.expand(ast, env) do
       {:literal, _, [value]} ->
         # Do not expand internals of `literal`.
@@ -14,6 +14,8 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.literal(unquote(value))
         end
+      orig = {:lazy, _, [type, caller]} ->
+        orig
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->
         quote location: :keep do
           TypeCheck.Builtin.literal(unquote(x))

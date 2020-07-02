@@ -475,7 +475,18 @@ defmodule TypeCheck.Builtin do
   end
 
   defmacro lazy(type_ast) do
-    res = %TypeCheck.Builtin.Lazy{type_ast: type_ast, caller: nil}
-    Macro.escape(res)
+    # caller = __CALLER__
+    # IO.inspect(caller, label: :caller)
+    # c = Macro.escape(caller)
+    # IO.inspect(c, label: :caller2)
+    # res = %TypeCheck.Builtin.Lazy{type_ast: type_ast, caller: c}
+    # Macro.escape(res)
+    quote location: :keep do
+      lazy(unquote(Macro.escape(type_ast)), unquote(Macro.escape(__CALLER__)))
+    end
+  end
+
+  def lazy(quoted_type, caller) do
+    %TypeCheck.Builtin.Lazy{type_ast: quoted_type, caller: caller}
   end
 end
