@@ -160,6 +160,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     """
   end
 
+  def format({s = %TypeCheck.Type.Public{}, :no_match, %{problem: problem}, val}) do
+    compound_check(val, s, "in the definition of `#{Macro.to_string(s.name_with_maybe_params)} :: (#{TypeCheck.Inspect.inspect_binary(s.structure)})` :\n", format(problem))
+  end
+
+  def format({s = %TypeCheck.Type.Private{}, :no_match, _, val}) do
+    "`#{inspect(val)}` does not match `#{TypeCheck.Inspect.inspect_binary(s)}`"
+  end
+
+  def format({s = %TypeCheck.Type.Opaque{}, :no_match, _, val}) do
+    "`#{inspect(val)}` does not match `#{TypeCheck.Inspect.inspect_binary(s)}`"
+  end
+
   defp compound_check(val, s, child_prefix \\ nil, child_problem) do
     child_str =
     if child_prefix do

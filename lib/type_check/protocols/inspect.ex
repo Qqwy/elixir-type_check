@@ -19,6 +19,9 @@ structs = [
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
+  TypeCheck.Type.Public,
+  TypeCheck.Type.Private,
+  TypeCheck.Type.Opaque,
 ]
 
 for struct <- structs do

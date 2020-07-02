@@ -37,14 +37,14 @@ defmodule TypeCheck.Type do
   def build_unescaped(type_ast, caller, add_typecheck_module \\ false) do
     type_ast = TypeCheck.Internals.PreExpander.rewrite(type_ast, caller)
     code =
-      if add_typecheck_module do
-        quote do
-          import __MODULE__.TypeCheck
-          unquote(type_ast)
-        end
-      else
-        type_ast
+    if add_typecheck_module do
+      quote do
+        import __MODULE__.TypeCheck
+        unquote(type_ast)
       end
+    else
+      type_ast
+    end
 
     {type, []} = Code.eval_quoted(code, [], caller)
     type
@@ -92,6 +92,78 @@ defmodule TypeCheck.Type do
       """
       def gen(type) do
         TypeCheck.Protocols.ToStreamData.to_gen(type)
+      end
+    end
+  end
+
+
+  defmodule Public do
+    defstruct [:name_with_maybe_params, :structure]
+
+    defimpl TypeCheck.Protocols.Inspect do
+      def inspect(s, opts) do
+        "#{Macro.to_string(s.name_with_maybe_params)}"
+      end
+    end
+
+    defimpl TypeCheck.Protocols.ToCheck do
+      def to_check(s, param) do
+        child_check = TypeCheck.Protocols.ToCheck.to_check(s.structure, param)
+        quote do
+          case unquote(child_check) do
+            {:ok, bindings} ->
+              {:ok, bindings}
+            {:error, problem} ->
+              {:error, {unquote(Macro.escape(s)), :no_match, %{problem: problem}, unquote(param)}}
+          end
+        end
+      end
+    end
+  end
+
+  defmodule Private do
+    defstruct [:name_with_maybe_params, :structure]
+
+    defimpl TypeCheck.Protocols.Inspect do
+      def inspect(s, opts) do
+        "#{Macro.to_string(s.name_with_maybe_params)} (private type)"
+      end
+    end
+
+    defimpl TypeCheck.Protocols.ToCheck do
+      def to_check(s, param) do
+        child_check = TypeCheck.Protocols.ToCheck.to_check(s.structure, param)
+        quote do
+          case unquote(child_check) do
+            {:ok, bindings} ->
+              {:ok, bindings}
+            {:error, problem} ->
+              {:error, {unquote(Macro.escape(s)), :no_match, %{problem: problem}, unquote(param)}}
+          end
+        end
+      end
+    end
+  end
+
+  defmodule Opaque do
+    defstruct [:name_with_maybe_params, :structure]
+    defimpl TypeCheck.Protocols.Inspect do
+      def inspect(s, opts) do
+        "#{Macro.to_string(s.name_with_maybe_params)} (opaque type)"
+      end
+    end
+
+    defimpl TypeCheck.Protocols.ToCheck do
+      def to_check(s, param) do
+        child_check = TypeCheck.Protocols.ToCheck.to_check(s.structure, param)
+        quote do
+          case unquote(child_check) do
+            {:ok, bindings} ->
+              {:ok, bindings}
+            {:error, problem} ->
+              {:error, {unquote(Macro.escape(s)), :no_match, %{problem: problem}, unquote(param)}}
+          end
+        end
       end
     end
   end

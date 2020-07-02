@@ -230,7 +230,7 @@ defmodule TypeCheck.Macros do
       end
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller)
 
-    res = type_fun_definition(name_with_maybe_params, type)
+    res = type_fun_definition(name_with_maybe_params, type, kind)
     quote location: :keep do
       case unquote(kind) do
         :opaque ->
@@ -267,7 +267,7 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp type_fun_definition(name_with_params, type) do
+  defp type_fun_definition(name_with_params, type, kind) do
     {_name, params} = Macro.decompose_call(name_with_params)
     params_check_code =
       params
@@ -276,13 +276,22 @@ defmodule TypeCheck.Macros do
         TypeCheck.Type.ensure_type!(unquote(param))
       end
     end)
+      kind_wrapper = kind_wrapper(type, kind)
     quote location: :keep do
       @doc false
       def unquote(name_with_params) do
         unquote_splicing(params_check_code)
         # import TypeCheck.Builtin
-        unquote(type)
+        %unquote(kind_wrapper){name_with_maybe_params: unquote(Macro.escape(name_with_params)), structure: unquote(type)}
       end
+    end
+  end
+
+  defp kind_wrapper(type, kind) do
+    case kind do
+      :type -> TypeCheck.Type.Public
+      :typep -> TypeCheck.Type.Private
+      :opaque -> TypeCheck.Type.Opaque
     end
   end
 
