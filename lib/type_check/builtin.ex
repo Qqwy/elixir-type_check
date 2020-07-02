@@ -473,4 +473,9 @@ defmodule TypeCheck.Builtin do
 
     %TypeCheck.Builtin.Guarded{type: type, guard: guard_ast}
   end
+
+  defmacro lazy(type_ast) do
+    res = %TypeCheck.Builtin.Lazy{type_ast: type_ast, caller: nil}
+    Macro.escape(res)
+  end
 end

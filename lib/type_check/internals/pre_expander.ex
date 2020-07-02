@@ -5,6 +5,7 @@ defmodule TypeCheck.Internals.PreExpander do
   # with alternatives that are not 'special'
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env) do
+    IO.inspect(ast, label: :pre_expander)
     case Macro.expand(ast, env) do
       {:literal, _, [value]} ->
         # Do not expand internals of `literal`.
@@ -100,6 +101,8 @@ defmodule TypeCheck.Internals.PreExpander do
         quote location: :keep do
           TypeCheck.Builtin.range(unquote(orig_ast))
         end
+      TypeCheck.Builtin.Lazy ->
+        orig_ast
       nil ->
         # A map with fixed fields
         # Keys are expected to be literal values
