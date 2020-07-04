@@ -532,7 +532,7 @@ defmodule TypeCheck.Builtin do
   end
 
   def find_matching_module(caller, name, arity) do
-    Enum.find(caller.functions, {caller.module, []}, fn {module, functions_with_arities} ->
+    Enum.find(caller.functions, {caller.module, []}, fn {_module, functions_with_arities} ->
       Enum.any?(functions_with_arities, &(&1 == {name, arity}))
     end)
     |> elem(0)

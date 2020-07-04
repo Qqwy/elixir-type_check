@@ -6,7 +6,7 @@ defmodule TypeCheck.Internals.PreExpander do
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env) do
     case Macro.expand(ast, env) do
-      ast = {:lazy_explicit, _, arguments} ->
+      ast = {:lazy_explicit, _, _arguments} ->
         ast
       {:literal, _, [value]} ->
         # Do not expand internals of `literal`.
