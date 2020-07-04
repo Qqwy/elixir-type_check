@@ -516,4 +516,21 @@ defmodule TypeCheck.Builtin do
 
     %TypeCheck.Builtin.Guarded{type: type, guard: guard_ast}
   end
+
+  defmacro lazy(type_call_ast) do
+    {module, name, arguments} =
+      case Macro.decompose_call(type_call_ast) do
+        {name, arguments} ->
+          {__CALLER__.module, name, arguments}
+        other -> other
+      end
+    quote location: :keep do
+      lazy_explicit(unquote(module), unquote(name), unquote(arguments))
+    end
+  end
+
+  @doc false
+  def lazy_explicit(module, name, arguments) do
+    %TypeCheck.Builtin.Lazy{mfa: {module, name, arguments}}
+  end
 end

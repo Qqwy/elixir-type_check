@@ -8,6 +8,11 @@ defmodule TypeCheck.Internals.ToTypespec do
   # to see what kind of rewrite we should do.
   def rewrite(ast, env) do
     case Macro.expand(ast, env) do
+      {:lazy, _, arguments} ->
+        # TODO make nicer
+        quote do
+          any()
+    end
       {:when, _, [type, _]} ->
         # Hide `when` that might contain code from the typespec
         type

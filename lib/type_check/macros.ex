@@ -281,6 +281,7 @@ defmodule TypeCheck.Macros do
       def unquote(name_with_params) do
         unquote_splicing(params_check_code)
         # import TypeCheck.Builtin
+        IO.inspect(unquote(Macro.escape(name_with_params)), label: :expanding_type)
         unquote(type)
       end
     end
