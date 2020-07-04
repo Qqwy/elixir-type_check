@@ -1,6 +1,9 @@
 defmodule TypeCheck.Builtin.Literal do
   defstruct [:value]
 
+  use TypeCheck
+  type problem_tuple_type :: {:error, %__MODULE__{value: literal :: any()}, :not_same_value, map(), val :: any()} when literal !== value
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{value: value}, param) do
       quote location: :keep do

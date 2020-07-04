@@ -1,5 +1,4 @@
 defmodule TypeCheck.Builtin.None do
-  defstruct []
   @moduledoc """
   The 'none' type has no inhabitants.
   In other words, no value will typecheck against this type.
@@ -11,6 +10,11 @@ defmodule TypeCheck.Builtin.None do
   meaning that if you attempt to use `none()` directly in a generator, you might get a `StreamData.FilterTooNarrowError`.
   However, it's still possible to combine it with other types like `:ok | :error | none()` and e.g. use the resulting generator of that.
   """
+
+  defstruct []
+
+  use TypeCheck
+  type problem_tuple_type :: {:error, %__MODULE__{}, :no_match, %{}, val :: any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do

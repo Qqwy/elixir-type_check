@@ -25,7 +25,7 @@ defmodule TypeCheck.Builtin do
 
   """
   def any() do
-    %TypeCheck.Builtin.Any{}
+    Macro.struct!(TypeCheck.Builtin.Any, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -46,7 +46,7 @@ defmodule TypeCheck.Builtin do
       ** (TypeCheck.TypeError) `10` is not an atom.
   """
   def atom() do
-    %TypeCheck.Builtin.Atom{}
+    Macro.struct!(TypeCheck.Builtin.Atom, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -87,7 +87,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Binary`
   """
   def binary() do
-    %TypeCheck.Builtin.Binary{}
+    Macro.struct!(TypeCheck.Builtin.Binary)
   end
 
   @doc typekind: :builtin
@@ -97,7 +97,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Bitstring`
   """
   def bitstring() do
-    %TypeCheck.Builtin.Bitstring{}
+   Macro.struct!(TypeCheck.Builtin.Bitstring, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -109,7 +109,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Boolean`
   """
   def boolean() do
-    %TypeCheck.Builtin.Boolean{}
+    Macro.struct!(TypeCheck.Builtin.Boolean, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -149,7 +149,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Function`
   """
   def function() do
-    %TypeCheck.Builtin.Function{}
+    Macro.struct!(TypeCheck.Builtin.Function, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -167,7 +167,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Integer`
   """
   def integer() do
-    %TypeCheck.Builtin.Integer{}
+    Macro.struct!(TypeCheck.Builtin.Integer, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -177,7 +177,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Integer`
   """
   def float() do
-    %TypeCheck.Builtin.Float{}
+    Macro.struct!(TypeCheck.Builtin.Float, __ENV__)
   end
 
 
@@ -189,7 +189,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Number`
   """
   def number() do
-    %TypeCheck.Builtin.Number{}
+    Macro.struct!(TypeCheck.Builtin.Number, __ENV__)
   end
 
   @doc typekind: :builtin

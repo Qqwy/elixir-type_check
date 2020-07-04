@@ -1,6 +1,9 @@
 defmodule TypeCheck.Builtin.Number do
   defstruct []
 
+  use TypeCheck
+  type problem_tuple_type :: {:error, %__MODULE__{}, :no_match, %{}, val :: any()}
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote do

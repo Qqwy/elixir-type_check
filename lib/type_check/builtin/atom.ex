@@ -6,6 +6,9 @@ defmodule TypeCheck.Builtin.Atom do
   Returns a problem tuple with the reason `:no_match` otherwise.
   """
 
+  use TypeCheck
+  type problem_tuple_type :: {:error, %__MODULE__{}, :no_match, map(), any()}
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote do

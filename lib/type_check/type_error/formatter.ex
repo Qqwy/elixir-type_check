@@ -18,7 +18,9 @@ defmodule TypeCheck.TypeError.Formatter do
   See the module documentation of all `TypeCheck.Builtin.*` modules
   for more information about the checks that they perform and the problem tuples they might return.
   """
-  @type problem_tuple :: {module(), atom(), map(), any()}
+  # @type problem_tuple :: {module(), atom(), map(), any()}
+  use TypeCheck
+  type problem_tuple :: {module, atom, map, any}
 
   @doc """
   A formatter is expected to turn a `problem_tuple` into a string

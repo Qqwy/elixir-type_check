@@ -1,6 +1,12 @@
 defmodule TypeCheck.Builtin.Range do
   defstruct [:range]
 
+  use TypeCheck
+  type problem_tuple_type :: (
+    {:error, %__MODULE__{range: any()}, :not_an_integer, %{}, any()}
+    | {:error, %__MODULE__{range: any()}, :not_in_range, %{}, integer()}
+  )
+
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{range: range}, param) do
