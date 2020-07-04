@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.Any do
   defstruct []
 
   use TypeCheck
-  type problem_tuple_type :: none()
+  type problem_tuple :: none()
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(_, _param) do

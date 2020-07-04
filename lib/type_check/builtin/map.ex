@@ -1,7 +1,6 @@
 defmodule TypeCheck.Builtin.Map do
   defstruct [:key_type, :value_type]
 
-
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote do

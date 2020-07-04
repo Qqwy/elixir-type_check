@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.Float do
   defstruct []
 
   use TypeCheck
-  type problem_tuple_type :: {:error, %__MODULE__{}, :no_match, %{}, any()}
+  type problem_tuple :: {%__MODULE__{}, :no_match, %{}, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do

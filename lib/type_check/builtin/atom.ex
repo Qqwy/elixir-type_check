@@ -7,7 +7,7 @@ defmodule TypeCheck.Builtin.Atom do
   """
 
   use TypeCheck
-  type problem_tuple_type :: {:error, %__MODULE__{}, :no_match, map(), any()}
+  type problem_tuple :: {%__MODULE__{}, :no_match, map(), any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do

@@ -1,6 +1,13 @@
 defmodule TypeCheck.Builtin.Tuple do
   defstruct [:element_types]
 
+  use TypeCheck
+  type problem_tuple :: (
+      {%__MODULE__{element_types: list()}, :not_a_tuple, %{}, any()}
+    | {%__MODULE__{element_types: list()}, :different_size, %{expected_size: integer()}, any()}
+    | {%__MODULE__{element_types: list()}, :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()}, any()}
+  )
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_types: types_list}, param) do
       element_checks_ast = build_element_checks_ast(types_list, param, s)
@@ -25,7 +32,7 @@ defmodule TypeCheck.Builtin.Tuple do
         impl = TypeCheck.Protocols.ToCheck.to_check(element_type, quote do elem(unquote(param), unquote(index)) end)
         quote location: :keep do
           [
-            {{:ok, element_bindings}, _index, _element_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(element_type))},
+            {{:ok, element_bindings}, _index} <- {unquote(impl), unquote(index)},
            bindings = element_bindings ++ bindings,
            ]
         end
@@ -36,8 +43,8 @@ defmodule TypeCheck.Builtin.Tuple do
           with unquote_splicing(element_checks) do
             {:ok, bindings}
           else
-            {{:error, error}, index, element_type} ->
-              {:error, {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index, element_type: element_type}, unquote(param)}}
+            {{:error, error}, index} ->
+              {:error, {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index}, unquote(param)}}
           end
         end
     end
@@ -45,7 +52,16 @@ defmodule TypeCheck.Builtin.Tuple do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      s.element_types
+      element_types =
+        case s.element_types do
+          %TypeCheck.Builtin.FixedList{element_types: element_types} ->
+            element_types
+          %TypeCheck.Builtin.List{element_type: element_type} ->
+            [element_type]
+          other -> other
+      end
+
+      element_types
       |> List.to_tuple
       |> Elixir.Inspect.inspect(%Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
     end

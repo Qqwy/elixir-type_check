@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.Binary do
   defstruct []
 
   use TypeCheck
-  type problem_tuple_type :: {:error, %__MODULE__{}, :no_match, %{}, any()}
+  type problem_tuple :: {%__MODULE__{}, :no_match, %{}, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
@@ -16,12 +16,6 @@ defmodule TypeCheck.Builtin.Binary do
       end
     end
   end
-
-  # def error_response_type() do
-  #   require TypeCheck.Type
-  #   import TypeCheck.Builtin
-  #   TypeCheck.Type.build({%__MODULE__{}, :no_match, %{}, any()})
-  # end
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, _opts) do

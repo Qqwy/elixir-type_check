@@ -23,10 +23,11 @@ defmodule TypeCheck.TypeError.Formatter do
   # type problem_tuple :: {module, atom, map, any}
   use TypeCheck
   type problem_tuple :: (
-    TypeCheck.Builtin.Any.problem_tuple_type
-    | TypeCheck.Builtin.Atom.problem_tuple_type
-    | TypeCheck.Builtin.Binary.problem_tuple_type
-    | TypeCheck.Builtin.Bitstring.problem_tuple_type
+    TypeCheck.Builtin.Any.problem_tuple
+    | TypeCheck.Builtin.Atom.problem_tuple
+    | TypeCheck.Builtin.Binary.problem_tuple
+    | TypeCheck.Builtin.Bitstring.problem_tuple
+    | TypeCheck.Builtin.Tuple.problem_tuple
   )
 
   @doc """
