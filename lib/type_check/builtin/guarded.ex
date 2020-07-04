@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Guarded do
         [type.name | extract_names(type.type)]
       %TypeCheck.Builtin.FixedList{} ->
         Enum.flat_map(type.element_types, &extract_names/1)
-      %TypeCheck.Builtin.Tuple{} ->
+      %TypeCheck.Builtin.FixedTuple{} ->
         Enum.flat_map(type.element_types, &extract_names/1)
       %TypeCheck.Builtin.FixedMap{} ->
         Enum.flat_map(type.keypairs, fn {_key, value} -> extract_names(value) end)
