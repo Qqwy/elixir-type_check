@@ -518,10 +518,12 @@ defmodule TypeCheck.Builtin do
   end
 
   defmacro lazy(type_call_ast) do
+    expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__)
     {module, name, arguments} =
-      case Macro.decompose_call(type_call_ast) do
+      case Macro.decompose_call(expanded_call) do
         {name, arguments} ->
-          {__CALLER__.module, name, arguments}
+          module = find_matching_module(__CALLER__, name, length(arguments))
+          {module, name, arguments}
         other -> other
       end
     quote location: :keep do
@@ -529,8 +531,14 @@ defmodule TypeCheck.Builtin do
     end
   end
 
+  def find_matching_module(caller, name, arity) do
+    Enum.find(caller.functions, caller.module, fn {module, functions_with_arities} ->
+      Enum.any?(functions_with_arities, &(&1 == {name, arity}))
+    end)
+  end
+
   @doc false
-  def lazy_explicit(module, name, arguments) do
-    %TypeCheck.Builtin.Lazy{mfa: {module, name, arguments}}
+  def lazy_explicit(module, function, arguments) do
+    %TypeCheck.Builtin.Lazy{module: module, function: function, arguments: arguments}
   end
 end
