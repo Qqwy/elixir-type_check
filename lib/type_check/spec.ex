@@ -6,6 +6,7 @@ defmodule TypeCheck.Spec do
   end
 
   def lookup(module, function, arity) do
+    Code.ensure_loaded(module)
     if function_exported?(module, spec_fun_name(function, arity), 0) do
       {:ok, apply(module, spec_fun_name(function, arity), [])}
     else
@@ -19,6 +20,7 @@ defmodule TypeCheck.Spec do
   end
 
   def defined?(module, function, arity) do
+    Code.ensure_loaded(module)
     function_exported?(module, spec_fun_name(function, arity), 0)
   end
 
