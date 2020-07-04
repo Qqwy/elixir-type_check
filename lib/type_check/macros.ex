@@ -281,8 +281,25 @@ defmodule TypeCheck.Macros do
       def unquote(name_with_params) do
         unquote_splicing(params_check_code)
         # import TypeCheck.Builtin
-        IO.inspect(unquote(Macro.escape(name_with_params)), label: :expanding_type)
+        unquote(type_expansion_loop_prevention_code(name_with_params))
         unquote(type)
+      end
+    end
+  end
+
+  # If a type is refered to more than 100_000 times
+  # we're probably in a type expansion loop
+  defp type_expansion_loop_prevention_code(name_with_params) do
+    key = {Macro.escape(name_with_params), :expansion_tracker}
+    quote do
+      expansion_tracker = Process.get({__MODULE__, unquote(key)}, 0)
+      if expansion_tracker > 100_000 do
+        raise """
+        Potentially infinite type expansion loop detected while expanding `#{unquote(Macro.to_string(name_with_params))}`.
+        You probably want to use `TypeCheck.Builtin.lazy` to defer type expansion to runtime.
+        """
+      else
+        Process.put({__MODULE__, unquote(key)}, expansion_tracker + 1)
       end
     end
   end
