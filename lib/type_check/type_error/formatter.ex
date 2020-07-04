@@ -27,6 +27,7 @@ defmodule TypeCheck.TypeError.Formatter do
     | TypeCheck.Builtin.Atom.problem_tuple
     | TypeCheck.Builtin.Binary.problem_tuple
     | TypeCheck.Builtin.Bitstring.problem_tuple
+    | TypeCheck.Builtin.FixedTuple.problem_tuple
     | TypeCheck.Builtin.Tuple.problem_tuple
   )
 

@@ -134,19 +134,25 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "`#{inspect(val)}` falls outside the range #{inspect(range)}.")
   end
 
-  def format({s = %TypeCheck.Builtin.Tuple{}, :not_a_tuple, _, val}) do
+  def format({s = %TypeCheck.Builtin.FixedTuple{}, :not_a_tuple, _, val}) do
     problem = "`#{inspect(val)}` is not a tuple."
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.Tuple{}, :different_size, %{expected_size: expected_size}, val}) do
+  def format({s = %TypeCheck.Builtin.FixedTuple{}, :different_size, %{expected_size: expected_size}, val}) do
     problem = "`#{inspect(val)}` has #{tuple_size(val)} elements rather than #{expected_size}."
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.Tuple{}, :element_error, %{problem: problem, index: index}, val}) do
+  def format({s = %TypeCheck.Builtin.FixedTuple{}, :element_error, %{problem: problem, index: index}, val}) do
     compound_check(val, s, "at index #{index}:\n", format(problem))
   end
+
+  def format({s = %TypeCheck.Builtin.Tuple{}, :no_match, _, val}) do
+    problem = "`#{inspect(val)}` is not a tuple."
+    compound_check(val, s, problem)
+  end
+
 
   def format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", format(problem))

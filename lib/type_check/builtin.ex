@@ -264,8 +264,7 @@ defmodule TypeCheck.Builtin do
   def fixed_tuple(element_types_list) when is_list(element_types_list) do
     Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
 
-    # %TypeCheck.Builtin.Tuple{element_types: element_types_list}
-    Macro.struct!(TypeCheck.Builtin.Tuple, __ENV__)
+    Macro.struct!(TypeCheck.Builtin.FixedTuple, __ENV__)
     |> Map.put(:element_types, element_types_list)
   end
 
@@ -285,6 +284,10 @@ defmodule TypeCheck.Builtin do
       0..size
       |> Enum.map(fn -> any() end)
     fixed_tuple(elems)
+  end
+
+  def tuple() do
+    Macro.struct!(TypeCheck.Builtin.Tuple, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -441,9 +444,9 @@ defmodule TypeCheck.Builtin do
   def fixed_map(list = %TypeCheck.Builtin.FixedList{}) do
     list.element_types
     |> Enum.map(fn
-      %TypeCheck.Builtin.Tuple{element_types: element_types} when length(element_types) == 2 ->
+      %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types} when length(element_types) == 2 ->
         {hd(element_types), hd(tl(element_types))}
-      tuple = %TypeCheck.Builtin.Tuple{element_types: element_types} when length(element_types) != 2 ->
+      tuple = %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types} when length(element_types) != 2 ->
         raise "Improper type passed to `fixed_map/1` #{inspect(tuple)}"
       thing ->
         TypeCheck.Type.ensure_type!(thing)
