@@ -1,5 +1,13 @@
 defmodule TypeCheck.Builtin.FixedList do
   defstruct [:element_types]
+  @moduledoc """
+  Checks whether the value is a list with the expected elements
+
+  On failure returns a problem tuple with:
+    - `:not_a_list` if the value is not a list
+    - `:different_length` if the value is a list but not of equal size.
+    - `:element_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:index` to indicate what and where the problem occured.
+  """
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
@@ -25,7 +33,7 @@ defmodule TypeCheck.Builtin.FixedList do
         |> Enum.flat_map(fn {element_type, index} ->
           impl = TypeCheck.Protocols.ToCheck.to_check(element_type, quote do hd(var!(rest, unquote(__MODULE__))) end)
           quote location: :keep do
-            [{{:ok, element_bindings}, index, element_type, var!(rest, unquote(__MODULE__))} <- {unquote(impl), unquote(index), unquote(Macro.escape(element_type)), tl(var!(rest, unquote(__MODULE__)))},
+            [{{:ok, element_bindings}, index, var!(rest, unquote(__MODULE__))} <- {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))},
             bindings = element_bindings ++ bindings]
           end
         end)
@@ -35,8 +43,8 @@ defmodule TypeCheck.Builtin.FixedList do
           with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do
             {:ok, bindings}
           else
-            {{:error, error}, index, element_type, _rest} ->
-              {:error, {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index, element_type: element_type}, unquote(param)}}
+            {{:error, error}, index, _rest} ->
+              {:error, {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index}, unquote(param)}}
           end
         end
     end

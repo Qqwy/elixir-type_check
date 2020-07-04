@@ -1,5 +1,13 @@
 defmodule TypeCheck.Builtin.FixedMap do
   defstruct [:keypairs]
+  @moduledoc """
+  Checks whether the value is a list with the expected elements
+
+  On failure returns a problem tuple with:
+  - `:not_a_map` if the value is not a map
+  - `:missing_keys` if the value does not have all of the expected keys. The extra information contains in this case `:keys` with a list of keys that are missing.
+  - `:value_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:key` to indicate what and where the problem occured.
+  """
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
@@ -44,7 +52,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         value_check = TypeCheck.Protocols.ToCheck.to_check(value_type, quote do Map.fetch!(unquote(param), unquote(key)) end)
         quote location: :keep do
           [
-            {{:ok, value_bindings}, _key, _element_type} <- {unquote(value_check), unquote(key), unquote(Macro.escape(value_type))},
+            {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
            bindings = value_bindings ++ bindings,
           ]
         end
@@ -55,8 +63,8 @@ defmodule TypeCheck.Builtin.FixedMap do
           with unquote_splicing(keypair_checks) do
             {:ok, bindings}
           else
-            {{:error, error}, key, value_type} ->
-              {:error, {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key, value_type: value_type}, unquote(param)}}
+            {{:error, error}, key} ->
+              {:error, {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
           end
         end
     end

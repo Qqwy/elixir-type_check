@@ -1,5 +1,10 @@
 defmodule TypeCheck.Builtin.Atom do
   defstruct []
+  @moduledoc """
+  Checks whether the value is any atom.
+
+  Returns a problem tuple with the reason `:no_match` otherwise.
+  """
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
