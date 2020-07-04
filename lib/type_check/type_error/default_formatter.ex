@@ -104,6 +104,10 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, format(problem))
   end
 
+  def format({%TypeCheck.Builtin.None{}, :no_match, _, val}) do
+    "`#{inspect(val)}` does not match `none()` (no value matches `none()`)."
+  end
+
   def format({%TypeCheck.Builtin.Number{}, :no_match, _, val}) do
     "`#{inspect(val)}` is not a number."
   end

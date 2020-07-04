@@ -542,4 +542,8 @@ defmodule TypeCheck.Builtin do
   def lazy_explicit(module, function, arguments) do
     %TypeCheck.Builtin.Lazy{module: module, function: function, arguments: arguments}
   end
+
+  def none() do
+    %TypeCheck.Builtin.None{}
+  end
 end

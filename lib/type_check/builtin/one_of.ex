@@ -36,9 +36,16 @@ defmodule TypeCheck.Builtin.OneOf do
     if Code.ensure_loaded?(StreamData) do
       defimpl TypeCheck.Protocols.ToStreamData do
         def to_gen(s) do
-          s.choices
-          |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
-          |> StreamData.one_of()
+          choice_gens =
+            s.choices
+            |> Enum.reject(fn choice -> match?(%TypeCheck.Builtin.None{}, choice) end)
+            |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
+          case choice_gens do
+            [] ->
+              raise "Cannot create a generator for `#{inspect(s)}` since it has no inhabiting values."
+              _ ->
+              StreamData.one_of(choice_gens)
+          end
         end
       end
     end
