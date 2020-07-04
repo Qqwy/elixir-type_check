@@ -2,6 +2,7 @@ defmodule TypeCheck.MacrosTest do
   use ExUnit.Case
   use ExUnitProperties
   import StreamData, only: []
+  import TypeCheck.Type.StreamData
 
   doctest TypeCheck.Macros
 
@@ -18,7 +19,7 @@ defmodule TypeCheck.MacrosTest do
     end
 
     property "can be turned into a StreamData generator" do
-      gen = TypeCheck.Type.StreamData.gen(BasicTypeDefinition.mylist())
+      gen = to_gen(BasicTypeDefinition.mylist())
       check all x <- gen do
         assert is_list(x)
         assert Enum.all?(x, fn elem -> is_integer(elem) end)

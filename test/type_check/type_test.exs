@@ -7,4 +7,6 @@ defmodule TypeCheck.TypeTest do
   import TypeCheck.Builtin
 
   doctest TypeCheck.Type
+
+  doctest TypeCheck.Type.StreamData
 end

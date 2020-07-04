@@ -114,8 +114,24 @@ defmodule TypeCheck.Type do
       When given a type, it is transformed to a StreamData generator
       that can be used in a property test.
 
+          iex> import TypeCheck.Type.StreamData
+          iex> generator = TypeCheck.Type.build({:ok | :error, integer()}) |> to_gen()
+          iex> StreamData.seeded(generator, 42) |> Enum.take(10)
+          [
+          {:ok, -1},
+          {:ok, 2},
+          {:ok, -2},
+          {:ok, -4},
+          {:ok, 1},
+          {:ok, 1},
+          {:ok, 2},
+          {:ok, 4},
+          {:ok, -7},
+          {:ok, 5}
+          ]
+
       """
-      def gen(type) do
+      def to_gen(type) do
         TypeCheck.Protocols.ToStreamData.to_gen(type)
       end
     end
