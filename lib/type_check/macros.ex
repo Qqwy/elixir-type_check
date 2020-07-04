@@ -225,7 +225,9 @@ defmodule TypeCheck.Macros do
           This type is managed by `TypeCheck`,
           which allows checking values against the type at runtime.
 
-          Full definition: #{type_definition_doc(name_with_maybe_params, type, kind)}
+          Full definition:
+
+          #{type_definition_doc(name_with_maybe_params, type, kind, caller)}
           """)
       end
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller)
@@ -254,15 +256,21 @@ defmodule TypeCheck.Macros do
     newdoc
   end
 
-  defp type_definition_doc(name_with_maybe_params, type_ast, kind) do
+  defp type_definition_doc(name_with_maybe_params, type_ast, kind, caller) do
     head = Macro.to_string(name_with_maybe_params)
     if kind == :opaque do
        """
        `head` _(opaque type)_
        """
     else
+      type_ast = Macro.prewalk(type_ast, fn
+        lazy_ast = {:lazy, _, _} -> lazy_ast
+        ast -> Macro.expand(ast, caller)
+      end)
       """
-      `#{head} :: #{Macro.to_string(type_ast)}`
+      ```
+      #{head} :: #{Macro.to_string(type_ast)}
+      ```
       """
     end
   end

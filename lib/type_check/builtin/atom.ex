@@ -23,12 +23,6 @@ defmodule TypeCheck.Builtin.Atom do
     end
   end
 
-  def error_response_type() do
-    require TypeCheck.Type
-    import TypeCheck.Builtin
-    TypeCheck.Type.build({%__MODULE__{}, :no_match, %{}, any()})
-  end
-
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, _opts) do
       "atom()"
