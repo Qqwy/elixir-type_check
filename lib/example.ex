@@ -17,7 +17,7 @@ defmodule Example do
 
   type example :: tuple(3)
 
-  type z :: tuple_of([3, 4, 5])
+  type z :: fixed_tuple([3, 4, 5])
 
   type blar :: map(atom(), integer())
   type blaz :: fixed_map(a: integer(), b: float(), c: blar())

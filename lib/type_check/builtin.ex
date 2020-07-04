@@ -3,6 +3,10 @@ defmodule TypeCheck.Builtin do
   # TypeCheck.Internals.ToTypespec.define_all()
 
   @moduledoc """
+
+  Usually you'd want to import this module when you're using TypeCheck.
+  Feel free to import only the things you need,
+  or hide (using `import ... except: `) the things you don't.
   """
 
   @doc typekind: :builtin
@@ -12,6 +16,13 @@ defmodule TypeCheck.Builtin do
   Will always succeed.
 
   c.f. `TypeCheck.Builtin.Any`
+
+
+      iex> TypeCheck.conforms!(10, any())
+      10
+      iex> TypeCheck.conforms!("foobar", any())
+      "foobar"
+
   """
   def any() do
     %TypeCheck.Builtin.Any{}
@@ -26,6 +37,13 @@ defmodule TypeCheck.Builtin do
   Any Elixir atom.
 
   c.f. `TypeCheck.Builtin.Atom`
+
+      iex> TypeCheck.conforms!(:ok, atom())
+      :ok
+      iex> TypeCheck.conforms!(:foo, atom())
+      :foo
+      iex> TypeCheck.conforms!(10, atom())
+      ** (TypeCheck.TypeError) `10` is not an atom.
   """
   def atom() do
     %TypeCheck.Builtin.Atom{}
@@ -162,6 +180,18 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Float{}
   end
 
+
+  @doc """
+  Any number (either a float or an integer)
+
+  Matches the same as `integer | float` but is more efficient.
+
+  C.f. `TypeCheck.Builtin.Number`
+  """
+  def number() do
+    %TypeCheck.Builtin.Number{}
+  end
+
   @doc typekind: :builtin
   @doc """
   A (proper) list with any type of elements;
@@ -179,6 +209,19 @@ defmodule TypeCheck.Builtin do
   A (proper) list containing only elements of type `a`.
 
   C.f. `TypeCheck.Builtin.List`
+
+
+      iex> TypeCheck.conforms!([1,2,3], list(integer()))
+      [1,2,3]
+
+      iex> TypeCheck.conforms!(:foo, list(integer()))
+      ** (TypeCheck.TypeError) `:foo` does not check against `list(integer())`. Reason:
+        `:foo` is not a list.
+
+      iex> TypeCheck.conforms!([1, 2, 3.3], list(integer()))
+      ** (TypeCheck.TypeError) `[1, 2, 3.3]` does not check against `list(integer())`. Reason:
+        at index 2:
+          `3.3` is not an integer.
   """
   def list(a) do
     TypeCheck.Type.ensure_type!(a)
@@ -192,10 +235,10 @@ defmodule TypeCheck.Builtin do
   - function is an `atom/0`
   - Arity is an `arity/0`
 
-  C.f. `tuple_of/1`
+  C.f. `fixed_tuple/1`
   """
   def mfa() do
-    tuple_of([module(), atom(), arity()])
+    fixed_tuple([module(), atom(), arity()])
   end
 
   @doc typekind: :builtin
@@ -203,21 +246,21 @@ defmodule TypeCheck.Builtin do
   A tuple whose elements are of the types given by `list_of_element_types`.
 
   Desugaring of writing tuples directly in your types:
-  `{a, b, c}` desugars to `tuple_of([a, b, c])`.
+  `{a, b, c}` desugars to `fixed_tuple([a, b, c])`.
 
   Represented in Elixir's builtin Typespecs as a plain tuple,
   where each of the elements are the respective element of `list_of_types`.
 
   C.f. `TypeCheck.Builtin.Tuple`
   """
-  def tuple_of(list_of_element_types)
+  def fixed_tuple(list_of_element_types)
   # prevents double-expanding
-  # when called as `tuple_of([1,2,3])` by the user.
-  def tuple_of(list = %TypeCheck.Builtin.FixedList{}) do
-    tuple_of(list.element_types)
+  # when called as `fixed_tuple([1,2,3])` by the user.
+  def fixed_tuple(list = %TypeCheck.Builtin.FixedList{}) do
+    fixed_tuple(list.element_types)
   end
 
-  def tuple_of(element_types_list) when is_list(element_types_list) do
+  def fixed_tuple(element_types_list) when is_list(element_types_list) do
     Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
 
     %TypeCheck.Builtin.Tuple{element_types: element_types_list}
@@ -238,7 +281,7 @@ defmodule TypeCheck.Builtin do
     elems =
       0..size
       |> Enum.map(fn -> any() end)
-    tuple_of(elems)
+    fixed_tuple(elems)
   end
 
   @doc typekind: :builtin

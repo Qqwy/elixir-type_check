@@ -3,7 +3,7 @@ defmodule Example2 do
   import TypeCheck.Builtin
 
   # type integer :: TypeCheck.Builtin.any()
-  type mylist :: list(integer())
+  type mylist :: list(Example.myint())
   type mylist2 :: list(integer())
   type mylist3(a) :: list(a)
   typep mylist4 :: mylist2()

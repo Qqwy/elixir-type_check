@@ -49,7 +49,7 @@ defmodule TypeCheck.TypeError do
 
   @impl true
   def exception(problem_tuple) do
-    message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple)
+    message = TypeCheck.TypeError.DefaultFormatter.format_wrap(problem_tuple)
 
     %__MODULE__{message: message, raw: problem_tuple}
   end

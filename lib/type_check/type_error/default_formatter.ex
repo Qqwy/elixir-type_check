@@ -1,6 +1,11 @@
 defmodule TypeCheck.TypeError.DefaultFormatter do
   @behaviour TypeCheck.TypeError.Formatter
 
+  def format_wrap(problem_tuple) do
+    format(problem_tuple)
+    |> String.trim_trailing
+  end
+
   @doc """
   Transforms a `problem_tuple` into a humanly-readable explanation string.
 

@@ -22,6 +22,31 @@ defmodule TypeCheck.Type do
   @type expandable_type() :: any()
 
 
+  @doc """
+  Constructs a concrete type from the given `type_ast`.
+
+  This means that you can pass type-syntax to this macro,
+  which will be transformed into explicit calls to the functions in `TypeCheck.Builtin`.
+
+      iex> res = TypeCheck.Type.build(:ok | :error)
+      iex> res
+      #TypeCheck.Type< :ok | :error >
+      iex> # This is the same as:
+      iex> import TypeCheck.Builtin, only: [one_of: 2, literal: 1]
+      iex> explicit = one_of(literal(:ok), literal(:error))
+      iex> res == explicit
+      true
+
+      iex> res = TypeCheck.Type.build({a :: number(), b :: number()} when a <= b)
+      iex> res
+      #TypeCheck.Type< ({a :: number(), b :: number()} when a <= b) >
+      iex> # This is the same as:
+      iex> import TypeCheck.Builtin, only: [fixed_tuple: 1, number: 0, guarded_by: 2, named_type: 2]
+      iex> explicit = guarded_by(fixed_tuple([named_type(:a, number()), named_type(:b, number())]), quote do a <= b end)
+      #TypeCheck.Type< ({a :: number(), b :: number()} when a <= b) >
+
+  Of course, you can refer to your own local and remote types as well.
+  """
   defmacro build(type_ast) do
     type_ast
     |> build_unescaped(__CALLER__)

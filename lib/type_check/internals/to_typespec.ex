@@ -26,7 +26,7 @@ defmodule TypeCheck.Internals.ToTypespec do
             unquote(snippet) | unquote(type)
           end
         end)
-      {:tuple_of, meta, [elem_types]} ->
+      {:fixed_tuple, meta, [elem_types]} ->
         {:{}, meta, elem_types}
       {:tuple, meta, [size]} ->
         elems = 0..size |> Enum.map(fn _ -> quote do any() end end)
