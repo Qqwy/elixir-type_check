@@ -287,13 +287,13 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  # If a type is refered to more than 100_000 times
+  # If a type is refered to more than 1_000_000 times
   # we're probably in a type expansion loop
   defp type_expansion_loop_prevention_code(name_with_params) do
     key = {Macro.escape(name_with_params), :expansion_tracker}
     quote do
       expansion_tracker = Process.get({__MODULE__, unquote(key)}, 0)
-      if expansion_tracker > 100_000 do
+      if expansion_tracker > 1_000_000 do
         raise """
         Potentially infinite type expansion loop detected while expanding `#{unquote(Macro.to_string(name_with_params))}`.
         You probably want to use `TypeCheck.Builtin.lazy` to defer type expansion to runtime.
