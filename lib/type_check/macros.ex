@@ -307,6 +307,7 @@ defmodule TypeCheck.Macros do
   defp define_spec({:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
     {name, params_ast} = Macro.decompose_call(name_with_params_ast)
     arity = length(params_ast)
+    return_type_ast = TypeCheck.Internals.PreExpander.rewrite(return_type_ast, caller)
 
     # require TypeCheck.Type
     # param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller))
