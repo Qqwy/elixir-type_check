@@ -87,7 +87,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Binary`
   """
   def binary() do
-    Macro.struct!(TypeCheck.Builtin.Binary)
+    Macro.struct!(TypeCheck.Builtin.Binary, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -225,7 +225,8 @@ defmodule TypeCheck.Builtin do
   """
   def list(a) do
     TypeCheck.Type.ensure_type!(a)
-    %TypeCheck.Builtin.List{element_type: a}
+    Macro.struct!(TypeCheck.Builtin.List, __ENV__)
+    |> Map.put(:element_type, a)
   end
   @doc typekind: :builtin
   @doc """
@@ -263,7 +264,9 @@ defmodule TypeCheck.Builtin do
   def fixed_tuple(element_types_list) when is_list(element_types_list) do
     Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
 
-    %TypeCheck.Builtin.Tuple{element_types: element_types_list}
+    # %TypeCheck.Builtin.Tuple{element_types: element_types_list}
+    Macro.struct!(TypeCheck.Builtin.Tuple, __ENV__)
+    |> Map.put(:element_types, element_types_list)
   end
 
   @doc typekind: :extension
@@ -299,7 +302,10 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Literal`
   """
   def literal(value) do
-    %TypeCheck.Builtin.Literal{value: value}
+    # %TypeCheck.Builtin.Literal{value: value}
+
+    Macro.struct!(TypeCheck.Builtin.Literal, __ENV__)
+    |> Map.put(:value, value)
   end
 
   @doc false
@@ -360,7 +366,10 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Range`
   """
   def range(range = _lower.._higher) do
-    %TypeCheck.Builtin.Range{range: range}
+    # %TypeCheck.Builtin.Range{range: range}
+
+    Macro.struct!(TypeCheck.Builtin.Range, __ENV__)
+    |> Map.put(:range, range)
   end
 
   @doc typekind: :builtin
@@ -373,7 +382,10 @@ defmodule TypeCheck.Builtin do
   C.f. `range/1`
   """
   def range(lower, higher) do
-    %TypeCheck.Builtin.Range{range: lower..higher}
+    # %TypeCheck.Builtin.Range{range: lower..higher}
+
+    Macro.struct!(TypeCheck.Builtin.Range, __ENV__)
+    |> Map.put(:range, lower..higher)
   end
 
   @doc typekind: :builtin
@@ -544,6 +556,7 @@ defmodule TypeCheck.Builtin do
   end
 
   def none() do
-    %TypeCheck.Builtin.None{}
+    Macro.struct!(TypeCheck.Builtin.None, __ENV__)
+
   end
 end
