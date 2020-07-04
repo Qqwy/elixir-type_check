@@ -14,7 +14,7 @@ defmodule TypeCheck.Builtin.Map do
     end
 
     defp build_keypairs_check(%TypeCheck.Builtin.Any{}, %TypeCheck.Builtin.Any{}, _param, _s) do
-      :ok
+      {:ok, []}
     end
 
     defp build_keypairs_check(key_type, value_type, param, s) do

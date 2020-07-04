@@ -3,7 +3,7 @@ defmodule TypeCheck.Builtin.Literal do
 
   use TypeCheck
   type t :: %__MODULE__{value: literal :: any()}
-  type problem_tuple :: {t(), :not_same_value, map(), val :: any()}
+  type problem_tuple :: {t(), :not_same_value, map(), value :: any()} when literal != value
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{value: value}, param) do
