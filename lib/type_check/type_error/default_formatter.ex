@@ -98,7 +98,17 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val)}` is not the same value as `#{inspect(expected_value)}`."
   end
 
-  # TODO Map
+  def format({s = %TypeCheck.Builtin.Map{}, :not_a_map, _, val}) do
+    compound_check(val, s, "`#{inspect(val)}` is not a map.")
+  end
+
+  def format({s = %TypeCheck.Builtin.Map{}, :key_error, %{problem: problem}, val}) do
+    compound_check(val, s, "key error:\n", format(problem))
+  end
+
+  def format({s = %TypeCheck.Builtin.Map{}, :key_error, %{problem: problem, key: key}, val}) do
+    compound_check(val, s, "value at key `#{key}`:\n", format(problem))
+  end
 
   def format({s = %TypeCheck.Builtin.NamedType{}, :named_type, %{problem: problem}, val}) do
     compound_check(val, s, format(problem))

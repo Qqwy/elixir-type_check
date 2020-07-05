@@ -33,10 +33,10 @@ defmodule TypeCheck.Builtin.Map do
               res = {:ok, value_bindings ++ key_bindings ++ bindings}
               {:cont, res}
             {{:error, problem}, _} ->
-              res = {:error, {unquote(Macro.escape(s)), :key_error, %{problem: problem}, orig_param}}
+              res = {:error, {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key}, orig_param}}
               {:halt, res}
             {_, {:error, problem}} ->
-              res = {:error, {unquote(Macro.escape(s)), :value_error, %{problem: problem}, orig_param}}
+              res = {:error, {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key}, orig_param}}
               {:halt, res}
           end
         end)
