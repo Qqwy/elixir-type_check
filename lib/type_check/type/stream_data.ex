@@ -33,6 +33,11 @@ if Code.ensure_loaded?(StreamData) do
     end
 
     def arbitrary_primitive_type_gen do
+      choices = primitive_types_list()
+      Elixir.StreamData.one_of(choices)
+    end
+
+    defp primitive_types_list() do
       import TypeCheck.Builtin
       simple =
         [any(), atom(), binary(), bitstring(), boolean(), float(), function(), integer(), number()]
@@ -40,8 +45,45 @@ if Code.ensure_loaded?(StreamData) do
 
       lit = Elixir.StreamData.term() |> Elixir.StreamData.map(&literal/1)
 
-      choices = [lit | simple]
-      Elixir.StreamData.one_of(choices)
+      [lit | simple]
+    end
+
+    def arbitrary_type_gen() do
+      # TODO WIP
+      StreamData.one_of(primitive_types_list() ++[list_gen(), map_gen(), fixed_list_gen(), fixed_tuple_gen()])
+    end
+
+    defp list_gen() do
+      lazy_type_gen()
+      |> StreamData.map(&TypeCheck.Builtin.list/1)
+    end
+
+    defp map_gen() do
+      {lazy_type_gen(), lazy_type_gen()}
+      |> StreamData.map(fn {key_type, value_type} ->
+        TypeCheck.Builtin.map(key_type, value_type)
+      end)
+    end
+
+    def fixed_list_gen() do
+      lazy_type_gen()
+      |> StreamData.list_of()
+      |> StreamData.map(&TypeCheck.Builtin.fixed_list/1)
+    end
+
+    def fixed_tuple_gen() do
+      lazy_type_gen()
+      |> StreamData.list_of(max_length: 255)
+      |> StreamData.map(&TypeCheck.Builtin.fixed_tuple/1)
+    end
+
+    defp lazy_type_gen() do
+      # Lazily call content generator
+      # To prevent infinite expansion recursion
+      StreamData.constant({})
+      |> StreamData.bind(fn _ ->
+        arbitrary_type_gen()
+      end)
     end
   end
 end
