@@ -6,7 +6,7 @@ defmodule TypeCheck.TypeError.FormatterTest do
   import TypeCheck.Type.StreamData
 
   property "the default formatter is able to handle all problem tuples (returning a binary string message)" do
-    check all problem <- to_gen(TypeCheck.TypeError.Formatter.problem_tuple()) do
+    check all problem <- StreamData.scale(to_gen(TypeCheck.TypeError.Formatter.problem_tuple()), &div(&1, 3)) do
       result = TypeCheck.TypeError.DefaultFormatter.format_wrap(problem)
       assert is_binary(result)
     end
