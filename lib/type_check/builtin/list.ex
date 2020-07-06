@@ -4,8 +4,8 @@ defmodule TypeCheck.Builtin.List do
   use TypeCheck
   opaque t :: %__MODULE__{element_type: TypeCheck.Type.t}
   type problem_tuple :: (
-    {t, :not_a_list, %{}, any()}
-    | {t, :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), index: integer()}, any()}
+      {t, :not_a_list, %{}, any()}
+      | {t, :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), index: non_neg_integer()}, any()}
   )
 
   defimpl TypeCheck.Protocols.ToCheck do

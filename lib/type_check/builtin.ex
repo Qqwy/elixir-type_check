@@ -172,14 +172,43 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  Any integer smaller than zero.
+
+  C.f. `TypeCheck.Builtin.NegInteger`
+  """
+  def neg_integer() do
+    Macro.struct!(TypeCheck.Builtin.NegInteger, __ENV__)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Any integer zero or larger.
+
+  C.f. `TypeCheck.Builtin.NonNegInteger`
+  """
+  def non_neg_integer() do
+    Macro.struct!(TypeCheck.Builtin.NonNegInteger, __ENV__)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Any integer larger than zero.
+
+  C.f. `TypeCheck.Builtin.PosInteger`
+  """
+  def pos_integer() do
+    Macro.struct!(TypeCheck.Builtin.PosInteger, __ENV__)
+  end
+
+  @doc typekind: :builtin
+  @doc """
   Any float.
 
-  C.f. `TypeCheck.Builtin.Integer`
+  C.f. `TypeCheck.Builtin.Float`
   """
   def float() do
     Macro.struct!(TypeCheck.Builtin.Float, __ENV__)
   end
-
 
   @doc """
   Any number (either a float or an integer)
@@ -536,6 +565,76 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Guarded{type: type, guard: guard_ast}
   end
 
+  @doc typekind: :extension
+  @doc """
+  Defers type-expansion until the last possible moment.
+
+  This is used to be able to expand recursive types.
+
+  For instance, if you have the following:
+
+  ```
+  defmodule MyBrokenlist do
+    type empty :: nil
+    type cons(a) :: {a, mylist(a)}
+    type mylist(a) :: empty() | cons(a)
+
+    spec new_list() :: mylist(any())
+    def new_list() do
+      nil
+    end
+
+    spec cons_val(mylist(any()), any()) :: mylist(any)
+    def cons_val(list, val) do
+      {val, list}
+    end
+  end
+  ```
+
+  then when `TypeCheck` is expanding the `spec`s at compile-time
+  to build the type-checking code, `mylist(a)` will call `cons(a)`
+  which will call `mylist(a)` which will call `cons(a)` etc. until infinity.
+  This makes compilation hang indefinitely.
+
+  To be able to handle types like this, use `lazy`:
+
+
+  ```
+  defmodule MyFixedList do
+    type empty :: nil
+    type cons(a) :: {a, lazy(mylist(a))}
+    type mylist(a) :: empty() | cons(a)
+
+    spec new_list() :: mylist(any())
+    def new_list() do
+      nil
+    end
+
+    spec cons_val(mylist(any()), any()) :: mylist(any)
+    def cons_val(list, val) do
+      {val, list}
+    end
+  end
+  ```
+
+  This will work as intended.
+
+  Since `lazy/1` defers type-expansion (and check-code-generation) until
+  runtime, the compiler is not able to optimize the type-checking code.
+
+  Thus, you should only use it when necessary, since it will be slower
+  than when using the inner type direcly.
+
+
+  ### In builtin typespecs
+
+
+  `lazy/1` does not exist in Elixir's builtin typespecs
+  (since builtin typespecs does not expand types it does not need to handle
+  recursive types in a special way).
+  Therefore, `lazy(some_type)` is represented
+  as `some_type` directly in ELixir's builtin typespecs.
+  """
   defmacro lazy(type_call_ast) do
     expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__)
     {module, name, arguments} =
@@ -562,8 +661,23 @@ defmodule TypeCheck.Builtin do
     %TypeCheck.Builtin.Lazy{module: module, function: function, arguments: arguments}
   end
 
+  @doc typekind: :builtin
+  @doc """
+  Matches no value at all.
+
+  `none()` is not very useful on its own,
+  but it is a useful default in certain circumstances,
+  as well as to indicate that you expect some place to not return at all.
+  (instead for instance throwing an exception or looping forever.)
+
+  C.f. `TypeCheck.Builtin.None`.
+  """
   def none() do
     Macro.struct!(TypeCheck.Builtin.None, __ENV__)
-
   end
+  @doc typekind: :builtin
+  @doc """
+  See `none/0`.
+  """
+  def no_return(), do: none()
 end
