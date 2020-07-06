@@ -302,7 +302,7 @@ defmodule TypeCheck.Macros do
     quote do
       expansion_tracker = Process.get({__MODULE__, unquote(key)}, 0)
       if expansion_tracker > 1_000_000 do
-        raise """
+        IO.warn """
         Potentially infinite type expansion loop detected while expanding `#{unquote(Macro.to_string(name_with_params))}`.
         You probably want to use `TypeCheck.Builtin.lazy` to defer type expansion to runtime.
         """
