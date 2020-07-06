@@ -9,8 +9,11 @@ defmodule TypeCheck.Builtin.Lazy do
     def to_check(s, param) do
       quote do
         type = TypeCheck.Builtin.Lazy.lazily_expand_type(unquote(Macro.escape(s)))
-        check_code = TypeCheck.Protocols.ToCheck.to_check(type, unquote(param))
-        {res, _} = Code.eval_quoted(check_code, [value: unquote(param)])
+        # Do not inject `param` one step deeper into the check,
+        # because that makes dealing with quoting/unquoting difficult.
+        lazy_value = unquote(param)
+        check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:lazy_value, nil))
+        {res, _} = Code.eval_quoted(check_code, [lazy_value: lazy_value])
         res
       end
     end

@@ -71,7 +71,7 @@ if Code.ensure_loaded?(StreamData) do
       |> StreamData.map(&TypeCheck.Builtin.fixed_list/1)
     end
 
-    def fixed_tuple_gen() do
+    defp fixed_tuple_gen() do
       lazy_type_gen()
       |> StreamData.list_of(max_length: 255)
       |> StreamData.map(&TypeCheck.Builtin.fixed_tuple/1)

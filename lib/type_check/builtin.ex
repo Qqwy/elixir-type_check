@@ -287,7 +287,7 @@ defmodule TypeCheck.Builtin do
   def fixed_tuple(list_of_element_types)
   # prevents double-expanding
   # when called as `fixed_tuple([1,2,3])` by the user.
-  def fixed_tuple(list = %TypeCheck.Builtin.FixedList{}) do
+  def fixed_tuple(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     fixed_tuple(list.element_types)
   end
 
@@ -392,7 +392,7 @@ defmodule TypeCheck.Builtin do
   """
   def one_of(list_of_possibilities)
 
-  def one_of(list = %TypeCheck.Builtin.FixedList{}) do
+  def one_of(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     one_of(list.element_types)
   end
 
@@ -495,7 +495,7 @@ defmodule TypeCheck.Builtin do
 
   # prevents double-expanding
   # when called as `fixed_map([a: 1, b: 2])` by the user.
-  def fixed_map(list = %TypeCheck.Builtin.FixedList{}) do
+  def fixed_map(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     list.element_types
     |> Enum.map(fn
       %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types} when length(element_types) == 2 ->
@@ -528,14 +528,15 @@ defmodule TypeCheck.Builtin do
 
   # prevents double-expanding
   # when called as `fixed_list([1,2,3])` by the user.
-  def fixed_list(list = %TypeCheck.Builtin.FixedList{}) do
+  def fixed_list(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     list
   end
 
   def fixed_list(element_types) when is_list(element_types) do
     Enum.map(element_types, &TypeCheck.Type.ensure_type!/1)
 
-    %TypeCheck.Builtin.FixedList{element_types: element_types}
+    Macro.struct!(TypeCheck.Builtin.FixedList, __ENV__)
+    |> Map.put(:element_types, element_types)
   end
 
   @doc typekind: :extension

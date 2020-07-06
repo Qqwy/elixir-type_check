@@ -1,5 +1,4 @@
 defmodule TypeCheck.Builtin.FixedList do
-  defstruct [:element_types]
   @moduledoc """
   Checks whether the value is a list with the expected elements
 
@@ -8,6 +7,17 @@ defmodule TypeCheck.Builtin.FixedList do
     - `:different_length` if the value is a list but not of equal size.
     - `:element_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:index` to indicate what and where the problem occured.
   """
+
+  defstruct [:element_types]
+
+  use TypeCheck
+  type t :: %__MODULE__{element_types: list()}
+  type problem_tuple :: (
+    {t(), :not_a_list, %{}, any()}
+    | {t(), :different_length, %{expected_length: non_neg_integer()}, list()}
+    | {t(), :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()}, list()}
+  )
+
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
