@@ -9,7 +9,7 @@ defmodule TypeCheck.BuiltinTest do
   doctest TypeCheck.Builtin
 
 
-  describe "Checks for builtin types adhere to their problem_tuple result types." do
+  describe "builtin types adhere to their problem_tuple result types." do
     possibilities =
       %{
         quote do any() end => TypeCheck.Builtin.Any,
