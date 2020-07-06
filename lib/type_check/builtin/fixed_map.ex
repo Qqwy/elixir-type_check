@@ -64,7 +64,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         end
       end)
 
-        quote location: :keep, generated: true do
+        quote location: :keep do
           bindings = []
           with unquote_splicing(keypair_checks) do
             {:ok, bindings}

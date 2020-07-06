@@ -2,10 +2,11 @@ defmodule TypeCheck.Builtin.FixedTuple do
   defstruct [:element_types]
 
   use TypeCheck
+  type t :: %__MODULE__{element_types: list()}
   type problem_tuple :: (
-      {%__MODULE__{element_types: list()}, :not_a_tuple, %{}, any()}
-    | {%__MODULE__{element_types: list()}, :different_size, %{expected_size: integer()}, tuple()}
-    | {%__MODULE__{element_types: list()}, :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()}, tuple()}
+      {t(), :not_a_tuple, %{}, any()}
+    | {t(), :different_size, %{expected_size: integer()}, tuple()}
+    | {t(), :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()}, tuple()}
   )
 
   defimpl TypeCheck.Protocols.ToCheck do

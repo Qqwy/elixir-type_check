@@ -2,9 +2,10 @@ defmodule TypeCheck.Builtin.Range do
   defstruct [:range]
 
   use TypeCheck
+  type t :: %__MODULE__{range: any()}
   type problem_tuple :: (
-      {%__MODULE__{range: any()}, :not_an_integer, %{}, any()}
-    | {%__MODULE__{range: any()}, :not_in_range, %{}, integer()}
+      {t(), :not_an_integer, %{}, any()}
+    | {t(), :not_in_range, %{}, integer()}
   )
 
 

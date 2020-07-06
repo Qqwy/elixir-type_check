@@ -50,6 +50,7 @@ defmodule TypeCheck.Type do
       iex> # This is the same as:
       iex> import TypeCheck.Builtin, only: [fixed_tuple: 1, number: 0, guarded_by: 2, named_type: 2]
       iex> explicit = guarded_by(fixed_tuple([named_type(:a, number()), named_type(:b, number())]), quote do a <= b end)
+      iex> explicit
       #TypeCheck.Type< ({a :: number(), b :: number()} when a <= b) >
 
   Of course, you can refer to your own local and remote types as well.

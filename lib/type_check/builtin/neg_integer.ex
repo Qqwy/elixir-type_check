@@ -27,7 +27,8 @@ defmodule TypeCheck.Builtin.NegInteger do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(_s) do
-        StreamData.negative_integer()
+        StreamData.positive_integer()
+        |> StreamData.map(&Kernel.-/1)
       end
     end
   end
