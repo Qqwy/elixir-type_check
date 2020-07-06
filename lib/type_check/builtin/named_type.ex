@@ -1,6 +1,11 @@
 defmodule TypeCheck.Builtin.NamedType do
   defstruct [:name, :type]
 
+  use TypeCheck
+  type t :: %__MODULE__{name: atom(), type: TypeCheck.Type.t()}
+  type problem_tuple :: {t(), :named_type, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, any()}
+
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)

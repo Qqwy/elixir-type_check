@@ -13,7 +13,7 @@ defmodule TypeCheck.Builtin.FixedList do
   use TypeCheck
   type t :: %__MODULE__{element_types: list()}
   type problem_tuple :: (
-    {t(), :not_a_list, %{}, any()}
+      {t(), :not_a_list, %{}, any()}
     | {t(), :different_length, %{expected_length: non_neg_integer()}, list()}
     | {t(), :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()}, list()}
   )

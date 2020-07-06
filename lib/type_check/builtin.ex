@@ -489,7 +489,7 @@ defmodule TypeCheck.Builtin do
 
   # prevents double-expanding
   # when called as `fixed_map(%{a: 1, b: 2})` by the user.
-  def fixed_map(map = %TypeCheck.Builtin.FixedMap{}) do
+  def fixed_map(map = %{__struct__: TypeCheck.Builtin.FixedMap}) do
     map
   end
 
@@ -511,7 +511,8 @@ defmodule TypeCheck.Builtin do
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
     Enum.map(keywords, &TypeCheck.Type.ensure_type!(elem(&1, 1)))
 
-    %TypeCheck.Builtin.FixedMap{keypairs: Enum.into(keywords, [])}
+    Macro.struct!(TypeCheck.Builtin.FixedMap, __ENV__)
+    |> Map.put(:keypairs, Enum.into(keywords, []))
   end
 
   @doc typekind: :extension

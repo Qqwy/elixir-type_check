@@ -5,6 +5,7 @@ end
 
 structs = [
   TypeCheck.Builtin.Any,
+  TypeCheck.Builtin.None,
   TypeCheck.Builtin.Atom,
   TypeCheck.Builtin.Binary,
   TypeCheck.Builtin.Bitstring,
@@ -14,6 +15,9 @@ structs = [
   TypeCheck.Builtin.FixedList,
   TypeCheck.Builtin.Float,
   TypeCheck.Builtin.Integer,
+  TypeCheck.Builtin.PosInteger,
+  TypeCheck.Builtin.NegInteger,
+  TypeCheck.Builtin.NonNegInteger,
   TypeCheck.Builtin.List,
   TypeCheck.Builtin.Literal,
   TypeCheck.Builtin.Map,

@@ -1,5 +1,4 @@
 defmodule TypeCheck.Builtin.FixedMap do
-  defstruct [:keypairs]
   @moduledoc """
   Checks whether the value is a list with the expected elements
 
@@ -8,6 +7,16 @@ defmodule TypeCheck.Builtin.FixedMap do
   - `:missing_keys` if the value does not have all of the expected keys. The extra information contains in this case `:keys` with a list of keys that are missing.
   - `:value_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:key` to indicate what and where the problem occured.
   """
+  defstruct [:keypairs]
+
+  use TypeCheck
+  type t :: %__MODULE__{keypairs: list({any(), any()})}
+  type problem_tuple :: (
+    {t(), :not_a_map, %{}, any()}
+    | {t(), :missing_keys, %{keys: list(atom())}, map()}
+    | {t(), :value_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
+  )
+
 
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.

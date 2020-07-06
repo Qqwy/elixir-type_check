@@ -86,6 +86,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val)}` is not an integer."
   end
 
+  def format({%TypeCheck.Builtin.PosInteger{}, :no_match, _, val}) do
+    "`#{inspect(val)}` is not a positive integer."
+  end
+
+  def format({%TypeCheck.Builtin.NegInteger{}, :no_match, _, val}) do
+    "`#{inspect(val)}` is not a negative integer."
+  end
+
+  def format({%TypeCheck.Builtin.NonNegInteger{}, :no_match, _, val}) do
+    "`#{inspect(val)}` is not a non-negative integer."
+  end
+
   def format({s = %TypeCheck.Builtin.List{}, :not_a_list, _, val}) do
     compound_check(val, s, "`#{inspect(val)}` is not a list.")
   end

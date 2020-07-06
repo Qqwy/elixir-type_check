@@ -1,6 +1,10 @@
 defmodule TypeCheck.Builtin.Lazy do
   defstruct [:module, :function, :arguments]
 
+
+  use TypeCheck
+  type problem_tuple :: lazy(TypeCheck.TypeError.Formatter.problem_tuple())
+
   def lazily_expand_type(s) do
     apply(s.module, s.function, s.arguments)
   end
