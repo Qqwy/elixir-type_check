@@ -15,6 +15,54 @@ defmodule TypeCheck do
   You'll also be able to create your own type-specifications that can be used
   in other type- and function-specifications in the same or other modules later on.
 
+
+  ## Types and their syntax
+
+  TypeCheck allows types written using (essentially) the same syntax as [Elixir's builtin typespecs](https://hexdocs.pm/elixir/typespecs.html#types-and-their-syntax).
+  This means the following:
+
+  - literal values like `:ok`, `10.0` or `"my string"` desugar to a call to `TypeCheck.Builtin.literal/1`, which is a type that matches only exactly that value.
+  - Basic types like `integer()`, `float()`, `atom()` etc. are directly supported (and exist as functions in `TypeCheck.Builtin`).
+  - tuples of types like `{atom(), integer()}` are supported (and desugar to `TypeCheck.Builtin.fixed_tuple/1`)
+  - maps where keys are literal values and the values are types like `%{a: integer(), b: integer(), 42 => float()}` desugar to calls to `TypeCheck.Builtin.fixed_map/1`.
+    - The same happens with structs like `%User{name: binary(), age: non_neg_integer()}`
+  - sum types like `integer() | string() | atom()` are supported, and desugar to calls to `TypeCheck.Builtin.one_of/1`.
+  - Ranges like `lower..higher` are supported, matching integers within the given range. This desugars into a call to `TypeCheck.Builtin.range/1`.
+
+  ### Extensions
+
+  TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
+
+
+  - fixed-size lists containing types like `[1, 2, integer()]` are supported, and desugar to `TypeCheck.Builtin.fixed_list/1`.
+    This example matches only lists of 3 elements where the first element is the literal `1`, the second the literal `2` and the last element any integer.
+    Elixir's builtin typespecs do not support fixed-size lists.
+  - named types like `x :: integer()` are supported; these are useful in combination with "type guards" (see the section below).
+  - "type guards" using the syntax `some_type when arbitrary_code` are supported, to add extra arbitrary checks to a value for it to match the type. (See the section about type guards below.)
+  - `lazy(some_type)`, which defers type-expansion until during runtime. This is required to be able to expand recursive types. C.f. `TypeCheck.Builtin.lazy/1`
+
+  ## Named Types Type Guards
+
+  To add extra custom checks to a type, you can use a so-called 'type guard'.
+  This is arbitrary code that is executed during a type-check once the type itself already matches.
+
+  You can use "named types" to refer to (parts of) the value that matched the type, and refer to these from a type-guard:
+
+  ```
+  type sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
+  ```
+
+      iex> TypeCheck.conforms!({10, 20}, sorted_pair)
+      {10, 20}
+      iex> TypeCheck.conforms!({20, 10}, sorted_pair)
+      ** (TypeCheck.TypeError) `{20, 10}` does not check against `({lower :: number(), higher :: number()} when lower <= higher)`. Reason:
+        type guard:
+          `lower <= higher` evaluated to false or nil.
+          bound values: %{higher: 10, lower: 20}
+
+  Named types are available in your guard even from the (both local and remote) types that you are using in your time, as long as those types are not defined as _opaque_ types.
+
+
   ## Manual type-checking
 
   If you want to check values against a type _outside_ of the checks the `spec` macro
@@ -28,6 +76,8 @@ defmodule TypeCheck do
   `dynamic_conforms` and variants.
   Because these have to evaluate the type-checking code at runtime,
   these checks be optimized by the compiler.
+
+
   """
 
   defmacro __using__(_options) do

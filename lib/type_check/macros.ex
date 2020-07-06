@@ -30,7 +30,9 @@ defmodule TypeCheck.Macros do
     defs =
       Module.get_attribute(env.module, TypeCheck.TypeDefs)
 
-    Module.create(Module.concat(env.module, TypeCheck), quote do
+    compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, env.module)
+
+    Module.create(compile_time_imports_module_name, quote do
       @moduledoc false
       # This extra module is created
       # so that we can already access the custom user types
@@ -46,7 +48,7 @@ defmodule TypeCheck.Macros do
 
     # And now for the tricky bit ;-)
     quote do
-      import __MODULE__.TypeCheck
+      import unquote(compile_time_imports_module_name)
 
       unquote(spec_quotes)
     end

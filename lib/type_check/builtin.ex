@@ -210,6 +210,7 @@ defmodule TypeCheck.Builtin do
     Macro.struct!(TypeCheck.Builtin.Float, __ENV__)
   end
 
+  @doc typekind: :builtin
   @doc """
   Any number (either a float or an integer)
 
@@ -315,6 +316,12 @@ defmodule TypeCheck.Builtin do
     fixed_tuple(elems)
   end
 
+  @doc typekind: :builtin
+  @doc """
+  A tuple of any size (with any elements).
+
+  C.f. `TypeCheck.Builtin.Tuple`
+  """
   def tuple() do
     Macro.struct!(TypeCheck.Builtin.Tuple, __ENV__)
   end
@@ -349,7 +356,7 @@ defmodule TypeCheck.Builtin do
   @doc """
   A union of multiple types (also known as a 'sum type')
 
-  Desugaring of `a | b` and `a | b | c | d`.
+  Desugaring of types separated by `|` like `a | b` or `a | b | c | d`.
   (and represented that way in Elixir's builtin Typespecs).
   """
   def one_of(left, right)
@@ -375,6 +382,11 @@ defmodule TypeCheck.Builtin do
   @doc """
   Version of `one_of` that allows passing many possibilities
   at once.
+
+  A union of multiple types (also known as a 'sum type')
+
+  Desugaring of types separated by `|` like `a | b` or `a | b | c | d`.
+  (and represented that way in Elixir's builtin Typespecs).
 
   c.f. `one_of/2`.
   """
@@ -404,6 +416,10 @@ defmodule TypeCheck.Builtin do
     |> Map.put(:range, range)
   end
 
+  def range(%{__struct__: TypeCheck.Builtin.Literal, value: val = %Range{}}) do
+    range(val)
+  end
+
   @doc typekind: :builtin
   @doc """
   Any integer between `lower` (includsive) and `higher` (exclusive).
@@ -413,6 +429,11 @@ defmodule TypeCheck.Builtin do
 
   C.f. `range/1`
   """
+  def range(lower, higher)
+
+  def range(%{__struct__: TypeCheck.Builtin.Literal, value: lower}, %{__struct__: TypeCheck.Builtin.Literal, value: higher}) do
+    range(lower, higher)
+  end
   def range(lower, higher) do
     # %TypeCheck.Builtin.Range{range: lower..higher}
 
@@ -649,7 +670,7 @@ defmodule TypeCheck.Builtin do
     end
   end
 
-  def find_matching_module(caller, name, arity) do
+  defp find_matching_module(caller, name, arity) do
     Enum.find(caller.functions, {caller.module, []}, fn {_module, functions_with_arities} ->
       Enum.any?(functions_with_arities, &(&1 == {name, arity}))
     end)

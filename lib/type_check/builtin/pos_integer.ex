@@ -1,4 +1,4 @@
-defmodule TypeCheck.Builtin.PositiveInteger do
+defmodule TypeCheck.Builtin.PosInteger do
   defstruct []
 
   use TypeCheck

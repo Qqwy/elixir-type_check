@@ -71,8 +71,10 @@ defmodule TypeCheck.Type do
     type_ast = TypeCheck.Internals.PreExpander.rewrite(type_ast, caller)
     code =
       if add_typecheck_module do
+        compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, caller.module)
+
         quote do
-          import __MODULE__.TypeCheck
+          import unquote(compile_time_imports_module_name)
           unquote(type_ast)
         end
       else

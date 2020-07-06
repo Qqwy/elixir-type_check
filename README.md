@@ -135,6 +135,7 @@ boolean()`. Reason:
 
 ### Pre-stable
 
+- [ ] Hide named types from opaque types.
 - [ ] Detailed documentation.
 - [ ] Rigorous tests.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.

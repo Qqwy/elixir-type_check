@@ -6,7 +6,9 @@ end
 structs = [
   TypeCheck.Builtin.Any,
   TypeCheck.Builtin.Atom,
-  TypeCheck.Builtin.Either,
+  TypeCheck.Builtin.Binary,
+  TypeCheck.Builtin.Bitstring,
+  TypeCheck.Builtin.Boolean,
   TypeCheck.Builtin.Guarded,
   TypeCheck.Builtin.FixedMap,
   TypeCheck.Builtin.FixedList,
@@ -16,6 +18,7 @@ structs = [
   TypeCheck.Builtin.Literal,
   TypeCheck.Builtin.Map,
   TypeCheck.Builtin.NamedType,
+  TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
