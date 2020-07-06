@@ -118,8 +118,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "key error:\n", format(problem))
   end
 
-  def format({s = %TypeCheck.Builtin.Map{}, :key_error, %{problem: problem, key: key}, val}) do
-    compound_check(val, s, "value at key `#{key}`:\n", format(problem))
+  def format({s = %TypeCheck.Builtin.Map{}, :value_error, %{problem: problem, key: key}, val}) do
+    compound_check(val, s, "under key `#{inspect(key)}`:\n", format(problem))
   end
 
   def format({s = %TypeCheck.Builtin.NamedType{}, :named_type, %{problem: problem}, val}) do

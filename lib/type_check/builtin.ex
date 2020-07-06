@@ -555,7 +555,9 @@ defmodule TypeCheck.Builtin do
   def named_type(name, type) do
     TypeCheck.Type.ensure_type!(type)
 
-    %TypeCheck.Builtin.NamedType{name: name, type: type}
+    Macro.struct!(TypeCheck.Builtin.NamedType, __ENV__)
+    |> Map.put(:name, name)
+    |> Map.put(:type, type)
   end
 
   @doc typekind: :extension
@@ -681,7 +683,8 @@ defmodule TypeCheck.Builtin do
 
   @doc false
   def lazy_explicit(module, function, arguments) do
-    %TypeCheck.Builtin.Lazy{module: module, function: function, arguments: arguments}
+    Macro.struct!(TypeCheck.Builtin.Lazy, __ENV__)
+    |> Map.merge(%{module: module, function: function, arguments: arguments})
   end
 
   @doc typekind: :builtin
