@@ -10,6 +10,11 @@ defmodule TypeCheck.Builtin.FixedMap do
   """
 
   defimpl TypeCheck.Protocols.ToCheck do
+    # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
+    def to_check(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param) when keypairs == [] do
+        map_check(param, s)
+    end
+
     def to_check(s, param) do
       quote location: :keep do
         with {:ok, []} <- unquote(map_check(param, s)),
@@ -30,6 +35,7 @@ defmodule TypeCheck.Builtin.FixedMap do
       end
     end
 
+    # TODO raise on superfluous keys (just like Elixir's built-in typespecs do not allow them)
     defp build_keys_presence_ast(s, param) do
       required_keys =
         s.keypairs
@@ -58,7 +64,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         end
       end)
 
-        quote location: :keep do
+        quote location: :keep, generated: true do
           bindings = []
           with unquote_splicing(keypair_checks) do
             {:ok, bindings}
