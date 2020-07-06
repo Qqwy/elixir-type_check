@@ -398,7 +398,9 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Map`
   """
   def map() do
-    %TypeCheck.Builtin.Map{key_type: any(), value_type: any()}
+    Macro.struct!(TypeCheck.Builtin.Map, __ENV__)
+    |> Map.put(:key_type, any())
+    |> Map.put(:value_type, any())
   end
 
   @doc typekind: :extension
@@ -413,7 +415,9 @@ defmodule TypeCheck.Builtin do
     TypeCheck.Type.ensure_type!(key_type)
     TypeCheck.Type.ensure_type!(value_type)
 
-    %TypeCheck.Builtin.Map{key_type: key_type, value_type: value_type}
+    Macro.struct!(TypeCheck.Builtin.Map, __ENV__)
+    |> Map.put(:key_type, key_type)
+    |> Map.put(:value_type, value_type)
   end
 
   @doc typekind: :builtin

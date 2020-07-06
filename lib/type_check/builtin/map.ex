@@ -1,6 +1,14 @@
 defmodule TypeCheck.Builtin.Map do
   defstruct [:key_type, :value_type]
 
+  use TypeCheck
+  opaque t :: %__MODULE__{key_type: TypeCheck.Type.t, value_type: TypeCheck.Type.t}
+  type problem_tuple :: (
+    {t, :not_a_map, %{}, any()}
+    | {t, :key_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), key: any()}, any()}
+    | {t, :value_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), key: any()}, any()}
+  )
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote do

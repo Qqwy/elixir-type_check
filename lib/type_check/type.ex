@@ -12,6 +12,13 @@ defmodule TypeCheck.Type do
   """
   @type t() :: any()
 
+  # To allow types to refer to this type
+  @doc false
+  def t do
+    import TypeCheck.Builtin
+    any()
+  end
+
   @typedoc """
   Indicates that we expect a 'type AST' that will be expanded
   to a proper type. This means that it might contain essentially the full syntax that Elixir Typespecs

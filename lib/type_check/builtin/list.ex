@@ -1,6 +1,12 @@
 defmodule TypeCheck.Builtin.List do
   defstruct [:element_type]
 
+  use TypeCheck
+  opaque t :: %__MODULE__{element_type: TypeCheck.Type.t}
+  type problem_tuple :: (
+    {t, :not_a_list, %{}, any()}
+    | {t, :element_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), index: integer()}, any()}
+  )
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_type: element_type}, param) do

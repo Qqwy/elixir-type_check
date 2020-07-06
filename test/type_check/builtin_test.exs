@@ -17,8 +17,8 @@ defmodule TypeCheck.BuiltinTest do
         bitstring: TypeCheck.Builtin.Bitstring,
         float: TypeCheck.Builtin.Float,
         integer: TypeCheck.Builtin.Integer,
-        # map: TypeCheck.Builtin.Map,
-        # list: TypeCheck.Builtin.List,
+        map: TypeCheck.Builtin.Map,
+        list: TypeCheck.Builtin.List,
         tuple: TypeCheck.Builtin.Tuple,
         number: TypeCheck.Builtin.Number,
       }
