@@ -13,6 +13,7 @@ structs = [
   TypeCheck.Builtin.Guarded,
   TypeCheck.Builtin.FixedMap,
   TypeCheck.Builtin.FixedList,
+  TypeCheck.Builtin.FixedTuple,
   TypeCheck.Builtin.Float,
   TypeCheck.Builtin.Integer,
   TypeCheck.Builtin.PosInteger,

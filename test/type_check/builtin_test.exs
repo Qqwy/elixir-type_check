@@ -20,6 +20,7 @@ defmodule TypeCheck.BuiltinTest do
         quote do float() end => TypeCheck.Builtin.Float,
         quote do [1, 2] end => TypeCheck.Builtin.FixedList,
         quote do %{a: 1, b: integer() } end => TypeCheck.Builtin.FixedMap,
+        quote do {1, float() } end => TypeCheck.Builtin.FixedTuple,
         quote do integer() end => TypeCheck.Builtin.Integer,
         quote do pos_integer() end => TypeCheck.Builtin.PosInteger,
         quote do neg_integer() end => TypeCheck.Builtin.NegInteger,
