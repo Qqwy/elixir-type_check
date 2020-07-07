@@ -26,8 +26,8 @@ defmodule TypeCheck do
           %User{name: name, age: age}
         end
 
-        spec is_old_enough?(t(), age()) :: boolean()
-        def is_old_enough?(user, limit) do
+        spec old_enough?(t(), age()) :: boolean()
+        def old_enough?(user, limit) do
           user.age >= limit
         end
       end

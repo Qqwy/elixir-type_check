@@ -30,8 +30,8 @@ end
 defmodule AgeCheck do
   use TypeCheck
 
-  spec is_user_older_than?(User.t, integer) :: boolean
-  def is_user_older_than?(user, age) do
+  spec user_older_than?(User.t, integer) :: boolean
+  def user_older_than?(user, age) do
     user.age >= age
   end
 end
@@ -40,25 +40,25 @@ end
 Now we can try the following:
 
 ```elixir
-iex> AgeCheck.is_user_older_than?(%User{name: "Qqwy", age: 11}, 10)
+iex> AgeCheck.user_older_than?(%User{name: "Qqwy", age: 11}, 10)
 true
-iex> AgeCheck.is_user_older_than?(%User{name: "Qqwy", age: 9}, 10)
+iex> AgeCheck.user_older_than?(%User{name: "Qqwy", age: 9}, 10)
 false
 ```
 
 So far so good. Now let's see what happens when we pass values that are incorrect:
 
 ```elixir
-iex> AgeCheck.is_user_older_than?("foobar", 42)
-** (TypeCheck.TypeError) The call `is_user_older_than?("foobar", 42)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
+iex> AgeCheck.user_older_than?("foobar", 42)
+** (TypeCheck.TypeError) The call `user_older_than?("foobar", 42)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
 ::
 boolean()`. Reason:
   parameter no. 1:
     `"foobar"` does not check against `%User{age: integer(), name: binary()}`. Reason:
       `"foobar"` is not a map.
 
-iex> AgeCheck.is_user_older_than?(%User{name: nil, age: 11}, 10)
-** (TypeCheck.TypeError) The call `is_user_older_than?(%User{age: 11, name: nil}, 10)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
+iex> AgeCheck.user_older_than?(%User{name: nil, age: 11}, 10)
+** (TypeCheck.TypeError) The call `user_older_than?(%User{age: 11, name: nil}, 10)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
 ::
 boolean()`. Reason:
   parameter no. 1:
@@ -66,8 +66,8 @@ boolean()`. Reason:
       under key `:name`:
         `nil` is not a binary.
 
-iex> AgeCheck.is_user_older_than?(%User{name: "Aaron", age: nil}, 10) 
-** (TypeCheck.TypeError) The call `is_user_older_than?(%User{age: nil, name: "Aaron"}, 10)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
+iex> AgeCheck.user_older_than?(%User{name: "Aaron", age: nil}, 10) 
+** (TypeCheck.TypeError) The call `user_older_than?(%User{age: nil, name: "Aaron"}, 10)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
 ::
 boolean()`. Reason:
   parameter no. 1:
@@ -75,8 +75,8 @@ boolean()`. Reason:
       under key `:age`:
         `nil` is not an integer.
 
-iex> AgeCheck.is_user_older_than?(%User{name: "José", age: 11}, 10.0) 
-** (TypeCheck.TypeError) The call `is_user_older_than?(%User{age: 11, name: "José"}, 10.0)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
+iex> AgeCheck.user_older_than?(%User{name: "José", age: 11}, 10.0) 
+** (TypeCheck.TypeError) The call `user_older_than?(%User{age: 11, name: "José"}, 10.0)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
 ::
 boolean()`. Reason:
   parameter no. 2:
@@ -89,8 +89,8 @@ And if we were to introduce an error in the function definition:
 defmodule AgeCheck do
   use TypeCheck
 
-  spec is_user_older_than?(User.t, integer) :: boolean
-  def is_user_older_than?(user, age) do
+  spec user_older_than?(User.t, integer) :: boolean
+  def user_older_than?(user, age) do
     user.age
   end
 end
@@ -99,7 +99,7 @@ end
 Then we get a nice error message explaining that problem as well:
 
 ```elixir
-** (TypeCheck.TypeError) The result of calling `is_user_older_than?(%User{age: 26, name: "Marten"}, 10)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
+** (TypeCheck.TypeError) The result of calling `user_older_than?(%User{age: 26, name: "Marten"}, 10)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
 ::
 boolean()`. Reason:
   Returned result:
