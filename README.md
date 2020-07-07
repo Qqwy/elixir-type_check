@@ -157,7 +157,7 @@ boolean()`. Reason:
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+TypeCheck [is available in Hex](https://hex.pm/docs/publish). The package can be installed
 by adding `type_check` to your list of dependencies in `mix.exs`:
 
 ```elixir
@@ -168,7 +168,9 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/type_check](https://hexdocs.pm/type_check).
+The documentation can be found at [https://hexdocs.pm/type_check](https://hexdocs.pm/type_check).
+
+### Formatter
+
+TypeCheck exports a couple of macros that you might want to use without parentheses. To make `mix format` respect this setting, add `import_deps: [:type_check]` to your `.formatter.exs` file.
 
