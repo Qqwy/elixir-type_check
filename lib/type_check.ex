@@ -13,7 +13,24 @@ defmodule TypeCheck do
   Using these, you're able to add function-specifications to your functions
   which will wrap them with runtime type-checks.
   You'll also be able to create your own type-specifications that can be used
-  in other type- and function-specifications in the same or other modules later on.
+  in other type- and function-specifications in the same or other modules later on:
+
+
+        use TypeCheck
+        defstruct [:name, :age]
+        type age :: non_neg_integer()
+        type t :: %User{name: binary(), age: age()}
+
+        spec new(binary(), age()) :: t()
+        def new(name, age) do
+          %User{name: name, age: age}
+        end
+
+        spec is_old_enough?(t(), age()) :: boolean()
+        def is_old_enough?(user, limit) do
+          user.age >= limit
+        end
+      end
 
 
   ## Types and their syntax
@@ -28,6 +45,15 @@ defmodule TypeCheck do
     - The same happens with structs like `%User{name: binary(), age: non_neg_integer()}`
   - sum types like `integer() | string() | atom()` are supported, and desugar to calls to `TypeCheck.Builtin.one_of/1`.
   - Ranges like `lower..higher` are supported, matching integers within the given range. This desugars into a call to `TypeCheck.Builtin.range/1`.
+
+  ### Currently unsupported features
+
+  The following typespec syntax can _not_ currently be used in TypeCheck. This will hopefully change in future versions of the library.
+
+  - Binary pattern-matches containing size-references like `<<_ :: size>>`.
+  - (Anonymous) function types like `( -> result_type)` and `(type1, type2 -> result_type)`.
+  - Shorthand nonempty list syntax (`[some_type, ...]`)
+  - Literal maps with `required(...)` and `optional(...)` keys. (TypeCheck does already support literal maps with a fixed set of keys, as well as maps with any number of key-value-pairs of fixed types. It is the special syntax that might mix these approaches that is not supported yet.)
 
   ### Extensions
 
@@ -73,9 +99,9 @@ defmodule TypeCheck do
   Unfortunately it also means that the types passed to them have to be known at compile time.
 
   If you have a type that is constructed dynamically at runtime, you can resort to
-  `dynamic_conforms` and variants.
-  Because these have to evaluate the type-checking code at runtime,
-  these checks be optimized by the compiler.
+  `dynamic_conforms/2` and variants.
+  Because these variants have to evaluate the type-checking code at runtime,
+  these checks are not optimized by the compiler.
 
 
   """
