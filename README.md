@@ -142,8 +142,6 @@ boolean()`. Reason:
 ### Pre-stable
 
 - [ ] Hide named types from opaque types.
-- [ ] Detailed documentation.
-- [ ] Rigorous tests.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
