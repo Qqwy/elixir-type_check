@@ -13,8 +13,8 @@
 - When a value does not match a type check, the user is shown **human-friendly error messages**.
 - Types and type-checks are generated at compiletime.
   - This means **type-checking code is optimized** rigorously by the compiler.
-- Property-checking generators can be extracted from type specifications without extra work.
-- Flexibility to add custom checks: Subparts of a type can be named, and 'type guards' can be specified to restrict what values are allowed to match that refer to these types.
+- **Property-checking generators** can be extracted from type specifications without extra work.
+- Flexibility to add **custom checks**: Subparts of a type can be named, and 'type guards' can be specified to restrict what values are allowed to match that refer to these types.
 
 
 ## Usage Example
