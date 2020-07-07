@@ -24,7 +24,7 @@ defmodule User do
   use TypeCheck
   defstruct [:name, :age]
 
-  type t :: %__MODULE__{name: binary, age: integer}
+  type t :: %User{name: binary, age: integer}
 end
 
 defmodule AgeCheck do
