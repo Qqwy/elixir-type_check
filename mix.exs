@@ -28,7 +28,7 @@ defmodule TypeCheck.MixProject do
 
   defp description do
     """
-    Fast and flexible runtime type-checking.
+    Fast and flexible runtime type-checking:      Type checks are optimized by the compiler and types can be composed, re-used and turned into Property-testing generators. TypeCheck also focuses on showing understandable messages on typecheck-failures.
     """
   end
 
