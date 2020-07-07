@@ -35,7 +35,7 @@ defmodule TypeCheck.MixProject do
   defp package do
     [
       name: :type_check,
-      files: ["lib", "mix.exs", "README*", "LICENSE"],
+      files: ["lib", "mix.exs", "README*", "LICENSE", "comparing_type_check_and_norm.md"],
       maintainers: ["Wiebe-Marten Wijnja/Qqwy"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url}
