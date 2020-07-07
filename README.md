@@ -1,4 +1,4 @@
-![](https://github.com/Qqwy/elixir-type_check/blob/master/media/type_check_logo_flat.svg)
+![](https://raw.githubusercontent.com/Qqwy/elixir-type_check/master/media/type_check_logo_flat.svg)
 
 # TypeCheck: Fast and flexible runtime type-checking for your Elixir projects.
 
