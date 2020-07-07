@@ -1,0 +1,15 @@
+dist: bionic
+language: elixir
+matrix:
+  include:
+    - otp_release: 22.0
+      elixir: 1.9
+    - otp_release: 22.0
+      elixir: 1.10
+
+cache:
+  directories:
+    - ~/.mix
+    - ~/.hex
+    - _build
+
