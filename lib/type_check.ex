@@ -15,7 +15,7 @@ defmodule TypeCheck do
   You'll also be able to create your own type-specifications that can be used
   in other type- and function-specifications in the same or other modules later on:
 
-
+      defmodule User do
         use TypeCheck
         defstruct [:name, :age]
         type age :: non_neg_integer()

@@ -9,13 +9,11 @@ defmodule TypeCheck.Internals.PreExpander do
       ast = {:lazy_explicit, _, _arguments} ->
         ast
 
-      {:literal, _, [value]} ->
+      ast = {:literal, _, [_value]} ->
         # Do not expand internals of `literal`.
         # Even if it contains fancy syntax
         # like ranges
-        quote location: :keep do
-          TypeCheck.Builtin.literal(unquote(value))
-        end
+        ast
 
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->
         quote location: :keep do

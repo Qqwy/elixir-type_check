@@ -314,7 +314,7 @@ defmodule TypeCheck.Builtin do
   def tuple(size) when is_integer(size) do
     elems =
       0..size
-      |> Enum.map(fn -> any() end)
+      |> Enum.map(fn _ -> any() end)
 
     fixed_tuple(elems)
   end
