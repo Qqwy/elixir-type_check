@@ -58,11 +58,11 @@ boolean()`. Reason:
       `"foobar"` is not a map.
 
 iex> AgeCheck.is_user_older_than?(%User{name: nil, age: 11}, 10)
-** (TypeCheck.TypeError) The call `is_user_older_than?(%Example3.User{age: 11, name: nil}, 10)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
+** (TypeCheck.TypeError) The call `is_user_older_than?(%User{age: 11, name: nil}, 10)` does not adhere to spec `is_user_older_than?(%User{age: integer(), name: binary()},  integer())
 ::
 boolean()`. Reason:
   parameter no. 1:
-    `%Example3.User{age: nil, name: nil}` does not check against `%User{age: integer(), name: binary()}`. Reason:
+    `%User{age: nil, name: nil}` does not check against `%User{age: integer(), name: binary()}`. Reason:
       under key `:name`:
         `nil` is not a binary.
 
@@ -71,7 +71,7 @@ iex> AgeCheck.is_user_older_than?(%User{name: "Aaron", age: nil}, 10)
 ::
 boolean()`. Reason:
   parameter no. 1:
-    `%Example3.User{age: nil, name: "Aaron"}` does not check against `%User{age: integer(), name: binary()}`. Reason:
+    `%User{age: nil, name: "Aaron"}` does not check against `%User{age: integer(), name: binary()}`. Reason:
       under key `:age`:
         `nil` is not an integer.
 
