@@ -197,7 +197,7 @@ Because TypeCheck adds `@type`, `@typep`, `@opaque` and `@spec`-attributes based
 
 [Norm](https://github.com/keathley/norm/) is an Elixir library for specifying the structure of data that can be used for both validation and data-generation.
 
-On a superficial level, Norm and TypeCheck seem similar. However, there are [important differences in their design considerations](comparing_type_check_and_norm.md).
+On a superficial level, Norm and TypeCheck seem similar. However, there are [important differences in their design considerations](Comparing TypeCheck and Norm.md).
 
 
 
