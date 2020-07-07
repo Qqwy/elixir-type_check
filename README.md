@@ -214,10 +214,13 @@ TypeCheck uses the same syntax that Elixir's built-in typespecs use (and is heav
 
 A simple 'manual' validation. (This is common Norm usage but manual validations are more rare in TypeCheck.)
 
-```
+```elixir
 # Norm:
 iex> Norm.conform!(123, spec(is_integer() and &(&1 > 0)))
 123
+```
+
+```elixir
 # TypeCheck
 iex> TypeCheck.conforms!(123, non_neg_integer())
 # or:
@@ -226,7 +229,7 @@ iex> TypeCheck.conforms!(123, x :: integer() when x >= 0)
 
 Defining custom type-specifications ('specs' in Norm parlance) and function-specifications ('contracts' in Norm parlance):
 
-```
+```elixir
 # Norm:
 defmodule Color do
   import Norm
@@ -238,7 +241,9 @@ defmodule Color do
     # ...
   end
 end
+```
 
+```elixir
 # TypeCheck:
 defmodule Color do
   use TypeCheck
@@ -250,12 +255,11 @@ defmodule Color do
     # ...
   end
 end
-
 ```
 
 Defining a more complicated specification of a custom structure with multiple fields:
 
-```
+```elixir
 # Norm:
 defmodule User do
   use Norm
@@ -285,7 +289,7 @@ defmodule User do
 end
 ```
 
-```
+```elixir
 # TypeCheck
 defmodule User do
   use TypeCheck
