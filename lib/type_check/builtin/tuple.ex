@@ -1,5 +1,6 @@
 defmodule TypeCheck.Builtin.Tuple do
   defstruct []
+
   @moduledoc """
   Checks whether the value is any tuple.
 
@@ -16,6 +17,7 @@ defmodule TypeCheck.Builtin.Tuple do
         case unquote(param) do
           x when is_tuple(x) ->
             {:ok, []}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end

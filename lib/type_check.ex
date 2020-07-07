@@ -131,10 +131,12 @@ defmodule TypeCheck do
   (Calling `use TypeCheck` will already do this; see the module documentation of `TypeCheck` for more information))
   """
   @type value :: any()
-  @spec conforms(value, TypeCheck.Type.expandable_type()) :: {:ok, value} | {:error, TypeCheck.TypeError.t()}
+  @spec conforms(value, TypeCheck.Type.expandable_type()) ::
+          {:ok, value} | {:error, TypeCheck.TypeError.t()}
   defmacro conforms(value, type) do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+
     quote do
       case unquote(check) do
         {:ok, bindings} -> {:ok, unquote(value)}
@@ -152,6 +154,7 @@ defmodule TypeCheck do
   defmacro conforms?(value, type) do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+
     quote do
       match?({:ok, _}, unquote(check))
     end
@@ -166,6 +169,7 @@ defmodule TypeCheck do
   defmacro conforms!(value, type) do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+
     quote do
       case unquote(check) do
         {:ok, _bindings} -> unquote(value)
@@ -189,10 +193,12 @@ defmodule TypeCheck do
   Use `dynamic_conforms` only when you cannot use the normal `conforms/2`,
   for instance when you're only able to construct the type to check against at runtime.
   """
-  @spec dynamic_conforms(value, TypeCheck.Type.t) :: {:ok, value} | {:error, TypeCheck.TypeError.t}
+  @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
+          {:ok, value} | {:error, TypeCheck.TypeError.t()}
   def dynamic_conforms(value, type) do
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
-    case Code.eval_quoted(check_code, [value: value]) do
+
+    case Code.eval_quoted(check_code, value: value) do
       {{:ok, _}, _} -> {:ok, value}
       {{:error, problem}, _} -> {:error, TypeCheck.TypeError.exception(problem)}
     end
@@ -203,7 +209,7 @@ defmodule TypeCheck do
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
   """
-  @spec dynamic_conforms?(value, TypeCheck.Type.t) :: boolean
+  @spec dynamic_conforms?(value, TypeCheck.Type.t()) :: boolean
   def dynamic_conforms?(value, type) do
     case dynamic_conforms(value, type) do
       {:ok, _value} -> true
@@ -216,7 +222,7 @@ defmodule TypeCheck do
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
   """
-  @spec dynamic_conforms!(value, TypeCheck.Type.t) :: value | no_return()
+  @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
   def dynamic_conforms!(value, type) do
     case dynamic_conforms(value, type) do
       {:ok, value} -> value

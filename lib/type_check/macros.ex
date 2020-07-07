@@ -27,19 +27,22 @@ defmodule TypeCheck.Macros do
   end
 
   defmacro __before_compile__(env) do
-    defs =
-      Module.get_attribute(env.module, TypeCheck.TypeDefs)
+    defs = Module.get_attribute(env.module, TypeCheck.TypeDefs)
 
     compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, env.module)
 
-    Module.create(compile_time_imports_module_name, quote do
-      @moduledoc false
-      # This extra module is created
-      # so that we can already access the custom user types
-      # at compile-time
-      # _inside_ the module they will be part of
-      unquote(defs)
-    end, env)
+    Module.create(
+      compile_time_imports_module_name,
+      quote do
+        @moduledoc false
+        # This extra module is created
+        # so that we can already access the custom user types
+        # at compile-time
+        # _inside_ the module they will be part of
+        unquote(defs)
+      end,
+      env
+    )
 
     # And now, define all specs:
     definitions = Module.definitions_in(env.module)
@@ -64,9 +67,23 @@ defmodule TypeCheck.Macros do
       param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
       return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
 
-      {params_spec_code, return_spec_code} = TypeCheck.Spec.prepare_spec_wrapper_code(name, param_types, clean_params, return_type, caller)
+      {params_spec_code, return_spec_code} =
+        TypeCheck.Spec.prepare_spec_wrapper_code(
+          name,
+          param_types,
+          clean_params,
+          return_type,
+          caller
+        )
 
-      TypeCheck.Spec.wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code)
+      TypeCheck.Spec.wrap_function_with_spec(
+        name,
+        line,
+        arity,
+        clean_params,
+        params_spec_code,
+        return_spec_code
+      )
     end
   end
 
@@ -213,15 +230,26 @@ defmodule TypeCheck.Macros do
     define_spec(specdef, __CALLER__)
   end
 
-  defp define_type({:when, _, [{:"::", _, [name_with_maybe_params, type]}, guard_ast]}, kind, caller) do
-    define_type({:"::", [], [name_with_maybe_params, {:when, [], [type, guard_ast]}]}, kind, caller)
+  defp define_type(
+         {:when, _, [{:"::", _, [name_with_maybe_params, type]}, guard_ast]},
+         kind,
+         caller
+       ) do
+    define_type(
+      {:"::", [], [name_with_maybe_params, {:when, [], [type, guard_ast]}]},
+      kind,
+      caller
+    )
   end
 
   defp define_type({:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
     clean_typedef = TypeCheck.Internals.ToTypespec.full_rewrite(type, caller)
+
     new_typedoc =
       case kind do
-        :typep -> false
+        :typep ->
+          false
+
         _ ->
           append_typedoc(caller, """
           This type is managed by `TypeCheck`,
@@ -232,20 +260,25 @@ defmodule TypeCheck.Macros do
           #{type_definition_doc(name_with_maybe_params, type, kind, caller)}
           """)
       end
+
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller)
 
     res = type_fun_definition(name_with_maybe_params, type)
+
     quote location: :keep do
       case unquote(kind) do
         :opaque ->
           @typedoc unquote(new_typedoc)
           @opaque unquote(name_with_maybe_params) :: unquote(clean_typedef)
+
         :type ->
           @typedoc unquote(new_typedoc)
           @type unquote(name_with_maybe_params) :: unquote(clean_typedef)
+
         :typep ->
           @typep unquote(name_with_maybe_params) :: unquote(clean_typedef)
       end
+
       unquote(res)
       Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
     end
@@ -260,15 +293,18 @@ defmodule TypeCheck.Macros do
 
   defp type_definition_doc(name_with_maybe_params, type_ast, kind, caller) do
     head = Macro.to_string(name_with_maybe_params)
+
     if kind == :opaque do
-       """
-       `head` _(opaque type)_
-       """
+      """
+      `head` _(opaque type)_
+      """
     else
-      type_ast = Macro.prewalk(type_ast, fn
-        lazy_ast = {:lazy, _, _} -> lazy_ast
-        ast -> Macro.expand(ast, caller)
-      end)
+      type_ast =
+        Macro.prewalk(type_ast, fn
+          lazy_ast = {:lazy, _, _} -> lazy_ast
+          ast -> Macro.expand(ast, caller)
+        end)
+
       """
       ```
       #{head} :: #{Macro.to_string(type_ast)}
@@ -279,13 +315,15 @@ defmodule TypeCheck.Macros do
 
   defp type_fun_definition(name_with_params, type) do
     {_name, params} = Macro.decompose_call(name_with_params)
+
     params_check_code =
       params
       |> Enum.map(fn param ->
-      quote do
-        TypeCheck.Type.ensure_type!(unquote(param))
-      end
-    end)
+        quote do
+          TypeCheck.Type.ensure_type!(unquote(param))
+        end
+      end)
+
     quote location: :keep do
       @doc false
       def unquote(name_with_params) do
@@ -301,13 +339,17 @@ defmodule TypeCheck.Macros do
   # we're probably in a type expansion loop
   defp type_expansion_loop_prevention_code(name_with_params) do
     key = {Macro.escape(name_with_params), :expansion_tracker}
+
     quote do
       expansion_tracker = Process.get({__MODULE__, unquote(key)}, 0)
+
       if expansion_tracker > 1_000_000 do
-        IO.warn """
-        Potentially infinite type expansion loop detected while expanding `#{unquote(Macro.to_string(name_with_params))}`.
+        IO.warn("""
+        Potentially infinite type expansion loop detected while expanding `#{
+          unquote(Macro.to_string(name_with_params))
+        }`.
         You probably want to use `TypeCheck.Builtin.lazy` to defer type expansion to runtime.
-        """
+        """)
       else
         Process.put({__MODULE__, unquote(key)}, expansion_tracker + 1)
       end
@@ -326,12 +368,22 @@ defmodule TypeCheck.Macros do
     clean_params = Macro.generate_arguments(arity, caller.module)
 
     spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
+
     quote location: :keep do
-      Module.put_attribute(__MODULE__, TypeCheck.Specs, {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)), unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))})
+      Module.put_attribute(
+        __MODULE__,
+        TypeCheck.Specs,
+        {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)),
+         unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))}
+      )
 
       def unquote(spec_fun_name)() do
         # import TypeCheck.Builtin
-        %TypeCheck.Spec{name: unquote(name), param_types: unquote(params_ast), return_type: unquote(return_type_ast)}
+        %TypeCheck.Spec{
+          name: unquote(name),
+          param_types: unquote(params_ast),
+          return_type: unquote(return_type_ast)
+        }
       end
     end
   end

@@ -11,8 +11,9 @@ defmodule TypeCheck.Builtin.NonNegInteger do
         case unquote(param) do
           x when is_integer(x) and x >= 0 ->
             {:ok, []}
+
           _ ->
-          {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end
       end
     end

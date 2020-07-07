@@ -2,12 +2,14 @@ defmodule TypeCheck.Builtin.Map do
   defstruct [:key_type, :value_type]
 
   use TypeCheck
-  opaque t :: %__MODULE__{key_type: TypeCheck.Type.t, value_type: TypeCheck.Type.t}
-  type problem_tuple :: (
-      {t(), :not_a_map, %{}, any()}
-    | {t(), :key_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), key: any()}, any()}
-    | {t(), :value_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple), key: any()}, any()}
-  )
+  opaque t :: %__MODULE__{key_type: TypeCheck.Type.t(), value_type: TypeCheck.Type.t()}
+
+  type problem_tuple ::
+         {t(), :not_a_map, %{}, any()}
+         | {t(), :key_error,
+            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
+         | {t(), :value_error,
+            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
@@ -15,6 +17,7 @@ defmodule TypeCheck.Builtin.Map do
         case unquote(param) do
           x when not is_map(x) ->
             {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, unquote(param)}}
+
           _ ->
             unquote(build_keypairs_check(s.key_type, s.value_type, param, s))
         end
@@ -26,8 +29,15 @@ defmodule TypeCheck.Builtin.Map do
     end
 
     defp build_keypairs_check(key_type, value_type, param, s) do
-      key_check = TypeCheck.Protocols.ToCheck.to_check(key_type, Macro.var(:single_field_key, __MODULE__))
-      value_check = TypeCheck.Protocols.ToCheck.to_check(value_type, Macro.var(:single_field_value, __MODULE__))
+      key_check =
+        TypeCheck.Protocols.ToCheck.to_check(key_type, Macro.var(:single_field_key, __MODULE__))
+
+      value_check =
+        TypeCheck.Protocols.ToCheck.to_check(
+          value_type,
+          Macro.var(:single_field_value, __MODULE__)
+        )
+
       quote do
         orig_param = unquote(param)
 
@@ -40,11 +50,20 @@ defmodule TypeCheck.Builtin.Map do
             {{:ok, key_bindings}, {:ok, value_bindings}} ->
               res = {:ok, value_bindings ++ key_bindings ++ bindings}
               {:cont, res}
+
             {{:error, problem}, _} ->
-              res = {:error, {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key}, orig_param}}
+              res =
+                {:error,
+                 {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key}, orig_param}}
+
               {:halt, res}
+
             {_, {:error, problem}} ->
-              res = {:error, {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key}, orig_param}}
+              res =
+                {:error,
+                 {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key},
+                  orig_param}}
+
               {:halt, res}
           end
         end)
@@ -54,7 +73,18 @@ defmodule TypeCheck.Builtin.Map do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do
-      Inspect.Algebra.container_doc("map(", [TypeCheck.Protocols.Inspect.inspect(list.key_type, opts), TypeCheck.Protocols.Inspect.inspect(list.value_type, opts)], ")", opts, fn x, _ -> x end, [separator: ",", break: :maybe])
+      Inspect.Algebra.container_doc(
+        "map(",
+        [
+          TypeCheck.Protocols.Inspect.inspect(list.key_type, opts),
+          TypeCheck.Protocols.Inspect.inspect(list.value_type, opts)
+        ],
+        ")",
+        opts,
+        fn x, _ -> x end,
+        separator: ",",
+        break: :maybe
+      )
     end
   end
 

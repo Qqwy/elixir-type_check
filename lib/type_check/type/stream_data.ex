@@ -39,8 +39,19 @@ if Code.ensure_loaded?(StreamData) do
 
     defp primitive_types_list() do
       import TypeCheck.Builtin
+
       simple =
-        [any(), atom(), binary(), bitstring(), boolean(), float(), function(), integer(), number()]
+        [
+          any(),
+          atom(),
+          binary(),
+          bitstring(),
+          boolean(),
+          float(),
+          function(),
+          integer(),
+          number()
+        ]
         |> Enum.map(&Elixir.StreamData.constant/1)
 
       lit = Elixir.StreamData.term() |> Elixir.StreamData.map(&literal/1)
@@ -50,7 +61,9 @@ if Code.ensure_loaded?(StreamData) do
 
     def arbitrary_type_gen() do
       # TODO WIP
-      StreamData.one_of(primitive_types_list() ++[list_gen(), map_gen(), fixed_list_gen(), fixed_tuple_gen()])
+      StreamData.one_of(
+        primitive_types_list() ++ [list_gen(), map_gen(), fixed_list_gen(), fixed_tuple_gen()]
+      )
     end
 
     defp list_gen() do

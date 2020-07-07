@@ -11,6 +11,7 @@ defmodule TypeCheck.Builtin.Float do
         case unquote(param) do
           x when is_float(x) ->
             {:ok, []}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end

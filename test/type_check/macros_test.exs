@@ -20,6 +20,7 @@ defmodule TypeCheck.MacrosTest do
 
     property "can be turned into a StreamData generator" do
       gen = to_gen(BasicTypeDefinition.mylist())
+
       check all x <- gen do
         assert is_list(x)
         assert Enum.all?(x, fn elem -> is_integer(elem) end)

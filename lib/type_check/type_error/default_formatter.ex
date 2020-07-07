@@ -3,7 +3,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   def format_wrap(problem_tuple) do
     format(problem_tuple)
-    |> String.trim_trailing
+    |> String.trim_trailing()
   end
 
   @doc """
@@ -11,7 +11,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   C.f. `TypeCheck.TypeError.Formatter` for more information about problem tuples.
   """
-  @spec format(TypeCheck.TypeError.Formatter.problem_tuple) :: String.t()
+  @spec format(TypeCheck.TypeError.Formatter.problem_tuple()) :: String.t()
   def format(problem_tuple)
 
   def format({%TypeCheck.Builtin.Atom{}, :no_match, _, val}) do
@@ -35,12 +35,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.FixedList{}, :different_length, %{expected_length: expected_length}, val}) do
+  def format(
+        {s = %TypeCheck.Builtin.FixedList{}, :different_length,
+         %{expected_length: expected_length}, val}
+      ) do
     problem = "`#{inspect(val)}` has #{length(val)} elements rather than #{expected_length}."
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.FixedList{}, :element_error, %{problem: problem, index: index}, val}) do
+  def format(
+        {s = %TypeCheck.Builtin.FixedList{}, :element_error, %{problem: problem, index: index},
+         val}
+      ) do
     compound_check(val, s, "at index #{index}:\n", format(problem))
   end
 
@@ -54,11 +60,14 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       keys
       |> Enum.map(&inspect/1)
       |> Enum.join(", ")
+
     problem = "`#{inspect(val)}` is missing the following required key(s): `#{keys_str}`."
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.FixedMap{}, :value_error, %{problem: problem, key: key}, val}) do
+  def format(
+        {s = %TypeCheck.Builtin.FixedMap{}, :value_error, %{problem: problem, key: key}, val}
+      ) do
     compound_check(val, s, "under key `#{inspect(key)}`:\n", format(problem))
   end
 
@@ -79,6 +88,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     `#{Macro.to_string(s.guard)}` evaluated to false or nil.
     bound values: #{inspect(bindings)}
     """
+
     compound_check(val, s, "type guard:\n", problem)
   end
 
@@ -102,7 +112,9 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "`#{inspect(val)}` is not a list.")
   end
 
-  def format({s = %TypeCheck.Builtin.List{}, :element_error, %{problem: problem, index: index}, val}) do
+  def format(
+        {s = %TypeCheck.Builtin.List{}, :element_error, %{problem: problem, index: index}, val}
+      ) do
     compound_check(val, s, "at index #{index}:\n", format(problem))
   end
 
@@ -139,13 +151,14 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       problems
       |> Enum.with_index()
       |> Enum.map(fn {problem, index} ->
-    """
-    #{index})
-    #{indent(format(problem))}
-    """
-    end)
-    |> Enum.join("\n")
-      compound_check(val, s, "all possibilities failed:\n", message)
+        """
+        #{index})
+        #{indent(format(problem))}
+        """
+      end)
+      |> Enum.join("\n")
+
+    compound_check(val, s, "all possibilities failed:\n", message)
   end
 
   def format({s = %TypeCheck.Builtin.Range{}, :not_an_integer, _, val}) do
@@ -161,12 +174,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.FixedTuple{}, :different_size, %{expected_size: expected_size}, val}) do
+  def format(
+        {s = %TypeCheck.Builtin.FixedTuple{}, :different_size, %{expected_size: expected_size},
+         val}
+      ) do
     problem = "`#{inspect(val)}` has #{tuple_size(val)} elements rather than #{expected_size}."
     compound_check(val, s, problem)
   end
 
-  def format({s = %TypeCheck.Builtin.FixedTuple{}, :element_error, %{problem: problem, index: index}, val}) do
+  def format(
+        {s = %TypeCheck.Builtin.FixedTuple{}, :element_error, %{problem: problem, index: index},
+         val}
+      ) do
     compound_check(val, s, "at index #{index}:\n", format(problem))
   end
 
@@ -175,11 +194,11 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
 
-
   def format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", format(problem))
     arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments})"
+
     """
     The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
       parameter no. #{index + 1}:
@@ -187,11 +206,16 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     """
   end
 
-  def format({s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, _val}) do
+  def format(
+        {s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, _val}
+      ) do
     arguments_str = arguments |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments_str})"
+
     """
-    The result of calling `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+    The result of calling `#{call}` does not adhere to spec `#{
+      TypeCheck.Inspect.inspect_binary(s)
+    }`. Reason:
       Returned result:
     #{indent(indent(format(problem)))}
     """
@@ -199,11 +223,11 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   defp compound_check(val, s, child_prefix \\ nil, child_problem) do
     child_str =
-    if child_prefix do
-      indent(child_prefix <> indent(child_problem))
-    else
-      indent(child_problem)
-    end
+      if child_prefix do
+        indent(child_prefix <> indent(child_problem))
+      else
+        indent(child_problem)
+      end
 
     """
     `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:

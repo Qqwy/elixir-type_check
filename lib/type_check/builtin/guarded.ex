@@ -6,22 +6,29 @@ defmodule TypeCheck.Builtin.Guarded do
     case type do
       %TypeCheck.Builtin.NamedType{} ->
         [type.name | extract_names(type.type)]
+
       %TypeCheck.Builtin.FixedList{} ->
         Enum.flat_map(type.element_types, &extract_names/1)
+
       %TypeCheck.Builtin.FixedTuple{} ->
         Enum.flat_map(type.element_types, &extract_names/1)
+
       %TypeCheck.Builtin.FixedMap{} ->
         Enum.flat_map(type.keypairs, fn {_key, value} -> extract_names(value) end)
+
       %TypeCheck.Builtin.List{} ->
         extract_names(type.element_type)
+
       %TypeCheck.Builtin.Map{} ->
         extract_names(type.key_type) ++ extract_names(type.value_type)
+
       %TypeCheck.Builtin.OneOf{} ->
         names =
           type.choices
           |> Enum.map(&extract_names/1)
-          |> Enum.sort
+          |> Enum.sort()
           |> Enum.into(%MapSet{})
+
         if MapSet.size(names) > 1 do
           raise """
           Attempted to construct a union type
@@ -30,22 +37,28 @@ defmodule TypeCheck.Builtin.Guarded do
           #{inspect(type)}
           """
         end
+
         Enum.at(names, 0)
+
       %TypeCheck.Builtin.Guarded{} ->
         # Recurse :-)
         extract_names(type.type)
-      _other -> []
+
+      _other ->
+        []
     end
   end
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       type_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
+
       names_map =
         TypeCheck.Builtin.Guarded.extract_names(s.type)
         |> Enum.map(fn name -> {name, {:unquote, [], [Macro.var(name, nil)]}} end)
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)
+
       quote location: :keep do
         case unquote(type_check) do
           {:ok, bindings} ->
@@ -57,14 +70,17 @@ defmodule TypeCheck.Builtin.Guarded do
             if unquote(s.guard) do
               {:ok, bindings}
             else
-              {:error, {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map}, unquote(param)}}
+              {:error,
+               {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map},
+                unquote(param)}}
             end
+
           {:error, problem} ->
-            {:error, {unquote(Macro.escape(s)), :type_failed, %{problem: problem}, unquote(param)}}
+            {:error,
+             {unquote(Macro.escape(s)), :type_failed, %{problem: problem}, unquote(param)}}
         end
       end
     end
-
   end
 
   defimpl TypeCheck.Protocols.Inspect do

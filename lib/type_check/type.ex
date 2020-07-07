@@ -28,7 +28,6 @@ defmodule TypeCheck.Type do
   """
   @type expandable_type() :: any()
 
-
   @doc """
   Constructs a concrete type from the given `type_ast`.
 
@@ -69,9 +68,11 @@ defmodule TypeCheck.Type do
   # assuming that you'd want to do further compile-time work with the type.
   def build_unescaped(type_ast, caller, add_typecheck_module \\ false) do
     type_ast = TypeCheck.Internals.PreExpander.rewrite(type_ast, caller)
+
     code =
       if add_typecheck_module do
-        compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, caller.module)
+        compile_time_imports_module_name =
+          Module.concat(TypeCheck.Internals.UserTypes, caller.module)
 
         quote do
           import unquote(compile_time_imports_module_name)
@@ -107,7 +108,9 @@ defmodule TypeCheck.Type do
 
         Both of these will perform the necessary conversions to turn 'normal' datatypes to types.
         """
-      _other -> :ok
+
+      _other ->
+        :ok
     end
   end
 end

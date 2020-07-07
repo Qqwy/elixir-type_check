@@ -11,6 +11,7 @@ defmodule TypeCheck.Builtin.Literal do
         case unquote(param) do
           x when x === unquote(Macro.escape(value)) ->
             {:ok, []}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :not_same_value, %{}, unquote(param)}}
         end
@@ -25,6 +26,7 @@ defmodule TypeCheck.Builtin.Literal do
           "literal("
           |> Inspect.Algebra.glue(Inspect.Algebra.to_doc(literal.value, opts))
           |> Inspect.Algebra.glue(")")
+
         _ ->
           Inspect.Algebra.to_doc(literal.value, opts)
       end

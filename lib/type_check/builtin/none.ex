@@ -35,7 +35,7 @@ defmodule TypeCheck.Builtin.None do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(_s) do
         "none() cannot directly be used in a generator since no values inhabit this type!"
-        |> StreamData.constant
+        |> StreamData.constant()
         |> StreamData.filter(fn _ -> false end, 1_000)
       end
     end

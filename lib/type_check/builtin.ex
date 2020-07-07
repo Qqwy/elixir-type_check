@@ -97,7 +97,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Bitstring`
   """
   def bitstring() do
-   Macro.struct!(TypeCheck.Builtin.Bitstring, __ENV__)
+    Macro.struct!(TypeCheck.Builtin.Bitstring, __ENV__)
   end
 
   @doc typekind: :builtin
@@ -255,9 +255,11 @@ defmodule TypeCheck.Builtin do
   """
   def list(a) do
     TypeCheck.Type.ensure_type!(a)
+
     Macro.struct!(TypeCheck.Builtin.List, __ENV__)
     |> Map.put(:element_type, a)
   end
+
   @doc typekind: :builtin
   @doc """
   A module-function-arity tuple
@@ -313,6 +315,7 @@ defmodule TypeCheck.Builtin do
     elems =
       0..size
       |> Enum.map(fn -> any() end)
+
     fixed_tuple(elems)
   end
 
@@ -374,6 +377,7 @@ defmodule TypeCheck.Builtin do
   def one_of(left, right = %TypeCheck.Builtin.OneOf{}) do
     one_of([left] ++ right.choices)
   end
+
   def one_of(left, right) do
     one_of([left, right])
   end
@@ -431,9 +435,13 @@ defmodule TypeCheck.Builtin do
   """
   def range(lower, higher)
 
-  def range(%{__struct__: TypeCheck.Builtin.Literal, value: lower}, %{__struct__: TypeCheck.Builtin.Literal, value: higher}) do
+  def range(%{__struct__: TypeCheck.Builtin.Literal, value: lower}, %{
+        __struct__: TypeCheck.Builtin.Literal,
+        value: higher
+      }) do
     range(lower, higher)
   end
+
   def range(lower, higher) do
     # %TypeCheck.Builtin.Range{range: lower..higher}
 
@@ -498,10 +506,14 @@ defmodule TypeCheck.Builtin do
   def fixed_map(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     list.element_types
     |> Enum.map(fn
-      %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types} when length(element_types) == 2 ->
+      %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types}
+      when length(element_types) == 2 ->
         {hd(element_types), hd(tl(element_types))}
-      tuple = %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types} when length(element_types) != 2 ->
+
+      tuple = %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types}
+      when length(element_types) != 2 ->
         raise "Improper type passed to `fixed_map/1` #{inspect(tuple)}"
+
       thing ->
         TypeCheck.Type.ensure_type!(thing)
     end)
@@ -662,13 +674,17 @@ defmodule TypeCheck.Builtin do
   """
   defmacro lazy(type_call_ast) do
     expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__)
+
     {module, name, arguments} =
       case Macro.decompose_call(expanded_call) do
         {name, arguments} ->
           module = find_matching_module(__CALLER__, name, length(arguments))
           {module, name, arguments}
-        other -> other
+
+        other ->
+          other
       end
+
     quote location: :keep do
       lazy_explicit(unquote(module), unquote(name), unquote(arguments))
     end
@@ -701,6 +717,7 @@ defmodule TypeCheck.Builtin do
   def none() do
     Macro.struct!(TypeCheck.Builtin.None, __ENV__)
   end
+
   @doc typekind: :builtin
   @doc """
   See `none/0`.

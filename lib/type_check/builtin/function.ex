@@ -11,6 +11,7 @@ defmodule TypeCheck.Builtin.Function do
         case unquote(param) do
           x when is_function(x) ->
             {:ok, []}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end

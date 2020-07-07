@@ -7,7 +7,6 @@ defmodule TypeCheckTest do
   use ExUnit.Case
   use ExUnitProperties
 
-
   import TypeCheckTest.TypeGuardExample
 
   doctest TypeCheck

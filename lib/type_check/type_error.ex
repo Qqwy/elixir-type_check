@@ -45,7 +45,8 @@ defmodule TypeCheck.TypeError do
   @typedoc """
   A problem_tuple contains all information about a failed type check.
   """
-  @type problem_tuple :: {type_checked_against(), check_name(), extra_information(), problematic_value()}
+  @type problem_tuple ::
+          {type_checked_against(), check_name(), extra_information(), problematic_value()}
 
   @impl true
   def exception(problem_tuple) do

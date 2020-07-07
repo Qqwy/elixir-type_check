@@ -1,7 +1,6 @@
 defmodule TypeCheck.Builtin.Lazy do
   defstruct [:module, :function, :arguments]
 
-
   use TypeCheck
   type problem_tuple :: lazy(TypeCheck.TypeError.Formatter.problem_tuple())
 
@@ -17,7 +16,7 @@ defmodule TypeCheck.Builtin.Lazy do
         # because that makes dealing with quoting/unquoting difficult.
         lazy_value = unquote(param)
         check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:lazy_value, nil))
-        {res, _} = Code.eval_quoted(check_code, [lazy_value: lazy_value])
+        {res, _} = Code.eval_quoted(check_code, lazy_value: lazy_value)
         res
       end
     end
@@ -35,8 +34,8 @@ defmodule TypeCheck.Builtin.Lazy do
       def to_gen(s) do
         StreamData.bind(StreamData.constant(nil), fn _ ->
           s
-          |>TypeCheck.Builtin.Lazy.lazily_expand_type
-          |> TypeCheck.Protocols.ToStreamData.to_gen
+          |> TypeCheck.Builtin.Lazy.lazily_expand_type()
+          |> TypeCheck.Protocols.ToStreamData.to_gen()
         end)
       end
     end

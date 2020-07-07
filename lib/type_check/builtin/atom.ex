@@ -1,5 +1,6 @@
 defmodule TypeCheck.Builtin.Atom do
   defstruct []
+
   @moduledoc """
   Checks whether the value is any atom.
 
@@ -16,6 +17,7 @@ defmodule TypeCheck.Builtin.Atom do
         case unquote(param) do
           x when is_atom(x) ->
             {:ok, []}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end

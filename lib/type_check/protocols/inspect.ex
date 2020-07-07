@@ -26,18 +26,18 @@ structs = [
   TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
-  TypeCheck.Builtin.Tuple,
+  TypeCheck.Builtin.Tuple
 ]
 
 for struct <- structs do
-    defimpl Inspect, for: struct do
-      def inspect(val, opts) do
-        "#TypeCheck.Type<"
-        |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(val, opts))
-        |> Inspect.Algebra.glue(">")
-        |> Inspect.Algebra.group
-      end
+  defimpl Inspect, for: struct do
+    def inspect(val, opts) do
+      "#TypeCheck.Type<"
+      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(val, opts))
+      |> Inspect.Algebra.glue(">")
+      |> Inspect.Algebra.group()
     end
+  end
 end
 
 defimpl TypeCheck.Protocols.Inspect, for: Any do
@@ -55,6 +55,6 @@ defmodule TypeCheck.Inspect do
 
   def inspect_binary(type, opts \\ %Inspect.Opts{}) do
     TypeCheck.Inspect.inspect(type, opts)
-    |> IO.iodata_to_binary
+    |> IO.iodata_to_binary()
   end
 end

@@ -11,17 +11,18 @@ defmodule TypeCheck.Builtin.FixedMap do
 
   use TypeCheck
   type t :: %__MODULE__{keypairs: list({any(), any()})}
-  type problem_tuple :: (
-    {t(), :not_a_map, %{}, any()}
-    | {t(), :missing_keys, %{keys: list(atom())}, map()}
-    | {t(), :value_error, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
-  )
 
+  type problem_tuple ::
+         {t(), :not_a_map, %{}, any()}
+         | {t(), :missing_keys, %{keys: list(atom())}, map()}
+         | {t(), :value_error,
+            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
-    def to_check(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param) when keypairs == [] do
-        map_check(param, s)
+    def to_check(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param)
+        when keypairs == [] do
+      map_check(param, s)
     end
 
     def to_check(s, param) do
@@ -49,13 +50,18 @@ defmodule TypeCheck.Builtin.FixedMap do
       required_keys =
         s.keypairs
         |> Enum.into(%{})
-        |> Map.keys
+        |> Map.keys()
+
       quote location: :keep do
-        actual_keys = unquote(param) |> Map.keys
+        actual_keys = unquote(param) |> Map.keys()
+
         case unquote(required_keys) -- actual_keys do
-          [] -> {:ok, []}
+          [] ->
+            {:ok, []}
+
           missing_keys ->
-            {:error, {unquote(Macro.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
+            {:error,
+             {unquote(Macro.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
         end
       end
     end
@@ -64,37 +70,55 @@ defmodule TypeCheck.Builtin.FixedMap do
       keypair_checks =
         keypairs
         |> Enum.flat_map(fn {key, value_type} ->
-        value_check = TypeCheck.Protocols.ToCheck.to_check(value_type, quote do Map.fetch!(unquote(param), unquote(key)) end)
-        quote location: :keep do
-          [
-            {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
-           bindings = value_bindings ++ bindings,
-          ]
-        end
-      end)
+          value_check =
+            TypeCheck.Protocols.ToCheck.to_check(
+              value_type,
+              quote do
+                Map.fetch!(unquote(param), unquote(key))
+              end
+            )
 
-        quote location: :keep do
-          bindings = []
-          with unquote_splicing(keypair_checks) do
-            {:ok, bindings}
-          else
-            {{:error, error}, key} ->
-              {:error, {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+          quote location: :keep do
+            [
+              {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
+              bindings = value_bindings ++ bindings
+            ]
           end
+        end)
+
+      quote location: :keep do
+        bindings = []
+
+        with unquote_splicing(keypair_checks) do
+          {:ok, bindings}
+        else
+          {{:error, error}, key} ->
+            {:error,
+             {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
         end
+      end
     end
   end
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       map = Enum.into(s.keypairs, %{})
+
       case Map.get(map, :__struct__) do
         %TypeCheck.Builtin.Literal{value: value} ->
           # Make sure we render structs as structs
           map = Map.put(map, :__struct__, value)
-          Elixir.Inspect.inspect(map, %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+
+          Elixir.Inspect.inspect(map, %Inspect.Opts{
+            opts
+            | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2
+          })
+
         _ ->
-          Elixir.Inspect.inspect(map, %Inspect.Opts{opts | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2})
+          Elixir.Inspect.inspect(map, %Inspect.Opts{
+            opts
+            | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2
+          })
       end
     end
   end
