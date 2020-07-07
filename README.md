@@ -174,3 +174,7 @@ The documentation can be found at [https://hexdocs.pm/type_check](https://hexdoc
 
 TypeCheck exports a couple of macros that you might want to use without parentheses. To make `mix format` respect this setting, add `import_deps: [:type_check]` to your `.formatter.exs` file.
 
+
+## Is it any good?
+
+[yes](https://news.ycombinator.com/item?id=3067434)
