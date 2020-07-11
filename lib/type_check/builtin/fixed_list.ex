@@ -23,7 +23,7 @@ defmodule TypeCheck.Builtin.FixedList do
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       expected_length = length(s.element_types)
-      element_checks_ast = build_element_checks_ast(s.element_types, param, s)
+      element_checks_ast = build_element_checks_ast(s, param, s)
 
       quote do
         case unquote(param) do
@@ -41,43 +41,78 @@ defmodule TypeCheck.Builtin.FixedList do
       end
     end
 
-    def simple?(_) do
-      false
+    def simple?(s) do
+      Enum.all?(s.element_types, fn v -> TypeCheck.Protocols.ToCheck.simple?(v) end)
     end
 
-    def build_element_checks_ast(element_types, param, s) do
-      element_checks =
-        element_types
-        |> Enum.with_index()
-        |> Enum.flat_map(fn {element_type, index} ->
-          impl =
-            TypeCheck.Protocols.ToCheck.to_check(
-              element_type,
-              quote do
-                hd(var!(rest, unquote(__MODULE__)))
+    def build_element_checks_ast(s,  param, s) do
+      element_types = s.element_types
+
+      if simple?(s) do
+        element_checks =
+          element_types
+          |> Enum.with_index()
+          |> Enum.flat_map(fn {element_type, index} ->
+              impl =
+                TypeCheck.Protocols.ToCheck.to_check(
+                  element_type,
+                  quote do
+                    hd(var!(rest, unquote(__MODULE__)))
+                  end
+                )
+
+              quote location: :keep do
+                [
+                  {:ok, index, var!(rest, unquote(__MODULE__))} <-
+                  {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))}
+                ]
               end
-            )
+            end)
 
           quote location: :keep do
-            [
-              {{:ok, element_bindings}, index, var!(rest, unquote(__MODULE__))} <-
-                {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))},
-              bindings = element_bindings ++ bindings
-            ]
+            with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do
+              :ok
+            else
+              {{:error, error}, index, _rest} ->
+                {:error,
+                 {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+                  unquote(param)}}
+            end
           end
-        end)
+      else
+        element_checks =
+          element_types
+          |> Enum.with_index()
+          |> Enum.flat_map(fn {element_type, index} ->
+              impl =
+                TypeCheck.Protocols.ToCheck.to_check(
+                  element_type,
+                  quote do
+                    hd(var!(rest, unquote(__MODULE__)))
+                  end
+                )
 
-      quote location: :keep do
-        bindings = []
+              quote location: :keep do
+                [
+                  {{:ok, element_bindings}, index, var!(rest, unquote(__MODULE__))} <-
+                  {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))},
+                  bindings = element_bindings ++ bindings
+                ]
+              end
+            end)
 
-        with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do
-          {:ok, bindings}
-        else
-          {{:error, error}, index, _rest} ->
-            {:error,
-             {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
-              unquote(param)}}
-        end
+          quote location: :keep do
+            bindings = []
+
+            with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do
+              {:ok, bindings}
+            else
+              {{:error, error}, index, _rest} ->
+                {:error,
+                 {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+                  unquote(param)}}
+            end
+          end
       end
     end
   end

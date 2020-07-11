@@ -21,16 +21,26 @@ defmodule TypeCheck.Builtin.FixedMap do
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
     def to_check(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param)
-        when keypairs == [] do
+    when keypairs == [] do
       map_check(param, s)
     end
 
     def to_check(s, param) do
-      quote location: :keep do
-        with :ok <- unquote(map_check(param, s)),
-             :ok <- unquote(build_keys_presence_ast(s, param)),
-             {:ok, bindings} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
-          {:ok, bindings}
+      if simple?(s) do
+        quote location: :keep do
+          with :ok <- unquote(map_check(param, s)),
+               :ok <- unquote(build_keys_presence_ast(s, param)),
+               :ok <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+            :ok
+          end
+        end
+      else
+        quote location: :keep do
+          with :ok <- unquote(map_check(param, s)),
+               :ok <- unquote(build_keys_presence_ast(s, param)),
+               {:ok, bindings} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+            {:ok, bindings}
+          end
         end
       end
     end

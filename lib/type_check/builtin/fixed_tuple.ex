@@ -12,9 +12,9 @@ defmodule TypeCheck.Builtin.FixedTuple do
             tuple()}
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(s = %{element_types: types_list}, param) do
-      element_checks_ast = build_element_checks_ast(types_list, param, s)
-      expected_size = length(types_list)
+    def to_check(s, param) do
+      element_checks_ast = build_element_checks_ast(s, param, s)
+      expected_size = length(s.element_types)
 
       quote do
         case unquote(param) do
@@ -32,15 +32,17 @@ defmodule TypeCheck.Builtin.FixedTuple do
       end
     end
 
-    def simple?(_) do
-      false
+    def simple?(s) do
+      Enum.all?(s.element_types, fn v -> TypeCheck.Protocols.ToCheck.simple?(v) end)
     end
 
-    defp build_element_checks_ast(types_list, param, s) do
-      element_checks =
-        types_list
-        |> Enum.with_index()
-        |> Enum.flat_map(fn {element_type, index} ->
+    defp build_element_checks_ast(s, param, s) do
+      types_list = s.element_types
+      if simple?(s) do
+        element_checks =
+          types_list
+          |> Enum.with_index()
+          |> Enum.flat_map(fn {element_type, index} ->
           impl =
             TypeCheck.Protocols.ToCheck.to_check(
               element_type,
@@ -51,22 +53,53 @@ defmodule TypeCheck.Builtin.FixedTuple do
 
           quote location: :keep do
             [
-              {{:ok, element_bindings}, _index} <- {unquote(impl), unquote(index)},
-              bindings = element_bindings ++ bindings
+              {:ok, _index} <- {unquote(impl), unquote(index)}
             ]
           end
         end)
 
-      quote location: :keep do
-        bindings = []
+          quote location: :keep do
+            with unquote_splicing(element_checks) do
+              :ok
+            else
+              {{:error, error}, index} ->
+                {:error,
+                 {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+                  unquote(param)}}
+            end
+          end
+      else
+        element_checks =
+          types_list
+          |> Enum.with_index()
+          |> Enum.flat_map(fn {element_type, index} ->
+            impl =
+              TypeCheck.Protocols.ToCheck.to_check(
+                element_type,
+                quote do
+                  elem(unquote(param), unquote(index))
+                end
+              )
 
-        with unquote_splicing(element_checks) do
-          {:ok, bindings}
-        else
-          {{:error, error}, index} ->
-            {:error,
-             {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
-              unquote(param)}}
+            quote location: :keep do
+              [
+                {{:ok, element_bindings}, _index} <- {unquote(impl), unquote(index)},
+                bindings = element_bindings ++ bindings
+              ]
+            end
+          end)
+
+        quote location: :keep do
+          bindings = []
+
+          with unquote_splicing(element_checks) do
+            {:ok, bindings}
+          else
+            {{:error, error}, index} ->
+              {:error,
+              {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+                unquote(param)}}
+          end
         end
       end
     end
