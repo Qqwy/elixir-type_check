@@ -50,6 +50,7 @@ defmodule TypeCheck.MixProject do
       {:stream_data, "~> 0.5.0", optional: true},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:benchee, "~> 1.0", only: :dev},
     ]
   end
 

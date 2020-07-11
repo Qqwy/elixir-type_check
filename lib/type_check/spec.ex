@@ -26,6 +26,23 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
+  def create_spec_def(name, arity, params_ast, return_type_ast) do
+    spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
+
+    quote location: :keep do
+      @doc false
+      def unquote(spec_fun_name)() do
+        # import TypeCheck.Builtin
+        %TypeCheck.Spec{
+          name: unquote(name),
+          param_types: unquote(params_ast),
+          return_type: unquote(return_type_ast)
+        }
+      end
+    end
+  end
+
+  @doc false
   def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
     quote line: line do
       defoverridable([{unquote(name), unquote(arity)}])

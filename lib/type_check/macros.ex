@@ -18,7 +18,8 @@ defmodule TypeCheck.Macros do
   """
   defmacro __using__(_options) do
     quote location: :keep do
-      import TypeCheck.Macros
+      import TypeCheck.Macros, only: [type: 1, typep: 1, opaque: 1, spec: 1]
+      @compile {:inline_size, 1080}
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
@@ -47,13 +48,22 @@ defmodule TypeCheck.Macros do
     # And now, define all specs:
     definitions = Module.definitions_in(env.module)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
+    spec_defs = create_spec_defs(specs, definitions, env)
     spec_quotes = wrap_functions_with_specs(specs, definitions, env)
 
     # And now for the tricky bit ;-)
     quote do
+      unquote(spec_defs)
+
       import unquote(compile_time_imports_module_name)
 
       unquote(spec_quotes)
+    end
+  end
+
+  defp create_spec_defs(specs, definitions, caller) do
+    for {name, line, arity, _clean_params, params_ast, return_type_ast} <- specs do
+      TypeCheck.Spec.create_spec_def(name, arity, params_ast, return_type_ast)
     end
   end
 
@@ -377,14 +387,30 @@ defmodule TypeCheck.Macros do
          unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))}
       )
 
-      def unquote(spec_fun_name)() do
-        # import TypeCheck.Builtin
-        %TypeCheck.Spec{
-          name: unquote(name),
-          param_types: unquote(params_ast),
-          return_type: unquote(return_type_ast)
-        }
-      end
+      # def unquote(spec_fun_name)() do
+      #   # import TypeCheck.Builtin
+      #   %TypeCheck.Spec{
+      #     name: unquote(name),
+      #     param_types: unquote(params_ast),
+      #     return_type: unquote(return_type_ast)
+      #   }
+      # end
     end
+  end
+
+  import Kernel, except: [@: 1]
+  defmacro @ast do
+    IO.inspect(ast)
+    case ast do
+      {name, _, expr} when name in ~w[type typep opaque spec]a ->
+        # apply(TypeCheck.Macros, name, expr)
+        quote do
+          TypeCheck.Macros.unquote(name)(unquote_splicing(expr))
+        end
+      _ ->
+        quote do
+          Kernel.@(unquote(ast))
+        end
+      end
   end
 end
