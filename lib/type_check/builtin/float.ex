@@ -17,6 +17,10 @@ defmodule TypeCheck.Builtin.Float do
         end
       end
     end
+
+    def simple?(_) do
+      true
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

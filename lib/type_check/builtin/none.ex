@@ -23,6 +23,10 @@ defmodule TypeCheck.Builtin.None do
         {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
       end
     end
+
+    def simple?(_) do
+      false
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

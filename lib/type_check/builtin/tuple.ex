@@ -23,6 +23,10 @@ defmodule TypeCheck.Builtin.Tuple do
         end
       end
     end
+
+    def simple?(_) do
+      false
+    end
   end
 
   def error_response_type() do

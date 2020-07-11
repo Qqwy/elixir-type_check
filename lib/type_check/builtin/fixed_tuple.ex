@@ -32,6 +32,10 @@ defmodule TypeCheck.Builtin.FixedTuple do
       end
     end
 
+    def simple?(_) do
+      false
+    end
+
     defp build_element_checks_ast(types_list, param, s) do
       element_checks =
         types_list

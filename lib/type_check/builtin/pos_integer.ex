@@ -17,6 +17,10 @@ defmodule TypeCheck.Builtin.PosInteger do
         end
       end
     end
+
+    def simple?(_) do
+      false
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

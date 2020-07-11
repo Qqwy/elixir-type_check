@@ -25,6 +25,10 @@ defmodule TypeCheck.Builtin.List do
       end
     end
 
+    def simple?(_) do
+      false
+    end
+
     defp build_element_check(%TypeCheck.Builtin.Any{}, _param, _s) do
       quote location: :keep do
         {:ok, []}

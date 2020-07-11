@@ -24,6 +24,10 @@ defmodule TypeCheck.Builtin.Map do
       end
     end
 
+    def simple?(_) do
+      false
+    end
+
     defp build_keypairs_check(%TypeCheck.Builtin.Any{}, %TypeCheck.Builtin.Any{}, _param, _s) do
       {:ok, []}
     end

@@ -41,6 +41,10 @@ defmodule TypeCheck.Builtin.FixedList do
       end
     end
 
+    def simple?(_) do
+      false
+    end
+
     def build_element_checks_ast(element_types, param, s) do
       element_checks =
         element_types

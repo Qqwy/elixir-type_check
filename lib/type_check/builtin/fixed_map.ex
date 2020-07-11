@@ -35,6 +35,10 @@ defmodule TypeCheck.Builtin.FixedMap do
       end
     end
 
+    def simple?(_) do
+      false
+    end
+
     defp map_check(param, s) do
       quote location: :keep do
         if is_map(unquote(param)) do

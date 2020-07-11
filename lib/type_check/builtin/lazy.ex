@@ -20,6 +20,10 @@ defmodule TypeCheck.Builtin.Lazy do
         res
       end
     end
+
+    def simple?(_) do
+      false
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

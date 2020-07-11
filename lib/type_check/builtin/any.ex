@@ -10,6 +10,10 @@ defmodule TypeCheck.Builtin.Any do
         {:ok, []}
       end
     end
+
+    def simple?(_) do
+      false
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do
