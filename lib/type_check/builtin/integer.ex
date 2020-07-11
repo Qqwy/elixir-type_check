@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.Integer do
       quote do
         case unquote(param) do
           x when is_integer(x) ->
-            {:ok, []}
+            :ok
 
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
@@ -19,7 +19,7 @@ defmodule TypeCheck.Builtin.Integer do
     end
 
     def simple?(_) do
-      false
+      true
     end
   end
 

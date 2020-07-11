@@ -27,22 +27,22 @@ defmodule TypeCheck.Builtin.FixedMap do
 
     def to_check(s, param) do
       quote location: :keep do
-        with {:ok, []} <- unquote(map_check(param, s)),
-             {:ok, []} <- unquote(build_keys_presence_ast(s, param)),
-             {:ok, bindings3} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
-          {:ok, bindings3}
+        with :ok <- unquote(map_check(param, s)),
+             :ok <- unquote(build_keys_presence_ast(s, param)),
+             {:ok, bindings} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+          {:ok, bindings}
         end
       end
     end
 
-    def simple?(_) do
-      false
+    def simple?(s) do
+      Enum.all?(s.keypairs, fn {_k, v} -> TypeCheck.Protocols.ToCheck.simple?(v) end)
     end
 
     defp map_check(param, s) do
       quote location: :keep do
         if is_map(unquote(param)) do
-          {:ok, []}
+          :ok
         else
           {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, unquote(param)}}
         end
@@ -61,7 +61,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
         case unquote(required_keys) -- actual_keys do
           [] ->
-            {:ok, []}
+            :ok
 
           missing_keys ->
             {:error,
@@ -71,9 +71,10 @@ defmodule TypeCheck.Builtin.FixedMap do
     end
 
     defp build_keypairs_checks_ast(keypairs, param, s) do
-      keypair_checks =
-        keypairs
-        |> Enum.flat_map(fn {key, value_type} ->
+      if simple?(s) do
+        keypair_checks =
+          keypairs
+          |> Enum.flat_map(fn {key, value_type} ->
           value_check =
             TypeCheck.Protocols.ToCheck.to_check(
               value_type,
@@ -84,21 +85,50 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           quote location: :keep do
             [
-              {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
-              bindings = value_bindings ++ bindings
+              {:ok, _key} <- {unquote(value_check), unquote(key)}
             ]
           end
         end)
 
-      quote location: :keep do
-        bindings = []
+          quote location: :keep do
+            with unquote_splicing(keypair_checks) do
+              :ok
+            else
+              {{:error, error}, key} ->
+                {:error,
+                 {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+            end
+          end
+      else
+        keypair_checks =
+          keypairs
+          |> Enum.flat_map(fn {key, value_type} ->
+            value_check =
+              TypeCheck.Protocols.ToCheck.to_check(
+                value_type,
+                quote do
+                  Map.fetch!(unquote(param), unquote(key))
+                end
+              )
 
-        with unquote_splicing(keypair_checks) do
-          {:ok, bindings}
-        else
-          {{:error, error}, key} ->
-            {:error,
-             {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+            quote location: :keep do
+              [
+                {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
+                bindings = value_bindings ++ bindings
+              ]
+            end
+          end)
+
+        quote location: :keep do
+          bindings = []
+
+          with unquote_splicing(keypair_checks) do
+            {:ok, bindings}
+          else
+            {{:error, error}, key} ->
+              {:error,
+              {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+          end
         end
       end
     end

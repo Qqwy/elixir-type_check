@@ -25,13 +25,13 @@ defmodule TypeCheck.Builtin.List do
       end
     end
 
-    def simple?(_) do
-      false
+    def simple?(s) do
+      TypeCheck.Protocols.ToCheck.simple?(s.element_type)
     end
 
     defp build_element_check(%TypeCheck.Builtin.Any{}, _param, _s) do
       quote location: :keep do
-        {:ok, []}
+        :ok
       end
     end
 
@@ -39,27 +39,53 @@ defmodule TypeCheck.Builtin.List do
       element_check =
         TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
 
-      quote do
-        orig_param = unquote(param)
+      if TypeCheck.Protocols.ToCheck.simple?(element_type) do
+        quote do
+          orig_param = unquote(param)
 
-        orig_param
-        |> Enum.with_index()
-        |> Enum.reduce_while({:ok, []}, fn {input, index}, {:ok, bindings} ->
-          var!(single_param, unquote(__MODULE__)) = input
+          orig_param
+          |> Enum.with_index()
+          |> Enum.reduce_while(:ok, fn {input, index}, _ ->
+            var!(single_param, unquote(__MODULE__)) = input
 
-          case unquote(element_check) do
-            {:ok, element_bindings} ->
-              {:cont, {:ok, element_bindings ++ bindings}}
+            case unquote(element_check) do
+              :ok ->
+                {:cont, :ok}
 
-            {:error, problem} ->
-              problem =
-                {:error,
-                 {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
-                  orig_param}}
+              {:error, problem} ->
+                problem =
+                  {:error,
+                   {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                    orig_param}}
 
-              {:halt, problem}
-          end
-        end)
+                {:halt, problem}
+            end
+          end)
+        end
+
+      else
+        quote do
+          orig_param = unquote(param)
+
+          orig_param
+          |> Enum.with_index()
+          |> Enum.reduce_while({:ok, []}, fn {input, index}, {:ok, bindings} ->
+            var!(single_param, unquote(__MODULE__)) = input
+
+            case unquote(element_check) do
+              {:ok, element_bindings} ->
+                {:cont, {:ok, element_bindings ++ bindings}}
+
+              {:error, problem} ->
+                problem =
+                  {:error,
+                   {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                    orig_param}}
+
+                {:halt, problem}
+            end
+          end)
+        end
       end
     end
   end

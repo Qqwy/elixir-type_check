@@ -16,7 +16,7 @@ defmodule TypeCheck.Builtin.Atom do
       quote do
         case unquote(param) do
           x when is_atom(x) ->
-            {:ok, []}
+            :ok
 
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
@@ -25,7 +25,7 @@ defmodule TypeCheck.Builtin.Atom do
     end
 
     def simple?(_) do
-      false
+      true
     end
   end
 

@@ -74,9 +74,16 @@ defmodule TypeCheck.Spec do
   defp param_check_code(param_type, clean_param, index, _caller) do
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
 
-    quote do
-      {{:ok, _bindings}, _index, _param_type} <-
+    if TypeCheck.Protocols.ToCheck.simple?(param_type) do
+      quote do
+        {:ok, _index, _param_type} <-
         {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
+      end
+    else
+      quote do
+        {{:ok, _bindings}, _index, _param_type} <-
+        {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
+      end
     end
   end
 
@@ -86,6 +93,8 @@ defmodule TypeCheck.Spec do
 
     quote do
       case unquote(return_code_check) do
+        :ok ->
+          nil
         {:ok, _bindings} ->
           nil
 
