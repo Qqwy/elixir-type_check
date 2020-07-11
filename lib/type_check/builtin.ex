@@ -262,6 +262,36 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  A list of pairs with atoms as 'keys' and anything allowed as as 'values'.
+
+  Shorthand for `list({atom(), any()})`
+
+      iex> x = [a: 1, b: 2]
+      iex> TypeCheck.conforms!(x, keyword())
+      [a: 1, b: 2]
+
+      iex> y = [a: 1, b: 2, 3]
+      iex> TypeCheck.conforms!(y, keyword())
+      ** (TypeCheck.TypeError) `[1, 2, 3.3]` does not check against `list({atom(), any()})`. Reason:
+        at index 2:
+          `3` is not a tuple.
+  """
+  def keyword() do
+    list(fixed_tuple([atom(), any()]))
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  A list of pairs with atoms as 'keys' and t's as 'values'.
+
+  Shorthand for `list({atom(), t})`
+  """
+  def keyword(t) do
+    list(fixed_tuple([atom(), t]))
+  end
+
+  @doc typekind: :builtin
+  @doc """
   A module-function-arity tuple
 
   - Module is a `module/0`
