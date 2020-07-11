@@ -278,7 +278,7 @@ defmodule TypeCheck.Builtin do
             `3` is not a tuple.
   """
   def keyword() do
-    list(fixed_tuple([atom(), any()]))
+    keyword(any())
   end
 
   @doc typekind: :builtin
