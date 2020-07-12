@@ -136,11 +136,21 @@ defmodule TypeCheck do
   defmacro conforms(value, type) do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+    simple? = TypeCheck.Protocols.ToCheck.simple?(type)
 
-    quote do
-      case unquote(check) do
-        {:ok, bindings} -> {:ok, unquote(value)}
-        {:error, problem} -> {:error, TypeCheck.TypeError.exception(problem)}
+    if simple? do
+      quote do
+        case unquote(check) do
+          :ok -> {:ok, unquote(value)}
+          {:error, problem} -> {:error, TypeCheck.TypeError.exception(problem)}
+        end
+      end
+    else
+      quote do
+        case unquote(check) do
+          {:ok, bindings} -> {:ok, unquote(value)}
+          {:error, problem} -> {:error, TypeCheck.TypeError.exception(problem)}
+        end
       end
     end
   end
@@ -154,9 +164,16 @@ defmodule TypeCheck do
   defmacro conforms?(value, type) do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+    simple? = TypeCheck.Protocols.ToCheck.simple?(type)
 
-    quote do
-      match?({:ok, _}, unquote(check))
+    if simple? do
+      quote do
+        match?(:ok, unquote(check))
+      end
+    else
+      quote do
+        match?({:ok, _}, unquote(check))
+      end
     end
   end
 
@@ -169,11 +186,21 @@ defmodule TypeCheck do
   defmacro conforms!(value, type) do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+    simple? = TypeCheck.Protocols.ToCheck.simple?(type)
 
-    quote do
-      case unquote(check) do
-        {:ok, _bindings} -> unquote(value)
-        {:error, other} -> raise TypeCheck.TypeError, other
+    if simple? do
+      quote do
+        case unquote(check) do
+          :ok -> unquote(value)
+          {:error, other} -> raise TypeCheck.TypeError, other
+        end
+      end
+    else
+      quote do
+        case unquote(check) do
+          {:ok, _bindings} -> unquote(value)
+          {:error, other} -> raise TypeCheck.TypeError, other
+        end
       end
     end
   end
@@ -199,6 +226,7 @@ defmodule TypeCheck do
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
 
     case Code.eval_quoted(check_code, value: value) do
+      {:ok, _} -> {:ok, value}
       {{:ok, _}, _} -> {:ok, value}
       {{:error, problem}, _} -> {:error, TypeCheck.TypeError.exception(problem)}
     end
