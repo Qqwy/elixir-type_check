@@ -53,11 +53,6 @@ defmodule TypeCheck.Type.StreamData do
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       TypeCheck.Protocols.Inspect.inspect(s.type, opts)
-      # "TypeCheck.Type.StreamData.wrap_with_gen("
-      # |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(s.type, opts))
-      # |> Inspect.Algebra.glue(",")
-      # |> Inspect.Algebra.glue(Inspect.inspect(s.generator_function, opts))
-      # |> Inspect.Algebra.glue(")")
     end
   end
 
