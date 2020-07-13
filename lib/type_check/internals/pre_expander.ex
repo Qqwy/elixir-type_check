@@ -15,6 +15,10 @@ defmodule TypeCheck.Internals.PreExpander do
         # like ranges
         ast
 
+      ast = {:&, _, _args} ->
+        # Do not expand inside captures
+        ast
+
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->
         quote location: :keep do
           TypeCheck.Builtin.literal(unquote(x))

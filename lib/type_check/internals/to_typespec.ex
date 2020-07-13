@@ -1,6 +1,6 @@
 defmodule TypeCheck.Internals.ToTypespec do
   def full_rewrite(ast, env) do
-    Macro.prewalk(ast, &rewrite(&1, env))
+    Macro.postwalk(ast, &rewrite(&1, env))
   end
 
   # TODO incorporate %Macro.Env{}.functions
@@ -21,6 +21,11 @@ defmodule TypeCheck.Internals.ToTypespec do
       {:guarded_by, _, [type, _]} ->
         # Hide `when` that might contain code from the typespec
         type
+
+      {:wrap_with_gen, _, [type, _]} ->
+        # Hide generator wrapper
+        type
+        # full_rewrite(type, env)
 
       {:"::", _, [_name, type_ast]} ->
         # Hide inner named types from the typespec.
