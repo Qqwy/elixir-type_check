@@ -28,7 +28,7 @@ defmodule TypeCheck.Type.StreamData do
       iex> defmodule IntString do
       ...>   use TypeCheck
       ...>   import TypeCheck.Type.StreamData
-      ...>   type t() :: ((val :: binary()) when Integer.parse(val) != :error)
+      ...>   @type! t() :: ((val :: binary()) when Integer.parse(val) != :error)
       ...>                 |> wrap_with_gen(&IntString.gen/0)
       ...>
       ...>   def gen() do
