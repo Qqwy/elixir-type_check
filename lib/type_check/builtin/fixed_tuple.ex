@@ -2,9 +2,9 @@ defmodule TypeCheck.Builtin.FixedTuple do
   defstruct [:element_types]
 
   use TypeCheck
-  type t :: %__MODULE__{element_types: list()}
+  @type! t :: %__MODULE__{element_types: list()}
 
-  type problem_tuple ::
+  @type! problem_tuple ::
          {t(), :not_a_tuple, %{}, any()}
          | {t(), :different_size, %{expected_size: integer()}, tuple()}
          | {t(), :element_error,
