@@ -24,13 +24,13 @@ defmodule User do
   use TypeCheck
   defstruct [:name, :age]
 
-  type t :: %User{name: binary, age: integer}
+  @type! t :: %User{name: binary, age: integer}
 end
 
 defmodule AgeCheck do
   use TypeCheck
 
-  spec user_older_than?(User.t, integer) :: boolean
+  @spec! user_older_than?(User.t, integer) :: boolean
   def user_older_than?(user, age) do
     user.age >= age
   end
@@ -89,7 +89,7 @@ And if we were to introduce an error in the function definition:
 defmodule AgeCheck do
   use TypeCheck
 
-  spec user_older_than?(User.t, integer) :: boolean
+  @spec! user_older_than?(User.t, integer) :: boolean
   def user_older_than?(user, age) do
     user.age
   end
@@ -137,7 +137,7 @@ boolean()`. Reason:
 - [x] Make sure to handle recursive (and mutually recursive) types without hanging.
   - [x] A compile-error is raised when a type is expanded more than a million times
   - [x] A macro called `lazy` is introduced to allow to defer type expansion to runtime (to _within_ the check).
-
+- [x] the Elixir formatter likes the way types+specs are constructed
 
 ### Pre-stable
 

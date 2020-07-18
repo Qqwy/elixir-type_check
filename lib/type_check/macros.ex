@@ -1,12 +1,20 @@
 defmodule TypeCheck.Macros do
   @moduledoc """
-  Contains the `spec`, `type`, `typep`, `opaque` macros to define runtime-checked function- and type-specifications.
+  Contains the `@spec!`, `@type!`, `@typep!`, `@opaque!` macros to define runtime-checked function- and type-specifications.
 
   ## Usage
 
   This module is included by calling `use TypeCheck`.
   This will set up the module to use the special macros.
 
+  Usually you'll want to use the module attribute-style of the macros, like
+  `@spec!` and `@type!`.
+  Using these forms has two advantages over using the direct calls:
+
+  1. Syntax highlighting will highlight the types correctly
+  and the Elixir formatter will not mess with the way you write your type.
+  2. It is clear to people who have not heard of `TypeCheck` before that `@type!` and `@spec!`
+  will work similarly to resp. `@type` and `@spec`.
 
   ### Avoiding naming conflicts with TypeCheck.Builtin
 
@@ -15,6 +23,13 @@ defmodule TypeCheck.Macros do
   you should hide those particular functions from TypeCheck.Builtin by adding
   `import TypeCheck.Builtin, except: [...]`
   below `use TypeCheck` manually.
+
+  ### Calling the explicit implementations
+
+  In case you are working in an environment where the `@/1` is already overridden
+  by another library, you can still use this library,
+  by simply adding `import TypeCheck.Macros, except: [@: 1]` to your module
+  and calling the direct versions of the macros instead.
   """
   defmacro __using__(_options) do
     quote location: :keep do
@@ -101,6 +116,8 @@ defmodule TypeCheck.Macros do
   @doc """
   Define a public type specification.
 
+  Usually invoked as `@type!`
+
   This behaves similarly to Elixir's builtin `@type` attribute,
   and will create a type whose name and definition are public.
 
@@ -123,13 +140,13 @@ defmodule TypeCheck.Macros do
   The syntax is essentially the same as for the built-in `@type` attribute:
 
   ```elixir
-  type type_name :: type_description
+  @type! type_name :: type_description
   ```
 
   It is possible to create parameterized types as well:
 
   ```
-  type dict(key, value) :: [{key, value}]
+  @type! dict(key, value) :: [{key, value}]
   ```
 
   ### Named types
@@ -137,7 +154,7 @@ defmodule TypeCheck.Macros do
   You can also introduce named types:
 
   ```
-  type color :: {red :: integer, green :: integer, blue :: integer}
+  @type! color :: {red :: integer, green :: integer, blue :: integer}
   ```
   Not only is this nice to document that the same type
   is being used for different purposes,
@@ -145,7 +162,7 @@ defmodule TypeCheck.Macros do
   to your type specifications:
 
   ```
-  type sorted_pair(a, b) :: {first :: a, second :: b} when first <= second
+  @type! sorted_pair(a, b) :: {first :: a, second :: b} when first <= second
   ```
 
   """
@@ -155,6 +172,9 @@ defmodule TypeCheck.Macros do
 
   @doc """
   Define a private type specification.
+
+
+  Usually invoked as `@typep!`
 
   This behaves similarly to Elixir's builtin `@typep` attribute,
   and will create a type whose name and structure is private
@@ -170,7 +190,7 @@ defmodule TypeCheck.Macros do
       - `TypeCheck.conforms/2` and variants,
       - `TypeCheck.Type.build/1`
 
-  `typep/1` accepts the same typedef expression as `type/1`.
+  `typep!/1` accepts the same typedef expression as `type!/1`.
   """
   defmacro typep!(typedef) do
     define_type(typedef, :typep, __CALLER__)
@@ -179,6 +199,8 @@ defmodule TypeCheck.Macros do
   @doc """
   Define a opaque type specification.
 
+
+  Usually invoked as `@opaque!`
 
   This behaves similarly to Elixir's builtin `@opaque` attribute,
   and will create a type whose name is public
@@ -200,7 +222,7 @@ defmodule TypeCheck.Macros do
     - `TypeCheck.conforms/2` and variants,
     - `TypeCheck.Type.build/1`
 
-  `opaque/1` accepts the same typedef expression as `type/1`.
+  `opaque!/1` accepts the same typedef expression as `type!/1`.
   """
   defmacro opaque!(typedef) do
     define_type(typedef, :opaque, __CALLER__)
@@ -208,6 +230,9 @@ defmodule TypeCheck.Macros do
 
   @doc """
   Define a function specification.
+
+
+  Usually invoked as `@spec!`
 
   A function specification will wrap the function
   with checks that each of its parameters are of the types it expects.
@@ -218,13 +243,13 @@ defmodule TypeCheck.Macros do
   The syntax is essentially the same as for built-in `@spec` attributes:
 
   ```
-  spec function_name(type1, type2) :: return_type
+  @spec! function_name(type1, type2) :: return_type
   ```
 
   It is also allowed to introduce named types:
 
   ```
-  spec days_since_epoch(year :: integer, month :: integer, day :: integer) :: integer
+  @spec! days_since_epoch(year :: integer, month :: integer, day :: integer) :: integer
   ```
 
   Note that `TypeCheck` does _not_ allow the `when` keyword to be used

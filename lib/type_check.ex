@@ -18,15 +18,15 @@ defmodule TypeCheck do
       defmodule User do
         use TypeCheck
         defstruct [:name, :age]
-        type age :: non_neg_integer()
-        type t :: %User{name: binary(), age: age()}
+        @type! age :: non_neg_integer()
+        @type! t :: %User{name: binary(), age: age()}
 
-        spec new(binary(), age()) :: t()
+        @spec! new(binary(), age()) :: t()
         def new(name, age) do
           %User{name: name, age: age}
         end
 
-        spec old_enough?(t(), age()) :: boolean()
+        @spec! old_enough?(t(), age()) :: boolean()
         def old_enough?(user, limit) do
           user.age >= limit
         end
@@ -91,7 +91,7 @@ defmodule TypeCheck do
 
   ## Manual type-checking
 
-  If you want to check values against a type _outside_ of the checks the `spec` macro
+  If you want to check values against a type _outside_ of the checks the `@spec!` macro
   wraps a function with,
   you can use the `conforms/2`/`conforms?/2`/`conforms!/2` macros in this module directly in your code.
 
@@ -102,8 +102,6 @@ defmodule TypeCheck do
   `dynamic_conforms/2` and variants.
   Because these variants have to evaluate the type-checking code at runtime,
   these checks are not optimized by the compiler.
-
-
   """
 
   defmacro __using__(_options) do
