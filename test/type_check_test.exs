@@ -1,6 +1,6 @@
 defmodule TypeCheckTest.TypeGuardExample do
   use TypeCheck
-  type sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
+  @type! sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
 end
 
 defmodule TypeCheckTest do
