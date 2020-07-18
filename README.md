@@ -155,6 +155,13 @@ boolean()`. Reason:
   - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
+
+### Changelog
+
+- 0.2.0 Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead.
+- 0.1.1 Fixing some documentation typos
+- 0.1.0 Initial Release
+
 ## Installation
 
 TypeCheck [is available in Hex](https://hex.pm/docs/publish). The package can be installed
