@@ -19,6 +19,10 @@
 
 ## Usage Example
 
+We add `use TypeCheck` to a module 
+and wherever we want to add runtime type-checks 
+we replace the normal calls to `@type` and `@spec` with `@type!` and `@spec!` respectively.
+
 ```elixir
 defmodule User do
   use TypeCheck

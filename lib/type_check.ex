@@ -5,9 +5,15 @@ defmodule TypeCheck do
   Fast and flexible runtime type-checking.
 
   The main way to use TypeCheck is by adding `use TypeCheck` in your modules.
-  This will allow you to use the macros of `TypeCheck.Macros` in your module.
+  This will allow you to use the macros of `TypeCheck.Macros` in your module,
+  which are versions of the normal type-specification module attributes
+  with an extra explamation point at the end:  `@type!`, `@spec!`, `@typep!` and `@opaque!`.
+
+
   It will also bring all functions in `TypeCheck.Builtin` in scope,
-  which is usually what you want.
+  which is usually what you want as this allows you to
+  use all types and special syntax that are built-in to Elixir
+  in the TypeCheck specifications.
 
 
   Using these, you're able to add function-specifications to your functions
