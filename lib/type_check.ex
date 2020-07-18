@@ -5,9 +5,15 @@ defmodule TypeCheck do
   Fast and flexible runtime type-checking.
 
   The main way to use TypeCheck is by adding `use TypeCheck` in your modules.
-  This will allow you to use the macros of `TypeCheck.Macros` in your module.
+  This will allow you to use the macros of `TypeCheck.Macros` in your module,
+  which are versions of the normal type-specification module attributes
+  with an extra explamation point at the end:  `@type!`, `@spec!`, `@typep!` and `@opaque!`.
+
+
   It will also bring all functions in `TypeCheck.Builtin` in scope,
-  which is usually what you want.
+  which is usually what you want as this allows you to
+  use all types and special syntax that are built-in to Elixir
+  in the TypeCheck specifications.
 
 
   Using these, you're able to add function-specifications to your functions
@@ -18,15 +24,15 @@ defmodule TypeCheck do
       defmodule User do
         use TypeCheck
         defstruct [:name, :age]
-        type age :: non_neg_integer()
-        type t :: %User{name: binary(), age: age()}
+        @type! age :: non_neg_integer()
+        @type! t :: %User{name: binary(), age: age()}
 
-        spec new(binary(), age()) :: t()
+        @spec! new(binary(), age()) :: t()
         def new(name, age) do
           %User{name: name, age: age}
         end
 
-        spec old_enough?(t(), age()) :: boolean()
+        @spec! old_enough?(t(), age()) :: boolean()
         def old_enough?(user, limit) do
           user.age >= limit
         end
@@ -91,7 +97,7 @@ defmodule TypeCheck do
 
   ## Manual type-checking
 
-  If you want to check values against a type _outside_ of the checks the `spec` macro
+  If you want to check values against a type _outside_ of the checks the `@spec!` macro
   wraps a function with,
   you can use the `conforms/2`/`conforms?/2`/`conforms!/2` macros in this module directly in your code.
 
@@ -102,8 +108,6 @@ defmodule TypeCheck do
   `dynamic_conforms/2` and variants.
   Because these variants have to evaluate the type-checking code at runtime,
   these checks are not optimized by the compiler.
-
-
   """
 
   defmacro __using__(_options) do

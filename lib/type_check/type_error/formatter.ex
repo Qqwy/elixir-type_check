@@ -23,7 +23,7 @@ defmodule TypeCheck.TypeError.Formatter do
   # type problem_tuple :: {module, atom, map, any}
   use TypeCheck
 
-  type problem_tuple ::
+  @type! problem_tuple ::
          TypeCheck.Builtin.Any.problem_tuple()
          | TypeCheck.Builtin.Atom.problem_tuple()
          | TypeCheck.Builtin.Binary.problem_tuple()

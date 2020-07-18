@@ -10,7 +10,7 @@ defmodule TypeCheck.MacrosTest do
     defmodule BasicTypeDefinition do
       use TypeCheck
 
-      type mylist :: list(integer())
+      @type! mylist :: list(integer())
     end
 
     test "is exported as function" do
