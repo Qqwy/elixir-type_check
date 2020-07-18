@@ -163,6 +163,7 @@ boolean()`. Reason:
 ### Changelog
 
 - 0.2.0 Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead.
+- 0.1.2 Added missing `keyword` type to TypeCheck.Builtin (#20)
 - 0.1.1 Fixing some documentation typos
 - 0.1.0 Initial Release
 
