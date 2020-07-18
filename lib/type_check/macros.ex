@@ -62,8 +62,8 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp create_spec_defs(specs, definitions, caller) do
-    for {name, line, arity, _clean_params, params_ast, return_type_ast} <- specs do
+  defp create_spec_defs(specs, _definitions, _caller) do
+    for {name, _line, arity, _clean_params, params_ast, return_type_ast} <- specs do
       TypeCheck.Spec.create_spec_def(name, arity, params_ast, return_type_ast)
     end
   end
@@ -378,8 +378,6 @@ defmodule TypeCheck.Macros do
 
     clean_params = Macro.generate_arguments(arity, caller.module)
 
-    spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
-
     quote location: :keep do
       Module.put_attribute(
         __MODULE__,
@@ -387,21 +385,11 @@ defmodule TypeCheck.Macros do
         {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)),
          unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))}
       )
-
-      # def unquote(spec_fun_name)() do
-      #   # import TypeCheck.Builtin
-      #   %TypeCheck.Spec{
-      #     name: unquote(name),
-      #     param_types: unquote(params_ast),
-      #     return_type: unquote(return_type_ast)
-      #   }
-      # end
     end
   end
 
   import Kernel, except: [@: 1]
   defmacro @ast do
-    IO.inspect(ast)
     case ast do
       {name, _, expr} when name in ~w[type! typep! opaque! spec!]a ->
         quote do
