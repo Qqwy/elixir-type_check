@@ -1,4 +1,6 @@
 %{
+  "benchee": {:hex, :benchee, "1.0.1", "66b211f9bfd84bd97e6d1beaddf8fc2312aaabe192f776e8931cb0c16f53a521", [:mix], [{:deep_merge, "~> 1.0", [hex: :deep_merge, repo: "hexpm", optional: false]}], "hexpm", "3ad58ae787e9c7c94dd7ceda3b587ec2c64604563e049b2a0e8baafae832addb"},
+  "deep_merge": {:hex, :deep_merge, "1.0.0", "b4aa1a0d1acac393bdf38b2291af38cb1d4a52806cf7a4906f718e1feb5ee961", [:mix], [], "hexpm", "ce708e5f094b9cd4e8f2be4f00d2f4250c4095be93f8cd6d018c753894885430"},
   "dialyxir": {:hex, :dialyxir, "1.0.0", "6a1fa629f7881a9f5aaf3a78f094b2a51a0357c843871b8bc98824e7342d00a5", [:mix], [{:erlex, ">= 0.2.6", [hex: :erlex, repo: "hexpm", optional: false]}], "hexpm", "aeb06588145fac14ca08d8061a142d52753dbc2cf7f0d00fc1013f53f8654654"},
   "earmark": {:hex, :earmark, "1.4.8", "a7d0b2a02d52ffd5ca73106f36cd7f7db333ded41c756f1f1407adadbeef9bb7", [:mix], [{:earmark_parser, ">= 1.4.9", [hex: :earmark_parser, repo: "hexpm", optional: false]}], "hexpm", "138d6a1de01e14e33c6762a245829d7d413d63b6d49d55c0232bbc6a561127ba"},
   "earmark_parser": {:hex, :earmark_parser, "1.4.9", "819bda2049e6ee1365424e4ced1ba65806eacf0d2867415f19f3f80047f8037b", [:mix], [], "hexpm", "8bf54fddabf2d7e137a0c22660e71b49d5a0a82d1fb05b5af62f2761cd6485c4"},

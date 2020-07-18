@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.1.2",
+      version: "0.2.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -50,6 +50,7 @@ defmodule TypeCheck.MixProject do
       {:stream_data, "~> 0.5.0", optional: true},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:benchee, "~> 1.0", only: :dev},
     ]
   end
 

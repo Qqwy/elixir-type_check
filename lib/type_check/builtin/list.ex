@@ -2,9 +2,9 @@ defmodule TypeCheck.Builtin.List do
   defstruct [:element_type]
 
   use TypeCheck
-  opaque t :: %__MODULE__{element_type: TypeCheck.Type.t()}
+  @opaque! t :: %__MODULE__{element_type: TypeCheck.Type.t()}
 
-  type problem_tuple ::
+  @type! problem_tuple ::
          {t(), :not_a_list, %{}, any()}
          | {t(), :element_error,
             %{

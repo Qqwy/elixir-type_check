@@ -8,8 +8,8 @@ defmodule TypeCheck.Builtin.Tuple do
   """
 
   use TypeCheck
-  type t :: %__MODULE__{}
-  type problem_tuple :: {t(), :no_match, map(), any()}
+  @type! t :: %__MODULE__{}
+  @type! problem_tuple :: {t(), :no_match, map(), any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
