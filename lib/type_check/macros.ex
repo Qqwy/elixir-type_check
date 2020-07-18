@@ -18,7 +18,8 @@ defmodule TypeCheck.Macros do
   """
   defmacro __using__(_options) do
     quote location: :keep do
-      import TypeCheck.Macros, only: [type: 1, typep: 1, opaque: 1, spec: 1]
+      import Kernel, except: [@: 1]
+      import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
       @compile {:inline_size, 1080}
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
@@ -148,7 +149,7 @@ defmodule TypeCheck.Macros do
   ```
 
   """
-  defmacro type(typedef) do
+  defmacro type!(typedef) do
     define_type(typedef, :type, __CALLER__)
   end
 
@@ -171,7 +172,7 @@ defmodule TypeCheck.Macros do
 
   `typep/1` accepts the same typedef expression as `type/1`.
   """
-  defmacro typep(typedef) do
+  defmacro typep!(typedef) do
     define_type(typedef, :typep, __CALLER__)
   end
 
@@ -201,7 +202,7 @@ defmodule TypeCheck.Macros do
 
   `opaque/1` accepts the same typedef expression as `type/1`.
   """
-  defmacro opaque(typedef) do
+  defmacro opaque!(typedef) do
     define_type(typedef, :opaque, __CALLER__)
   end
 
@@ -236,7 +237,7 @@ defmodule TypeCheck.Macros do
     (See `TypeCheck.Builtin.guarded_by/2` for more information.)
 
   """
-  defmacro spec(specdef) do
+  defmacro spec!(specdef) do
     define_spec(specdef, __CALLER__)
   end
 
@@ -402,8 +403,7 @@ defmodule TypeCheck.Macros do
   defmacro @ast do
     IO.inspect(ast)
     case ast do
-      {name, _, expr} when name in ~w[type typep opaque spec]a ->
-        # apply(TypeCheck.Macros, name, expr)
+      {name, _, expr} when name in ~w[type! typep! opaque! spec!]a ->
         quote do
           TypeCheck.Macros.unquote(name)(unquote_splicing(expr))
         end
