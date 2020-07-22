@@ -29,7 +29,7 @@ defmodule TypeCheck.Spec do
   def create_spec_def(name, arity, param_types, return_type) do
     spec_fun_name = spec_fun_name(name, arity)
 
-    res = quote location: :keep do
+    quote location: :keep do
       @doc false
       def unquote(spec_fun_name)() do
         # import TypeCheck.Builtin
@@ -40,8 +40,6 @@ defmodule TypeCheck.Spec do
         }
       end
     end
-    IO.puts(Macro.to_string(res))
-    res
   end
 
   @doc false

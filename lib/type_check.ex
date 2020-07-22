@@ -87,10 +87,10 @@ defmodule TypeCheck do
       iex> TypeCheck.conforms!({10, 20}, sorted_pair)
       {10, 20}
       iex> TypeCheck.conforms!({20, 10}, sorted_pair)
-      ** (TypeCheck.TypeError) `{20, 10}` does not check against `({lower :: number(), higher :: number()} when lower <= higher)`. Reason:
+      ** (TypeCheck.TypeError) `{20, 10}` does not check against `(sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher)`. Reason:
         type guard:
           `lower <= higher` evaluated to false or nil.
-          bound values: %{higher: 10, lower: 20}
+          bound values: %{higher: 10, lower: 20, sorted_pair: {20, 10}}
 
   Named types are available in your guard even from the (both local and remote) types that you are using in your time, as long as those types are not defined as _opaque_ types.
 
