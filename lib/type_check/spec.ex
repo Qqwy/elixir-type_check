@@ -26,20 +26,22 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def create_spec_def(name, arity, params_ast, return_type_ast) do
-    spec_fun_name = :"__type_check_spec_for_#{name}/#{arity}__"
+  def create_spec_def(name, arity, param_types, return_type) do
+    spec_fun_name = spec_fun_name(name, arity)
 
-    quote location: :keep do
+    res = quote location: :keep do
       @doc false
       def unquote(spec_fun_name)() do
         # import TypeCheck.Builtin
         %TypeCheck.Spec{
           name: unquote(name),
-          param_types: unquote(params_ast),
-          return_type: unquote(return_type_ast)
+          param_types: unquote(Macro.escape(param_types)),
+          return_type: unquote(Macro.escape(return_type))
         }
       end
     end
+    IO.puts(Macro.to_string(res))
+    res
   end
 
   @doc false

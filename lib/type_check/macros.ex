@@ -77,9 +77,14 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp create_spec_defs(specs, _definitions, _caller) do
+  defp create_spec_defs(specs, _definitions, caller) do
     for {name, _line, arity, _clean_params, params_ast, return_type_ast} <- specs do
-      TypeCheck.Spec.create_spec_def(name, arity, params_ast, return_type_ast)
+      require TypeCheck.Type
+
+      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
+      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
+
+      TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type)
     end
   end
 
@@ -90,6 +95,7 @@ defmodule TypeCheck.Macros do
       end
 
       require TypeCheck.Type
+
       param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
       return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
 

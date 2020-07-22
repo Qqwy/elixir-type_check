@@ -3,6 +3,15 @@ defmodule TypeCheckTest.TypeGuardExample do
   @type! sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
 end
 
+defmodule TypeCheckTest.SpecWithGuardExample do
+  use TypeCheck
+  @spec! in_magic_range((x :: non_neg_integer() when x != 42)) :: boolean()
+  def in_magic_range(val) do
+    true
+  end
+end
+
+
 defmodule TypeCheckTest do
   use ExUnit.Case
   use ExUnitProperties
@@ -46,4 +55,28 @@ defmodule TypeCheckTest do
   #     end
   #   end
   # end
+
+  describe "spec with guard" do
+    test "it is callable" do
+      assert TypeCheckTest.SpecWithGuardExample.in_magic_range(10) == true
+    end
+
+    test "it will raise when the input does not match the spec type" do
+      exception = assert_raise(TypeCheck.TypeError, fn ->
+        TypeCheckTest.SpecWithGuardExample.in_magic_range(-10)
+      end)
+
+      assert {%TypeCheck.Spec{}, :param_error, %{}, [-10]} = exception.raw
+
+      assert {%TypeCheck.Builtin.Guarded{}, :type_failed, %{}, -10} = elem(exception.raw, 2).problem
+    end
+    test "it will raise when the input does not match the spec guard" do
+      exception = assert_raise(TypeCheck.TypeError, fn ->
+        TypeCheckTest.SpecWithGuardExample.in_magic_range(42)
+      end)
+
+      assert {%TypeCheck.Spec{}, :param_error, %{}, [42]} = exception.raw
+      assert {%TypeCheck.Builtin.Guarded{}, :guard_failed, %{}, 42} = elem(exception.raw, 2).problem
+    end
+  end
 end
