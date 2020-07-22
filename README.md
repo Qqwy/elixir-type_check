@@ -162,6 +162,7 @@ boolean()`. Reason:
 
 ### Changelog
 
+- 0.2.1 Improved parsing of types that have a type-guard at the root level. (c.f. #24)
 - 0.2.0 Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead.
 - 0.1.2 Added missing `keyword` type to TypeCheck.Builtin (#20)
 - 0.1.1 Fixing some documentation typos
