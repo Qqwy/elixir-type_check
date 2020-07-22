@@ -5,14 +5,27 @@ defmodule TypeCheck.Internals.PreExpander do
   # with alternatives that are not 'special'
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env) do
+    builtin_imports = env.functions[TypeCheck.Builtin]
     case Macro.expand(ast, env) do
-      ast = {:lazy_explicit, _, _arguments} ->
-        ast
+      ast = {:lazy_explicit, meta, args}  ->
+        if {:lazy_explicit, 3} in builtin_imports do
+          ast
+        else
+          {:lazy_explicit, meta, Enum.map(args, &rewrite(&1, env))}
+        end
 
-      ast = {:literal, _, [_value]} ->
+      ast = {:literal, meta, [value]} ->
         # Do not expand internals of `literal`.
         # Even if it contains fancy syntax
         # like ranges
+        if {:literal, 1} in builtin_imports do
+          ast
+        else
+          {:literal, meta, [rewrite(value, env)]}
+        end
+
+      ast = {:&, _, _args} ->
+        # Do not expand inside captures
         ast
 
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->

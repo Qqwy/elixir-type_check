@@ -26,7 +26,7 @@ structs = [
   TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
-  TypeCheck.Builtin.Tuple
+  TypeCheck.Builtin.Tuple,
 ]
 
 for struct <- structs do
