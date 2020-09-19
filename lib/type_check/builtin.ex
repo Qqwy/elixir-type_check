@@ -370,13 +370,14 @@ defmodule TypeCheck.Builtin do
 
   For instance, `10` desugars to `literal(10)`.
 
-  Represented in Elixir's builtin Typespecs as the primitive value itself.
+  Represented in Elixir's builtin Typespecs as
+  - for integers, atoms and booleans: the primitive value itself.
+  - for binaries, a more general `binary()` is used
+    as Elixir's builtin typespecs do not support literal UTF-8 binaries as literal values.
 
   C.f. `TypeCheck.Builtin.Literal`
   """
   def literal(value) do
-    # %TypeCheck.Builtin.Literal{value: value}
-
     Macro.struct!(TypeCheck.Builtin.Literal, __ENV__)
     |> Map.put(:value, value)
   end

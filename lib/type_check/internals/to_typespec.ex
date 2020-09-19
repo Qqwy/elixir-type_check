@@ -102,9 +102,14 @@ defmodule TypeCheck.Internals.ToTypespec do
         end
 
       {:literal, _, [elem_type]} ->
-        # TODO range
-        quote do
-          unquote(elem_type)
+        if is_binary(elem_type) do
+          quote do
+            binary()
+          end
+        else
+          quote do
+            unquote(elem_type)
+          end
         end
 
       {:fixed_map, _, [keywords]} ->
@@ -123,6 +128,16 @@ defmodule TypeCheck.Internals.ToTypespec do
       {:map, _, [key_type, value_type]} ->
         quote do
           %{optional(unquote(key_type)) => unquote(value_type)}
+        end
+
+      # Relax these types that Elixir's builtin typespecs does not accept
+      binary when is_binary(binary) ->
+        quote do
+          binary()
+        end
+      float when is_float(float) ->
+        quote do
+          float()
         end
 
       other ->
