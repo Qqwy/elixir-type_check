@@ -44,6 +44,56 @@ defmodule TypeCheck.Type.StreamData do
     %__MODULE__{type: type, generator_function: generator_function}
   end
 
+  @doc """
+  Customizes a type with a _custom_ generator.
+
+  Similar to wrap_with_gen/2 but this variant
+  allows the preparation of arguments that should be passed to the to-be-called function.
+
+  This function is expected to return either:
+  - A StreamData generator.
+  - An arity-1 function, which will then immediately be called,
+    passing in the original StreamData generator of the type that is being wrapped.
+
+  ## Example:
+
+
+      iex> defmodule MinMaxFloatString do
+      ...>   use TypeCheck
+      ...>   import TypeCheck.Type.StreamData
+      ...>   defmacro min_max_float(min, max) do
+      ...>     quote do
+      ...>        ((val :: binary()) when Float.parse(val) != :error)
+      ...>        |> wrap_with_gen(MinMaxFloatString, :gen, [unquote(min), unquote(max)])
+      ...>     end
+      ...>   end
+      ...>
+      ...>   def gen(min, max) do
+      ...>     StreamData.float(min: min, max: max)
+      ...>     |> StreamData.map(&to_string/1)
+      ...>   end
+      ...> end
+      ...>
+      ...> defmodule Example do
+      ...>   use TypeCheck
+      ...>   require MinMaxFloatString
+      ...>   import TypeCheck.Type.StreamData
+      ...>   @type! unit :: MinMaxFloatString.min_max_float(0.0, 1.0)
+      ...> end
+      ...> Example.unit() |> TypeCheck.Type.StreamData.to_gen() |> StreamData.seeded(42) |> Enum.take(10)
+      ["0.0", "0.5", "0.75", "0.0", "0.25", "0.75", "0.90625", "0.78125", "0.0", "0.90625"]
+  """
+  def wrap_with_gen(type, module, function_name, args) when is_atom(module) and is_atom(function_name) and is_list(args) do
+    %__MODULE__{type: type, generator_function: {module, function_name, args}}
+  end
+
+  def wrap_with_gen(type, module = %TypeCheck.Builtin.Literal{}, function_name = %TypeCheck.Builtin.Literal{}, args = %TypeCheck.Builtin.FixedList{}) do
+    wrap_with_gen(type, module.value, function_name.value, Enum.map(args.element_types, fn elem -> elem.value end))
+  end
+  def wrap_with_gen(t, m, f, a) do
+    IO.inspect({t, m, f, a}, structs: false)
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       TypeCheck.Protocols.ToCheck.to_check(s.type, param)
@@ -60,12 +110,20 @@ defmodule TypeCheck.Type.StreamData do
 
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-        if is_function(s.generator_function, 0) do
-          s.generator_function.()
-        else
-          s.type
-          |> TypeCheck.Protocols.ToStreamData.to_gen()
-          |> s.generator_function.()
+        case s.generator_function() do
+          f when is_function(f, 0) ->
+            f.()
+          f when is_function(f, 1) ->
+            s.type
+            |> TypeCheck.Protocols.ToStreamData.to_gen()
+            |> f.()
+          {module, function_name, args} ->
+            case apply(module, function_name, args) do
+              fun when is_function(fun) ->
+                fun.()
+              res = %StreamData{} ->
+                res
+            end
         end
       end
     end

@@ -32,12 +32,19 @@ defmodule TypeCheck.Internals.ToTypespec do
         end
 
       ast = {:wrap_with_gen, _, [type, _]} ->
-        if {:wrap_with_gen, 2} in env.functions[TypeCheck.Type.StreamData] do
+        # if env.functions[TypeCheck.Type.StreamData] && {:wrap_with_gen, 2} in env.functions[TypeCheck.Type.StreamData] do
           # Hide generator wrapper
-          type
-        else
-          ast
-        end
+        full_rewrite(type, env)
+        # else
+        #   ast
+        # end
+      ast = {:wrap_with_gen, _, [type, _module, _function, _args]} ->
+        # if env.functions[TypeCheck.Type.StreamData] && {:wrap_with_gen, 4} in env.functions[TypeCheck.Type.StreamData] do
+          # Hide generator wrapper
+        full_rewrite(type, env)
+        # else
+        #   ast
+        # end
 
       {:"::", _, [_name, type_ast]} ->
         # Hide inner named types from the typespec.

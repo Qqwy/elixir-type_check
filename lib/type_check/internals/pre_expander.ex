@@ -6,6 +6,8 @@ defmodule TypeCheck.Internals.PreExpander do
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env) do
     builtin_imports = env.functions[TypeCheck.Builtin]
+    stream_data_available? = Code.ensure_loaded?(StreamData)
+
     case Macro.expand(ast, env) do
       ast = {:lazy_explicit, meta, args}  ->
         if {:lazy_explicit, 3} in builtin_imports do
@@ -23,6 +25,11 @@ defmodule TypeCheck.Internals.PreExpander do
         else
           {:literal, meta, [rewrite(value, env)]}
         end
+
+        # Do not expand TypeCheck.Type.StreamData.wrap_with_gen
+      ast = {:wrap_with_gen, meta, [type | args]} when stream_data_available? ->
+        rewritten_type = rewrite(type, env)
+        {:wrap_with_gen, meta, [rewritten_type | args]}
 
       ast = {:&, _, _args} ->
         # Do not expand inside captures
