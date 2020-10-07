@@ -7,7 +7,7 @@ defmodule TypeCheck do
   The main way to use TypeCheck is by adding `use TypeCheck` in your modules.
   This will allow you to use the macros of `TypeCheck.Macros` in your module,
   which are versions of the normal type-specification module attributes
-  with an extra explamation point at the end:  `@type!`, `@spec!`, `@typep!` and `@opaque!`.
+  with an extra explanation point at the end:  `@type!`, `@spec!`, `@typep!` and `@opaque!`.
 
 
   It will also bring all functions in `TypeCheck.Builtin` in scope,
