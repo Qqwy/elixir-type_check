@@ -21,9 +21,16 @@ defmodule TypeCheck.MixProject do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [
-      extra_applications: [:logger]
-    ]
+    case Mix.env() do
+      :prod ->
+        [
+          extra_applications: [:logger]
+        ]
+      _ ->
+        [
+          extra_applications: [:logger, :stream_data]
+        ]
+    end
   end
 
   defp description do
