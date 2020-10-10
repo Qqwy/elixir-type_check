@@ -382,11 +382,6 @@ defmodule TypeCheck.Builtin do
     |> Map.put(:value, value)
   end
 
-  @doc false
-  def left | right do
-    one_of(left, right)
-  end
-
   @doc typekind: :builtin
   @doc """
   A union of multiple types (also known as a 'sum type')
