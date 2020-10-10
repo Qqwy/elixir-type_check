@@ -48,9 +48,9 @@ defmodule TypeCheck.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:stream_data, "~> 0.5.0", optional: true},
-      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:benchee, "~> 1.0", only: :dev},
+      {:ex_doc, "~> 0.22", only: :docs, runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dialize], runtime: false},
+      {:benchee, "~> 1.0", only: :bench},
     ]
   end
 
