@@ -162,8 +162,10 @@ boolean()`. Reason:
 
 ### Changelog
 
-- 0.2.1 Improved parsing of types that have a type-guard at the root level. (c.f. #24)
-- 0.2.0 Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead.
+- 0.2.3 Bugfix release: Ensure TypeCheck compiles on Elixir v1.11 (#30), Ensure StreamData truly is an optional dependency (#27).
+- 0.2.2 Support for literal strings should no longer break in Elixir's builtin typespecs.
+- 0.2.1 Improved parsing of types that have a type-guard at the root level. (c.f. #24), support for custom generators.
+- 0.2.0 Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead, support named types in specs.
 - 0.1.2 Added missing `keyword` type to TypeCheck.Builtin (#20)
 - 0.1.1 Fixing some documentation typos
 - 0.1.0 Initial Release
@@ -212,15 +214,6 @@ Because TypeCheck adds `@type`, `@typep`, `@opaque` and `@spec`-attributes based
 
 On a superficial level, Norm and TypeCheck seem similar. However, there are [important differences in their design considerations](Comparing TypeCheck and Norm.md).
 
-## Changelog
-
-- 0.2.3 Bugfix release: Ensure TypeCheck compiles on Elixir v1.11 (#30), Ensure StreamData truly is an optional dependency (#27).
-- 0.2.2 Support for literal strings should no longer break in Elixir's builtin typespecs.
-- 0.2.1 Support custom generators.
-- 0.2.0 Support named types in specs
-- 0.1.2 Adding the `keyword()` and `keyword(t)` builtin types that were still missing.
-- 0.1.1 Fixing some typographic errors in the documentation.
-- 0.1.0 Initial Release
 
 ## Is it any good?
 
