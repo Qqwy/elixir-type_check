@@ -273,7 +273,7 @@ defmodule TypeCheck.Macros do
   end
 
   defp define_type(
-         {:when, _, [named_type = {:"::", _, [name_with_maybe_params, type]}, guard_ast]},
+         {:when, _, [named_type = {:"::", _, [name_with_maybe_params, _type]}, guard_ast]},
          kind,
          caller
        ) do
