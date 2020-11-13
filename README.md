@@ -178,7 +178,7 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.1.0"}
+    {:type_check, "~> 0.2.0"}
   ]
 end
 ```
