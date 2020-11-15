@@ -118,7 +118,8 @@ defmodule TypeCheck.Macros do
         arity,
         clean_params,
         params_spec_code,
-        return_spec_code
+        return_spec_code,
+        typecheck_options
       )
     end
   end

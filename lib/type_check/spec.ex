@@ -32,7 +32,6 @@ defmodule TypeCheck.Spec do
     quote location: :keep do
       @doc false
       def unquote(spec_fun_name)() do
-        # import TypeCheck.Builtin
         %TypeCheck.Spec{
           name: unquote(name),
           param_types: unquote(Macro.escape(param_types)),
@@ -43,18 +42,21 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
-    quote line: line do
-      defoverridable([{unquote(name), unquote(arity)}])
+  def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code, typecheck_options) do
+    if typecheck_options.check.enabled do
+      quote line: line do
+        defoverridable([{unquote(name), unquote(arity)}])
 
-      def unquote(name)(unquote_splicing(clean_params)) do
-        # import TypeCheck.Builtin
-
-        unquote(params_spec_code)
-        var!(super_result, nil) = super(unquote_splicing(clean_params))
-        unquote(return_spec_code)
-        var!(super_result, nil)
+        def unquote(name)(unquote_splicing(clean_params)) do
+          unquote(params_spec_code)
+          var!(super_result, nil) = super(unquote_splicing(clean_params))
+          unquote(return_spec_code)
+          var!(super_result, nil)
+        end
       end
+    else
+      # Do not override anything
+      quote do end
     end
   end
 
