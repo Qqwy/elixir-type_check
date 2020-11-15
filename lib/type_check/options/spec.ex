@@ -4,4 +4,12 @@ defmodule TypeCheck.Options.Spec do
     enabled: true,
     depth: :infinity
   ]
+
+  def new() do
+    %__MODULE__{}
+  end
+
+  def new(enum) do
+    struct(new(), enum)
+  end
 end

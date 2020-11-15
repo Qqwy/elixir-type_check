@@ -54,9 +54,9 @@ defmodule TypeCheck.Type do
 
   Of course, you can refer to your own local and remote types as well.
   """
-  defmacro build(type_ast) do
+  defmacro build(type_ast, options \\ TypeCheck.Options.new()) do
     type_ast
-    |> build_unescaped(__CALLER__)
+    |> build_unescaped(__CALLER__, options)
     |> Macro.escape()
   end
 
@@ -66,8 +66,8 @@ defmodule TypeCheck.Type do
   # Transforms `type_ast` (which is expected to be a quoted Elixir AST) into a type value.
   # The result is _not_ escaped
   # assuming that you'd want to do further compile-time work with the type.
-  def build_unescaped(type_ast, caller, add_typecheck_module \\ false) do
-    type_ast = TypeCheck.Internals.PreExpander.rewrite(type_ast, caller)
+  def build_unescaped(type_ast, caller, typecheck_options, add_typecheck_module \\ false) do
+    type_ast = TypeCheck.Internals.PreExpander.rewrite(type_ast, caller, typecheck_options)
 
     code =
       if add_typecheck_module do

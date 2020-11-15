@@ -40,6 +40,8 @@ defmodule TypeCheck.Macros do
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
       @before_compile TypeCheck.Macros
+
+      Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options)))
     end
   end
 
@@ -81,8 +83,9 @@ defmodule TypeCheck.Macros do
     for {name, _line, arity, _clean_params, params_ast, return_type_ast} <- specs do
       require TypeCheck.Type
 
-      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
-      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
+      typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
+      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
       TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type)
     end
@@ -96,8 +99,9 @@ defmodule TypeCheck.Macros do
 
       require TypeCheck.Type
 
-      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, true))
-      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, true)
+      typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
+      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
       {params_spec_code, return_spec_code} =
         TypeCheck.Spec.prepare_spec_wrapper_code(
@@ -303,7 +307,8 @@ defmodule TypeCheck.Macros do
           """)
       end
 
-    type = TypeCheck.Internals.PreExpander.rewrite(type, caller)
+    typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+    type = TypeCheck.Internals.PreExpander.rewrite(type, caller, typecheck_options)
 
     res = type_fun_definition(name_with_maybe_params, type)
 

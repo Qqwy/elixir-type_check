@@ -5,11 +5,10 @@ defmodule TypeCheck.Options do
 
   """
 
-  @type mfa() :: {atom(), atom(), non_neg_integer()}
   @type type_override() :: {(... -> any()), (... -> any())}
 
   @type t :: %__MODULE__{
-    specs: TypeCheck.Options.Spec.t(),
+    spec: TypeCheck.Options.Spec.t(),
     overrides: list(type_override())
   }
 
@@ -20,28 +19,38 @@ defmodule TypeCheck.Options do
   end
 
   def new(enum) do
-    spec = TypeCheck.Options.Spec.new(enum[:spec])
-    overrides = check_overrides!(enum[:overrides])
+    spec = TypeCheck.Options.Spec.new(enum[:spec] || [])
+    overrides = check_overrides!(enum[:overrides] || [])
     %__MODULE__{spec: spec, overrides: overrides}
   end
 
   def check_overrides!(overrides) do
     overrides
-    |> Enum.each(fn {k, v} ->
-      ensure_external_function!(k)
-      ensure_external_function!(v)
+    |> Enum.map(fn {k, v} ->
+      {module_k, function_k, arity_k} = ensure_external_function!(k)
+      {module_v, function_v, arity_v} = ensure_external_function!(v)
+      if arity_k != arity_v do
+        raise "Error while parsing TypeCheck overides: override #{inspect(v)} does not have same arity as original type #{inspect(k)}."
+      else
+        {
+          {module_k, function_k, arity_k},
+          {module_v, function_v, arity_v}
+        }
+      end
     end)
-
-    overrides
   end
 
   defp ensure_external_function!(fun) when is_function(fun) do
     case Function.info(fun, :type) do
       {:type, :external} ->
-        :ok
+        info = Function.info(fun)
+        {info[:module], info[:name], info[:arity]}
       _other ->
         raise "Error while parsing TypeCheck overides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
     end
+  end
+  defp ensure_external_function!({module, function, arity}) when is_atom(module) and is_atom(function) and arity >= 0 do
+    {module, function, arity}
   end
   defp ensure_external_function!(fun) do
     raise "Error while parsing TypeCheck overides: #{inspect(fun)} is not a function!"

@@ -137,8 +137,8 @@ defmodule TypeCheck do
   @type value :: any()
   @spec conforms(value, TypeCheck.Type.expandable_type()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
-  defmacro conforms(value, type) do
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__)
+  defmacro conforms(value, type, options \\ TypeCheck.Options.new()) do
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     quote do
@@ -155,8 +155,8 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `conforms/2`.
   """
   @spec conforms?(value, TypeCheck.Type.expandable_type()) :: boolean()
-  defmacro conforms?(value, type) do
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__)
+  defmacro conforms?(value, type, options \\ TypeCheck.Options.new()) do
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     quote do
@@ -170,8 +170,8 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `conforms/2`.
   """
   @spec conforms!(value, TypeCheck.Type.expandable_type()) :: value | no_return()
-  defmacro conforms!(value, type) do
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__)
+  defmacro conforms!(value, type, options \\ TypeCheck.Options.new()) do
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     quote do
