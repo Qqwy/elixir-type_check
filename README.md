@@ -54,37 +54,64 @@ So far so good. Now let's see what happens when we pass values that are incorrec
 
 ```elixir
 iex> AgeCheck.user_older_than?("foobar", 42)
-** (TypeCheck.TypeError) The call `user_older_than?("foobar", 42)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
-::
-boolean()`. Reason:
-  parameter no. 1:
-    `"foobar"` does not check against `%User{age: integer(), name: binary()}`. Reason:
-      `"foobar"` is not a map.
+** (TypeCheck.TypeError) At lib/type_check_example.ex:28:
+The call to `user_older_than?/2` failed,
+because parameter no. 1 does not adhere to the spec `%User{age: integer(), name: binary()}`.
+Rather, its value is: `"foobar"`.
+Details:
+  The call `user_older_than?("foobar", 42)` 
+  does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer()) :: boolean()`. Reason:
+    parameter no. 1:
+      `"foobar"` does not check against `%User{age: integer(), name: binary()}`. Reason:
+        `"foobar"` is not a map.
+    (type_check_example 0.1.0) lib/type_check_example.ex:28: AgeCheck.user_older_than?/2
+```
 
+```elixir
 iex> AgeCheck.user_older_than?(%User{name: nil, age: 11}, 10)
-** (TypeCheck.TypeError) The call `user_older_than?(%User{age: 11, name: nil}, 10)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
-::
-boolean()`. Reason:
-  parameter no. 1:
-    `%User{age: nil, name: nil}` does not check against `%User{age: integer(), name: binary()}`. Reason:
-      under key `:name`:
-        `nil` is not a binary.
+** (TypeCheck.TypeError) At lib/type_check_example.ex:28:
+The call to `user_older_than?/2` failed,
+because parameter no. 1 does not adhere to the spec `%User{age: integer(), name: binary()}`.
+Rather, its value is: `%User{age: 11, name: nil}`.
+Details:
+  The call `user_older_than?(%User{age: 11, name: nil}, 10)` 
+  does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer()) :: boolean()`. Reason:
+    parameter no. 1:
+      `%User{age: 11, name: nil}` does not check against `%User{age: integer(), name: binary()}`. Reason:
+        under key `:name`:
+          `nil` is not a binary.
+    (type_check_example 0.1.0) lib/type_check_example.ex:28: AgeCheck.user_older_than?/2
+```
 
+```elixir
 iex> AgeCheck.user_older_than?(%User{name: "Aaron", age: nil}, 10) 
-** (TypeCheck.TypeError) The call `user_older_than?(%User{age: nil, name: "Aaron"}, 10)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
-::
-boolean()`. Reason:
-  parameter no. 1:
-    `%User{age: nil, name: "Aaron"}` does not check against `%User{age: integer(), name: binary()}`. Reason:
-      under key `:age`:
-        `nil` is not an integer.
+** (TypeCheck.TypeError) At lib/type_check_example.ex:28:
+The call to `user_older_than?/2` failed,
+because parameter no. 1 does not adhere to the spec `%User{age: integer(), name: binary()}`.
+Rather, its value is: `%User{age: nil, name: "Aaron"}`.
+Details:
+  The call `user_older_than?(%User{age: nil, name: "Aaron"}, 10)` 
+  does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer()) :: boolean()`. Reason:
+    parameter no. 1:
+      `%User{age: nil, name: "Aaron"}` does not check against `%User{age: integer(), name: binary()}`. Reason:
+        under key `:age`:
+          `nil` is not an integer.
+    (type_check_example 0.1.0) lib/type_check_example.ex:28: AgeCheck.user_older_than?/2
+```
 
+```elixir
+    
 iex> AgeCheck.user_older_than?(%User{name: "José", age: 11}, 10.0) 
-** (TypeCheck.TypeError) The call `user_older_than?(%User{age: 11, name: "José"}, 10.0)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
-::
-boolean()`. Reason:
-  parameter no. 2:
-    `10.0` is not an integer.
+** (TypeCheck.TypeError) At lib/type_check_example.ex:28:
+The call to `user_older_than?/2` failed,
+because parameter no. 2 does not adhere to the spec `integer()`.
+Rather, its value is: `10.0`.
+Details:
+  The call `user_older_than?(%User{age: 11, name: "José"}, 10.0)` 
+  does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer()) :: boolean()`. Reason:
+    parameter no. 2:
+      `10.0` is not an integer.
+    (type_check_example 0.1.0) lib/type_check_example.ex:28: AgeCheck.user_older_than?/2
 ```
 
 And if we were to introduce an error in the function definition:
@@ -103,11 +130,15 @@ end
 Then we get a nice error message explaining that problem as well:
 
 ```elixir
-** (TypeCheck.TypeError) The result of calling `user_older_than?(%User{age: 26, name: "Marten"}, 10)` does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer())
-::
-boolean()`. Reason:
-  Returned result:
-    `2` is not a boolean.
+** (TypeCheck.TypeError) The call to `user_older_than?/2` failed,
+because the returned result does not adhere to the spec `boolean()`.
+Rather, its value is: `26`.
+Details:
+  The result of calling `user_older_than?(%User{age: 26, name: "Marten"}, 10)` 
+  does not adhere to spec `user_older_than?(%User{age: integer(), name: binary()},  integer()) :: boolean()`. Reason:
+    Returned result:
+      `26` is not a boolean.
+    (type_check_example 0.1.0) lib/type_check_example.ex:28: AgeCheck.user_older_than?/2
 ```
 
 ## Features & Roadmap

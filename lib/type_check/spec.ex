@@ -82,8 +82,9 @@ defmodule TypeCheck.Spec do
       else
         {{:error, problem}, index, param_type} ->
           raise TypeCheck.TypeError,
-                {unquote(spec_fun_name(name, arity))(), :param_error,
-                 %{index: index, problem: problem}, unquote(clean_params)}
+          {
+            {unquote(spec_fun_name(name, arity))(), :param_error,
+             %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}
       end
     end
   end

@@ -144,7 +144,7 @@ defmodule TypeCheck do
     quote do
       case unquote(check) do
         {:ok, bindings} -> {:ok, unquote(value)}
-        {:error, problem} -> {:error, TypeCheck.TypeError.exception(problem)}
+        {:error, problem} -> {:error, TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})}
       end
     end
   end
@@ -204,7 +204,10 @@ defmodule TypeCheck do
 
     case Code.eval_quoted(check_code, value: value) do
       {{:ok, _}, _} -> {:ok, value}
-      {{:error, problem}, _} -> {:error, TypeCheck.TypeError.exception(problem)}
+      {{:error, problem}, _} ->
+        {:current_stacktrace, [_ , caller | _]} = Process.info(self(), :current_stacktrace)
+        location = elem(caller, 3)
+        {:error, TypeCheck.TypeError.exception({problem, location})}
     end
   end
 
