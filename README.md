@@ -193,6 +193,7 @@ Details:
 
 ### Changelog
 
+- 0.3.1 Fixed link in the documentation.
 - 0.3.0 Improve DefaultFormatter output when used with long function- or type-signatures (c.f. #32). Also, bugfix for `Builtin.tuple/1`.
 - 0.2.3 Bugfix release: Ensure TypeCheck compiles on Elixir v1.11 (#30), Ensure StreamData truly is an optional dependency (#27).
 - 0.2.2 Support for literal strings should no longer break in Elixir's builtin typespecs.
