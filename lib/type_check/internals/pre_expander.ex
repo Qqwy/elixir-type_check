@@ -23,6 +23,12 @@ defmodule TypeCheck.Internals.PreExpander do
         else
           {:literal, meta, [rewrite(value, env)]}
         end
+      ast = {:tuple, meta, [value]} ->
+        if {:tuple, 1} in builtin_imports do
+          ast
+        else
+          {:tuple, meta, [rewrite(value, env)]}
+        end
 
       ast = {:&, _, _args} ->
         # Do not expand inside captures

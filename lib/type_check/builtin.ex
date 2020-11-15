@@ -342,9 +342,10 @@ defmodule TypeCheck.Builtin do
 
   For instance, `tuple(3)` is represented as `{any(), any(), any()}`.
   """
-  def tuple(size) when is_integer(size) do
+  def tuple(0), do: fixed_tuple([])
+  def tuple(size) when is_integer(size) and size > 0 do
     elems =
-      0..size
+      1..size
       |> Enum.map(fn _ -> any() end)
 
     fixed_tuple(elems)
