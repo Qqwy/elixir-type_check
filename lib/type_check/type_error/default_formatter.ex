@@ -200,9 +200,12 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     call = "#{s.name}(#{arguments})"
 
     """
-    The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
-      parameter no. #{index + 1}:
-    #{indent(indent(format(problem)))}
+    The call to `#{s.name}/#{Enum.count(arguments)}` failed,
+    because parameter no. #{index + 1} does not adhere to the spec `#{Enum.at(TypeCheck.Inspect.inspect_binary(s.param_types), index)}`.
+      Details:
+        The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+          parameter no. #{index + 1}:
+    #{indent(indent(indent(indent(format(problem)))))}
     """
   end
 
@@ -213,11 +216,12 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     call = "#{s.name}(#{arguments_str})"
 
     """
-    The result of calling `#{call}` does not adhere to spec `#{
-      TypeCheck.Inspect.inspect_binary(s)
-    }`. Reason:
-      Returned result:
-    #{indent(indent(format(problem)))}
+    The call to `#{s.name}/#{Enum.count(arguments)}` failed,
+    because the returned result does not adhere to the spec `#{TypeCheck.Inspect.inspect_binary(s.return_type)}`.
+      Details:
+        The result of calling `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+          Returned result:
+    #{indent(indent(indent(indent(format(problem)))))}
     """
   end
 
