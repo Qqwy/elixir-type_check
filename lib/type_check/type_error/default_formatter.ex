@@ -6,11 +6,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       do_format(problem_tuple)
       |> String.trim_trailing()
 
-    """
-
-    #{location_string(location)}
-    #{res}
-    """
+    location_string(location) <> res
   end
 
   defp location_string([]), do: ""
@@ -19,7 +15,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     line = location[:line]
 
     file = String.replace_prefix(raw_file, File.cwd! <> "/", "")
-    "At #{file}:#{line}:"
+    "At #{file}:#{line}:\n"
   end
 
   @doc """
