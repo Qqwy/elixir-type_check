@@ -8,11 +8,11 @@ defmodule TypeCheck.Options do
   @type type_override() :: {(... -> any()), (... -> any())}
 
   @type t :: %__MODULE__{
-    spec: TypeCheck.Options.Spec.t(),
+    check: TypeCheck.Options.Check.t(),
     overrides: list(type_override())
   }
 
-  defstruct [spec: %TypeCheck.Options.Spec{}, overrides: []]
+  defstruct [check: %TypeCheck.Options.Check{}, overrides: []]
 
   def new() do
     %__MODULE__{}
@@ -23,11 +23,11 @@ defmodule TypeCheck.Options do
   end
 
   def new(enum) do
-    spec = TypeCheck.Options.Spec.new(enum[:spec] || [])
+    check = TypeCheck.Options.Check.new(enum[:check] || [])
     raw_overrides = enum[:overrides] || []
     {overrides, _} = Code.eval_quoted(raw_overrides)
     overrides = check_overrides!(overrides)
-    %__MODULE__{spec: spec, overrides: overrides}
+    %__MODULE__{check: check, overrides: overrides}
   end
 
   def check_overrides!(overrides) do
