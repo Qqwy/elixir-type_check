@@ -52,7 +52,6 @@ defmodule TypeCheck.TypeError do
 
   @impl true
   def exception({problem_tuple, location}) do
-    IO.inspect(location)
     message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple, location)
 
     %__MODULE__{message: message, raw: problem_tuple, location: location}
