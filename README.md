@@ -193,6 +193,7 @@ Details:
 
 ### Changelog
 
+- 0.3.1 Fixed link in the documentation.
 - 0.3.0 Improve DefaultFormatter output when used with long function- or type-signatures (c.f. #32). Also, bugfix for `Builtin.tuple/1`.
 - 0.2.3 Bugfix release: Ensure TypeCheck compiles on Elixir v1.11 (#30), Ensure StreamData truly is an optional dependency (#27).
 - 0.2.2 Support for literal strings should no longer break in Elixir's builtin typespecs.
@@ -244,7 +245,7 @@ Because TypeCheck adds `@type`, `@typep`, `@opaque` and `@spec`-attributes based
 
 [Norm](https://github.com/keathley/norm/) is an Elixir library for specifying the structure of data that can be used for both validation and data-generation.
 
-On a superficial level, Norm and TypeCheck seem similar. However, there are [important differences in their design considerations](./Comparing TypeCheck and Norm.md).
+On a superficial level, Norm and TypeCheck seem similar. However, there are [important differences in their design considerations](https://github.com/Qqwy/elixir-type_check/blob/master/Comparing%20TypeCheck%20and%20Norm.md).
 
 
 ## Is it any good?
