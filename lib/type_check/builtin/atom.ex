@@ -12,7 +12,8 @@ defmodule TypeCheck.Builtin.Atom do
   @type! problem_tuple :: {t(), :no_match, map(), any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(s, param) do
+    def to_check(s, param, depth) when depth <= 0, do: quote do {:ok, []} end
+    def to_check(s, param, depth) do
       quote do
         case unquote(param) do
           x when is_atom(x) ->

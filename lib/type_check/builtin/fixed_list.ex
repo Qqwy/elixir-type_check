@@ -21,9 +21,19 @@ defmodule TypeCheck.Builtin.FixedList do
             list()}
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(s, param) do
+    def to_check(s, param, depth) when depth <= 0, do: quote do {:ok, []} end
+    def to_check(s, param, 1) do
+      quote do
+        case unquote(param) do
+          x when not is_list(x) ->
+            {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, x}}
+
+        end
+      end
+    end
+    def to_check(s, param, depth) do
       expected_length = length(s.element_types)
-      element_checks_ast = build_element_checks_ast(s.element_types, param, s)
+      element_checks_ast = build_element_checks_ast(s.element_types, param, s, TypeCheck.Options.Check.decrement_depth(depth) )
 
       quote do
         case unquote(param) do
@@ -41,7 +51,7 @@ defmodule TypeCheck.Builtin.FixedList do
       end
     end
 
-    def build_element_checks_ast(element_types, param, s) do
+    def build_element_checks_ast(element_types, param, s, depth) do
       element_checks =
         element_types
         |> Enum.with_index()
@@ -51,7 +61,8 @@ defmodule TypeCheck.Builtin.FixedList do
               element_type,
               quote do
                 hd(var!(rest, unquote(__MODULE__)))
-              end
+              end,
+              depth
             )
 
           quote location: :keep do

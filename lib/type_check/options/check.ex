@@ -45,4 +45,10 @@ defmodule TypeCheck.Options.Check do
   def new(enum) do
     struct(new(), enum)
   end
+
+  @doc false
+  # Used internally to decrement the depth in a conforming way
+  # for recursive ToCheck calls
+  def decrement_depth(:infinity), do: :infinity
+  def decrement_depth(integer) when is_integer(integer), do: integer - 1
 end

@@ -6,7 +6,8 @@ defmodule TypeCheck.Builtin.Bitstring do
   @type! problem_tuple :: {t(), :no_match, map(), any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(s, param) do
+    def to_check(s, param, depth) when depth <= 0, do: quote do {:ok, []} end
+    def to_check(s, param, _depth) do
       quote do
         case unquote(param) do
           x when is_bitstring(x) ->
