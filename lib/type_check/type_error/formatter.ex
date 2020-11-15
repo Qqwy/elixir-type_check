@@ -52,5 +52,5 @@ defmodule TypeCheck.TypeError.Formatter do
   A formatter is expected to turn a `problem_tuple` into a string
   that can be used as `:message` of the TypeCheck.TypeError exception.
   """
-  @callback format(problem_tuple) :: String.t()
+  @callback format(problem_tuple, TypeCheck.TypeError.location()) :: String.t()
 end

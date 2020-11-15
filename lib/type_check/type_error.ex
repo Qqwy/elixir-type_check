@@ -11,9 +11,9 @@ defmodule TypeCheck.TypeError do
   (TODO at some point this might be configured to use your custom formatter instead)
 
   """
-  defexception [:message, :raw]
+  defexception [:message, :raw, :location]
 
-  @type t() :: %__MODULE__{message: String.t(), raw: problem_tuple()}
+  @type t() :: %__MODULE__{message: String.t(), raw: problem_tuple(), location: location()}
 
   @typedoc """
   Any built-in TypeCheck struct (c.f. `TypeCheck.Builtin.*`), whose check(s) failed.
@@ -27,6 +27,8 @@ defmodule TypeCheck.TypeError do
   For instance, for `TypeCheck.Builtin.List` we have `:not_a_list`, `:different_length`, and `:element_error`.
   """
   @type check_name :: atom()
+
+  @type location :: [] | [file: binary(), line: non_neg_integer()]
 
   @typedoc """
   An extra map with any information related to the check that failed.
@@ -49,9 +51,14 @@ defmodule TypeCheck.TypeError do
           {type_checked_against(), check_name(), extra_information(), problematic_value()}
 
   @impl true
-  def exception(problem_tuple) do
-    message = TypeCheck.TypeError.DefaultFormatter.format_wrap(problem_tuple)
+  def exception({problem_tuple, location}) do
+    IO.inspect(location)
+    message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple, location)
 
-    %__MODULE__{message: message, raw: problem_tuple}
+    %__MODULE__{message: message, raw: problem_tuple, location: location}
+  end
+
+  def exception(problem_tuple) do
+    exception({problem_tuple, []})
   end
 end

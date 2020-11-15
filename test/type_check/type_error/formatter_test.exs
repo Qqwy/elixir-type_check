@@ -11,7 +11,7 @@ defmodule TypeCheck.TypeError.FormatterTest do
                   to_gen(TypeCheck.TypeError.Formatter.problem_tuple()),
                   &div(&1, 3)
                 ) do
-      result = TypeCheck.TypeError.DefaultFormatter.format_wrap(problem)
+      result = TypeCheck.TypeError.DefaultFormatter.format(problem)
       assert is_binary(result)
     end
   end
