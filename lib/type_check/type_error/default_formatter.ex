@@ -18,7 +18,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     raw_file = location[:file]
     line = location[:line]
 
-    file = String.replace_prefix(raw_file, File.cwd!, ".")
+    file = String.replace_prefix(raw_file, File.cwd! <> "/", "")
     "At #{file}:#{line}:"
   end
 
