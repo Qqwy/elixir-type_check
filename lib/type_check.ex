@@ -138,6 +138,7 @@ defmodule TypeCheck do
   @spec conforms(value, TypeCheck.Type.expandable_type()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
   defmacro conforms(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
@@ -156,6 +157,7 @@ defmodule TypeCheck do
   """
   @spec conforms?(value, TypeCheck.Type.expandable_type()) :: boolean()
   defmacro conforms?(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
@@ -171,6 +173,7 @@ defmodule TypeCheck do
   """
   @spec conforms!(value, TypeCheck.Type.expandable_type()) :: value | no_return()
   defmacro conforms!(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 

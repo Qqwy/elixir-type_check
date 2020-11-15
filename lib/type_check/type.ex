@@ -55,6 +55,8 @@ defmodule TypeCheck.Type do
   Of course, you can refer to your own local and remote types as well.
   """
   defmacro build(type_ast, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
+
     type_ast
     |> build_unescaped(__CALLER__, options)
     |> Macro.escape()

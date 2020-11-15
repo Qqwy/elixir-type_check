@@ -18,9 +18,15 @@ defmodule TypeCheck.Options do
     %__MODULE__{}
   end
 
+  def new(already_struct = %__MODULE__{}) do
+    already_struct
+  end
+
   def new(enum) do
     spec = TypeCheck.Options.Spec.new(enum[:spec] || [])
-    overrides = check_overrides!(enum[:overrides] || [])
+    raw_overrides = enum[:overrides] || []
+    {overrides, _} = Code.eval_quoted(raw_overrides)
+    overrides = check_overrides!(overrides)
     %__MODULE__{spec: spec, overrides: overrides}
   end
 
