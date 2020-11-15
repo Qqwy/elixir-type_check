@@ -218,7 +218,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     because parameter no. #{index + 1} does not adhere to the spec `#{param_spec}`.
     Rather, its value is: `#{inspect(val |> Enum.at(index))}`.
     Details:
-      The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+      The call `#{call}`
+      does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
         parameter no. #{index + 1}:
     #{indent(indent(indent(do_format(problem))))}
     """
@@ -237,7 +238,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     because the returned result does not adhere to the spec `#{result_spec}`.
     Rather, its value is: `#{inspect(val)}`.
     Details:
-      The result of calling `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+      The result of calling `#{call}`
+      does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
         Returned result:
     #{indent(indent(indent(do_format(problem))))}
     """
