@@ -196,32 +196,38 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   def format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", format(problem))
+    function_with_arity = "#{s.name}/#{Enum.count(val)}"
+    param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary()
     arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments})"
 
     """
-    The call to `#{s.name}/#{Enum.count(arguments)}` failed,
-    because parameter no. #{index + 1} does not adhere to the spec `#{Enum.at(TypeCheck.Inspect.inspect_binary(s.param_types), index)}`.
-      Details:
-        The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
-          parameter no. #{index + 1}:
-    #{indent(indent(indent(indent(format(problem)))))}
+    The call to `#{function_with_arity}` failed,
+    because parameter no. #{index + 1} does not adhere to the spec `#{param_spec}`.
+    Rather, its value is: `#{inspect(val |> Enum.at(index))}`.
+    Details:
+      The call `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+        parameter no. #{index + 1}:
+    #{indent(indent(indent(format(problem))))}
     """
   end
 
   def format(
-        {s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, _val}
+        {s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}
       ) do
+    function_with_arity = "#{s.name}/#{Enum.count(arguments)}"
+    result_spec = s.return_type |> TypeCheck.Inspect.inspect_binary()
     arguments_str = arguments |> Enum.map(&inspect/1) |> Enum.join(", ")
     call = "#{s.name}(#{arguments_str})"
 
     """
-    The call to `#{s.name}/#{Enum.count(arguments)}` failed,
-    because the returned result does not adhere to the spec `#{TypeCheck.Inspect.inspect_binary(s.return_type)}`.
-      Details:
-        The result of calling `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
-          Returned result:
-    #{indent(indent(indent(indent(format(problem)))))}
+    The call to `#{function_with_arity}` failed,
+    because the returned result does not adhere to the spec `#{result_spec}`.
+    Rather, its value is: `#{inspect(val)}`.
+    Details:
+      The result of calling `#{call}` does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+        Returned result:
+    #{indent(indent(indent(format(problem))))}
     """
   end
 
