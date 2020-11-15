@@ -110,9 +110,9 @@ defmodule TypeCheck do
   these checks are not optimized by the compiler.
   """
 
-  defmacro __using__(_options) do
+  defmacro __using__(options) do
     quote do
-      use TypeCheck.Macros
+      use TypeCheck.Macros, unquote(options)
       import TypeCheck.Builtin
     end
   end

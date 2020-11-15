@@ -31,7 +31,7 @@ defmodule TypeCheck.Macros do
   by simply adding `import TypeCheck.Macros, except: [@: 1]` to your module
   and calling the direct versions of the macros instead.
   """
-  defmacro __using__(_options) do
+  defmacro __using__(options) do
     quote location: :keep do
       import Kernel, except: [@: 1]
       import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
