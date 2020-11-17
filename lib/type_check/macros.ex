@@ -173,7 +173,12 @@ defmodule TypeCheck.Macros do
 
   """
   defmacro type!(typedef) do
-    define_type(typedef, :type, __CALLER__)
+    # The extra indirection here ensures we are able to support unquote fragments
+    quote do
+      unquote(Macro.escape(typedef, unquote: true))
+      |> TypeCheck.Macros.define_type(:type, __ENV__)
+      |> Code.eval_quoted(binding(__ENV__), __ENV__)
+    end
   end
 
   @doc """
@@ -199,7 +204,12 @@ defmodule TypeCheck.Macros do
   `typep!/1` accepts the same typedef expression as `type!/1`.
   """
   defmacro typep!(typedef) do
-    define_type(typedef, :typep, __CALLER__)
+    # The extra indirection here ensures we are able to support unquote fragments
+    quote do
+      unquote(Macro.escape(typedef, unquote: true))
+      |> TypeCheck.Macros.define_type(:typep, __ENV__)
+      |> Code.eval_quoted(binding(__ENV__), __ENV__)
+    end
   end
 
   @doc """
@@ -231,7 +241,12 @@ defmodule TypeCheck.Macros do
   `opaque!/1` accepts the same typedef expression as `type!/1`.
   """
   defmacro opaque!(typedef) do
-    define_type(typedef, :opaque, __CALLER__)
+    # The extra indirection here ensures we are able to support unquote fragments
+    quote do
+      unquote(Macro.escape(typedef, unquote: true))
+      |> TypeCheck.Macros.define_type(:opaque, __ENV__)
+      |> Code.eval_quoted(binding(__ENV__), __ENV__)
+    end
   end
 
   @doc """
@@ -269,10 +284,16 @@ defmodule TypeCheck.Macros do
 
   """
   defmacro spec!(specdef) do
-    define_spec(specdef, __CALLER__)
+    # The extra indirection here ensures we are able to support unquote fragments
+    quote do
+      unquote(Macro.escape(specdef, unquote: true))
+      |> TypeCheck.Macros.define_spec(__ENV__)
+      |> Code.eval_quoted(binding(__ENV__), __ENV__)
+    end
   end
 
-  defp define_type(
+  @doc false
+  def define_type(
          {:when, _, [named_type = {:"::", _, [name_with_maybe_params, _type]}, guard_ast]},
          kind,
          caller
@@ -284,7 +305,7 @@ defmodule TypeCheck.Macros do
     )
   end
 
-  defp define_type({:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
+  def define_type({:"::", _meta, [name_with_maybe_params, type]}, kind, caller) do
     clean_typedef = TypeCheck.Internals.ToTypespec.full_rewrite(type, caller)
 
     new_typedoc =
@@ -398,7 +419,8 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp define_spec({:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
+  @doc false
+  def define_spec({:"::", _meta, [name_with_params_ast, return_type_ast]}, caller) do
     {name, params_ast} = Macro.decompose_call(name_with_params_ast)
     arity = length(params_ast)
     # return_type_ast = TypeCheck.Internals.PreExpander.rewrite(return_type_ast, caller)
