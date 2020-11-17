@@ -31,8 +31,6 @@ defmodule TypeCheck.MacrosTest do
       defmodule UnquoteFragmentSpec do
         defmacro my_macro(name) do
           quote bind_quoted: [name: name], location: :keep do
-
-            use TypeCheck
             spec! unquote(:"my_function_#{name}")(binary) :: binary
             def unquote(:"my_function_#{name}")(greeting) do
               greeting
@@ -42,6 +40,7 @@ defmodule TypeCheck.MacrosTest do
       end
 
       defmodule UnquoteFragmentSpecExample do
+        use TypeCheck
         require UnquoteFragmentSpec
 
         UnquoteFragmentSpec.my_macro("greeter")
