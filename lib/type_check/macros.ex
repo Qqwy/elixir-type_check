@@ -30,6 +30,101 @@ defmodule TypeCheck.Macros do
   by another library, you can still use this library,
   by simply adding `import TypeCheck.Macros, except: [@: 1]` to your module
   and calling the direct versions of the macros instead.
+
+
+  ### TypeCheck and metaprogramming
+
+  In certain cases you might want to use TypeCheck to dynamically generate
+  types or functions, such as to add `@spec!`-s to functions
+  that themselves are dynamically generated.
+
+  TypeCheck's macros support 'unquote fragments',
+  just like many builtin 'definition' constructs like `def`, but also `@type` do.
+  (c.f. `Elixir.Kernel.SpecialForms.quote/2` for more details about unquote fragments.)
+
+  An example:
+
+  ```
+  defmodule MetaExample do
+    use TypeCheck
+    people = ~w[joe robert mike]a
+    for name <- people do
+      @type! unquote(name)() :: %{name: unquote(name), coolness_level: :high}
+    end
+  end
+  ```
+
+  ```
+  iex> MetaExample.joe
+  #TypeCheck.Type< %{coolness_level: :high, name: :joe} >
+
+  iex> MetaExample.mike
+  #TypeCheck.Type< %{coolness_level: :high, name: :mike} >
+
+  ```
+
+  #### Macros
+
+  Inside macros, we use unquote fragments in the same way.
+  There is however one more thing to keep in mind:
+  You'll need to add a call to `import Kernel, except: [@: 1]` in your macro (before the quote)
+  to make sure you can call `@type!`, `@spec!` etc.
+  This is a subtle consequence of Elixir's macro-hygiene rules.
+  [See this issue on Elixir's GitHub repository for more info](https://github.com/elixir-lang/elixir/issues/10497#issuecomment-729479434)
+
+  (Alternatively, directly calls to `type!`, `spec!` etc. are possible without overriding the import.)
+
+  An example:
+
+  ```
+  defmodule GreeterMacro do
+    defmacro generate_greeter(greeting) do
+      import Kernel, except: [@: 1] # Ensures TypeSpec's overridden `@` is used in the quote
+      quote do
+        @spec! unquote(greeting)(binary) :: binary
+        def unquote(greeting)(name) do
+          "\#{greeting}, \#{name}!"
+        end
+      end
+    end
+  end
+
+  defmodule GreeterExample do
+    use TypeCheck
+    require GreeterMacro
+
+    GreeterMacro.generate_greeter(:hi)
+    GreeterMacro.generate_greeter(:hello)
+  end
+  ```
+
+  ```
+  iex> GreeterExample.hi("John")
+  "hi, John!"
+
+  iex> GreeterExample.hello("Frank")
+  "hello, Frank!"
+
+  iex> GreeterExample.hi(42)
+  ** (TypeCheck.TypeError) At test/type_check/macros_test.exs:32:
+  The call to `hi/1` failed,
+  because parameter no. 1 does not adhere to the spec `binary()`.
+  Rather, its value is: `42`.
+  Details:
+    The call `hi(42)`
+    does not adhere to spec `hi(binary()) :: binary()`. Reason:
+      parameter no. 1:
+        `42` is not a binary.
+
+  ```
+
+  #### About `use TypeCheck`
+
+  The `use TypeCheck` statement adds an `@before_compile`-hook to the final module,
+  which is used to wrap functions with the specified runtime type-checks.
+
+  This means that some care needs to be taken to ensure that a call to `use TypeCheck` exists
+  in the final module, if you're generating specs dynamically from inside macros.
   """
   defmacro __using__(_options) do
     quote location: :keep do
