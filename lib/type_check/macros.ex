@@ -40,7 +40,7 @@ defmodule TypeCheck.Macros do
 
   TypeCheck's macros support 'unquote fragments',
   just like many builtin 'definition' constructs like `def`, but also `@type` do.
-  (c.f. Kernel.SpecialForms.quote/1 for more details about unquote fragments.)
+  (c.f. `Elixir.Kernel.SpecialForms.quote/2` for more details about unquote fragments.)
 
   An example:
 
@@ -70,7 +70,7 @@ defmodule TypeCheck.Macros do
   You'll need to add a call to `import Kernel, except: [@: 1]` in your macro (before the quote)
   to make sure you can call `@type!`, `@spec!` etc.
   This is a subtle consequence of Elixir's macro-hygiene rules.
-  [See this issue on GitHub for more info](https://github.com/elixir-lang/elixir/issues/10497)
+  [See this issue on Elixir's GitHub repository for more info](https://github.com/elixir-lang/elixir/issues/10497#issuecomment-729479434)
 
   (Alternatively, directly calls to `type!`, `spec!` etc. are possible without overriding the import.)
 
