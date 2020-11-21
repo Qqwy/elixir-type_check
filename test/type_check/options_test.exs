@@ -16,6 +16,39 @@ defmodule TypeCheck.OptionsTest do
         assert is_list(options.overrides)
       end
     end
+
+    test "overrides are respected by the macros" do
+      import StreamData, except: [integer: 0]
+
+      defmodule OverrideExample.Original do
+        @type t() :: integer()
+      end
+
+      defmodule OverrideExample.Replacement do
+        use TypeCheck
+        @type! t() :: integer()
+      end
+
+      defmodule OverrideExample do
+        use TypeCheck, overrides: [{&OverrideExample.Original.t/0, &OverrideExample.Replacement.t/0}]
+
+        @spec! times_two(OverrideExample.Original.t()) :: integer()
+        def times_two(input) do
+          input * 2
+        end
+      end
+
+      assert OverrideExample.times_two(42) == 84
+      assert_raise(TypeCheck.TypeError, fn ->
+        OverrideExample.times_two("a beautiful string")
+      end)
+    end
+
+    test "an argument error is raised on an improper overrides list" do
+      assert_raise(ArgumentError, "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `&OverrideExample.Original.t/0`.", fn ->
+        TypeCheck.Options.new(overrides: [&OverrideExample.Original.t/0])
+      end)
+    end
   end
 
   # Ensure either original and/or override

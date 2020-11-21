@@ -210,6 +210,7 @@ defmodule TypeCheck do
       {{:error, problem}, _} ->
         {:current_stacktrace, [_ , caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)
+        location = update_in(location[:file], &to_string/1)
         {:error, TypeCheck.TypeError.exception({problem, location})}
     end
   end

@@ -58,19 +58,23 @@ defmodule TypeCheck.Options do
   end
 
   def check_overrides!(overrides) do
-    overrides
-    |> Enum.map(fn {k, v} ->
-      {module_k, function_k, arity_k} = ensure_external_function!(k)
-      {module_v, function_v, arity_v} = ensure_external_function!(v)
-      if arity_k != arity_v do
-        raise "Error while parsing TypeCheck overides: override #{inspect(v)} does not have same arity as original type #{inspect(k)}."
-      else
-        {
-          {module_k, function_k, arity_k},
-          {module_v, function_v, arity_v}
-        }
-      end
-    end)
+    Enum.map(overrides, &check_override!/1)
+  end
+
+  defp check_override!({original, override}) do
+    {module_k, function_k, arity_k} = ensure_external_function!(original)
+    {module_v, function_v, arity_v} = ensure_external_function!(override)
+    if arity_k != arity_v do
+      raise "Error while parsing TypeCheck overides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
+    else
+      {
+        {module_k, function_k, arity_k},
+        {module_v, function_v, arity_v}
+      }
+    end
+  end
+  defp check_override!(other) do
+    raise ArgumentError, "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `#{inspect(other)}`."
   end
 
   defp ensure_external_function!(fun) when is_function(fun) do
