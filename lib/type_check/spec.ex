@@ -67,6 +67,9 @@ defmodule TypeCheck.Spec do
     {params_code, return_code}
   end
 
+  defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller) do
+    quote do end
+  end
   defp params_check_code(name, arity, param_types, clean_params, caller) do
     paired_params =
       param_types

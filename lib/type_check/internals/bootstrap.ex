@@ -9,6 +9,7 @@ defmodule TypeCheck.Internals.Bootstrap do
     {:module, _} ->
 
       __MODULE__.Macros.recompile(TypeCheck.Options, "lib/type_check/options.ex")
+      __MODULE__.Macros.recompile(TypeCheck.Builtin, "lib/type_check/builtin.ex")
 
   end
 end

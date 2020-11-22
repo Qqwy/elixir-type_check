@@ -2,6 +2,11 @@ defmodule TypeCheck.Builtin do
   require TypeCheck.Internals.ToTypespec
   # TypeCheck.Internals.ToTypespec.define_all()
 
+  import TypeCheck.Internals.Bootstrap.Macros
+  if_recompiling? do
+    use TypeCheck
+  end
+
   @moduledoc """
 
   Usually you'd want to import this module when you're using TypeCheck.
@@ -24,12 +29,18 @@ defmodule TypeCheck.Builtin do
       "foobar"
 
   """
+  if_recompiling? do
+    @spec! any() :: %TypeCheck.Builtin.Any{}
+  end
   def any() do
     Macro.struct!(TypeCheck.Builtin.Any, __ENV__)
   end
 
   @doc typekind: :builtin
   @doc "alias for `any/0`"
+  if_recompiling? do
+    @spec! term() :: %TypeCheck.Builtin.Any{}
+  end
   def term(), do: any()
 
   @doc typekind: :builtin
@@ -45,6 +56,9 @@ defmodule TypeCheck.Builtin do
       iex> TypeCheck.conforms!(10, atom())
       ** (TypeCheck.TypeError) `10` is not an atom.
   """
+  if_recompiling? do
+    @spec! atom() :: %TypeCheck.Builtin.Atom{}
+  end
   def atom() do
     Macro.struct!(TypeCheck.Builtin.Atom, __ENV__)
   end
@@ -57,6 +71,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `atom/0`
   """
+  if_recompiling? do
+    @spec! module() :: %TypeCheck.Builtin.Atom{}
+  end
   def module(), do: atom()
 
   @doc typekind: :builtin

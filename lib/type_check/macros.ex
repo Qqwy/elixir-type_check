@@ -207,7 +207,7 @@ defmodule TypeCheck.Macros do
           caller
         )
 
-      TypeCheck.Spec.wrap_function_with_spec(
+      res = TypeCheck.Spec.wrap_function_with_spec(
         name,
         line,
         arity,
@@ -215,6 +215,8 @@ defmodule TypeCheck.Macros do
         params_spec_code,
         return_spec_code
       )
+      # IO.puts(Macro.to_string(res))
+      res
     end
   end
 
