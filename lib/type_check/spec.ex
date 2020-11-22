@@ -68,6 +68,8 @@ defmodule TypeCheck.Spec do
   end
 
   defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller) do
+    # No check needed for arity-0 functions.
+    # Also gets rid of a compiler warning 'else will never match'
     quote do end
   end
   defp params_check_code(name, arity, param_types, clean_params, caller) do

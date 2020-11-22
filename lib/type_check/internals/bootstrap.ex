@@ -8,6 +8,7 @@ defmodule TypeCheck.Internals.Bootstrap do
     {:error, problem} -> IO.puts(problem)
     {:module, _} ->
 
+      __MODULE__.Macros.recompile(TypeCheck.Type, "lib/type_check/type.ex")
       __MODULE__.Macros.recompile(TypeCheck.Options, "lib/type_check/options.ex")
       __MODULE__.Macros.recompile(TypeCheck.Builtin, "lib/type_check/builtin.ex")
 
