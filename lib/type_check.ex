@@ -110,9 +110,9 @@ defmodule TypeCheck do
   these checks are not optimized by the compiler.
   """
 
-  defmacro __using__(_options) do
+  defmacro __using__(options) do
     quote do
-      use TypeCheck.Macros
+      use TypeCheck.Macros, unquote(options)
       import TypeCheck.Builtin
     end
   end
@@ -137,8 +137,9 @@ defmodule TypeCheck do
   @type value :: any()
   @spec conforms(value, TypeCheck.Type.expandable_type()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
-  defmacro conforms(value, type) do
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__)
+  defmacro conforms(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     quote do
@@ -155,8 +156,9 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `conforms/2`.
   """
   @spec conforms?(value, TypeCheck.Type.expandable_type()) :: boolean()
-  defmacro conforms?(value, type) do
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__)
+  defmacro conforms?(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     quote do
@@ -170,8 +172,9 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `conforms/2`.
   """
   @spec conforms!(value, TypeCheck.Type.expandable_type()) :: value | no_return()
-  defmacro conforms!(value, type) do
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__)
+  defmacro conforms!(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     quote do
@@ -207,6 +210,7 @@ defmodule TypeCheck do
       {{:error, problem}, _} ->
         {:current_stacktrace, [_ , caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)
+        location = update_in(location[:file], &to_string/1)
         {:error, TypeCheck.TypeError.exception({problem, location})}
     end
   end

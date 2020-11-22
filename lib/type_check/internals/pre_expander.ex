@@ -4,14 +4,17 @@ defmodule TypeCheck.Internals.PreExpander do
   # to replace all Kernel.SpecialForms
   # with alternatives that are not 'special'
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
-  def rewrite(ast, env) do
+  def rewrite(ast, env, options) do
     builtin_imports = env.functions[TypeCheck.Builtin]
-    case Macro.expand(ast, env) do
+    ast
+    |> Macro.expand(env)
+    |> TypeCheck.Internals.Overrides.rewrite_if_override(options.overrides, env)
+    |> case do
       ast = {:lazy_explicit, meta, args}  ->
         if {:lazy_explicit, 3} in builtin_imports do
           ast
         else
-          {:lazy_explicit, meta, Enum.map(args, &rewrite(&1, env))}
+          {:lazy_explicit, meta, Enum.map(args, &rewrite(&1, env, options))}
         end
 
       ast = {:literal, meta, [value]} ->
@@ -21,13 +24,13 @@ defmodule TypeCheck.Internals.PreExpander do
         if {:literal, 1} in builtin_imports do
           ast
         else
-          {:literal, meta, [rewrite(value, env)]}
+          {:literal, meta, [rewrite(value, env, options)]}
         end
       ast = {:tuple, meta, [value]} ->
         if {:tuple, 1} in builtin_imports do
           ast
         else
-          {:tuple, meta, [rewrite(value, env)]}
+          {:tuple, meta, [rewrite(value, env, options)]}
         end
 
       ast = {:&, _, _args} ->
@@ -42,7 +45,7 @@ defmodule TypeCheck.Internals.PreExpander do
       list when is_list(list) ->
         rewritten_values =
           list
-          |> Enum.map(&rewrite(&1, env))
+          |> Enum.map(&rewrite(&1, env, options))
 
         quote location: :keep do
           TypeCheck.Builtin.fixed_list(unquote(rewritten_values))
@@ -50,18 +53,18 @@ defmodule TypeCheck.Internals.PreExpander do
 
       {:|, _, [lhs, rhs]} ->
         quote location: :keep do
-          TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env)), unquote(rewrite(rhs, env)))
+          TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env, options)), unquote(rewrite(rhs, env, options)))
         end
 
       ast = {:%{}, _, fields} ->
-        rewrite_map_or_struct(fields, ast, env)
+        rewrite_map_or_struct(fields, ast, env, options)
 
       {:%, _, [struct_name, {:%{}, _, fields}]} ->
-        rewrite_struct(struct_name, fields, env)
+        rewrite_struct(struct_name, fields, env, options)
 
       {:"::", _, [{name, _, atom}, type_ast]} when is_atom(atom) ->
         quote location: :keep do
-          TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env)))
+          TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env, options)))
         end
 
       ast = {:when, _, [_type, list]} when is_list(list) ->
@@ -82,14 +85,14 @@ defmodule TypeCheck.Internals.PreExpander do
 
       {:when, _, [type, guard]} ->
         quote location: :keep do
-          TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env)), unquote(Macro.escape(guard)))
+          TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env, options)), unquote(Macro.escape(guard)))
         end
 
       {:{}, _, elements} ->
-        rewrite_tuple(elements, env)
+        rewrite_tuple(elements, env, options)
 
       {left, right} ->
-        rewrite_tuple([left, right], env)
+        rewrite_tuple([left, right], env, options)
 
       orig = {variable, meta, atom} when is_atom(atom) ->
         # Ensures we'll get no pesky warnings when zero-arity types
@@ -102,7 +105,7 @@ defmodule TypeCheck.Internals.PreExpander do
 
       {other_fun, meta, args} when is_list(args) ->
         # Make sure arguments of any function are expanded
-        {other_fun, meta, Enum.map(args, &rewrite(&1, env))}
+        {other_fun, meta, Enum.map(args, &rewrite(&1, env, options))}
 
       other ->
         # Fallback
@@ -118,17 +121,17 @@ defmodule TypeCheck.Internals.PreExpander do
     {name, 0} in definitions
   end
 
-  defp rewrite_tuple(tuple_elements, env) do
+  defp rewrite_tuple(tuple_elements, env, options) do
     rewritten_elements =
       tuple_elements
-      |> Enum.map(&rewrite(&1, env))
+      |> Enum.map(&rewrite(&1, env, options))
 
     quote location: :keep do
       TypeCheck.Builtin.fixed_tuple(unquote(rewritten_elements))
     end
   end
 
-  defp rewrite_map_or_struct(struct_fields, orig_ast, env) do
+  defp rewrite_map_or_struct(struct_fields, orig_ast, env, options) do
     case struct_fields[:__struct__] do
       Range ->
         quote location: :keep do
@@ -139,7 +142,7 @@ defmodule TypeCheck.Internals.PreExpander do
         # A map with fixed fields
         # Keys are expected to be literal values
         field_types =
-          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
+          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
 
         quote location: :keep do
           TypeCheck.Builtin.fixed_map(unquote(field_types))
@@ -154,8 +157,8 @@ defmodule TypeCheck.Internals.PreExpander do
     end
   end
 
-  defp rewrite_struct(struct_name, fields, env) do
-    field_types = Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env)} end)
+  defp rewrite_struct(struct_name, fields, env, options) do
+    field_types = Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
     # TODO wrap in struct-checker
     quote do
       TypeCheck.Builtin.fixed_map(

@@ -701,7 +701,9 @@ defmodule TypeCheck.Builtin do
   as `some_type` directly in ELixir's builtin typespecs.
   """
   defmacro lazy(type_call_ast) do
-    expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__)
+
+    typecheck_options = Module.get_attribute(__CALLER__.module, TypeCheck.Options, TypeCheck.Options.new())
+    expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__, typecheck_options)
 
     {module, name, arguments} =
       case Macro.decompose_call(expanded_call) do
