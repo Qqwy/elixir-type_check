@@ -38,18 +38,23 @@ defmodule TypeCheck.Options do
   if_recompiling? do
     use TypeCheck
 
-    @type! remote_type() :: {atom, atom, 0..255} | function
-    @type! type_override :: {remote_type(), remote_type()}
+    @type! remote_type() :: mfa() | function
+
+    @typedoc """
+    An extra check is performed to ensure that the original type
+    and the replacement type have the same arity.
+    """
+    @type! type_override :: {original :: remote_type(), replacement :: remote_type()}
     @type! type_overrides :: list(type_override())
 
-    @type! t :: %__MODULE__{
+    @type! t :: %TypeCheck.Options{
       overrides: type_overrides()
     }
   else
-    @type remote_type() :: {atom, atom, 0..255} | function
+    @type remote_type() :: mfa | function
     @type type_override :: {remote_type(), remote_type()}
 
-    @type t :: %__MODULE__{
+    @type t :: %TypeCheck.Options{
       overrides: list(type_override())
     }
   end
