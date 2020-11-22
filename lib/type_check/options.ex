@@ -1,4 +1,5 @@
 defmodule TypeCheck.Options do
+  import TypeCheck.Internals.Bootstrap.Macros
   @moduledoc """
   Defines the options that TypeCheck supports on calls to `use TypeCheck`.
 
@@ -58,7 +59,21 @@ defmodule TypeCheck.Options do
   end
 
   def check_overrides!(overrides) do
+    if_recompiling? do
+      typecheck_overrides_list!(overrides)
+    end
+
     Enum.map(overrides, &check_override!/1)
+  end
+
+  if_recompiling? do
+    defp typecheck_overrides_list!(overrides) do
+      import TypeCheck.Builtin
+
+      mfa = one_of(fixed_tuple([atom(), atom(), range(0, 255)]), function())
+      mfa_list = list(fixed_tuple([mfa, mfa]))
+      TypeCheck.dynamic_conforms!(overrides, mfa_list)
+    end
   end
 
   defp check_override!({original, override}) do
