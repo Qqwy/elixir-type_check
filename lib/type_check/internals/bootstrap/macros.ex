@@ -2,10 +2,13 @@ defmodule TypeCheck.Internals.Bootstrap.Macros do
   @moduledoc false
   # Used inside modules that want to add checks
   # where this is not possible because of cyclic dependencies otherwise
-  defmacro if_recompiling?(do: block) do
+  defmacro if_recompiling?(kwargs) do
+    doblock = kwargs[:do] || quote do end
+    elseblock = kwargs[:else] || quote do end
+
     case Code.ensure_loaded(__CALLER__.module) do
-      {:module, _} -> block
-      {:error, _} -> quote do end
+      {:module, _} -> doblock
+      {:error, _} -> elseblock
     end
   end
 

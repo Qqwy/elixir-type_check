@@ -35,11 +35,24 @@ defmodule TypeCheck.Options do
   ```
   """
 
-  @type type_override() :: {(... -> any()), (... -> any())}
+  if_recompiling? do
+    use TypeCheck
 
-  @type t :: %__MODULE__{
-    overrides: list(type_override())
-  }
+    @type! remote_type() :: {atom, atom, 0..255} | function
+    @type! type_override :: {remote_type(), remote_type()}
+    @type! type_overrides :: list(type_override())
+
+    @type! t :: %__MODULE__{
+      overrides: type_overrides()
+    }
+  else
+    @type remote_type() :: {atom, atom, 0..255} | function
+    @type type_override :: {remote_type(), remote_type()}
+
+    @type t :: %__MODULE__{
+      overrides: list(type_override())
+    }
+  end
 
   defstruct [overrides: []]
 
@@ -51,6 +64,9 @@ defmodule TypeCheck.Options do
     already_struct
   end
 
+  if_recompiling? do
+    @spec! new(enum :: any()) :: t()
+  end
   def new(enum) do
     raw_overrides = enum[:overrides] || []
     # {overrides, _} = Code.eval_quoted(raw_overrides)
@@ -58,22 +74,11 @@ defmodule TypeCheck.Options do
     %__MODULE__{overrides: overrides}
   end
 
-  def check_overrides!(overrides) do
-    if_recompiling? do
-      typecheck_overrides_list!(overrides)
-    end
-
-    Enum.map(overrides, &check_override!/1)
-  end
-
   if_recompiling? do
-    defp typecheck_overrides_list!(overrides) do
-      import TypeCheck.Builtin
-
-      mfa = one_of(fixed_tuple([atom(), atom(), range(0, 255)]), function())
-      mfa_list = list(fixed_tuple([mfa, mfa]))
-      TypeCheck.dynamic_conforms!(overrides, mfa_list)
-    end
+    @spec! check_overrides!(overrides :: type_overrides()) :: type_overrides()
+  end
+  def check_overrides!(overrides) do
+    Enum.map(overrides, &check_override!/1)
   end
 
   defp check_override!({original, override}) do
