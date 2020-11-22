@@ -14,7 +14,9 @@ defmodule TypeCheck.Internals.Bootstrap.Macros do
 
   defmacro recompile(module, filename) do
     quote do
-      prev = Code.get_compiler_option(:ignore_module_conflict)
+      # Compatible with Elixir 1.9:
+      # If support no longer necessary, replace with Code.get_compiler_option
+      prev = Code.compiler_options[:ignore_module_conflict]
       Code.put_compiler_option(:ignore_module_conflict, true)
       require unquote(module)
       Code.compile_file(unquote(filename))
