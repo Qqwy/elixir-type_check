@@ -44,8 +44,8 @@ defmodule TypeCheck.OptionsTest do
       end)
     end
 
-    test "an argument error is raised on an improper overrides list" do
-      assert_raise(ArgumentError, "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `&OverrideExample.Original.t/0`.", fn ->
+    test "an TypeCheck.TypeError is raised on an improper overrides list" do
+      assert_raise(TypeCheck.TypeError, fn ->
         TypeCheck.Options.new(overrides: [&OverrideExample.Original.t/0])
       end)
     end
