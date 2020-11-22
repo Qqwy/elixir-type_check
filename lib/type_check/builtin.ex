@@ -82,8 +82,11 @@ defmodule TypeCheck.Builtin do
   but indicates that the result will be used
   as a boolean.
   """
+  if_recompiling? do
+    @spec! as_boolean(t :: TypeCheck.Type.t()) :: TypeCheck.Type.t()
+  end
   def as_boolean(type) do
-    TypeCheck.Type.ensure_type!(type)
+    # TypeCheck.Type.ensure_type!(type)
     type
   end
 
