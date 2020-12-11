@@ -7,7 +7,7 @@ defmodule TypeCheck.Internals.ToTypespec do
   # to check whether TypeCheck.Builtin was imported
   # to see what kind of rewrite we should do.
   def rewrite(ast, env) do
-    builtin_imports = env.functions[TypeCheck.Builtin]
+    builtin_imports = env.functions[TypeCheck.Builtin] || []
     case Macro.expand(ast, env) do
       ast = {:lazy_explicit, _, [module, name, arguments]} ->
         if {:lazy_explicit, 3} in builtin_imports do
@@ -32,7 +32,7 @@ defmodule TypeCheck.Internals.ToTypespec do
         end
 
       ast = {:wrap_with_gen, _, [type, _]} ->
-        if {:wrap_with_gen, 2} in env.functions[TypeCheck.Type.StreamData] do
+        if {:wrap_with_gen, 2} in (env.functions[TypeCheck.Type.StreamData] || []) do
           # Hide generator wrapper
           type
         else

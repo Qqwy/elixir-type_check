@@ -15,7 +15,13 @@ defmodule TypeCheck.Type do
   In practice, this type means 'any of the' structs in the `TypeCheck.Builtin.*` modules.
   """
   if_recompiling? do
-    @type! t() :: (x :: any() when TypeCheck.Type.is_type?(x))
+    import TypeCheck.Type.StreamData
+
+      @type! t() :: (x :: any() when TypeCheck.Type.is_type?(x))
+                    |> wrap_with_gen(&TypeCheck.Type.stream_data_type_gen/0)
+    # else
+    #   @type! t() :: (x :: any() when TypeCheck.Type.is_type?(x))
+    # end
   else
     @type t() :: any()
   end
@@ -121,6 +127,27 @@ defmodule TypeCheck.Type do
 
       _other ->
         :ok
+    end
+  end
+
+  @doc """
+  Generates TypeCheck types as values,
+  to be used in metaprogramming/dogfooding tests.
+
+  Currently this implementation is somewhat limited and only generates
+  _some_ valid TypeCheck types rather than instances of all valid types.
+
+  (it only generates primitive types rather than also nested/composed types.)
+
+  """
+  if Code.ensure_compiled(StreamData) do
+    def stream_data_type_gen do
+      StreamData.term()
+      # import TypeCheck.Builtin
+      # primitive_builtin_types = [any(), atom(), arity(), binary(), bitstring(), boolean(), byte(), char(), charlist(), function(), integer(), neg_integer(), non_neg_integer(), pos_integer(), float(), number(), list(), mfa(), tuple(), map()]
+      # primitive_builtin_types
+      # |> Enum.map(&TypeCheck.Type.StreamData.ToStreamData.to_gen/1)
+      # |> StreamData.one_of()
     end
   end
 end

@@ -1,4 +1,7 @@
 defmodule TypeCheck.Builtin do
+
+  # @on_definition TypeCheck.CompilationChecker
+
   require TypeCheck.Internals.ToTypespec
   # TypeCheck.Internals.ToTypespec.define_all()
 
