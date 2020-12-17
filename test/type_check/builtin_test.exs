@@ -91,7 +91,7 @@ defmodule TypeCheck.BuiltinTest do
       test "#{module} Dogfoods by using TypeCheck itself" do
         internal_module = Module.concat(TypeCheck.Internals.UserTypes, unquote(module))
         assert Code.ensure_loaded?(internal_module)
-        assert TypeCheck.Type.is_type?(apply(internal_module, :problem_tuple, []))
+        assert TypeCheck.Type.type?(apply(internal_module, :problem_tuple, []))
       end
 
       test "#{Macro.to_string(type)} has a proper implementation of the Inspect protocol" do

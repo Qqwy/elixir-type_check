@@ -494,15 +494,15 @@ defmodule TypeCheck.Builtin do
 
   # Prevents nesting
   # for nicer error messages on failure.
-  def one_of(left = %TypeCheck.Builtin.OneOf{}, right = %TypeCheck.Builtin.OneOf{}) do
+  def one_of(left = %{__struct__: TypeCheck.Builtin.OneOf}, right = %{__struct__: TypeCheck.Builtin.OneOf}) do
     one_of(left.choices ++ right.choices)
   end
 
-  def one_of(left = %TypeCheck.Builtin.OneOf{}, right) do
+  def one_of(left = %{__struct__: TypeCheck.Builtin.OneOf}, right) do
     one_of(left.choices ++ [right])
   end
 
-  def one_of(left, right = %TypeCheck.Builtin.OneOf{}) do
+  def one_of(left, right = %{__struct__: TypeCheck.Builtin.OneOf}) do
     one_of([left] ++ right.choices)
   end
 
@@ -533,7 +533,9 @@ defmodule TypeCheck.Builtin do
   end
 
   def one_of(list_of_possibilities) when is_list(list_of_possibilities) do
-    %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
+    # %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
+    build_struct(TypeCheck.Builtin.OneOf)
+    |> Map.put(:choices, list_of_possibilities)
   end
 
   @doc typekind: :builtin

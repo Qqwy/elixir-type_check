@@ -50,7 +50,7 @@ defmodule TypeCheck.MacrosTest do
 
     test "is exported as function" do
       assert {:mylist, 0} in BasicTypeDefinition.__info__(:functions)
-      assert TypeCheck.Type.is_type?(BasicTypeDefinition.mylist())
+      assert TypeCheck.Type.type?(BasicTypeDefinition.mylist())
     end
 
     property "can be turned into a StreamData generator" do

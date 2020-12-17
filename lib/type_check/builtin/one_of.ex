@@ -1,6 +1,9 @@
 defmodule TypeCheck.Builtin.OneOf do
   defstruct [:choices]
 
+  use TypeCheck
+  @type! t() :: %TypeCheck.Builtin.OneOf{choices: list(TypeCheck.Type.t())}
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(x = %{choices: choices}, param) do
       snippets =
