@@ -24,29 +24,29 @@ defmodule TypeCheck.TypeError.Formatter do
   use TypeCheck
 
   @type! problem_tuple ::
-         TypeCheck.Builtin.Any.problem_tuple()
-         | TypeCheck.Builtin.Atom.problem_tuple()
+         # TypeCheck.Builtin.Any.problem_tuple()
+          TypeCheck.Builtin.Atom.problem_tuple()
          | TypeCheck.Builtin.Binary.problem_tuple()
          | TypeCheck.Builtin.Bitstring.problem_tuple()
          | TypeCheck.Builtin.Boolean.problem_tuple()
-         | TypeCheck.Builtin.FixedList.problem_tuple()
-         | TypeCheck.Builtin.FixedMap.problem_tuple()
-         | TypeCheck.Builtin.FixedTuple.problem_tuple()
+         # | TypeCheck.Builtin.FixedList.problem_tuple()
+         # | TypeCheck.Builtin.FixedMap.problem_tuple()
+         # | TypeCheck.Builtin.FixedTuple.problem_tuple()
          | TypeCheck.Builtin.Float.problem_tuple()
          | TypeCheck.Builtin.Integer.problem_tuple()
-         # | TypeCheck.Builtin.Lazy.problem_tuple
-         | TypeCheck.Builtin.List.problem_tuple()
+         # # | TypeCheck.Builtin.Lazy.problem_tuple
+         # | TypeCheck.Builtin.List.problem_tuple()
          | TypeCheck.Builtin.Literal.problem_tuple()
-         | TypeCheck.Builtin.Map.problem_tuple()
-         | TypeCheck.Builtin.NamedType.problem_tuple()
+         # | TypeCheck.Builtin.Map.problem_tuple()
+         # | TypeCheck.Builtin.NamedType.problem_tuple()
          | TypeCheck.Builtin.NegInteger.problem_tuple()
          | TypeCheck.Builtin.NonNegInteger.problem_tuple()
-         | TypeCheck.Builtin.None.problem_tuple()
+         # | TypeCheck.Builtin.None.problem_tuple()
          | TypeCheck.Builtin.Number.problem_tuple()
-         # | TypeCheck.Builtin.OneOf.problem_tuple
+         # # | TypeCheck.Builtin.OneOf.problem_tuple
          | TypeCheck.Builtin.PosInteger.problem_tuple()
-         | TypeCheck.Builtin.Range.problem_tuple()
-         | TypeCheck.Builtin.Tuple.problem_tuple()
+         # | TypeCheck.Builtin.Range.problem_tuple()
+         # | TypeCheck.Builtin.Tuple.problem_tuple()
 
   @doc """
   A formatter is expected to turn a `problem_tuple` into a string
