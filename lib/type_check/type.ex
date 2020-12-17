@@ -15,7 +15,7 @@ defmodule TypeCheck.Type do
   In practice, this type means 'any of the' structs in the `TypeCheck.Builtin.*` modules.
   """
   if_recompiling? do
-    @type! t() :: (x :: any() when TypeCheck.Type.is_type?(x))
+    @type! t() :: (x :: any() when TypeCheck.Type.type?(x))
   else
     @type t() :: any()
   end
@@ -100,7 +100,7 @@ defmodule TypeCheck.Type do
     TypeCheck.Internals.ToTypespec.rewrite(type, __CALLER__)
   end
 
-  def is_type?(possibly_a_type) do
+  def type?(possibly_a_type) do
     TypeCheck.Protocols.ToCheck.impl_for(possibly_a_type) != nil
   end
 

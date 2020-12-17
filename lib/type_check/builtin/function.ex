@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.Function do
   defstruct []
 
   use TypeCheck
-  @type! t :: %__MODULE__{}
+  @opaque! t :: %TypeCheck.Builtin.Function{}
   @type! problem_tuple :: {t(), :no_match, map(), any()}
 
   defimpl TypeCheck.Protocols.ToCheck do

@@ -2,7 +2,7 @@ defmodule TypeCheck.Spec do
   defstruct [:name, :param_types, :return_type]
 
   defp spec_fun_name(function, arity) do
-    :"__type_check_spec_for_#{function}/#{arity}__"
+    :"__TypeCheck spec for '#{function}/#{arity}'__"
   end
 
   def lookup(module, function, arity) do

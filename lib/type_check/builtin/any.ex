@@ -2,6 +2,7 @@ defmodule TypeCheck.Builtin.Any do
   defstruct []
 
   use TypeCheck
+  @opaque! t :: %TypeCheck.Builtin.Any{}
   @type! problem_tuple :: none()
 
   defimpl TypeCheck.Protocols.ToCheck do

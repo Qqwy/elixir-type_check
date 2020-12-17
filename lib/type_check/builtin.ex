@@ -30,7 +30,7 @@ defmodule TypeCheck.Builtin do
 
   """
   if_recompiling? do
-    @spec! any() :: %TypeCheck.Builtin.Any{}
+    @spec! any() :: TypeCheck.Builtin.Any.t()
   end
   def any() do
     build_struct(TypeCheck.Builtin.Any)
@@ -39,7 +39,7 @@ defmodule TypeCheck.Builtin do
   @doc typekind: :builtin
   @doc "alias for `any/0`"
   if_recompiling? do
-    @spec! term() :: %TypeCheck.Builtin.Any{}
+    @spec! term() :: TypeCheck.Builtin.Any.t()
   end
   def term(), do: any()
 
@@ -57,7 +57,7 @@ defmodule TypeCheck.Builtin do
       ** (TypeCheck.TypeError) `10` is not an atom.
   """
   if_recompiling? do
-    @spec! atom() :: %TypeCheck.Builtin.Atom{}
+    @spec! atom() :: TypeCheck.Builtin.Atom.t()
   end
   def atom() do
     build_struct(TypeCheck.Builtin.Atom)
@@ -72,7 +72,7 @@ defmodule TypeCheck.Builtin do
   c.f. `atom/0`
   """
   if_recompiling? do
-    @spec! module() :: %TypeCheck.Builtin.Atom{}
+    @spec! module() :: TypeCheck.Builtin.Atom.t()
   end
   def module(), do: atom()
 
@@ -94,6 +94,9 @@ defmodule TypeCheck.Builtin do
   @doc """
   Shorthand for `range(0..255)`
   """
+  if_recompiling? do
+    @spec! arity() :: TypeCheck.Builtin.Range.t()
+  end
   def arity() do
     range(0..255)
   end
@@ -106,6 +109,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `TypeCheck.Builtin.Binary`
   """
+  if_recompiling? do
+    @spec! binary() :: TypeCheck.Builtin.Binary.t()
+  end
   def binary() do
     build_struct(TypeCheck.Builtin.Binary)
   end
@@ -116,6 +122,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `TypeCheck.Builtin.Bitstring`
   """
+  if_recompiling? do
+    @spec! bitstring() :: TypeCheck.Builtin.Bitstring.t()
+  end
   def bitstring() do
     build_struct(TypeCheck.Builtin.Bitstring)
   end
@@ -128,6 +137,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `TypeCheck.Builtin.Boolean`
   """
+  if_recompiling? do
+    @spec! boolean() :: TypeCheck.Builtin.Boolean.t()
+  end
   def boolean() do
     build_struct(TypeCheck.Builtin.Boolean)
   end
@@ -138,6 +150,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `range/1`
   """
+  if_recompiling? do
+    @spec! byte() :: TypeCheck.Builtin.Range.t()
+  end
   def byte() do
     range(0..255)
   end
@@ -148,6 +163,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `range/1`
   """
+  if_recompiling? do
+    @spec! char() :: TypeCheck.Builtin.Range.t()
+  end
   def char() do
     range(0..0x10FFFF)
   end
@@ -158,6 +176,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `list/1` and `char/0`
   """
+  if_recompiling? do
+    @spec! charlist() :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.Range.t())
+  end
   def charlist() do
     list(char())
   end
@@ -168,6 +189,9 @@ defmodule TypeCheck.Builtin do
 
   c.f. `TypeCheck.Builtin.Function`
   """
+  if_recompiling? do
+    @spec! function() :: TypeCheck.Builtin.Function.t()
+  end
   def function() do
     build_struct(TypeCheck.Builtin.Function)
   end
@@ -176,6 +200,9 @@ defmodule TypeCheck.Builtin do
   @doc """
   Alias for `function/0`.
   """
+  if_recompiling? do
+    @spec! fun() :: TypeCheck.Builtin.Function.t()
+  end
   def fun() do
     function()
   end
@@ -186,6 +213,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Integer`
   """
+  if_recompiling? do
+    @spec! integer() :: TypeCheck.Builtin.Integer.t()
+  end
   def integer() do
     build_struct(TypeCheck.Builtin.Integer)
   end
@@ -196,6 +226,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.NegInteger`
   """
+  if_recompiling? do
+    @spec! neg_integer() :: TypeCheck.Builtin.NegInteger.t()
+  end
   def neg_integer() do
     build_struct(TypeCheck.Builtin.NegInteger)
   end
@@ -206,6 +239,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.NonNegInteger`
   """
+  if_recompiling? do
+    @spec! non_neg_integer() :: TypeCheck.Builtin.NonNegInteger.t()
+  end
   def non_neg_integer() do
     build_struct(TypeCheck.Builtin.NonNegInteger)
   end
@@ -216,6 +252,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.PosInteger`
   """
+  if_recompiling? do
+    @spec! pos_integer() :: TypeCheck.Builtin.PosInteger.t()
+  end
   def pos_integer() do
     build_struct(TypeCheck.Builtin.PosInteger)
   end
@@ -226,6 +265,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Float`
   """
+  if_recompiling? do
+    @spec! float() :: TypeCheck.Builtin.Float.t()
+  end
   def float() do
     build_struct(TypeCheck.Builtin.Float)
   end
@@ -238,6 +280,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Number`
   """
+  if_recompiling? do
+    @spec! number() :: TypeCheck.Builtin.Number.t()
+  end
   def number() do
     build_struct(TypeCheck.Builtin.Number)
   end
@@ -250,6 +295,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `list/1` and `any/0`
   """
+  if_recompiling? do
+    @spec! list() :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.Any.t())
+  end
   def list() do
     list(any())
   end
@@ -273,9 +321,10 @@ defmodule TypeCheck.Builtin do
         at index 2:
           `3.3` is not an integer.
   """
+  if_recompiling? do
+    @spec! list(a :: TypeCheck.Type.t()) :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())
+  end
   def list(a) do
-    TypeCheck.Type.ensure_type!(a)
-
     build_struct(TypeCheck.Builtin.List)
     |> Map.put(:element_type, a)
   end
@@ -297,6 +346,9 @@ defmodule TypeCheck.Builtin do
           `3` does not check against `{atom(), any()}`. Reason:
             `3` is not a tuple.
   """
+  if_recompiling? do
+    @spec! keyword() :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.FixedTuple.t())
+  end
   def keyword() do
     keyword(any())
   end
@@ -307,6 +359,9 @@ defmodule TypeCheck.Builtin do
 
   Shorthand for `list({atom(), t})`
   """
+  if_recompiling? do
+    @spec! keyword(a :: TypeCheck.Type.t()) :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.FixedTuple.t())
+  end
   def keyword(t) do
     list(fixed_tuple([atom(), t]))
   end
@@ -321,6 +376,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `fixed_tuple/1`
   """
+  if_recompiling? do
+    @spec! mfa() :: TypeCheck.Builtin.FixedTuple.t()
+  end
   def mfa() do
     fixed_tuple([module(), atom(), arity()])
   end
@@ -337,15 +395,25 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Tuple`
   """
+  if_recompiling? do
+    @spec fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
+  end
   def fixed_tuple(list_of_element_types)
   # prevents double-expanding
   # when called as `fixed_tuple([1,2,3])` by the user.
+  # This is also the reason for the indirection here
   def fixed_tuple(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
-    fixed_tuple(list.element_types)
+    do_fixed_tuple(list.element_types)
   end
 
   def fixed_tuple(element_types_list) when is_list(element_types_list) do
-    Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
+    do_fixed_tuple(element_types_list)
+  end
+
+  if_recompiling? do
+    @spec! do_fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
+  end
+  defp do_fixed_tuple(element_types_list) do
 
     build_struct(TypeCheck.Builtin.FixedTuple)
     |> Map.put(:element_types, element_types_list)
@@ -362,6 +430,9 @@ defmodule TypeCheck.Builtin do
 
   For instance, `tuple(3)` is represented as `{any(), any(), any()}`.
   """
+  if_recompiling? do
+    @spec! tuple(size :: non_neg_integer()) :: TypeCheck.Builtin.FixedTuple.t()
+  end
   def tuple(0), do: fixed_tuple([])
   def tuple(size) when is_integer(size) and size > 0 do
     elems =
@@ -377,6 +448,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Tuple`
   """
+  if_recompiling? do
+    @spec! tuple() :: TypeCheck.Builtin.Tuple.t()
+  end
   def tuple() do
     build_struct(TypeCheck.Builtin.Tuple)
   end
@@ -398,6 +472,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Literal`
   """
+  if_recompiling? do
+    @spec! literal(a :: term()) :: TypeCheck.Builtin.Literal.t()
+  end
   def literal(value) do
     build_struct(TypeCheck.Builtin.Literal)
     |> Map.put(:value, value)
@@ -410,6 +487,9 @@ defmodule TypeCheck.Builtin do
   Desugaring of types separated by `|` like `a | b` or `a | b | c | d`.
   (and represented that way in Elixir's builtin Typespecs).
   """
+  if_recompiling? do
+    @spec! one_of(left :: TypeCheck.Type.t(), right :: TypeCheck.Type.t()) :: TypeCheck.Builtin.OneOf.t()
+  end
   def one_of(left, right)
 
   # Prevents nesting
@@ -442,8 +522,12 @@ defmodule TypeCheck.Builtin do
 
   c.f. `one_of/2`.
   """
+  if_recompiling? do
+    @spec one_of(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.OneOf.t()
+  end
   def one_of(list_of_possibilities)
 
+  # Fix double expansion
   def one_of(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     one_of(list.element_types)
   end
@@ -491,8 +575,6 @@ defmodule TypeCheck.Builtin do
   end
 
   def range(lower, higher) do
-    # %TypeCheck.Builtin.Range{range: lower..higher}
-
     build_struct(TypeCheck.Builtin.Range)
     |> Map.put(:range, lower..higher)
   end
