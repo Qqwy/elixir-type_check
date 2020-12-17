@@ -13,7 +13,7 @@ defmodule TypeCheck.Builtin.Map do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_map(x) ->
             {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, unquote(param)}}
@@ -38,7 +38,7 @@ defmodule TypeCheck.Builtin.Map do
           Macro.var(:single_field_value, __MODULE__)
         )
 
-      quote do
+      quote generated: true, location: :keep do
         orig_param = unquote(param)
 
         orig_param

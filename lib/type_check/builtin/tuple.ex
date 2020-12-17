@@ -13,7 +13,7 @@ defmodule TypeCheck.Builtin.Tuple do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when is_tuple(x) ->
             {:ok, []}

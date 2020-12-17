@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.Lazy do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         type = TypeCheck.Builtin.Lazy.lazily_expand_type(unquote(Macro.escape(s)))
         # Do not inject `param` one step deeper into the check,
         # because that makes dealing with quoting/unquoting difficult.

@@ -59,7 +59,7 @@ defmodule TypeCheck.Builtin.Guarded do
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         case unquote(type_check) do
           {:ok, bindings} ->
             # Shadows all but the most recently-bound value for each name

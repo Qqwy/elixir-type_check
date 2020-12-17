@@ -7,7 +7,7 @@ defmodule TypeCheck.Builtin.PosInteger do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when is_integer(x) and x > 0 ->
             {:ok, []}

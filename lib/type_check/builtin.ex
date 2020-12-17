@@ -33,7 +33,7 @@ defmodule TypeCheck.Builtin do
     @spec! any() :: %TypeCheck.Builtin.Any{}
   end
   def any() do
-    Macro.struct!(TypeCheck.Builtin.Any, __ENV__)
+    build_struct(TypeCheck.Builtin.Any)
   end
 
   @doc typekind: :builtin
@@ -60,7 +60,7 @@ defmodule TypeCheck.Builtin do
     @spec! atom() :: %TypeCheck.Builtin.Atom{}
   end
   def atom() do
-    Macro.struct!(TypeCheck.Builtin.Atom, __ENV__)
+    build_struct(TypeCheck.Builtin.Atom)
   end
 
   @doc typekind: :builtin
@@ -107,7 +107,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Binary`
   """
   def binary() do
-    Macro.struct!(TypeCheck.Builtin.Binary, __ENV__)
+    build_struct(TypeCheck.Builtin.Binary)
   end
 
   @doc typekind: :builtin
@@ -117,7 +117,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Bitstring`
   """
   def bitstring() do
-    Macro.struct!(TypeCheck.Builtin.Bitstring, __ENV__)
+    build_struct(TypeCheck.Builtin.Bitstring)
   end
 
   @doc typekind: :builtin
@@ -129,7 +129,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Boolean`
   """
   def boolean() do
-    Macro.struct!(TypeCheck.Builtin.Boolean, __ENV__)
+    build_struct(TypeCheck.Builtin.Boolean)
   end
 
   @doc typekind: :builtin
@@ -169,7 +169,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Function`
   """
   def function() do
-    Macro.struct!(TypeCheck.Builtin.Function, __ENV__)
+    build_struct(TypeCheck.Builtin.Function)
   end
 
   @doc typekind: :builtin
@@ -187,7 +187,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Integer`
   """
   def integer() do
-    Macro.struct!(TypeCheck.Builtin.Integer, __ENV__)
+    build_struct(TypeCheck.Builtin.Integer)
   end
 
   @doc typekind: :builtin
@@ -197,7 +197,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.NegInteger`
   """
   def neg_integer() do
-    Macro.struct!(TypeCheck.Builtin.NegInteger, __ENV__)
+    build_struct(TypeCheck.Builtin.NegInteger)
   end
 
   @doc typekind: :builtin
@@ -207,7 +207,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.NonNegInteger`
   """
   def non_neg_integer() do
-    Macro.struct!(TypeCheck.Builtin.NonNegInteger, __ENV__)
+    build_struct(TypeCheck.Builtin.NonNegInteger)
   end
 
   @doc typekind: :builtin
@@ -217,7 +217,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.PosInteger`
   """
   def pos_integer() do
-    Macro.struct!(TypeCheck.Builtin.PosInteger, __ENV__)
+    build_struct(TypeCheck.Builtin.PosInteger)
   end
 
   @doc typekind: :builtin
@@ -227,7 +227,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Float`
   """
   def float() do
-    Macro.struct!(TypeCheck.Builtin.Float, __ENV__)
+    build_struct(TypeCheck.Builtin.Float)
   end
 
   @doc typekind: :builtin
@@ -239,7 +239,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Number`
   """
   def number() do
-    Macro.struct!(TypeCheck.Builtin.Number, __ENV__)
+    build_struct(TypeCheck.Builtin.Number)
   end
 
   @doc typekind: :builtin
@@ -276,7 +276,7 @@ defmodule TypeCheck.Builtin do
   def list(a) do
     TypeCheck.Type.ensure_type!(a)
 
-    Macro.struct!(TypeCheck.Builtin.List, __ENV__)
+    build_struct(TypeCheck.Builtin.List)
     |> Map.put(:element_type, a)
   end
 
@@ -347,7 +347,7 @@ defmodule TypeCheck.Builtin do
   def fixed_tuple(element_types_list) when is_list(element_types_list) do
     Enum.map(element_types_list, &TypeCheck.Type.ensure_type!/1)
 
-    Macro.struct!(TypeCheck.Builtin.FixedTuple, __ENV__)
+    build_struct(TypeCheck.Builtin.FixedTuple)
     |> Map.put(:element_types, element_types_list)
   end
 
@@ -378,7 +378,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Tuple`
   """
   def tuple() do
-    Macro.struct!(TypeCheck.Builtin.Tuple, __ENV__)
+    build_struct(TypeCheck.Builtin.Tuple)
   end
 
   @doc typekind: :builtin
@@ -399,7 +399,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Literal`
   """
   def literal(value) do
-    Macro.struct!(TypeCheck.Builtin.Literal, __ENV__)
+    build_struct(TypeCheck.Builtin.Literal)
     |> Map.put(:value, value)
   end
 
@@ -464,7 +464,7 @@ defmodule TypeCheck.Builtin do
   def range(range = _lower.._higher) do
     # %TypeCheck.Builtin.Range{range: range}
 
-    Macro.struct!(TypeCheck.Builtin.Range, __ENV__)
+    build_struct(TypeCheck.Builtin.Range)
     |> Map.put(:range, range)
   end
 
@@ -493,7 +493,7 @@ defmodule TypeCheck.Builtin do
   def range(lower, higher) do
     # %TypeCheck.Builtin.Range{range: lower..higher}
 
-    Macro.struct!(TypeCheck.Builtin.Range, __ENV__)
+    build_struct(TypeCheck.Builtin.Range)
     |> Map.put(:range, lower..higher)
   end
 
@@ -504,7 +504,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Map`
   """
   def map() do
-    Macro.struct!(TypeCheck.Builtin.Map, __ENV__)
+    build_struct(TypeCheck.Builtin.Map)
     |> Map.put(:key_type, any())
     |> Map.put(:value_type, any())
   end
@@ -521,7 +521,7 @@ defmodule TypeCheck.Builtin do
     TypeCheck.Type.ensure_type!(key_type)
     TypeCheck.Type.ensure_type!(value_type)
 
-    Macro.struct!(TypeCheck.Builtin.Map, __ENV__)
+    build_struct(TypeCheck.Builtin.Map)
     |> Map.put(:key_type, key_type)
     |> Map.put(:value_type, value_type)
   end
@@ -571,7 +571,7 @@ defmodule TypeCheck.Builtin do
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
     Enum.map(keywords, &TypeCheck.Type.ensure_type!(elem(&1, 1)))
 
-    Macro.struct!(TypeCheck.Builtin.FixedMap, __ENV__)
+    build_struct(TypeCheck.Builtin.FixedMap)
     |> Map.put(:keypairs, Enum.into(keywords, []))
   end
 
@@ -596,7 +596,7 @@ defmodule TypeCheck.Builtin do
   def fixed_list(element_types) when is_list(element_types) do
     Enum.map(element_types, &TypeCheck.Type.ensure_type!/1)
 
-    Macro.struct!(TypeCheck.Builtin.FixedList, __ENV__)
+    build_struct(TypeCheck.Builtin.FixedList)
     |> Map.put(:element_types, element_types)
   end
 
@@ -615,7 +615,7 @@ defmodule TypeCheck.Builtin do
   def named_type(name, type) do
     TypeCheck.Type.ensure_type!(type)
 
-    Macro.struct!(TypeCheck.Builtin.NamedType, __ENV__)
+    build_struct(TypeCheck.Builtin.NamedType)
     |> Map.put(:name, name)
     |> Map.put(:type, type)
   end
@@ -749,7 +749,7 @@ defmodule TypeCheck.Builtin do
 
   @doc false
   def lazy_explicit(module, function, arguments) do
-    Macro.struct!(TypeCheck.Builtin.Lazy, __ENV__)
+    build_struct(TypeCheck.Builtin.Lazy)
     |> Map.merge(%{module: module, function: function, arguments: arguments})
   end
 
@@ -765,7 +765,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.None`.
   """
   def none() do
-    Macro.struct!(TypeCheck.Builtin.None, __ENV__)
+    build_struct(TypeCheck.Builtin.None)
   end
 
   @doc typekind: :builtin
@@ -773,4 +773,11 @@ defmodule TypeCheck.Builtin do
   See `none/0`.
   """
   def no_return(), do: none()
+
+
+  # Reason we cannot dirctly use %module{}
+  # is because then we'd create circular dependencies.
+  defp build_struct(module) do
+    Macro.struct!(module, __ENV__)
+  end
 end

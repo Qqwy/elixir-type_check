@@ -12,7 +12,7 @@ defmodule TypeCheck.Builtin.NamedType do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         case unquote(inner_check) do
           {:ok, bindings} ->
             # Write it to a non-hygienic variable

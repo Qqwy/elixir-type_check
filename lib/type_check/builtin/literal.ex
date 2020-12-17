@@ -7,7 +7,7 @@ defmodule TypeCheck.Builtin.Literal do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{value: value}, param) do
-      quote location: :keep do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when x === unquote(Macro.escape(value)) ->
             {:ok, []}

@@ -26,7 +26,7 @@ defmodule TypeCheck.Builtin.FixedMap do
     end
 
     def to_check(s, param) do
-      quote location: :keep do
+      quote generated: true, location: :keep do
         with {:ok, []} <- unquote(map_check(param, s)),
              {:ok, []} <- unquote(build_keys_presence_ast(s, param)),
              {:ok, bindings3} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
@@ -36,7 +36,7 @@ defmodule TypeCheck.Builtin.FixedMap do
     end
 
     defp map_check(param, s) do
-      quote location: :keep do
+      quote generated: true, location: :keep do
         if is_map(unquote(param)) do
           {:ok, []}
         else
@@ -52,7 +52,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         |> Enum.into(%{})
         |> Map.keys()
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         actual_keys = unquote(param) |> Map.keys()
 
         case unquote(required_keys) -- actual_keys do
@@ -73,12 +73,12 @@ defmodule TypeCheck.Builtin.FixedMap do
           value_check =
             TypeCheck.Protocols.ToCheck.to_check(
               value_type,
-              quote do
+              quote generated: true, location: :keep do
                 Map.fetch!(unquote(param), unquote(key))
               end
             )
 
-          quote location: :keep do
+          quote generated: true, location: :keep do
             [
               {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
               bindings = value_bindings ++ bindings
@@ -86,7 +86,7 @@ defmodule TypeCheck.Builtin.FixedMap do
           end
         end)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         bindings = []
 
         with unquote_splicing(keypair_checks) do

@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.OneOf do
         |> Enum.flat_map(fn choice ->
           choice_check = TypeCheck.Protocols.ToCheck.to_check(choice, param)
 
-          quote location: :keep do
+          quote generated: true, location: :keep do
             [
               {:error, problem} <- unquote(choice_check),
               problems = [problem | problems]
@@ -16,7 +16,7 @@ defmodule TypeCheck.Builtin.OneOf do
           end
         end)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         problems = []
 
         with unquote_splicing(snippets) do
