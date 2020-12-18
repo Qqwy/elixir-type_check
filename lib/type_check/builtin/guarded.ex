@@ -1,6 +1,9 @@
 defmodule TypeCheck.Builtin.Guarded do
   defstruct [:type, :guard]
 
+  use TypeCheck
+  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: term()}
+
   @doc false
   def extract_names(type) do
     case type do

@@ -547,6 +547,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Range`
   """
+  if_recompiling? do
+    @spec! range(range :: (%Range{} | TypeCheck.Builtin.Range.t())) :: TypeCheck.Builtin.Range.t()
+  end
   def range(range = _lower.._higher) do
     # %TypeCheck.Builtin.Range{range: range}
 
@@ -567,6 +570,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `range/1`
   """
+  if_recompiling? do
+    @spec range(lower :: integer(), higher :: integer()) :: TypeCheck.Builtin.Range.t()
+  end
   def range(lower, higher)
 
   def range(%{__struct__: TypeCheck.Builtin.Literal, value: lower}, %{
@@ -587,6 +593,10 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Map`
   """
+
+  if_recompiling? do
+    @spec! map() :: TypeCheck.Builtin.Map.t()
+  end
   def map() do
     build_struct(TypeCheck.Builtin.Map)
     |> Map.put(:key_type, any())
@@ -601,6 +611,9 @@ defmodule TypeCheck.Builtin do
 
   C.f. `TypeCheck.Builtin.Map`
   """
+  if_recompiling? do
+    @spec! map(key_type :: TypeCheck.Type.t(), value_type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.Map.t()
+  end
   def map(key_type, value_type) do
     TypeCheck.Type.ensure_type!(key_type)
     TypeCheck.Type.ensure_type!(value_type)
@@ -625,6 +638,9 @@ defmodule TypeCheck.Builtin do
   ```.
   (for e.g. a call to `fixed_map([a_key: value_type1, {"other key", value_type2}])`)
   """
+  if_recompiling? do
+    @spec fixed_map(key_value_type_pairs :: keyword()) :: TypeCheck.Builtin.FixedMap.t()
+  end
   def fixed_map(keywords)
 
   # prevents double-expanding
@@ -669,6 +685,10 @@ defmodule TypeCheck.Builtin do
   Cannot directly be represented in Elixir's builtin Typespecs,
   and is thus represented as `[any()]` instead.
   """
+  if_recompiling? do
+    @spec fixed_list(element_types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedList.t()
+  end
+
   def fixed_list(element_types)
 
   # prevents double-expanding
@@ -677,9 +697,14 @@ defmodule TypeCheck.Builtin do
     list
   end
 
-  def fixed_list(element_types) when is_list(element_types) do
-    Enum.map(element_types, &TypeCheck.Type.ensure_type!/1)
+  def fixed_list(element_types) do
+    do_fixed_list(element_types)
+  end
 
+  if_recompiling? do
+    @spec! do_fixed_list(element_types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedList.t()
+  end
+  defp do_fixed_list(element_types) do
     build_struct(TypeCheck.Builtin.FixedList)
     |> Map.put(:element_types, element_types)
   end
@@ -696,6 +721,9 @@ defmodule TypeCheck.Builtin do
   Cannot directly be represented in Elixir's builtin Typespecs,
   and is thus represented as `type` (without the name) instead.
   """
+  if_recompiling? do
+    @spec! named_type(name :: atom(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
+  end
   def named_type(name, type) do
     TypeCheck.Type.ensure_type!(type)
 
@@ -725,13 +753,16 @@ defmodule TypeCheck.Builtin do
   Cannot be represented in Elixir's builtin Typespecs,
   and is thus represented as `type` (without the guard) instead.
   """
+  if_recompiling? do
+    @spec! guarded_by(type :: TypeCheck.Type.t(), ast :: term()) :: TypeCheck.Builtin.Guarded.t()
+  end
   def guarded_by(type, guard_ast) do
-    TypeCheck.Type.ensure_type!(type)
-
     # Make sure the type contains coherent names.
     TypeCheck.Builtin.Guarded.extract_names(type)
 
-    %TypeCheck.Builtin.Guarded{type: type, guard: guard_ast}
+    build_struct(TypeCheck.Builtin.Guarded)
+    |> Map.put(:type, type)
+    |> Map.put(:guard, guard_ast)
   end
 
   @doc typekind: :extension
@@ -804,6 +835,9 @@ defmodule TypeCheck.Builtin do
   Therefore, `lazy(some_type)` is represented
   as `some_type` directly in ELixir's builtin typespecs.
   """
+  if_recompiling? do
+    @spec lazy(ast :: TypeCheck.Type.t()) :: TypeCheck.Builtin.Lazy.t()
+  end
   defmacro lazy(type_call_ast) do
 
     typecheck_options = Module.get_attribute(__CALLER__.module, TypeCheck.Options, TypeCheck.Options.new())

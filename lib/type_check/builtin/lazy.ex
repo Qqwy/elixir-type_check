@@ -2,6 +2,7 @@ defmodule TypeCheck.Builtin.Lazy do
   defstruct [:module, :function, :arguments]
 
   use TypeCheck
+  @type! t :: %TypeCheck.Builtin.Lazy{module: module(), function: atom(), arguments: list(term())}
   @type! problem_tuple :: TypeCheck.TypeError.Formatter.problem_tuple()
 
   def lazily_expand_type(s) do
