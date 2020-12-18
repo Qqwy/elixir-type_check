@@ -12,7 +12,7 @@ defmodule TypeCheck.Type do
 
   It is also expected to implement the TypeCheck.Protocols.Inspect protocol (although that has an `Any` fallback).
 
-  In practice, this type means 'any of the' structs in the `TypeCheck.Builtin.*` modules.
+  In practice, this type means 'any of the structs in the `TypeCheck.Builtin.*` modules'.
   """
   if_recompiling? do
     import TypeCheck.Type.StreamData
@@ -20,13 +20,6 @@ defmodule TypeCheck.Type do
   else
     @type t() :: any()
   end
-
-  # To allow types to refer to this type
-  # @doc false
-  # def t do
-  #   import TypeCheck.Builtin
-  #   any()
-  # end
 
   @typedoc """
   Indicates that we expect a 'type AST' that will be expanded
