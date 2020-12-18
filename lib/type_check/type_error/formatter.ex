@@ -23,12 +23,12 @@ defmodule TypeCheck.TypeError.Formatter do
   # type problem_tuple :: {module, atom, map, any}
   use TypeCheck
 
-  # NOTE: Currently does not contain problem_tuples
-  # of types whose definition depends on `TypeCheck.Type.t`
-  # since there is no good generator for that one yet.
+  # Note that `Lazy` is missing here.
+  # This is because `lazy` does not have its own problem tuple,
+  # rather it will always return the problem tuple of the contained type.
   @type! problem_tuple ::
-         # TypeCheck.Builtin.Any.problem_tuple()
-          TypeCheck.Builtin.Atom.problem_tuple()
+         TypeCheck.Builtin.Any.problem_tuple()
+         | TypeCheck.Builtin.Atom.problem_tuple()
          | TypeCheck.Builtin.Binary.problem_tuple()
          | TypeCheck.Builtin.Bitstring.problem_tuple()
          | TypeCheck.Builtin.Boolean.problem_tuple()
@@ -37,16 +37,15 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.FixedTuple.problem_tuple()
          | TypeCheck.Builtin.Float.problem_tuple()
          | TypeCheck.Builtin.Integer.problem_tuple()
-         # # | TypeCheck.Builtin.Lazy.problem_tuple # Problem
-         | TypeCheck.Builtin.List.problem_tuple() # Problem
+         | TypeCheck.Builtin.List.problem_tuple()
          | TypeCheck.Builtin.Literal.problem_tuple()
-         # | TypeCheck.Builtin.Map.problem_tuple() # Problem
-         # | TypeCheck.Builtin.NamedType.problem_tuple() # Problem
+         | TypeCheck.Builtin.Map.problem_tuple()
+         | TypeCheck.Builtin.NamedType.problem_tuple()
          | TypeCheck.Builtin.NegInteger.problem_tuple()
          | TypeCheck.Builtin.NonNegInteger.problem_tuple()
          | TypeCheck.Builtin.None.problem_tuple()
          | TypeCheck.Builtin.Number.problem_tuple()
-         # # | TypeCheck.Builtin.OneOf.problem_tuple # Problem
+         | TypeCheck.Builtin.OneOf.problem_tuple()
          | TypeCheck.Builtin.PosInteger.problem_tuple()
          | TypeCheck.Builtin.Range.problem_tuple()
          | TypeCheck.Builtin.Tuple.problem_tuple()

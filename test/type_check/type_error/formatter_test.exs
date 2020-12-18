@@ -1,5 +1,5 @@
 defmodule TypeCheck.TypeError.FormatterTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
   import StreamData, only: []
 
@@ -9,15 +9,24 @@ defmodule TypeCheck.TypeError.FormatterTest do
                  TypeCheck.Builtin.Binary,
                  TypeCheck.Builtin.Bitstring,
                  TypeCheck.Builtin.Boolean,
+                 TypeCheck.Builtin.FixedList,
+                 TypeCheck.Builtin.FixedMap,
+                 TypeCheck.Builtin.FixedTuple,
                  TypeCheck.Builtin.Float,
                  TypeCheck.Builtin.Integer,
+                 TypeCheck.Builtin.Lazy,
+                 TypeCheck.Builtin.List,
                  TypeCheck.Builtin.Literal,
-                 # TypeCheck.Builtin.NamedType, # Known to be broken.
-                 # TODO: ^ Fix as soon as `implements_protocol` is a thing.
+                 TypeCheck.Builtin.Map,
+                 TypeCheck.Builtin.NamedType,
                  TypeCheck.Builtin.NegInteger,
                  TypeCheck.Builtin.NonNegInteger,
+                 TypeCheck.Builtin.None,
+                 TypeCheck.Builtin.Number,
+                 TypeCheck.Builtin.OneOf,
                  TypeCheck.Builtin.PosInteger,
-                 TypeCheck.Builtin.Number] do
+                 TypeCheck.Builtin.Range,
+                 TypeCheck.Builtin.Tuple] do
     property "the default formatter is able to handle all problem tuples (returning a binary string message) of type #{module}" do
       check all problem <-
       StreamData.scale(

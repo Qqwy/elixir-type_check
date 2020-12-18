@@ -46,6 +46,8 @@ defmodule TypeCheck.TypeError do
   @type problematic_value :: any()
   @typedoc """
   A problem_tuple contains all information about a failed type check.
+
+  c.f. TypeCheck.TypeError.Formatter.problem_tuple for a more precise definition
   """
   @type problem_tuple ::
           {type_checked_against(), check_name(), extra_information(), problematic_value()}

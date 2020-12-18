@@ -17,7 +17,7 @@ defmodule TypeCheck.Builtin.FixedList do
          {t(), :not_a_list, %{}, any()}
          | {t(), :different_length, %{expected_length: non_neg_integer()}, list()}
          | {t(), :element_error,
-            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()},
+            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: non_neg_integer()},
             list()}
 
   defimpl TypeCheck.Protocols.ToCheck do

@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.Lazy do
   defstruct [:module, :function, :arguments]
 
   use TypeCheck
-  @type! problem_tuple :: lazy(TypeCheck.TypeError.Formatter.problem_tuple())
+  @type! problem_tuple :: TypeCheck.TypeError.Formatter.problem_tuple()
 
   def lazily_expand_type(s) do
     apply(s.module, s.function, s.arguments)
@@ -36,6 +36,7 @@ defmodule TypeCheck.Builtin.Lazy do
           s
           |> TypeCheck.Builtin.Lazy.lazily_expand_type()
           |> TypeCheck.Protocols.ToStreamData.to_gen()
+          |> StreamData.scale(fn size -> trunc(:math.log(size + 1)) end) # Since we assume that `lazy` is used for recursive types.
         end)
       end
     end

@@ -3,6 +3,7 @@ defmodule TypeCheck.Builtin.OneOf do
 
   use TypeCheck
   @type! t() :: %TypeCheck.Builtin.OneOf{choices: list(TypeCheck.Type.t())}
+  @type! problem_tuple :: {t(), :all_failed, %{problems: list(lazy(TypeCheck.TypeError.Formatter.problem_tuple))}, term()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(x = %{choices: choices}, param) do
