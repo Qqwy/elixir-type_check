@@ -892,6 +892,18 @@ defmodule TypeCheck.Builtin do
   """
   def no_return(), do: none()
 
+  @doc typekind: :extension
+  @doc """
+  Checks whether the given value implements the particular protocol.
+  """
+  if_recompiling? do
+    @spec! implements_protocol(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
+  end
+  def implements_protocol(protocol_name) do
+    build_struct(TypeCheck.Builtin.ImplementsProtocol)
+    |> Map.put(:protocol, protocol_name)
+  end
+
 
   # Reason we cannot dirctly use %module{}
   # is because then we'd create circular dependencies.
