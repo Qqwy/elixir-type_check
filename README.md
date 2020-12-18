@@ -193,6 +193,7 @@ Details:
 
 ### Changelog
 
+- 0.4.0 (prerelease): TypeCheck now bootstraps itself with its own checks, allowing for greater certainty about the correct functioning of the library.
 - 0.3.2 Support for unquote fragments inside types and specs. (c.f. #39)
 - 0.3.1 Fixed link in the documentation.
 - 0.3.0 Improve DefaultFormatter output when used with long function- or type-signatures (c.f. #32). Also, bugfix for `Builtin.tuple/1`.
