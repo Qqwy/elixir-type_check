@@ -37,7 +37,41 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
             raise "values of the type #{inspect(s)} can only be generated when the protocol is consolidated."
           {:consolidated, implementations} ->
             # Extract all implementations that have their own ToStreamData implementation.
-            raise "TODO #{inspect(implementations)}"
+            # raise "TODO #{inspect(implementations)}"
+            implementations
+            |> Enum.map(&stream_data_impl/1)
+            |> Enum.filter(fn val -> match?({:ok, _}, val) end)
+            |> Enum.map(fn {:ok, val} -> val end)
+            |> StreamData.one_of()
+        end
+      end
+
+      def stream_data_impl(module) do
+        import TypeCheck.Builtin
+        alias TypeCheck.Type.StreamData, as: SD
+        case module do
+          # Generators for builtin (non-struct) protocol types
+          Atom -> {:ok, SD.to_gen(atom())}
+          Integer -> {:ok, SD.to_gen(integer())}
+          Float -> {:ok, SD.to_gen(float())}
+          BitString -> {:ok, SD.to_gen(bitstring())}
+          List -> {:ok, SD.to_gen(list())}
+          Map -> {:ok, SD.to_gen(map())}
+          Tuple -> {:ok, SD.to_gen(tuple())}
+          Boolean -> {:ok, SD.to_gen(boolean())}
+          # Function -> {:ok, SD.to_gen(function())}
+          _ ->
+            {:consolidated, to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
+            cond do
+              function_exported?(module, :t, 0) and module in to_streamdata_impls ->
+                lazy(module.t())
+                |> StreamData.bind(fn generated_type ->
+                  SD.to_gen(generated_type)
+                end)
+              # TODO maybe there are other cases in which we can autogenerate values of the type?
+              true ->
+                {:error, :no_impl}
+            end
         end
       end
     end
