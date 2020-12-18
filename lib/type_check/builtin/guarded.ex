@@ -1,6 +1,9 @@
 defmodule TypeCheck.Builtin.Guarded do
   defstruct [:type, :guard]
 
+  use TypeCheck
+  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: term()}
+
   @doc false
   def extract_names(type) do
     case type do
@@ -59,7 +62,7 @@ defmodule TypeCheck.Builtin.Guarded do
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         case unquote(type_check) do
           {:ok, bindings} ->
             # Shadows all but the most recently-bound value for each name

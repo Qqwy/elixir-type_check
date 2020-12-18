@@ -16,7 +16,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
       element_checks_ast = build_element_checks_ast(types_list, param, s)
       expected_size = length(types_list)
 
-      quote do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_tuple(x) ->
             {:error, {unquote(Macro.escape(s)), :not_a_tuple, %{}, x}}
@@ -40,12 +40,12 @@ defmodule TypeCheck.Builtin.FixedTuple do
           impl =
             TypeCheck.Protocols.ToCheck.to_check(
               element_type,
-              quote do
+              quote generated: true, location: :keep do
                 elem(unquote(param), unquote(index))
               end
             )
 
-          quote location: :keep do
+          quote generated: true, location: :keep do
             [
               {{:ok, element_bindings}, _index} <- {unquote(impl), unquote(index)},
               bindings = element_bindings ++ bindings
@@ -53,7 +53,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
           end
         end)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         bindings = []
 
         with unquote_splicing(element_checks) do

@@ -127,7 +127,7 @@ defmodule TypeCheck.Macros do
   in the final module, if you're generating specs dynamically from inside macros.
   """
   defmacro __using__(options) do
-    quote location: :keep do
+    quote generated: true, location: :keep do
       import Kernel, except: [@: 1]
       import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
       @compile {:inline_size, 1080}
@@ -147,7 +147,7 @@ defmodule TypeCheck.Macros do
 
     Module.create(
       compile_time_imports_module_name,
-      quote do
+      quote generated: true, location: :keep do
         @moduledoc false
         # This extra module is created
         # so that we can already access the custom user types
@@ -165,7 +165,7 @@ defmodule TypeCheck.Macros do
     spec_quotes = wrap_functions_with_specs(specs, definitions, env)
 
     # And now for the tricky bit ;-)
-    quote do
+    quote generated: true, location: :keep do
       unquote(spec_defs)
 
       import unquote(compile_time_imports_module_name)
@@ -207,7 +207,7 @@ defmodule TypeCheck.Macros do
           caller
         )
 
-      TypeCheck.Spec.wrap_function_with_spec(
+      res = TypeCheck.Spec.wrap_function_with_spec(
         name,
         line,
         arity,
@@ -215,6 +215,8 @@ defmodule TypeCheck.Macros do
         params_spec_code,
         return_spec_code
       )
+      # IO.puts(Macro.to_string(res))
+      res
     end
   end
 
@@ -273,7 +275,7 @@ defmodule TypeCheck.Macros do
   """
   defmacro type!(typedef) do
     # The extra indirection here ensures we are able to support unquote fragments
-    quote do
+    quote generated: true, location: :keep do
       unquote(Macro.escape(typedef, unquote: true))
       |> TypeCheck.Macros.define_type(:type, __ENV__)
       |> Code.eval_quoted(binding(__ENV__), __ENV__)
@@ -304,7 +306,7 @@ defmodule TypeCheck.Macros do
   """
   defmacro typep!(typedef) do
     # The extra indirection here ensures we are able to support unquote fragments
-    quote do
+    quote generated: true, location: :keep do
       unquote(Macro.escape(typedef, unquote: true))
       |> TypeCheck.Macros.define_type(:typep, __ENV__)
       |> Code.eval_quoted(binding(__ENV__), __ENV__)
@@ -341,7 +343,7 @@ defmodule TypeCheck.Macros do
   """
   defmacro opaque!(typedef) do
     # The extra indirection here ensures we are able to support unquote fragments
-    quote do
+    quote generated: true, location: :keep do
       unquote(Macro.escape(typedef, unquote: true))
       |> TypeCheck.Macros.define_type(:opaque, __ENV__)
       |> Code.eval_quoted(binding(__ENV__), __ENV__)
@@ -384,7 +386,7 @@ defmodule TypeCheck.Macros do
   """
   defmacro spec!(specdef) do
     # The extra indirection here ensures we are able to support unquote fragments
-    quote do
+    quote generated: true, location: :keep do
       unquote(Macro.escape(specdef, unquote: true))
       |> TypeCheck.Macros.define_spec(__ENV__)
       |> Code.eval_quoted(binding(__ENV__), __ENV__)
@@ -428,7 +430,7 @@ defmodule TypeCheck.Macros do
 
     res = type_fun_definition(name_with_maybe_params, type)
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       case unquote(kind) do
         :opaque ->
           @typedoc unquote(new_typedoc)
@@ -482,12 +484,12 @@ defmodule TypeCheck.Macros do
     params_check_code =
       params
       |> Enum.map(fn param ->
-        quote do
+      quote generated: true, location: :keep do
           TypeCheck.Type.ensure_type!(unquote(param))
         end
       end)
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       @doc false
       def unquote(name_with_params) do
         unquote_splicing(params_check_code)
@@ -503,7 +505,7 @@ defmodule TypeCheck.Macros do
   defp type_expansion_loop_prevention_code(name_with_params) do
     key = {Macro.escape(name_with_params), :expansion_tracker}
 
-    quote do
+    quote generated: true, location: :keep do
       expansion_tracker = Process.get({__MODULE__, unquote(key)}, 0)
 
       if expansion_tracker > 1_000_000 do
@@ -531,7 +533,7 @@ defmodule TypeCheck.Macros do
 
     clean_params = Macro.generate_arguments(arity, caller.module)
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       Module.put_attribute(
         __MODULE__,
         TypeCheck.Specs,
@@ -545,11 +547,11 @@ defmodule TypeCheck.Macros do
   defmacro @ast do
     case ast do
       {name, _, expr} when name in ~w[type! typep! opaque! spec!]a ->
-        quote do
+        quote generated: true, location: :keep do
           TypeCheck.Macros.unquote(name)(unquote_splicing(expr))
         end
       _ ->
-        quote do
+        quote generated: true, location: :keep do
           Kernel.@(unquote(ast))
         end
       end

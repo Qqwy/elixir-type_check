@@ -2,7 +2,8 @@ defmodule TypeCheck.Builtin.Lazy do
   defstruct [:module, :function, :arguments]
 
   use TypeCheck
-  @type! problem_tuple :: lazy(TypeCheck.TypeError.Formatter.problem_tuple())
+  @type! t :: %TypeCheck.Builtin.Lazy{module: module(), function: atom(), arguments: list(term())}
+  @type! problem_tuple :: TypeCheck.TypeError.Formatter.problem_tuple()
 
   def lazily_expand_type(s) do
     apply(s.module, s.function, s.arguments)
@@ -10,7 +11,7 @@ defmodule TypeCheck.Builtin.Lazy do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         type = TypeCheck.Builtin.Lazy.lazily_expand_type(unquote(Macro.escape(s)))
         # Do not inject `param` one step deeper into the check,
         # because that makes dealing with quoting/unquoting difficult.
@@ -36,6 +37,7 @@ defmodule TypeCheck.Builtin.Lazy do
           s
           |> TypeCheck.Builtin.Lazy.lazily_expand_type()
           |> TypeCheck.Protocols.ToStreamData.to_gen()
+          |> StreamData.scale(fn size -> trunc(:math.log(size + 1)) end) # Since we assume that `lazy` is used for recursive types.
         end)
       end
     end

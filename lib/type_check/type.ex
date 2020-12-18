@@ -2,6 +2,10 @@ defmodule TypeCheck.Type do
   @moduledoc """
   TODO
   """
+  import TypeCheck.Internals.Bootstrap.Macros
+  if_recompiling? do
+    use TypeCheck
+  end
 
   @typedoc """
   Something is a TypeCheck.Type if it implements the TypeCheck.Protocols.ToCheck protocol.
@@ -10,14 +14,19 @@ defmodule TypeCheck.Type do
 
   In practice, this type means 'any of the' structs in the `TypeCheck.Builtin.*` modules.
   """
-  @type t() :: any()
+  if_recompiling? do
+    import TypeCheck.Type.StreamData
+    @type! t() :: ((x :: any() when TypeCheck.Type.type?(x)) |> wrap_with_gen(&TypeCheck.Type.StreamData.arbitrary_type_gen/0))
+  else
+    @type t() :: any()
+  end
 
   # To allow types to refer to this type
-  @doc false
-  def t do
-    import TypeCheck.Builtin
-    any()
-  end
+  # @doc false
+  # def t do
+  #   import TypeCheck.Builtin
+  #   any()
+  # end
 
   @typedoc """
   Indicates that we expect a 'type AST' that will be expanded
@@ -92,7 +101,7 @@ defmodule TypeCheck.Type do
     TypeCheck.Internals.ToTypespec.rewrite(type, __CALLER__)
   end
 
-  def is_type?(possibly_a_type) do
+  def type?(possibly_a_type) do
     TypeCheck.Protocols.ToCheck.impl_for(possibly_a_type) != nil
   end
 

@@ -158,6 +158,7 @@ defmodule TypeCheck.Type.StreamData do
       StreamData.constant({})
       |> StreamData.bind(fn _ ->
         arbitrary_type_gen()
+        |> StreamData.scale(fn size -> div(size, 2) end)
       end)
     end
   end

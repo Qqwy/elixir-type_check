@@ -1,6 +1,10 @@
 defmodule TypeCheck.Builtin.OneOf do
   defstruct [:choices]
 
+  use TypeCheck
+  @type! t() :: %TypeCheck.Builtin.OneOf{choices: list(TypeCheck.Type.t())}
+  @type! problem_tuple :: {t(), :all_failed, %{problems: list(lazy(TypeCheck.TypeError.Formatter.problem_tuple))}, term()}
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(x = %{choices: choices}, param) do
       snippets =
@@ -8,7 +12,7 @@ defmodule TypeCheck.Builtin.OneOf do
         |> Enum.flat_map(fn choice ->
           choice_check = TypeCheck.Protocols.ToCheck.to_check(choice, param)
 
-          quote location: :keep do
+          quote generated: true, location: :keep do
             [
               {:error, problem} <- unquote(choice_check),
               problems = [problem | problems]
@@ -16,7 +20,7 @@ defmodule TypeCheck.Builtin.OneOf do
           end
         end)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         problems = []
 
         with unquote_splicing(snippets) do

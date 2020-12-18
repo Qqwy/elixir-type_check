@@ -2,7 +2,7 @@ defmodule TypeCheck.Builtin.NamedType do
   defstruct [:name, :type]
 
   use TypeCheck
-  @type! t :: %__MODULE__{name: atom(), type: TypeCheck.Type.t()}
+  @type! t :: %TypeCheck.Builtin.NamedType{name: atom(), type: TypeCheck.Type.t()}
 
   @type! problem_tuple ::
          {t(), :named_type, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())},
@@ -12,7 +12,7 @@ defmodule TypeCheck.Builtin.NamedType do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         case unquote(inner_check) do
           {:ok, bindings} ->
             # Write it to a non-hygienic variable
@@ -29,12 +29,16 @@ defmodule TypeCheck.Builtin.NamedType do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(literal, opts) do
-      to_string(literal.name)
+      stringify_name(literal.name, opts)
       |> Inspect.Algebra.glue("::")
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(literal.type, opts))
       |> Inspect.Algebra.group()
     end
+    defp stringify_name(atom, _) when is_atom(atom), do: to_string(atom)
+    defp stringify_name(str, _) when is_binary(str), do: to_string(str)
+    defp stringify_name(other, opts), do: TypeCheck.Protocols.Inspect.inspect(other, opts)
   end
+
 
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do

@@ -3,11 +3,11 @@ defmodule TypeCheck.Builtin.Integer do
 
   use TypeCheck
   @type! t :: %__MODULE__{}
-  @type! problem_tuple :: {t(), :no_match, map(), any()}
+  @type! problem_tuple :: {t(), :no_match, %{}, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when is_integer(x) ->
             {:ok, []}

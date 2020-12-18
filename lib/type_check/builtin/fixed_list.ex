@@ -17,7 +17,7 @@ defmodule TypeCheck.Builtin.FixedList do
          {t(), :not_a_list, %{}, any()}
          | {t(), :different_length, %{expected_length: non_neg_integer()}, list()}
          | {t(), :element_error,
-            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()},
+            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: non_neg_integer()},
             list()}
 
   defimpl TypeCheck.Protocols.ToCheck do
@@ -25,7 +25,7 @@ defmodule TypeCheck.Builtin.FixedList do
       expected_length = length(s.element_types)
       element_checks_ast = build_element_checks_ast(s.element_types, param, s)
 
-      quote do
+      quote generated: :true, location: :keep do
         case unquote(param) do
           x when not is_list(x) ->
             {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, x}}
@@ -54,7 +54,7 @@ defmodule TypeCheck.Builtin.FixedList do
               end
             )
 
-          quote location: :keep do
+          quote generated: true, location: :keep do
             [
               {{:ok, element_bindings}, index, var!(rest, unquote(__MODULE__))} <-
                 {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))},
@@ -63,7 +63,7 @@ defmodule TypeCheck.Builtin.FixedList do
           end
         end)
 
-      quote location: :keep do
+      quote generated: true, location: :keep do
         bindings = []
 
         with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do

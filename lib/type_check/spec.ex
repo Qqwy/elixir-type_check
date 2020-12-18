@@ -2,7 +2,7 @@ defmodule TypeCheck.Spec do
   defstruct [:name, :param_types, :return_type]
 
   defp spec_fun_name(function, arity) do
-    :"__type_check_spec_for_#{function}/#{arity}__"
+    :"__TypeCheck spec for '#{function}/#{arity}'__"
   end
 
   def lookup(module, function, arity) do
@@ -67,6 +67,11 @@ defmodule TypeCheck.Spec do
     {params_code, return_code}
   end
 
+  defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller) do
+    # No check needed for arity-0 functions.
+    # Also gets rid of a compiler warning 'else will never match'
+    quote do end
+  end
   defp params_check_code(name, arity, param_types, clean_params, caller) do
     paired_params =
       param_types

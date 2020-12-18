@@ -19,7 +19,7 @@ defmodule TypeCheck.Builtin.None do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote do
+      quote generated: true, location: :keep do
         {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
       end
     end
