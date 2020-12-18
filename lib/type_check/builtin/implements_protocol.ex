@@ -64,10 +64,14 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
             {:consolidated, to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
             cond do
               function_exported?(module, :t, 0) and module in to_streamdata_impls ->
-                lazy(module.t())
-                |> StreamData.bind(fn generated_type ->
+                res =
+                  lazy(module.t())
+                  |> SD.to_gen()
+                  |> StreamData.bind(fn generated_type ->
+                  IO.inspect(generated_type, structs: false)
                   SD.to_gen(generated_type)
                 end)
+                  {:ok, res}
               # TODO maybe there are other cases in which we can autogenerate values of the type?
               true ->
                 {:error, :no_impl}

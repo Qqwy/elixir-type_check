@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.FixedMap do
   defstruct [:keypairs]
 
   use TypeCheck
-  @type! t :: %__MODULE__{keypairs: list({any(), any()})}
+  @type! t :: %__MODULE__{keypairs: list({TypeCheck.Type.t(), TypeCheck.Type.t()})}
 
   @type! problem_tuple ::
          {t(), :not_a_map, %{}, any()}

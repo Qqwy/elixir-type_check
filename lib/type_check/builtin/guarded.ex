@@ -2,7 +2,13 @@ defmodule TypeCheck.Builtin.Guarded do
   defstruct [:type, :guard]
 
   use TypeCheck
-  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: term()}
+  import TypeCheck.Type.StreamData
+  @type! ast() :: term() |> wrap_with_gen(&TypeCheck.Builtin.Guarded.ast_gen/1)
+  def ast_gen(term) do
+    Macro.escape(term)
+  end
+
+  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast()}
 
   @doc false
   def extract_names(type) do
