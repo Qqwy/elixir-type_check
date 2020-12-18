@@ -227,7 +227,7 @@ TypeCheck exports a couple of macros that you might want to use without parenthe
 
 ## TypeCheck compared to other tools
 
-TypeCheck is by no means the other solution out there to reduce the number of bugs in your code.
+TypeCheck is by no means the only solution out there to reduce the number of bugs in your code.
 
 ### Elixir's builtin typespecs and Dialyzer
 
