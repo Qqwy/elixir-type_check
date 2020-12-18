@@ -177,12 +177,13 @@ Details:
 ### Pre-stable
 
 - [ ] Hide named types from opaque types.
-- [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
-- [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
+- [x] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
+- [x] Allow overriding remote types that you do not have access to.
+  - [ ] Overrides for the builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
-- [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
-- [ ] Manually overriding generators for user-specified types if so desired.
+- [x] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
+- [x] Manually overriding generators for user-specified types if so desired.
 
 ### Longer-term future ideas
 
@@ -213,7 +214,7 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.2.0"}
+    {:type_check, "~> 0.3.0"}
   ]
 end
 ```
