@@ -23,6 +23,9 @@ defmodule TypeCheck.TypeError.Formatter do
   # type problem_tuple :: {module, atom, map, any}
   use TypeCheck
 
+  # NOTE: Currently does not contain problem_tuples
+  # of types whose definition depends on `TypeCheck.Type.t`
+  # since there is no good generator for that one yet.
   @type! problem_tuple ::
          # TypeCheck.Builtin.Any.problem_tuple()
           TypeCheck.Builtin.Atom.problem_tuple()
@@ -35,7 +38,7 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.Float.problem_tuple()
          | TypeCheck.Builtin.Integer.problem_tuple()
          # # | TypeCheck.Builtin.Lazy.problem_tuple # Problem
-         # | TypeCheck.Builtin.List.problem_tuple() # Problem
+         | TypeCheck.Builtin.List.problem_tuple() # Problem
          | TypeCheck.Builtin.Literal.problem_tuple()
          # | TypeCheck.Builtin.Map.problem_tuple() # Problem
          # | TypeCheck.Builtin.NamedType.problem_tuple() # Problem
