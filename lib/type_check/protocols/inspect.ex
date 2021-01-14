@@ -46,6 +46,19 @@ defimpl TypeCheck.Protocols.Inspect, for: Any do
   end
 end
 
+
+# Override because Stream's normal Elixir implementation messes with TypeCheck's type-inspecting.
+# This is probably a bit of a hack, but should be 'good enough' since using %Stream{}-structs themselves
+# in types should be rare.
+# c.f. https://github.com/Qqwy/elixir-type_check/issues/45
+defimpl TypeCheck.Protocols.Inspect, for: Stream do
+  def inspect(%{}, _opts) do
+    import Elixir.Inspect.Algebra
+
+    concat(["#Stream<", "[...]", ">"])
+  end
+end
+
 defmodule TypeCheck.Inspect do
   def inspect(type, opts \\ %Inspect.Opts{}) do
     type

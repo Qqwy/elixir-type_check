@@ -109,13 +109,17 @@ defmodule TypeCheck.Builtin.FixedMap do
           # Make sure we render structs as structs
           map = Map.put(map, :__struct__, value)
 
-          Elixir.Inspect.inspect(map, %Inspect.Opts{
+          # Ensure that structs can override their normal inspect
+          # by implementing the TypeCheck Inspect protocol:
+          TypeCheck.Protocols.Inspect.inspect(map, %Inspect.Opts{
             opts
             | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2
           })
 
         _ ->
-          Elixir.Inspect.inspect(map, %Inspect.Opts{
+          # Ensure that structs can override their normal inspect
+          # by implementing the TypeCheck Inspect protocol:
+          TypeCheck.Protocols.Inspect.inspect(map, %Inspect.Opts{
             opts
             | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2
           })
