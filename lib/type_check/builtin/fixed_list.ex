@@ -11,7 +11,7 @@ defmodule TypeCheck.Builtin.FixedList do
   defstruct [:element_types]
 
   use TypeCheck
-  @type! t :: %__MODULE__{element_types: list()}
+  @type! t :: %__MODULE__{element_types: list(TypeCheck.Type.t())}
 
   @type! problem_tuple ::
          {t(), :not_a_list, %{}, any()}
