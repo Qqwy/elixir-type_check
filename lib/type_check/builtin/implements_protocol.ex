@@ -59,20 +59,20 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
           Map -> {:ok, SD.to_gen(map())}
           Tuple -> {:ok, SD.to_gen(tuple())}
           Boolean -> {:ok, SD.to_gen(boolean())}
-          # Function -> {:ok, SD.to_gen(function())}
+          # Function -> {:ok, SD.to_gen(function())} # function-specs cannot be generated yet.
           _ ->
             {:consolidated, to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
             cond do
+                # If module contains a `@type! t :: ...`
               function_exported?(module, :t, 0) and module in to_streamdata_impls ->
                 res =
-                  lazy(module.t())
+                  module.t()
                   |> SD.to_gen()
-                  |> StreamData.bind(fn generated_type ->
-                  IO.inspect(generated_type, structs: false)
-                  SD.to_gen(generated_type)
-                end)
-                  {:ok, res}
-              # TODO maybe there are other cases in which we can autogenerate values of the type?
+                {:ok, res}
+                # If module contains `new/0`
+              function_exported?(module, :new, 0) ->
+                res = StreamData.constant(module.new())
+                {:ok, res}
               true ->
                 {:error, :no_impl}
             end
