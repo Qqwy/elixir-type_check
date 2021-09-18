@@ -49,7 +49,7 @@ defmodule TypeCheck.Builtin.FixedList do
           impl =
             TypeCheck.Protocols.ToCheck.to_check(
               element_type,
-              quote do
+              quote generated: true, location: :keep do
                 hd(var!(rest, unquote(__MODULE__)))
               end
             )

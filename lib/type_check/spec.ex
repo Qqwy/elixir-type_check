@@ -29,7 +29,7 @@ defmodule TypeCheck.Spec do
   def create_spec_def(name, arity, param_types, return_type) do
     spec_fun_name = spec_fun_name(name, arity)
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       @doc false
       def unquote(spec_fun_name)() do
         # import TypeCheck.Builtin
@@ -44,7 +44,7 @@ defmodule TypeCheck.Spec do
 
   @doc false
   def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
-    quote line: line do
+    quote generated: true, location: :keep, line: line do
       defoverridable([{unquote(name), unquote(arity)}])
 
       def unquote(name)(unquote_splicing(clean_params)) do
@@ -70,7 +70,7 @@ defmodule TypeCheck.Spec do
   defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller) do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
-    quote do end
+    quote generated: true, location: :keep do end
   end
   defp params_check_code(name, arity, param_types, clean_params, caller) do
     paired_params =
@@ -81,7 +81,7 @@ defmodule TypeCheck.Spec do
         param_check_code(param_type, clean_param, index, caller)
       end)
 
-    quote line: caller.line do
+    quote line: caller.line, generated: true, location: :keep do
       with unquote_splicing(paired_params) do
         # Run actual code
       else
@@ -97,7 +97,7 @@ defmodule TypeCheck.Spec do
   defp param_check_code(param_type, clean_param, index, _caller) do
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
 
-    quote do
+    quote generated: true, location: :keep do
       {{:ok, _bindings}, _index, _param_type} <-
         {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
@@ -107,7 +107,7 @@ defmodule TypeCheck.Spec do
     return_code_check =
       TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
 
-    quote do
+    quote generated: true, location: :keep do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
           nil

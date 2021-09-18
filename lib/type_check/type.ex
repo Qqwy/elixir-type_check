@@ -85,7 +85,7 @@ defmodule TypeCheck.Type do
         compile_time_imports_module_name =
           Module.concat(TypeCheck.Internals.UserTypes, caller.module)
 
-        quote do
+        quote generated: true, location: :keep do
           import unquote(compile_time_imports_module_name)
           unquote(type_ast)
         end

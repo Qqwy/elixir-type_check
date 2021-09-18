@@ -3,8 +3,8 @@ defmodule TypeCheck.Internals.Bootstrap.Macros do
   # Used inside modules that want to add checks
   # where this is not possible because of cyclic dependencies otherwise
   defmacro if_recompiling?(kwargs) do
-    doblock = kwargs[:do] || quote do end
-    elseblock = kwargs[:else] || quote do end
+    doblock = kwargs[:do] || quote generated: true, location: :keep do end
+    elseblock = kwargs[:else] || quote generated: true, location: :keep do end
 
     case Code.ensure_loaded(__CALLER__.module) do
       {:module, _} -> doblock

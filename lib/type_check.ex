@@ -111,7 +111,7 @@ defmodule TypeCheck do
   """
 
   defmacro __using__(options) do
-    quote do
+    quote generated: true, location: :keep do
       use TypeCheck.Macros, unquote(options)
       import TypeCheck.Builtin
     end
@@ -142,7 +142,7 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    quote do
+    quote generated: true, location: :keep do
       case unquote(check) do
         {:ok, bindings} -> {:ok, unquote(value)}
         {:error, problem} -> {:error, TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})}
@@ -161,7 +161,7 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    quote do
+    quote generated: true, location: :keep do
       match?({:ok, _}, unquote(check))
     end
   end
@@ -177,7 +177,7 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    quote do
+    quote generated: true, location: :keep do
       case unquote(check) do
         {:ok, _bindings} -> unquote(value)
         {:error, other} -> raise TypeCheck.TypeError, other

@@ -12,7 +12,7 @@ defmodule TypeCheck.Internals.ToTypespec do
       ast = {:lazy_explicit, _, [module, name, arguments]} ->
         if {:lazy_explicit, 3} in builtin_imports do
           # Removes 'lazy' from typespec.
-          quote do
+          quote generated: true, location: :keep do
             unquote(module).unquote(name)(unquote_splicing(arguments))
           end
         else
@@ -54,7 +54,7 @@ defmodule TypeCheck.Internals.ToTypespec do
       ast = {:one_of, _, [types]} ->
         if {:one_of, 1} in builtin_imports do
         Enum.reduce(types, fn type, snippet ->
-          quote do
+          quote generated: true, location: :keep do
             unquote(snippet) | unquote(type)
           end
         end)
@@ -74,7 +74,7 @@ defmodule TypeCheck.Internals.ToTypespec do
         elems =
           0..size
           |> Enum.map(fn _ ->
-            quote do
+            quote generated: true, location: :keep do
               any()
             end
           end)
@@ -92,22 +92,22 @@ defmodule TypeCheck.Internals.ToTypespec do
         end
 
       {:range, _meta, [lower, higher]} ->
-        quote do
+        quote generated: true, location: :keep do
           unquote(lower)..unquote(higher)
         end
 
       {:range, _meta, [range]} ->
-        quote do
+        quote generated: true, location: :keep do
           unquote(range)
         end
 
       {:literal, _, [elem_type]} ->
         if is_binary(elem_type) do
-          quote do
+          quote generated: true, location: :keep do
             binary()
           end
         else
-          quote do
+          quote generated: true, location: :keep do
             unquote(elem_type)
           end
         end
@@ -116,27 +116,27 @@ defmodule TypeCheck.Internals.ToTypespec do
         snippets =
           keywords
           |> Enum.map(fn {key, value} ->
-            quote do
+            quote generated: true, location: :keep do
               {required(unquote(key)), unquote(value)}
             end
           end)
 
-        quote do
+        quote generated: true, location: :keep do
           %{unquote_splicing(snippets)}
         end
 
       {:map, _, [key_type, value_type]} ->
-        quote do
+        quote generated: true, location: :keep do
           %{optional(unquote(key_type)) => unquote(value_type)}
         end
 
       # Relax these types that Elixir's builtin typespecs does not accept
       binary when is_binary(binary) ->
-        quote do
+        quote generated: true, location: :keep do
           binary()
         end
       float when is_float(float) ->
-        quote do
+        quote generated: true, location: :keep do
           float()
         end
 
