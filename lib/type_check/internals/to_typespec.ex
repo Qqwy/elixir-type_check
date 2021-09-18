@@ -3,9 +3,6 @@ defmodule TypeCheck.Internals.ToTypespec do
     Macro.postwalk(ast, &rewrite(&1, env))
   end
 
-  # TODO incorporate %Macro.Env{}.functions
-  # to check whether TypeCheck.Builtin was imported
-  # to see what kind of rewrite we should do.
   def rewrite(ast, env) do
     builtin_imports = env.functions[TypeCheck.Builtin] || []
     case Macro.expand(ast, env) do
