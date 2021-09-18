@@ -57,8 +57,8 @@ defmodule TypeCheck.Spec do
       ...(7)> TypeCheck.Spec.lookup!(Example, :greeter, 1)
       #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
 
-      ...(8)> TypeCheck.Spec.lookup!(Example, :nonexistent, 0)
-      ** (ArgumentError) No spec found for `TypeCheck.SpecTest.Example.nonexistent/0`
+      iex> TypeCheck.Spec.lookup!(Example, :nonexistent, 0)
+      ** (ArgumentError) No spec found for `Example.nonexistent/0`
   """
   def lookup!(module, function, arity) do
     case lookup(module, function, arity) do
