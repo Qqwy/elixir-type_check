@@ -5,6 +5,31 @@ defmodule TypeCheck.Spec do
     :"__TypeCheck spec for '#{function}/#{arity}'__"
   end
 
+  @doc """
+  Looks up the spec for a particular `{module, function, arity}`.
+
+  On success, returns `{:ok, spec}`.
+  On failure, returns `{:error, :not_found}`.
+
+  This is quite an advanced low-level function,
+  which you usually won't need to interact with directly.
+
+
+  c.f. `lookup!/3`.
+
+      iex(1)> defmodule Example do
+      ...(2)>   use TypeCheck
+      ...(3)>   @spec! greeter(name :: binary()) :: binary()
+      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
+      ...(5)> end
+      ...(6)>
+      ...(7)> {:ok, spec} = TypeCheck.Spec.lookup(Example, :greeter, 1)
+      ...(8)> spec
+      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+
+      iex> TypeCheck.Spec.lookup(Example, :nonexistent, 0)
+      {:error, :not_found}
+  """
   def lookup(module, function, arity) do
     Code.ensure_loaded(module)
 
@@ -15,11 +40,49 @@ defmodule TypeCheck.Spec do
     end
   end
 
+  @doc """
+  Looks up the spec for a particular `{module, function, arity}`.
+
+  On success, returns `spec`.
+  Raises when the spec cannot be found.
+
+  c.f. `lookup/3`.
+
+      iex(1)> defmodule Example do
+      ...(2)>   use TypeCheck
+      ...(3)>   @spec! greeter(name :: binary()) :: binary()
+      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
+      ...(5)> end
+      ...(6)>
+      ...(7)> TypeCheck.Spec.lookup!(Example, :greeter, 1)
+      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+
+      ...(8)> TypeCheck.Spec.lookup!(Example, :nonexistent, 0)
+      ** (ArgumentError) No spec found for `TypeCheck.SpecTest.Example.nonexistent/0`
+  """
   def lookup!(module, function, arity) do
-    {:ok, res} = lookup(module, function, arity)
-    res
+    case lookup(module, function, arity) do
+      {:ok, spec} -> spec
+      _ -> raise ArgumentError, "No spec found for `#{inspect(module)}.#{to_string(function)}/#{arity}`"
+    end
   end
 
+  @doc """
+  True if a spec was added to `{module, function, arity}`.
+
+  c.f. `lookup/3`.
+
+      iex(1)> defmodule Example do
+      ...(2)>   use TypeCheck
+      ...(3)>   @spec! greeter(name :: binary()) :: binary()
+      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
+      ...(5)> end
+      ...(6)>
+      ...(7)> TypeCheck.Spec.defined?(Example, :greeter, 1)
+      true
+      ...(8)> TypeCheck.Spec.defined?(Example, :nonexistent, 0)
+      false
+  """
   def defined?(module, function, arity) do
     Code.ensure_loaded(module)
     function_exported?(module, spec_fun_name(function, arity), 0)
