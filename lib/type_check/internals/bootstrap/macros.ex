@@ -1,4 +1,6 @@
 defmodule TypeCheck.Internals.Bootstrap.Macros do
+  # coveralls-ignore-start
+
   @moduledoc false
   # Used inside modules that want to add checks
   # where this is not possible because of cyclic dependencies otherwise
@@ -23,4 +25,6 @@ defmodule TypeCheck.Internals.Bootstrap.Macros do
       Code.compiler_options(%{:ignore_module_conflict => prev})
     end
   end
+
+  # coveralls-ignore-end
 end
