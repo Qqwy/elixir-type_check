@@ -63,9 +63,9 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
             res =
               {StreamData.integer(), StreamData.integer()}
               |> StreamData.bind(fn {a, b} ->
-                SD.to_gen(range(min(a, b), max(a, b)))
+                StreamData.constant(Kernel.".."(min(a, b), max(a, b)))
               end)
-          {:ok, res}
+            {:ok, res}
           # Function -> {:ok, SD.to_gen(function())} # function-specs cannot be generated yet.
           _ ->
             try do

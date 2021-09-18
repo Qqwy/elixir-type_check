@@ -114,4 +114,19 @@ defmodule TypeCheck.BuiltinTest do
     assert {:ok, _} = TypeCheck.conforms(none(), any())
     assert {:error, _} = TypeCheck.conforms(any(), none())
   end
+
+  describe "implements_protocol" do
+    property "implements_protocol(Enumerable) is able to generate enumerables" do
+      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(Enumerable)) do
+        assert is_integer(Enum.count(value))
+      end
+    end
+
+    property "implements_protocol(Collectable) is able to generate collectables" do
+      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(Collectable)) do
+        {_initial, collection_fun} = Collectable.into(value)
+        assert is_function(collection_fun, 2)
+      end
+    end
+  end
 end

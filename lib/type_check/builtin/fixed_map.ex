@@ -142,7 +142,6 @@ defmodule TypeCheck.Builtin.FixedMap do
       def to_gen(s) do
         s.keypairs
         |> Enum.map(fn {key, value} ->
-          IO.inspect(value, label: :fixed_map_to_stream_data)
           {key, TypeCheck.Protocols.ToStreamData.to_gen(value)}
         end)
         |> StreamData.fixed_map()
