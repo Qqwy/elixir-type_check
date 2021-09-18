@@ -69,6 +69,13 @@ defmodule TypeCheck.Builtin do
   but indicates that the atom
   is expected to be used as a module.
 
+      iex> TypeCheck.conforms!(String, module())
+      String
+      iex> TypeCheck.conforms!(:array, module())
+      :array
+      iex> TypeCheck.conforms!("hello", module())
+      ** (TypeCheck.TypeError) `"hello"` is not an atom.
+
   c.f. `atom/0`
   """
   if_recompiling? do
@@ -81,18 +88,29 @@ defmodule TypeCheck.Builtin do
   The same as `type`,
   but indicates that the result will be used
   as a boolean.
+
+      iex> TypeCheck.conforms!(:ok, as_boolean(atom()))
+      :ok
+      iex> TypeCheck.conforms!(10, as_boolean(atom()))
+      ** (TypeCheck.TypeError) `10` is not an atom.
   """
   if_recompiling? do
     @spec! as_boolean(t :: TypeCheck.Type.t()) :: TypeCheck.Type.t()
   end
   def as_boolean(type) do
-    # TypeCheck.Type.ensure_type!(type)
+    TypeCheck.Type.ensure_type!(type)
     type
   end
 
   @doc typekind: :builtin
   @doc """
   Shorthand for `range(0..255)`
+
+      iex> TypeCheck.conforms!(1, arity())
+      1
+      iex> TypeCheck.conforms!(1000, arity())
+      ** (TypeCheck.TypeError) `1000` does not check against `0..255`. Reason:
+        `1000` falls outside the range 0..255.
   """
   if_recompiling? do
     @spec! arity() :: TypeCheck.Builtin.Range.t()
