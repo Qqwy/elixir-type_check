@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
   """
 
   use TypeCheck
-  @type! t :: %TypeCheck.Builtin.ImplementsProtocol{protocol: module()}
+  @type! t :: %__MODULE__{protocol: module()}
   @type! problem_tuple :: {t(), :no_match, %{}, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do

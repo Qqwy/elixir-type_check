@@ -27,6 +27,7 @@ structs = [
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
+  TypeCheck.Builtin.ImplementsProtocol,
 ]
 
 for struct <- structs do
