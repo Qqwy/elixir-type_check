@@ -857,7 +857,7 @@ defmodule TypeCheck.Builtin do
           other
       end
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       lazy_explicit(unquote(module), unquote(name), unquote(arguments))
     end
   end
