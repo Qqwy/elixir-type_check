@@ -33,6 +33,15 @@ defmodule TypeCheck.Internals.PreExpander do
           {:tuple, meta, [rewrite(value, env, options)]}
         end
 
+      ast = {:implements_protocol, meta, [module]} ->
+         # Do not expand arguments to `implements_protocol/1` further
+         if {:implements_protocol, 1} in builtin_imports do
+           ast
+         else
+           {:implements_protocol, meta, [rewrite(module, env, options)]}
+         end
+
+
       ast = {:&, _, _args} ->
         # Do not expand inside captures
         ast

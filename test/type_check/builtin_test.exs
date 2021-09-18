@@ -72,7 +72,10 @@ defmodule TypeCheck.BuiltinTest do
       end => TypeCheck.Builtin.None,
       quote do
         x :: integer()
-      end => TypeCheck.Builtin.NamedType
+      end => TypeCheck.Builtin.NamedType,
+      quote do
+        implements_protocol(Enumerable)
+      end => TypeCheck.Builtin.ImplementsProtocol,
     }
 
     for {type, module} <- possibilities do
@@ -103,6 +106,12 @@ defmodule TypeCheck.BuiltinTest do
         assert str =~ ~r{^#TypeCheck.Type< }
         assert str =~ ~r{ >$}
       end
+
     end
+  end
+
+  test "none() and any() are opposites" do
+    assert {:ok, _} = TypeCheck.conforms(none(), any())
+    assert {:error, _} = TypeCheck.conforms(any(), none())
   end
 end

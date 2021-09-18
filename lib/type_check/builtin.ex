@@ -978,7 +978,7 @@ defmodule TypeCheck.Builtin do
   if_recompiling? do
     @spec! implements_protocol(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
   end
-  def implements_protocol(protocol_name) do
+  def implements_protocol(protocol_name) when is_atom(protocol_name) do
     build_struct(TypeCheck.Builtin.ImplementsProtocol)
     |> Map.put(:protocol, protocol_name)
   end
