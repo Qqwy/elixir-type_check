@@ -5,7 +5,7 @@ defmodule TypeCheck.Internals.PreExpander do
   # with alternatives that are not 'special'
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env, options) do
-    builtin_imports = env.functions[TypeCheck.Builtin]
+    builtin_imports = env.functions[TypeCheck.Builtin] || []
     ast
     |> Macro.expand(env)
     |> TypeCheck.Internals.Overrides.rewrite_if_override(options.overrides, env)
