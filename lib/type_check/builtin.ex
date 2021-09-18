@@ -895,6 +895,24 @@ defmodule TypeCheck.Builtin do
   @doc typekind: :extension
   @doc """
   Checks whether the given value implements the particular protocol.
+
+
+  For this type-check to work, [Protocol Consolidation](https://hexdocs.pm/elixir/Protocol.html#module-consolidation) needs to be active.
+
+  ## Data generation
+
+  TypeCheck tries to generate values of any type implementing the protocol.
+  These generators can generate any built-in type for which the protocol is implemented (with the exception of functions, and datetimes).
+
+  It can also generate your custom structs, as long as:
+
+  - They contain a TypeCheck type called `t`.
+    In this case, any values adhering to `t` will be generated.
+  - They don't have a `t` TypeCheck type, but contain a `new/0` function.
+    In this case, a single value is generated each time: the result of calling `YourStructModule.new/0`.
+
+  A deliberate choice was made not to automatically generate values for any module by using `struct/0`,
+  because this would not respect the `@enforce_keys` option that might be given to structs.
   """
   if_recompiling? do
     @spec! implements_protocol(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
