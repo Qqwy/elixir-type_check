@@ -669,7 +669,11 @@ defmodule TypeCheck.Builtin do
   end
 
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
-    Enum.map(keywords, &TypeCheck.Type.ensure_type!(elem(&1, 1)))
+    # Note: Keys are expected to be any literal term.
+    # This does _not_ need to be wrapped in an extra call to `literal/1`.
+    Enum.each(keywords, fn {_key, value} ->
+      TypeCheck.Type.ensure_type!(value)
+    end)
 
     build_struct(TypeCheck.Builtin.FixedMap)
     |> Map.put(:keypairs, Enum.into(keywords, []))

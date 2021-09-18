@@ -59,12 +59,19 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
           Map -> {:ok, SD.to_gen(map())}
           Tuple -> {:ok, SD.to_gen(tuple())}
           Boolean -> {:ok, SD.to_gen(boolean())}
+          Range ->
+            res =
+              {StreamData.integer(), StreamData.integer()}
+              |> StreamData.bind(fn a, b ->
+                SD.to_gen(range(min(a, b), max(a, b)))
+              end)
+          {:ok, res}
           # Function -> {:ok, SD.to_gen(function())} # function-specs cannot be generated yet.
           _ ->
-            {:consolidated, to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
+            {:consolidated, _to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
             cond do
                 # If module contains a `@type! t :: ...`
-              function_exported?(module, :t, 0) and module in to_streamdata_impls ->
+              function_exported?(module, :t, 0) ->
                 res =
                   module.t()
                   |> SD.to_gen()

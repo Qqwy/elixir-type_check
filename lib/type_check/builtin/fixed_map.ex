@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.FixedMap do
   defstruct [:keypairs]
 
   use TypeCheck
-  @type! t :: %__MODULE__{keypairs: list({TypeCheck.Type.t(), TypeCheck.Type.t()})}
+  @type! t :: %__MODULE__{keypairs: list({term(), TypeCheck.Type.t()})}
 
   @type! problem_tuple ::
          {t(), :not_a_map, %{}, any()}
@@ -102,7 +102,17 @@ defmodule TypeCheck.Builtin.FixedMap do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      map = Enum.into(s.keypairs, %{})
+      map = case s.keypairs do
+        list when is_list(list) ->
+          Enum.into(s.keypairs, %{})
+        %TypeCheck.Builtin.List{element_type: %TypeCheck.Builtin.FixedTuple{element_types: [key_type, value_type]}} ->
+                # Special case for when calling on the 'meta' FixedMap
+                # i.e. `TypeCheck.Builtin.FixedMap.t()`
+          %{key_type => value_type}
+
+      end
+      # IO.inspect(s, structs: false, label: :inspect_my_fixed_map)
+      # map = Enum.into(s.keypairs, %{})
 
       case Map.get(map, :__struct__) do
         %TypeCheck.Builtin.Literal{value: value} ->

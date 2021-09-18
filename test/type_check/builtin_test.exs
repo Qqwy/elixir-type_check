@@ -83,6 +83,8 @@ defmodule TypeCheck.BuiltinTest do
               :ok
 
             {:error, problem = %TypeCheck.TypeError{}} ->
+              # IO.inspect(problem.raw, label: :raw_problem)
+              # IO.inspect(unquote(module).problem_tuple(), structs: false, label: :raw_problem_tuple)
               TypeCheck.conforms!(problem.raw, unquote(module).problem_tuple())
           end
         end
