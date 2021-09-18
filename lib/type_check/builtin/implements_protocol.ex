@@ -62,25 +62,30 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
           Range ->
             res =
               {StreamData.integer(), StreamData.integer()}
-              |> StreamData.bind(fn a, b ->
+              |> StreamData.bind(fn {a, b} ->
                 SD.to_gen(range(min(a, b), max(a, b)))
               end)
           {:ok, res}
           # Function -> {:ok, SD.to_gen(function())} # function-specs cannot be generated yet.
           _ ->
-            {:consolidated, _to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
-            cond do
-                # If module contains a `@type! t :: ...`
-              function_exported?(module, :t, 0) ->
-                res =
-                  module.t()
-                  |> SD.to_gen()
-                {:ok, res}
-                # If module contains `new/0`
-              function_exported?(module, :new, 0) ->
-                res = StreamData.constant(module.new())
-                {:ok, res}
-              true ->
+            try do
+              {:consolidated, _to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
+              cond do
+                  # If module contains a `@type! t :: ...`
+                function_exported?(module, :t, 0) ->
+                  res =
+                    module.t()
+                    |> SD.to_gen()
+                  {:ok, res}
+                  # If module contains `new/0`
+                function_exported?(module, :new, 0) ->
+                  res = StreamData.constant(module.new())
+                  {:ok, res}
+                true ->
+                  {:error, :no_impl}
+              end
+            rescue _ ->
+                # Skip all implementations that raise an error when invoked like this.
                 {:error, :no_impl}
             end
         end
