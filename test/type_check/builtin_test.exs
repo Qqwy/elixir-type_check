@@ -128,5 +128,12 @@ defmodule TypeCheck.BuiltinTest do
         assert is_function(collection_fun, 2)
       end
     end
+
+    property "implements_protocol(Inspect) is able to generate any inspectable type (essentially anything?)" do
+      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(String.Chars)) do
+        res = inspect(value)
+        assert is_binary(res)
+      end
+    end
   end
 end
