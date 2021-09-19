@@ -149,7 +149,7 @@ defmodule TypeCheck do
       end
     end
 
-    IO.puts(Macro.to_string(res))
+    # IO.puts(Macro.to_string(res))
     res
   end
 
@@ -168,7 +168,7 @@ defmodule TypeCheck do
       match?({:ok, _}, unquote(check))
     end
 
-    IO.puts(Macro.to_string(res))
+    # IO.puts(Macro.to_string(res))
     res
   end
 
@@ -190,7 +190,8 @@ defmodule TypeCheck do
       end
     end
 
-    IO.puts(Macro.to_string(res))
+    # IO.puts(Macro.to_string(res))
+    res
   end
 
   @doc """
