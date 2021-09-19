@@ -207,7 +207,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format({%TypeCheck.Builtin.ImplementsProtocol{protocol: protocol_name}, :no_match, _, val}) do
-    problem = "`#{inspect(val)}` does not implement the protocol `#{protocol_name}`"
+    "`#{inspect(val)}` does not implement the protocol `#{protocol_name}`"
   end
 
   def do_format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do

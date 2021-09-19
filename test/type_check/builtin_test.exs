@@ -11,8 +11,8 @@ defmodule TypeCheck.BuiltinTest do
   describe "builtin types adhere to their problem_tuple result types." do
     possibilities = %{
       quote do
-      any()
-    end => TypeCheck.Builtin.Any,
+        any()
+      end => TypeCheck.Builtin.Any,
       quote do
         atom()
       end => TypeCheck.Builtin.Atom,
@@ -81,14 +81,27 @@ defmodule TypeCheck.BuiltinTest do
     for {type, module} <- possibilities do
       property "for type `#{Macro.to_string(type)}`" do
         check all input <- StreamData.term() do
-          case TypeCheck.conforms(input, unquote(type)) do
-            {:ok, _} ->
-              :ok
+          # We special-case 'Any' and 'None'
+          # as they otherwise trigger "this clause cannot match because of different types/sizes"-warnings.
+          case unquote(module) do
+            TypeCheck.Builtin.Any ->
+              # Should _always_ match
+              assert {:ok, _} = TypeCheck.conforms(input, unquote(type))
+            TypeCheck.Builtin.None ->
+              # Should _never_ match
+              assert {:error, _} = TypeCheck.conforms(input, unquote(type))
+            _other ->
+              # Matches sometimes.
 
-            {:error, problem = %TypeCheck.TypeError{}} ->
-              # IO.inspect(problem.raw, label: :raw_problem)
-              # IO.inspect(unquote(module).problem_tuple(), structs: false, label: :raw_problem_tuple)
-              TypeCheck.conforms!(problem.raw, unquote(module).problem_tuple())
+              case TypeCheck.conforms(input, unquote(type)) do
+                {:ok, _} ->
+                  :ok
+
+                {:error, problem = %TypeCheck.TypeError{}} ->
+                  # IO.inspect(problem.raw, label: :raw_problem)
+                  # IO.inspect(unquote(module).problem_tuple(), structs: false, label: :raw_problem_tuple)
+                  TypeCheck.conforms!(problem.raw, unquote(module).problem_tuple())
+              end
           end
         end
       end
