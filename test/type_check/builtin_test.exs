@@ -74,7 +74,7 @@ defmodule TypeCheck.BuiltinTest do
         x :: integer()
       end => TypeCheck.Builtin.NamedType,
       quote do
-        implements_protocol(Enumerable)
+        impl(Enumerable)
       end => TypeCheck.Builtin.ImplementsProtocol,
     }
 

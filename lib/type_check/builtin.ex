@@ -976,9 +976,9 @@ defmodule TypeCheck.Builtin do
   because this would not respect the `@enforce_keys` option that might be given to structs.
   """
   if_recompiling? do
-    @spec! implements_protocol(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
+    @spec! impl(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
   end
-  def implements_protocol(protocol_name) when is_atom(protocol_name) do
+  def impl(protocol_name) when is_atom(protocol_name) do
     build_struct(TypeCheck.Builtin.ImplementsProtocol)
     |> Map.put(:protocol, protocol_name)
   end

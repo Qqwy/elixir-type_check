@@ -26,7 +26,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, _opts) do
-      "implements_protocol(#{inspect(s.protocol)})"
+      "impl(#{inspect(s.protocol)})"
     end
   end
   if Code.ensure_loaded?(StreamData) do
