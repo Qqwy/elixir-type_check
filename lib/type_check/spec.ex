@@ -107,6 +107,7 @@ defmodule TypeCheck.Spec do
 
   @doc false
   def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
+
     quote generated: true, location: :keep, line: line do
       defoverridable([{unquote(name), unquote(arity)}])
 
@@ -118,7 +119,10 @@ defmodule TypeCheck.Spec do
         unquote(return_spec_code)
         var!(super_result, nil)
       end
+
     end
+    # IO.puts(Code.format_string!(Macro.to_string(res)))
+    # res
   end
 
   @doc false
@@ -151,7 +155,7 @@ defmodule TypeCheck.Spec do
         {{:error, problem}, index, param_type} ->
           raise TypeCheck.TypeError,
           {
-            {unquote(spec_fun_name(name, arity))(), :param_error,
+            {__MODULE__.unquote(spec_fun_name(name, arity))(), :param_error,
              %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}
       end
     end
@@ -177,7 +181,7 @@ defmodule TypeCheck.Spec do
 
         {:error, problem} ->
           raise TypeCheck.TypeError,
-                {unquote(spec_fun_name(name, arity))(), :return_error,
+                {__MODULE__.unquote(spec_fun_name(name, arity))(), :return_error,
                  %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
       end
     end
