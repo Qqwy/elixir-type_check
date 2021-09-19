@@ -29,7 +29,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocolTest do
     end
 
     property "implements_protocol(Inspect) is able to generate any inspectable type (essentially anything?)" do
-      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(String.Chars)) do
+      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(Inspect)), max_runs: 1_000 do
         res = inspect(value)
         assert is_binary(res)
       end
