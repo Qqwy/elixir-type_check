@@ -55,6 +55,15 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
         {:ok, StreamData.binary()}
       end
 
+      # Lists can only turned into binaries/charlists
+      # if they themselves are charlists
+      def stream_data_impl(protocol, List) when protocol in [String.Chars, List.Chars] do
+        charlist_gen =
+          StreamData.string(:ascii)
+          |> StreamData.map(&to_charlist/1)
+        {:ok, charlist_gen}
+      end
+
       # Refrain from BitString implementation of Collectable,
       # as it is (1) only implemented for binaries
       # and (2) only accepts as elements other binaries or charlists,
