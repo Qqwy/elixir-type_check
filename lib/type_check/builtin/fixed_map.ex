@@ -102,15 +102,15 @@ defmodule TypeCheck.Builtin.FixedMap do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      map = case s.keypairs do
-        list when is_list(list) ->
-          Enum.into(s.keypairs, %{})
-        %TypeCheck.Builtin.List{element_type: %TypeCheck.Builtin.FixedTuple{element_types: [key_type, value_type]}} ->
-                # Special case for when calling on the 'meta' FixedMap
-                # i.e. `TypeCheck.Builtin.FixedMap.t()`
-          %{key_type => value_type}
+      # map = case s.keypairs do
+        # list when is_list(list) ->
+          map = Enum.into(s.keypairs, %{})
+        # %TypeCheck.Builtin.List{element_type: %TypeCheck.Builtin.FixedTuple{element_types: [key_type, value_type]}} ->
+        #         # Special case for when calling on the 'meta' FixedMap
+        #         # i.e. `TypeCheck.Builtin.FixedMap.t()`
+        #   %{key_type => value_type}
 
-      end
+      # end
       # IO.inspect(s, structs: false, label: :inspect_my_fixed_map)
       # map = Enum.into(s.keypairs, %{})
 

@@ -39,14 +39,38 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
             # Extract all implementations that have their own ToStreamData implementation.
             # raise "TODO #{inspect(implementations)}"
             implementations
-            |> Enum.map(&stream_data_impl/1)
+            |> Enum.map(&stream_data_impl(s.protocol, &1))
             |> Enum.filter(fn val -> match?({:ok, _}, val) end)
             |> Enum.map(fn {:ok, val} -> val end)
             |> StreamData.one_of()
         end
       end
 
-      def stream_data_impl(module) do
+      ## 'exceptional' overrides for common protocols
+      ## that have strings attached
+
+      # A number of protocols are implemented for BitString
+      # but actually raise for bitstring which is not a proper binary
+      def stream_data_impl(protocol, BitString) when protocol in [String.Chars, List.Chars] do
+        {:ok, StreamData.binary()}
+      end
+
+      # Refrain from BitString implementation of Collectable,
+      # as it is (1) only implemented for binaries
+      # and (2) only accepts as elements other binaries or charlists,
+      # so it is a bad candidate for functions checking
+      # filling values into 'arbitrary collectables'.
+      def stream_data_impl(Collectable, BitString) do
+        {:error, :misbehaving_impl}
+      end
+
+      # non-empty lists are deprecated for the Collectable protocol
+      def stream_data_impl(Collectable, List) do
+        {:ok, StreamData.constant([])}
+      end
+
+      # 'general' case
+      def stream_data_impl(_protocol, module) do
         import TypeCheck.Builtin
         alias TypeCheck.Type.StreamData, as: SD
         case module do
@@ -60,13 +84,15 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
           Tuple -> {:ok, SD.to_gen(tuple())}
           Boolean -> {:ok, SD.to_gen(boolean())}
           Range ->
+            # Note: These are _literal_ range-structs;
             res =
               {StreamData.integer(), StreamData.integer()}
               |> StreamData.bind(fn {a, b} ->
                 StreamData.constant(Kernel.".."(min(a, b), max(a, b)))
               end)
             {:ok, res}
-          # Function -> {:ok, SD.to_gen(function())} # function-specs cannot be generated yet.
+          Function ->
+            {:error, :not_implemented_yet}
           _ ->
             try do
               {:consolidated, _to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)

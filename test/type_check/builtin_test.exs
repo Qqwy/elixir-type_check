@@ -11,8 +11,8 @@ defmodule TypeCheck.BuiltinTest do
   describe "builtin types adhere to their problem_tuple result types." do
     possibilities = %{
       quote do
-        any()
-      end => TypeCheck.Builtin.Any,
+      any()
+    end => TypeCheck.Builtin.Any,
       quote do
         atom()
       end => TypeCheck.Builtin.Atom,
@@ -121,27 +121,5 @@ defmodule TypeCheck.BuiltinTest do
   test "none() and any() are opposites" do
     assert {:ok, _} = TypeCheck.conforms(none(), any())
     assert {:error, _} = TypeCheck.conforms(any(), none())
-  end
-
-  describe "implements_protocol" do
-    property "implements_protocol(Enumerable) is able to generate enumerables" do
-      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(Enumerable)) do
-        assert is_integer(Enum.count(value))
-      end
-    end
-
-    property "implements_protocol(Collectable) is able to generate collectables" do
-      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(Collectable)) do
-        {_initial, collection_fun} = Collectable.into(value)
-        assert is_function(collection_fun, 2)
-      end
-    end
-
-    property "implements_protocol(Inspect) is able to generate any inspectable type (essentially anything?)" do
-      check all value <- TypeCheck.Protocols.ToStreamData.to_gen(implements_protocol(String.Chars)) do
-        res = inspect(value)
-        assert is_binary(res)
-      end
-    end
   end
 end
