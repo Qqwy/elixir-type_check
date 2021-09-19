@@ -21,6 +21,7 @@ structs = [
   TypeCheck.Builtin.NonNegInteger,
   TypeCheck.Builtin.List,
   TypeCheck.Builtin.Literal,
+  TypeCheck.Builtin.Lazy,
   TypeCheck.Builtin.Map,
   TypeCheck.Builtin.NamedType,
   TypeCheck.Builtin.Number,
