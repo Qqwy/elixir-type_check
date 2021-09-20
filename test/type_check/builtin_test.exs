@@ -72,18 +72,36 @@ defmodule TypeCheck.BuiltinTest do
       end => TypeCheck.Builtin.None,
       quote do
         x :: integer()
-      end => TypeCheck.Builtin.NamedType
+      end => TypeCheck.Builtin.NamedType,
+      quote do
+        impl(Enumerable)
+      end => TypeCheck.Builtin.ImplementsProtocol,
     }
 
     for {type, module} <- possibilities do
       property "for type `#{Macro.to_string(type)}`" do
         check all input <- StreamData.term() do
-          case TypeCheck.conforms(input, unquote(type)) do
-            {:ok, _} ->
-              :ok
+          # We special-case 'Any' and 'None'
+          # as they otherwise trigger "this clause cannot match because of different types/sizes"-warnings.
+          case unquote(module) do
+            TypeCheck.Builtin.Any ->
+              # Should _always_ match
+              assert {:ok, _} = TypeCheck.conforms(input, unquote(type))
+            TypeCheck.Builtin.None ->
+              # Should _never_ match
+              assert {:error, _} = TypeCheck.conforms(input, unquote(type))
+            _other ->
+              # Matches sometimes.
 
-            {:error, problem = %TypeCheck.TypeError{}} ->
-              TypeCheck.conforms!(problem.raw, unquote(module).problem_tuple())
+              case TypeCheck.conforms(input, unquote(type)) do
+                {:ok, _} ->
+                  :ok
+
+                {:error, problem = %TypeCheck.TypeError{}} ->
+                  # IO.inspect(problem.raw, label: :raw_problem)
+                  # IO.inspect(unquote(module).problem_tuple(), structs: false, label: :raw_problem_tuple)
+                  TypeCheck.conforms!(problem.raw, unquote(module).problem_tuple())
+              end
           end
         end
       end
@@ -101,6 +119,20 @@ defmodule TypeCheck.BuiltinTest do
         assert str =~ ~r{^#TypeCheck.Type< }
         assert str =~ ~r{ >$}
       end
+
+      unless module in [TypeCheck.Builtin.None] do
+        property "#{module}'s ToStreamData implementation conforms with its own type" do
+          require TypeCheck.Type
+          check all value <- TypeCheck.Protocols.ToStreamData.to_gen(TypeCheck.Type.build(unquote(type))) do
+            assert {:ok, _} = TypeCheck.conforms(value, unquote(type))
+          end
+        end
+      end
     end
+  end
+
+  test "none() and any() are opposites" do
+    assert {:ok, _} = TypeCheck.conforms(none(), any())
+    assert {:error, _} = TypeCheck.conforms(any(), none())
   end
 end

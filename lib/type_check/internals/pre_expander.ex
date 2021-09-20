@@ -5,7 +5,7 @@ defmodule TypeCheck.Internals.PreExpander do
   # with alternatives that are not 'special'
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env, options) do
-    builtin_imports = env.functions[TypeCheck.Builtin]
+    builtin_imports = env.functions[TypeCheck.Builtin] || []
     ast
     |> Macro.expand(env)
     |> TypeCheck.Internals.Overrides.rewrite_if_override(options.overrides, env)
@@ -33,12 +33,21 @@ defmodule TypeCheck.Internals.PreExpander do
           {:tuple, meta, [rewrite(value, env, options)]}
         end
 
+      ast = {:impl, meta, [module]} ->
+         # Do not expand arguments to `impl/1` further
+         if {:impl, 1} in builtin_imports do
+           ast
+         else
+           {:impl, meta, [rewrite(module, env, options)]}
+         end
+
+
       ast = {:&, _, _args} ->
         # Do not expand inside captures
         ast
 
       x when is_integer(x) or is_float(x) or is_atom(x) or is_bitstring(x) ->
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.literal(unquote(x))
         end
 
@@ -47,12 +56,12 @@ defmodule TypeCheck.Internals.PreExpander do
           list
           |> Enum.map(&rewrite(&1, env, options))
 
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.fixed_list(unquote(rewritten_values))
         end
 
       {:|, _, [lhs, rhs]} ->
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env, options)), unquote(rewrite(rhs, env, options)))
         end
 
@@ -63,7 +72,7 @@ defmodule TypeCheck.Internals.PreExpander do
         rewrite_struct(struct_name, fields, env, options)
 
       {:"::", _, [{name, _, atom}, type_ast]} when is_atom(atom) ->
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.named_type(unquote(name), unquote(rewrite(type_ast, env, options)))
         end
 
@@ -84,7 +93,7 @@ defmodule TypeCheck.Internals.PreExpander do
         """
 
       {:when, _, [type, guard]} ->
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env, options)), unquote(Macro.escape(guard)))
         end
 
@@ -126,7 +135,7 @@ defmodule TypeCheck.Internals.PreExpander do
       tuple_elements
       |> Enum.map(&rewrite(&1, env, options))
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       TypeCheck.Builtin.fixed_tuple(unquote(rewritten_elements))
     end
   end
@@ -134,7 +143,7 @@ defmodule TypeCheck.Internals.PreExpander do
   defp rewrite_map_or_struct(struct_fields, orig_ast, env, options) do
     case struct_fields[:__struct__] do
       Range ->
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.range(unquote(orig_ast))
         end
 
@@ -144,14 +153,14 @@ defmodule TypeCheck.Internals.PreExpander do
         field_types =
           Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
 
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.fixed_map(unquote(field_types))
         end
 
       _other ->
         # Unhandled already-expanded structs
         # Treat them as literal values
-        quote location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Builtin.literal(unquote(orig_ast))
         end
     end
@@ -160,7 +169,7 @@ defmodule TypeCheck.Internals.PreExpander do
   defp rewrite_struct(struct_name, fields, env, options) do
     field_types = Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
     # TODO wrap in struct-checker
-    quote do
+    quote generated: true, location: :keep do
       TypeCheck.Builtin.fixed_map(
         [__struct__: TypeCheck.Builtin.literal(unquote(struct_name))] ++ unquote(field_types)
       )

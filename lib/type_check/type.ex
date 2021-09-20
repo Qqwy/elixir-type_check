@@ -85,7 +85,7 @@ defmodule TypeCheck.Type do
         compile_time_imports_module_name =
           Module.concat(TypeCheck.Internals.UserTypes, caller.module)
 
-        quote do
+        quote generated: true, location: :keep do
           import unquote(compile_time_imports_module_name)
           unquote(type_ast)
         end
@@ -118,6 +118,10 @@ defmodule TypeCheck.Type do
         or use TypeCheck.Type.build/1 to construct a one-off type.
 
         Both of these will perform the necessary conversions to turn 'normal' datatypes to types.
+
+        (If you _really_ want to build a type manually,
+        be sure to use `TypeCheck.Builtin.literal/1`
+        to turn a literal value into a type.)
         """
 
       _other ->

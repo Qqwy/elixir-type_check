@@ -69,6 +69,13 @@ defmodule TypeCheck.Builtin do
   but indicates that the atom
   is expected to be used as a module.
 
+      iex> TypeCheck.conforms!(String, module())
+      String
+      iex> TypeCheck.conforms!(:array, module())
+      :array
+      iex> TypeCheck.conforms!("hello", module())
+      ** (TypeCheck.TypeError) `"hello"` is not an atom.
+
   c.f. `atom/0`
   """
   if_recompiling? do
@@ -81,18 +88,29 @@ defmodule TypeCheck.Builtin do
   The same as `type`,
   but indicates that the result will be used
   as a boolean.
+
+      iex> TypeCheck.conforms!(:ok, as_boolean(atom()))
+      :ok
+      iex> TypeCheck.conforms!(10, as_boolean(atom()))
+      ** (TypeCheck.TypeError) `10` is not an atom.
   """
   if_recompiling? do
     @spec! as_boolean(t :: TypeCheck.Type.t()) :: TypeCheck.Type.t()
   end
   def as_boolean(type) do
-    # TypeCheck.Type.ensure_type!(type)
+    TypeCheck.Type.ensure_type!(type)
     type
   end
 
   @doc typekind: :builtin
   @doc """
   Shorthand for `range(0..255)`
+
+      iex> TypeCheck.conforms!(1, arity())
+      1
+      iex> TypeCheck.conforms!(1000, arity())
+      ** (TypeCheck.TypeError) `1000` does not check against `0..255`. Reason:
+        `1000` falls outside the range 0..255.
   """
   if_recompiling? do
     @spec! arity() :: TypeCheck.Builtin.Range.t()
@@ -149,6 +167,14 @@ defmodule TypeCheck.Builtin do
   A byte; shorthand for `range(0..255)`
 
   c.f. `range/1`
+
+      iex> TypeCheck.conforms!(1, byte())
+      1
+      iex> TypeCheck.conforms!(255, byte())
+      255
+      iex> TypeCheck.conforms!(256, byte())
+      ** (TypeCheck.TypeError) `256` does not check against `0..255`. Reason:
+        `256` falls outside the range 0..255.
   """
   if_recompiling? do
     @spec! byte() :: TypeCheck.Builtin.Range.t()
@@ -162,6 +188,12 @@ defmodule TypeCheck.Builtin do
   A char; shorthand for `range(0..0x10FFFF)`
 
   c.f. `range/1`
+
+      iex> TypeCheck.conforms!(?a, char())
+      97
+      iex> TypeCheck.conforms!(-1, char())
+      ** (TypeCheck.TypeError) `-1` does not check against `0..1114111`. Reason:
+        `-1` falls outside the range 0..1114111.
   """
   if_recompiling? do
     @spec! char() :: TypeCheck.Builtin.Range.t()
@@ -175,6 +207,12 @@ defmodule TypeCheck.Builtin do
   A list filled with characters; exactly `list(char())`
 
   c.f. `list/1` and `char/0`
+
+      iex> TypeCheck.conforms!('hello world', charlist())
+      'hello world'
+      iex> TypeCheck.conforms!("hello world", charlist())
+      ** (TypeCheck.TypeError) `"hello world"` does not check against `list(0..1114111)`. Reason:
+        `"hello world"` is not a list.
   """
   if_recompiling? do
     @spec! charlist() :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.Range.t())
@@ -188,6 +226,13 @@ defmodule TypeCheck.Builtin do
   Any function (of any arity), regardless of input or output types
 
   c.f. `TypeCheck.Builtin.Function`
+
+      iex> TypeCheck.conforms!(&div/2, function())
+      &:erlang.div/2
+      iex> TypeCheck.conforms!(&Application.get_env/3, function())
+      &Application.get_env/3
+      iex> TypeCheck.conforms!(42, function())
+      ** (TypeCheck.TypeError) `42` is not a function.
   """
   if_recompiling? do
     @spec! function() :: TypeCheck.Builtin.Function.t()
@@ -199,6 +244,9 @@ defmodule TypeCheck.Builtin do
   @doc typekind: :builtin
   @doc """
   Alias for `function/0`.
+
+      iex> TypeCheck.conforms!(&div/2, fun())
+      &:erlang.div/2
   """
   if_recompiling? do
     @spec! fun() :: TypeCheck.Builtin.Function.t()
@@ -212,6 +260,15 @@ defmodule TypeCheck.Builtin do
   Any integer.
 
   C.f. `TypeCheck.Builtin.Integer`
+
+      iex> TypeCheck.conforms!(42, integer())
+      42
+
+      iex> TypeCheck.conforms!(42.0, integer())
+      ** (TypeCheck.TypeError) `42.0` is not an integer.
+
+      iex> TypeCheck.conforms!("hello", integer())
+      ** (TypeCheck.TypeError) `"hello"` is not an integer.
   """
   if_recompiling? do
     @spec! integer() :: TypeCheck.Builtin.Integer.t()
@@ -669,7 +726,11 @@ defmodule TypeCheck.Builtin do
   end
 
   def fixed_map(keywords) when is_map(keywords) or is_list(keywords) do
-    Enum.map(keywords, &TypeCheck.Type.ensure_type!(elem(&1, 1)))
+    # Note: Keys are expected to be any literal term.
+    # This does _not_ need to be wrapped in an extra call to `literal/1`.
+    Enum.each(keywords, fn {_key, value} ->
+      TypeCheck.Type.ensure_type!(value)
+    end)
 
     build_struct(TypeCheck.Builtin.FixedMap)
     |> Map.put(:keypairs, Enum.into(keywords, []))
@@ -853,7 +914,7 @@ defmodule TypeCheck.Builtin do
           other
       end
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       lazy_explicit(unquote(module), unquote(name), unquote(arguments))
     end
   end
@@ -891,6 +952,36 @@ defmodule TypeCheck.Builtin do
   See `none/0`.
   """
   def no_return(), do: none()
+
+  @doc typekind: :extension
+  @doc """
+  Checks whether the given value implements the particular protocol.
+
+
+  For this type-check to work, [Protocol Consolidation](https://hexdocs.pm/elixir/Protocol.html#module-consolidation) needs to be active.
+
+  ## Data generation
+
+  TypeCheck tries to generate values of any type implementing the protocol.
+  These generators can generate any built-in type for which the protocol is implemented (with the exception of functions, and datetimes).
+
+  It can also generate your custom structs, as long as:
+
+  - They contain a TypeCheck type called `t`.
+    In this case, any values adhering to `t` will be generated.
+  - They don't have a `t` TypeCheck type, but contain a `new/0` function.
+    In this case, a single value is generated each time: the result of calling `YourStructModule.new/0`.
+
+  A deliberate choice was made not to automatically generate values for any module by using `struct/0`,
+  because this would not respect the `@enforce_keys` option that might be given to structs.
+  """
+  if_recompiling? do
+    @spec! impl(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
+  end
+  def impl(protocol_name) when is_atom(protocol_name) do
+    build_struct(TypeCheck.Builtin.ImplementsProtocol)
+    |> Map.put(:protocol, protocol_name)
+  end
 
 
   # Reason we cannot dirctly use %module{}

@@ -23,6 +23,7 @@ defmodule TypeCheckTest do
 
   import TypeCheckTest.TypeGuardExample
 
+  require TypeCheck.Type
   doctest TypeCheck
 
   # property "the different confrorm variants have the same results" do

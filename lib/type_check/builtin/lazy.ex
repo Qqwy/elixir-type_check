@@ -25,8 +25,21 @@ defmodule TypeCheck.Builtin.Lazy do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      inspected_arguments = Enum.map(s.arguments, &TypeCheck.Protocols.Inspect.inspect(&1, opts))
-      "lazy( #{s.module}.#{s.function}(#{inspected_arguments}) )"
+      inspected_arguments =
+        s.arguments
+        |> Enum.map(&TypeCheck.Protocols.Inspect.inspect(&1, opts))
+        |> Inspect.Algebra.fold_doc(fn doc, acc ->
+        Inspect.Algebra.concat([doc, ",", acc])
+        end)
+        # |> Enum.map(&to_string/1)
+        # |> Enum.join(", ")
+
+      "lazy("
+      |> Inspect.Algebra.concat("#{inspect(s.module)}.#{s.function}(")
+      |> Inspect.Algebra.concat(inspected_arguments)
+      |> Inspect.Algebra.concat(")")
+
+      # "lazy( #{s.module}.#{s.function}(#{inspected_arguments}) )"
     end
   end
 

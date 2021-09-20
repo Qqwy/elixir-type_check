@@ -26,7 +26,9 @@ defmodule TypeCheck.TypeError.FormatterTest do
                  TypeCheck.Builtin.OneOf,
                  TypeCheck.Builtin.PosInteger,
                  TypeCheck.Builtin.Range,
-                 TypeCheck.Builtin.Tuple] do
+                 TypeCheck.Builtin.Tuple,
+                 TypeCheck.Builtin.Function,
+                ] do
     property "the default formatter is able to handle all problem tuples (returning a binary string message) of type #{module}" do
       check all problem <-
       StreamData.scale(

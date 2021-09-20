@@ -21,12 +21,14 @@ structs = [
   TypeCheck.Builtin.NonNegInteger,
   TypeCheck.Builtin.List,
   TypeCheck.Builtin.Literal,
+  TypeCheck.Builtin.Lazy,
   TypeCheck.Builtin.Map,
   TypeCheck.Builtin.NamedType,
   TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
+  TypeCheck.Builtin.ImplementsProtocol,
 ]
 
 for struct <- structs do

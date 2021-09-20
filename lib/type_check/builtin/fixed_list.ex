@@ -11,7 +11,7 @@ defmodule TypeCheck.Builtin.FixedList do
   defstruct [:element_types]
 
   use TypeCheck
-  @type! t :: %__MODULE__{element_types: list()}
+  @type! t :: %__MODULE__{element_types: list(TypeCheck.Type.t())}
 
   @type! problem_tuple ::
          {t(), :not_a_list, %{}, any()}
@@ -49,7 +49,7 @@ defmodule TypeCheck.Builtin.FixedList do
           impl =
             TypeCheck.Protocols.ToCheck.to_check(
               element_type,
-              quote do
+              quote generated: true, location: :keep do
                 hd(var!(rest, unquote(__MODULE__)))
               end
             )

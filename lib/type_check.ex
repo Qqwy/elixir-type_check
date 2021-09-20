@@ -111,7 +111,7 @@ defmodule TypeCheck do
   """
 
   defmacro __using__(options) do
-    quote do
+    quote generated: true, location: :keep do
       use TypeCheck.Macros, unquote(options)
       import TypeCheck.Builtin
     end
@@ -142,12 +142,15 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    quote do
+    res = quote generated: true, location: :keep do
       case unquote(check) do
         {:ok, bindings} -> {:ok, unquote(value)}
         {:error, problem} -> {:error, TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})}
       end
     end
+
+    # IO.puts(Macro.to_string(res))
+    res
   end
 
   @doc """
@@ -161,9 +164,12 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    quote do
+    res = quote generated: true, location: :keep do
       match?({:ok, _}, unquote(check))
     end
+
+    # IO.puts(Macro.to_string(res))
+    res
   end
 
   @doc """
@@ -177,12 +183,15 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    quote do
+    res = quote generated: true, location: :keep do
       case unquote(check) do
         {:ok, _bindings} -> unquote(value)
         {:error, other} -> raise TypeCheck.TypeError, other
       end
     end
+
+    # IO.puts(Macro.to_string(res))
+    res
   end
 
   @doc """
@@ -199,6 +208,14 @@ defmodule TypeCheck do
 
   Use `dynamic_conforms` only when you cannot use the normal `conforms/2`,
   for instance when you're only able to construct the type to check against at runtime.
+
+      iex> fourty_two = TypeCheck.Type.build(42)
+      iex> TypeCheck.dynamic_conforms(42, fourty_two)
+      {:ok, 42}
+      iex> {error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
+      iex> type_error.message
+      "At lib/type_check.ex:219:
+      `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
@@ -219,6 +236,13 @@ defmodule TypeCheck do
   Similar to `dynamic_conforms/2`, but returns `true` if the value typechecked and `false` if it did not.
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
+
+
+      iex> fourty_two = TypeCheck.Type.build(42)
+      iex> TypeCheck.dynamic_conforms?(42, fourty_two)
+      true
+      iex> TypeCheck.dynamic_conforms?(20, fourty_two)
+      false
   """
   @spec dynamic_conforms?(value, TypeCheck.Type.t()) :: boolean
   def dynamic_conforms?(value, type) do
@@ -232,6 +256,13 @@ defmodule TypeCheck do
   Similar to `dynamic_conforms/2`, but returns `value` if the value typechecked and raises TypeCheck.TypeError if it did not.
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
+
+      iex> fourty_two = TypeCheck.Type.build(42)
+      iex> TypeCheck.dynamic_conforms!(42, fourty_two)
+      42
+      iex> TypeCheck.dynamic_conforms!(20, fourty_two)
+      ** (TypeCheck.TypeError) At lib/type_check.ex:219:
+      `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
   def dynamic_conforms!(value, type) do

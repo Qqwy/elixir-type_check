@@ -206,6 +206,10 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
 
+  def do_format({%TypeCheck.Builtin.ImplementsProtocol{protocol: protocol_name}, :no_match, _, val}) do
+    "`#{inspect(val)}` does not implement the protocol `#{protocol_name}`"
+  end
+
   def do_format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", do_format(problem))
     function_with_arity = "#{s.name}/#{Enum.count(val)}"

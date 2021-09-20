@@ -5,6 +5,31 @@ defmodule TypeCheck.Spec do
     :"__TypeCheck spec for '#{function}/#{arity}'__"
   end
 
+  @doc """
+  Looks up the spec for a particular `{module, function, arity}`.
+
+  On success, returns `{:ok, spec}`.
+  On failure, returns `{:error, :not_found}`.
+
+  This is quite an advanced low-level function,
+  which you usually won't need to interact with directly.
+
+
+  c.f. `lookup!/3`.
+
+      iex(1)> defmodule Example do
+      ...(2)>   use TypeCheck
+      ...(3)>   @spec! greeter(name :: binary()) :: binary()
+      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
+      ...(5)> end
+      ...(6)>
+      ...(7)> {:ok, spec} = TypeCheck.Spec.lookup(Example, :greeter, 1)
+      ...(8)> spec
+      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+
+      iex> TypeCheck.Spec.lookup(Example, :nonexistent, 0)
+      {:error, :not_found}
+  """
   def lookup(module, function, arity) do
     Code.ensure_loaded(module)
 
@@ -15,11 +40,49 @@ defmodule TypeCheck.Spec do
     end
   end
 
+  @doc """
+  Looks up the spec for a particular `{module, function, arity}`.
+
+  On success, returns `spec`.
+  Raises when the spec cannot be found.
+
+  c.f. `lookup/3`.
+
+      iex(1)> defmodule Example do
+      ...(2)>   use TypeCheck
+      ...(3)>   @spec! greeter(name :: binary()) :: binary()
+      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
+      ...(5)> end
+      ...(6)>
+      ...(7)> TypeCheck.Spec.lookup!(Example, :greeter, 1)
+      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+
+      iex> TypeCheck.Spec.lookup!(Example, :nonexistent, 0)
+      ** (ArgumentError) No spec found for `Example.nonexistent/0`
+  """
   def lookup!(module, function, arity) do
-    {:ok, res} = lookup(module, function, arity)
-    res
+    case lookup(module, function, arity) do
+      {:ok, spec} -> spec
+      _ -> raise ArgumentError, "No spec found for `#{inspect(module)}.#{to_string(function)}/#{arity}`"
+    end
   end
 
+  @doc """
+  True if a spec was added to `{module, function, arity}`.
+
+  c.f. `lookup/3`.
+
+      iex(1)> defmodule Example do
+      ...(2)>   use TypeCheck
+      ...(3)>   @spec! greeter(name :: binary()) :: binary()
+      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
+      ...(5)> end
+      ...(6)>
+      ...(7)> TypeCheck.Spec.defined?(Example, :greeter, 1)
+      true
+      ...(8)> TypeCheck.Spec.defined?(Example, :nonexistent, 0)
+      false
+  """
   def defined?(module, function, arity) do
     Code.ensure_loaded(module)
     function_exported?(module, spec_fun_name(function, arity), 0)
@@ -29,7 +92,7 @@ defmodule TypeCheck.Spec do
   def create_spec_def(name, arity, param_types, return_type) do
     spec_fun_name = spec_fun_name(name, arity)
 
-    quote location: :keep do
+    quote generated: true, location: :keep do
       @doc false
       def unquote(spec_fun_name)() do
         # import TypeCheck.Builtin
@@ -44,7 +107,8 @@ defmodule TypeCheck.Spec do
 
   @doc false
   def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
-    quote line: line do
+
+    quote generated: true, location: :keep, line: line do
       defoverridable([{unquote(name), unquote(arity)}])
 
       def unquote(name)(unquote_splicing(clean_params)) do
@@ -55,7 +119,10 @@ defmodule TypeCheck.Spec do
         unquote(return_spec_code)
         var!(super_result, nil)
       end
+
     end
+    # IO.puts(Code.format_string!(Macro.to_string(res)))
+    # res
   end
 
   @doc false
@@ -70,7 +137,7 @@ defmodule TypeCheck.Spec do
   defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller) do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
-    quote do end
+    quote generated: true, location: :keep do end
   end
   defp params_check_code(name, arity, param_types, clean_params, caller) do
     paired_params =
@@ -81,14 +148,14 @@ defmodule TypeCheck.Spec do
         param_check_code(param_type, clean_param, index, caller)
       end)
 
-    quote line: caller.line do
+    quote line: caller.line, generated: true, location: :keep do
       with unquote_splicing(paired_params) do
         # Run actual code
       else
         {{:error, problem}, index, param_type} ->
           raise TypeCheck.TypeError,
           {
-            {unquote(spec_fun_name(name, arity))(), :param_error,
+            {__MODULE__.unquote(spec_fun_name(name, arity))(), :param_error,
              %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}
       end
     end
@@ -97,7 +164,7 @@ defmodule TypeCheck.Spec do
   defp param_check_code(param_type, clean_param, index, _caller) do
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
 
-    quote do
+    quote generated: true, location: :keep do
       {{:ok, _bindings}, _index, _param_type} <-
         {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
@@ -107,14 +174,14 @@ defmodule TypeCheck.Spec do
     return_code_check =
       TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
 
-    quote do
+    quote generated: true, location: :keep do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
           nil
 
         {:error, problem} ->
           raise TypeCheck.TypeError,
-                {unquote(spec_fun_name(name, arity))(), :return_error,
+                {__MODULE__.unquote(spec_fun_name(name, arity))(), :return_error,
                  %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
       end
     end
