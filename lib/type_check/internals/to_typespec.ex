@@ -109,6 +109,11 @@ defmodule TypeCheck.Internals.ToTypespec do
           end
         end
 
+      {:impl, _, [protocol_name]} ->
+        quote generated: true, location: :keep do
+          unquote(protocol_name).t()
+        end
+
       {:fixed_map, _, [keywords]} ->
         snippets =
           keywords
