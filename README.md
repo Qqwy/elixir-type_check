@@ -173,12 +173,16 @@ Details:
   - [x] A compile-error is raised when a type is expanded more than a million times
   - [x] A macro called `lazy` is introduced to allow to defer type expansion to runtime (to _within_ the check).
 - [x] the Elixir formatter likes the way types+specs are constructed
+- [x] A type `impl(ProtocolName)` to work with 'any type implementing protocol `Protocolname`'.
+  - [x] Type checks.
+  - [x] StreamData generator.
 
 ### Pre-stable
 
-- [ ] Hide named types from opaque types.
+- [ ] High code-coverage to ensure stability of implementation.
 - [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
+- [ ] Hide named types from opaque types.
 - [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
@@ -193,6 +197,9 @@ Details:
 
 ### Changelog
 
+- 0.4.0 Support for `impl(ProtocolName)` to accept any type implementing a particular protocol.
+  - Also adds rudimentary support for overriding remote types.
+  - Bugfix when inspecting `lazy( ...)`-types.
 - 0.3.2 Support for unquote fragments inside types and specs. (c.f. #39)
 - 0.3.1 Fixed link in the documentation.
 - 0.3.0 Improve DefaultFormatter output when used with long function- or type-signatures (c.f. #32). Also, bugfix for `Builtin.tuple/1`.
@@ -212,7 +219,7 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.2.0"}
+    {:type_check, "~> 0.4.0"}
   ]
 end
 ```
