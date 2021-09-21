@@ -4,8 +4,9 @@
 
 
 [![hex.pm version](https://img.shields.io/hexpm/v/type_check.svg)](https://hex.pm/packages/type_check)
-[![Build Status](https://travis-ci.org/Qqwy/elixir-type_check.svg?branch=master)](https://travis-ci.org/Qqwy/elixir-type_check)
 [![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/type_check/index.html)
+[![ci](https://github.com/Qqwy/elixir-type_check/actions/workflows/ci.yml/badge.svg)](https://github.com/Qqwy/elixir-type_check/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/Qqwy/elixir-type_check/badge.svg)](https://coveralls.io/github/Qqwy/elixir-type_check)
 
 ## Core ideas
 
