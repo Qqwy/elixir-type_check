@@ -1,0 +1,44 @@
+# create this in .github/workflows/ci.yml
+name: ci
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      matrix:
+        otp: ['24.x', '23.x', '22.x']
+        elixir: ['1.12.x', '1.11.x', '1.10.x', '1.9.x', '1.8.x', '1.7.x']
+        exclude: 
+          - otp: '24.x'
+            elixir: '1.7.x'
+          - otp: '24.x'
+            elixir: '1.8.x'
+          - otp: '24.x'
+            elixir: '1.9.x'
+    env:
+      MIX_ENV: test
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - uses: actions/cache@v2
+        id: mix-cache
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-${{ matrix.otp}}-${{ matrix.elixir }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.otp}}-${{ matrix.elixir }}-mix-
+      - if: steps.mix-cache.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+          mix deps.compile
+      - run: mix compile
+      - run: mix test
+      - run: mix coveralls.github
