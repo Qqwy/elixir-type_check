@@ -5,7 +5,8 @@ defmodule TypeCheck.Options do
 
   Supported options:
 
-  - `:overrides`: A list of overrides for remote types.
+  - `:overrides`: A list of overrides for remote types. (default: `[]`)
+  - `:debug`: When true, will (at compile-time) print the generated TypeCheck-checking code. (default: `false`)
 
   These options are usually specified as passed to `use TypeCheck`,
   although they may also be passed in direct calls to `TypeCheck.conforms/3` (and its variants).
@@ -32,6 +33,11 @@ defmodule TypeCheck.Options do
   use TypeCheck, overrides: [
     {&Ecto.Schema.t/0, &MyProject.TypeCheckOverrides.Ecto.Schema.t/0}
   ]
+
+  ### Debugging
+
+  Passing the option `debug: true` will at compile-time print the generated code
+  for all added `@spec`s, as well as `TypeCheck.conforms/3`/`TypeCheck.conforms?/3`/`TypeCheck.conforms!/3` calls.
   ```
   """
 
@@ -48,18 +54,20 @@ defmodule TypeCheck.Options do
     @type! type_overrides :: list(type_override())
 
     @type! t :: %TypeCheck.Options{
-      overrides: type_overrides()
+      overrides: type_overrides(),
+      debug: boolean()
     }
   else
     @type remote_type() :: mfa | function
     @type type_override :: {remote_type(), remote_type()}
 
     @type t :: %TypeCheck.Options{
-      overrides: list(type_override())
+      overrides: list(type_override()),
+      debug: boolean()
     }
   end
 
-  defstruct [overrides: []]
+  defstruct [overrides: [], debug: false]
 
   def new() do
     %__MODULE__{}
@@ -74,9 +82,11 @@ defmodule TypeCheck.Options do
   end
   def new(enum) do
     raw_overrides = enum[:overrides] || []
-    # {overrides, _} = Code.eval_quoted(raw_overrides)
+    debug = enum[:debug] || false
+
     overrides = check_overrides!(raw_overrides)
-    %__MODULE__{overrides: overrides}
+
+    %__MODULE__{overrides: overrides, debug: debug}
   end
 
   if_recompiling? do

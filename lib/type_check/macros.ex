@@ -215,7 +215,11 @@ defmodule TypeCheck.Macros do
         params_spec_code,
         return_spec_code
       )
-      # IO.puts(Macro.to_string(res))
+
+      if typecheck_options.debug do
+        TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.Macros @spec", res)
+      end
+
       res
     end
   end
