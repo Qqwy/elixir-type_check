@@ -64,8 +64,6 @@ defmodule TypeCheck.Builtin.Guarded do
 
       type_names = MapSet.new(TypeCheck.Builtin.Guarded.extract_names(s.type))
       guard_names = TypeCheck.Internals.Helper.extract_vars_from_ast(s.guard)
-      IO.inspect(type_names, label: :type_names)
-      IO.inspect(guard_names, label: :guard_names)
       used_and_existing_names = MapSet.intersection(type_names, guard_names)
 
       names_map =
