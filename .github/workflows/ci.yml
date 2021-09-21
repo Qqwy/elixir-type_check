@@ -9,12 +9,8 @@ jobs:
     strategy:
       matrix:
         otp: ['24.x', '23.x', '22.x']
-        elixir: ['1.12.x', '1.11.x', '1.10.x', '1.9.x', '1.8.x', '1.7.x']
+        elixir: ['1.12.x', '1.11.x', '1.10.x', '1.9.x']
         exclude: 
-          - otp: '24.x'
-            elixir: '1.7.x'
-          - otp: '24.x'
-            elixir: '1.8.x'
           - otp: '24.x'
             elixir: '1.9.x'
     env:
