@@ -37,4 +37,4 @@ jobs:
           mix deps.compile
       - run: mix compile
       - run: mix test
-      # - run: mix coveralls.github # Coveralls is down irght now. Re-enable later
+      - run: mix coveralls.github # Coveralls is down irght now. Re-enable later
