@@ -106,9 +106,12 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code) do
+  def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code, typespec) do
 
     quote generated: true, location: :keep, line: line do
+      if Module.get_attribute(__MODULE__, :autogen_typespec) do
+        @spec unquote(typespec)
+      end
       defoverridable([{unquote(name), unquote(arity)}])
 
       def unquote(name)(unquote_splicing(clean_params)) do
@@ -121,8 +124,6 @@ defmodule TypeCheck.Spec do
       end
 
     end
-    # IO.puts(Code.format_string!(Macro.to_string(res)))
-    # res
   end
 
   @doc false
@@ -184,6 +185,15 @@ defmodule TypeCheck.Spec do
                 {__MODULE__.unquote(spec_fun_name(name, arity))(), :return_error,
                  %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
       end
+    end
+  end
+
+  @doc false
+  def to_typespec(name, params_ast, return_type_ast, caller) do
+    clean_param_types = Enum.map(params_ast, &TypeCheck.Internals.ToTypespec.full_rewrite(&1, caller))
+    clean_return_type = TypeCheck.Internals.ToTypespec.full_rewrite(return_type_ast, caller)
+    quote generated: true, location: :keep do
+      unquote(name)(unquote_splicing(clean_param_types)) :: unquote(clean_return_type)
     end
   end
 

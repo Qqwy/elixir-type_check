@@ -137,6 +137,8 @@ defmodule TypeCheck.Macros do
       @before_compile TypeCheck.Macros
 
       Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options)))
+
+      Module.put_attribute(__MODULE__, :autogen_typespec, true)
     end
   end
 
@@ -198,6 +200,8 @@ defmodule TypeCheck.Macros do
       param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
       return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
+      clean_specdef = TypeCheck.Spec.to_typespec(name, params_ast, return_type_ast, caller)
+
       {params_spec_code, return_spec_code} =
         TypeCheck.Spec.prepare_spec_wrapper_code(
           name,
@@ -213,7 +217,8 @@ defmodule TypeCheck.Macros do
         arity,
         clean_params,
         params_spec_code,
-        return_spec_code
+        return_spec_code,
+        clean_specdef
       )
 
       if typecheck_options.debug do
@@ -435,18 +440,21 @@ defmodule TypeCheck.Macros do
     res = type_fun_definition(name_with_maybe_params, type)
 
     quote generated: true, location: :keep do
-      case unquote(kind) do
-        :opaque ->
-          @typedoc unquote(new_typedoc)
-          @opaque unquote(name_with_maybe_params) :: unquote(clean_typedef)
+      if Module.get_attribute(__MODULE__, :autogen_typespec) do
+        case unquote(kind) do
+          :opaque ->
+            @typedoc unquote(new_typedoc)
+            @opaque unquote(name_with_maybe_params) :: unquote(clean_typedef)
 
-        :type ->
-          @typedoc unquote(new_typedoc)
-          @type unquote(name_with_maybe_params) :: unquote(clean_typedef)
+          :type ->
+            @typedoc unquote(new_typedoc)
+            @type unquote(name_with_maybe_params) :: unquote(clean_typedef)
 
-        :typep ->
-          @typep unquote(name_with_maybe_params) :: unquote(clean_typedef)
+          :typep ->
+            @typep unquote(name_with_maybe_params) :: unquote(clean_typedef)
+        end
       end
+      Module.put_attribute(__MODULE__, :autogen_typespec, true)
 
       unquote(res)
       Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
