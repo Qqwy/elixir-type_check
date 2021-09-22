@@ -150,7 +150,7 @@ defmodule TypeCheck do
     end
 
     if(options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.TypeCheck.conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
     end
     res
   end
@@ -171,7 +171,7 @@ defmodule TypeCheck do
     end
 
     if(options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.TypeCheck.conforms?(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms?(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
     res
@@ -196,7 +196,7 @@ defmodule TypeCheck do
     end
 
     if(options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.TypeCheck.conforms!(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms!(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
     res
@@ -232,7 +232,7 @@ defmodule TypeCheck do
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
 
     if(options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", check_code)
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", check_code)
     end
 
     case Code.eval_quoted(check_code, value: value) do
