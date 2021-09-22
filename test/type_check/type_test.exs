@@ -15,4 +15,8 @@ defmodule TypeCheck.TypeTest do
     stream_type_string =  TypeCheck.Type.build(%Stream{}) |> inspect()
     assert stream_type_string == "#TypeCheck.Type< #Stream<[...]> >"
   end
+
+  test "ensure_type! raises on non-types with a descriptive message" do
+    assert_raise(RuntimeError, ~r{^Invalid value passed to a function expecting a type!}, fn -> TypeCheck.Type.ensure_type!(42) end)
+  end
 end
