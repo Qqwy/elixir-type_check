@@ -16,6 +16,7 @@ defmodule TypeCheck.MixProject do
       source_url: @source_url,
       homepage_url: "https://github.com/Qqwy/elixir-type_check",
       docs: docs(),
+      elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
@@ -39,6 +40,9 @@ defmodule TypeCheck.MixProject do
         ]
     end
   end
+
+  def elixirc_paths(:test), do: ["lib", "test/support"]
+  def elixirc_paths(_), do: ["lib"]
 
   defp description do
     """

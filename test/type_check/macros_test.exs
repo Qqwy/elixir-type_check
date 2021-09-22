@@ -37,6 +37,21 @@ defmodule TypeCheck.MacrosTest do
       GreeterMacro.generate_greeter(:hello)
     end
 
+    # We cheat a little here;
+    # This is an alternative simplified implementation of `IEx.Helpers.t`
+    # Which only works for this particular example.
+    # c.f. https://github.com/elixir-lang/elixir/blob/c31c79f8f8df27b8eaeb01365dd7eb64f5e1f347/lib/iex/lib/iex/introspection.ex#L650
+    def t(module) do
+      {:ok, [type: type]} = Code.Typespec.fetch_types(module)
+
+      "@type " <>
+      (
+        type
+        |> Code.Typespec.type_to_quoted()
+        |> Macro.to_string
+      )
+    end
+
     doctest TypeCheck.Macros
   end
 
@@ -88,5 +103,9 @@ defmodule TypeCheck.MacrosTest do
         UnquoteFragmentSpecExample.my_function_greeter(1)
       end)
     end
+  end
+
+  describe "@autogen_typespec false" do
+    
   end
 end
