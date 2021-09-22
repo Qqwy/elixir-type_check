@@ -48,17 +48,17 @@ defmodule TypeCheck.Spec do
 
   c.f. `lookup/3`.
 
-      iex(1)> defmodule Example do
+      iex(1)> defmodule Example2 do
       ...(2)>   use TypeCheck
       ...(3)>   @spec! greeter(name :: binary()) :: binary()
       ...(4)>   def greeter(name), do: "Hello, \#{name}!"
       ...(5)> end
       ...(6)>
-      ...(7)> TypeCheck.Spec.lookup!(Example, :greeter, 1)
+      ...(7)> TypeCheck.Spec.lookup!(Example2, :greeter, 1)
       #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
 
-      iex> TypeCheck.Spec.lookup!(Example, :nonexistent, 0)
-      ** (ArgumentError) No spec found for `Example.nonexistent/0`
+      iex> TypeCheck.Spec.lookup!(Example2, :nonexistent, 0)
+      ** (ArgumentError) No spec found for `Example2.nonexistent/0`
   """
   def lookup!(module, function, arity) do
     case lookup(module, function, arity) do
@@ -72,15 +72,15 @@ defmodule TypeCheck.Spec do
 
   c.f. `lookup/3`.
 
-      iex(1)> defmodule Example do
+      iex(1)> defmodule Example3 do
       ...(2)>   use TypeCheck
       ...(3)>   @spec! greeter(name :: binary()) :: binary()
       ...(4)>   def greeter(name), do: "Hello, \#{name}!"
       ...(5)> end
       ...(6)>
-      ...(7)> TypeCheck.Spec.defined?(Example, :greeter, 1)
+      ...(7)> TypeCheck.Spec.defined?(Example3, :greeter, 1)
       true
-      ...(8)> TypeCheck.Spec.defined?(Example, :nonexistent, 0)
+      ...(8)> TypeCheck.Spec.defined?(Example3, :nonexistent, 0)
       false
   """
   def defined?(module, function, arity) do

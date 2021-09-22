@@ -18,26 +18,6 @@ defmodule TypeCheck.OptionsTest do
     end
 
     test "overrides are respected by the macros" do
-      import StreamData, except: [integer: 0]
-
-      defmodule OverrideExample.Original do
-        @type t() :: integer()
-      end
-
-      defmodule OverrideExample.Replacement do
-        use TypeCheck
-        @type! t() :: integer()
-      end
-
-      defmodule OverrideExample do
-        use TypeCheck, overrides: [{&OverrideExample.Original.t/0, &OverrideExample.Replacement.t/0}]
-
-        @spec! times_two(OverrideExample.Original.t()) :: integer()
-        def times_two(input) do
-          input * 2
-        end
-      end
-
       assert OverrideExample.times_two(42) == 84
       assert_raise(TypeCheck.TypeError, fn ->
         OverrideExample.times_two("a beautiful string")
@@ -46,7 +26,7 @@ defmodule TypeCheck.OptionsTest do
 
     test "an TypeCheck.TypeError is raised on an improper overrides list" do
       assert_raise(TypeCheck.TypeError, fn ->
-        TypeCheck.Options.new(overrides: [&OverrideExample.Original.t/0])
+        TypeCheck.Options.new(overrides: [{OverrideExample.Original, :t, 0}])
       end)
     end
   end
