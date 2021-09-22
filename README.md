@@ -177,27 +177,34 @@ Details:
 - [x] A type `impl(ProtocolName)` to work with 'any type implementing protocol `Protocolname`'.
   - [x] Type checks.
   - [x] StreamData generator.
+- [x] High code-coverage to ensure stability of implementation.
+- [x] Make sure we handle most (if not all) of Typespec's primitive types and syntax. (With the exception of functions and binary pattern matching)
+- [x] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
+- [x] Manually overriding generators for user-specified types if so desired.
 
 ### Pre-stable
 
-- [ ] High code-coverage to ensure stability of implementation.
-- [ ] Make sure we handle most (if not all) of Typespec's primitive types and syntax.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
 - [ ] Hide named types from opaque types.
-- [ ] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
-- [ ] Manually overriding generators for user-specified types if so desired.
+- [ ] Creating generators from specs
+  - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 
 ### Longer-term future ideas
 
-- [ ] Creating generators from specs
-  - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
-
 
 ### Changelog
 
+- 0.5.0 Stability improvements:
+  - Adding `Typecheck.Option` `debug: true`, which will (at compile-time) print the checks that TypeCheck is generating.
+  - Actually autogenerate a `@spec`, which did not yet happen before.
+  - When writing `@autogen_typespec false`, no typespec is exported for the next `@type!`/`@opaque`/`@spec!` encountered in a module.
+  - Code coverage increased to 85%
+  - Bugfixes w.r.t. generating typespecs
+  - Fixes compiler-warnings on unused named types when using a type guard. (c.f. #25)
+  - Fixes any warnings that were triggered during the test suite before.
 - 0.4.0 Support for `impl(ProtocolName)` to accept any type implementing a particular protocol.
   - Also adds rudimentary support for overriding remote types.
   - Bugfix when inspecting `lazy( ...)`-types.
@@ -220,7 +227,7 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.4.0"}
+    {:type_check, "~> 0.5.0"}
   ]
 end
 ```
