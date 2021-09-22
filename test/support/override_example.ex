@@ -1,4 +1,5 @@
 # Used by TypeCheck.Macros tests
+# coveralls-ignore-start
 defmodule OverrideExample.Original do
   @type t() :: integer()
 end
@@ -16,3 +17,4 @@ defmodule OverrideExample do
     input * 2
   end
 end
+# coveralls-ignore-end

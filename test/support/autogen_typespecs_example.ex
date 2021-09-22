@@ -1,4 +1,5 @@
 # Required for the `@autogen_typespecs false` module doctests of TypeCheck.Macros
+# coveralls-ignore-start
 defmodule AutogenTypespecsExample do
   use TypeCheck
 
@@ -11,3 +12,4 @@ defmodule AutogenTypespecsExample do
   @autogen_typespec false
   @type! bar() :: integer()
 end
+# coveralls-ignore-end
