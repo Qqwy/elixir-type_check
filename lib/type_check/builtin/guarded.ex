@@ -62,8 +62,12 @@ defmodule TypeCheck.Builtin.Guarded do
     def to_check(s, param) do
       type_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
 
+      type_names = MapSet.new(TypeCheck.Builtin.Guarded.extract_names(s.type))
+      guard_names = TypeCheck.Internals.Helper.extract_vars_from_ast(s.guard)
+      used_and_existing_names = MapSet.intersection(type_names, guard_names)
+
       names_map =
-        TypeCheck.Builtin.Guarded.extract_names(s.type)
+        used_and_existing_names
         |> Enum.map(fn name -> {name, {:unquote, [], [Macro.var(name, nil)]}} end)
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)

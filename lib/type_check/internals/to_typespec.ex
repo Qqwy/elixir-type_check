@@ -81,9 +81,11 @@ defmodule TypeCheck.Internals.ToTypespec do
           ast
         end
 
-      ast = {:fixed_list, _meta, [elem_types]} ->
+      ast = {:fixed_list, _meta, [_elem_types]} ->
         if {:fixed_list, 1} in builtin_imports do
-          elem_types
+          quote generated: true, location: :keep do
+            list()
+          end
         else
           ast
         end

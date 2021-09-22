@@ -97,10 +97,6 @@ defmodule TypeCheck.Type do
     type
   end
 
-  defmacro to_typespec(type) do
-    TypeCheck.Internals.ToTypespec.rewrite(type, __CALLER__)
-  end
-
   def type?(possibly_a_type) do
     TypeCheck.Protocols.ToCheck.impl_for(possibly_a_type) != nil
   end

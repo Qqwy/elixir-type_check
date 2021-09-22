@@ -149,7 +149,9 @@ defmodule TypeCheck do
       end
     end
 
-    # IO.puts(Macro.to_string(res))
+    if(options.debug) do
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+    end
     res
   end
 
@@ -168,7 +170,10 @@ defmodule TypeCheck do
       match?({:ok, _}, unquote(check))
     end
 
-    # IO.puts(Macro.to_string(res))
+    if(options.debug) do
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms?(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+    end
+
     res
   end
 
@@ -190,7 +195,10 @@ defmodule TypeCheck do
       end
     end
 
-    # IO.puts(Macro.to_string(res))
+    if(options.debug) do
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms!(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+    end
+
     res
   end
 
@@ -212,15 +220,20 @@ defmodule TypeCheck do
       iex> fourty_two = TypeCheck.Type.build(42)
       iex> TypeCheck.dynamic_conforms(42, fourty_two)
       {:ok, 42}
-      iex> {error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
+      iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At lib/type_check.ex:228:
+      "At lib/type_check.ex:241:
       `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
-  def dynamic_conforms(value, type) do
+  def dynamic_conforms(value, type, options \\ TypeCheck.Options.new()) do
+    options = TypeCheck.Options.new(options)
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
+
+    if(options.debug) do
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", check_code)
+    end
 
     case Code.eval_quoted(check_code, value: value) do
       {{:ok, _}, _} -> {:ok, value}
@@ -245,8 +258,8 @@ defmodule TypeCheck do
       false
   """
   @spec dynamic_conforms?(value, TypeCheck.Type.t()) :: boolean
-  def dynamic_conforms?(value, type) do
-    case dynamic_conforms(value, type) do
+  def dynamic_conforms?(value, type, options \\ TypeCheck.Options.new()) do
+    case dynamic_conforms(value, type, options) do
       {:ok, _value} -> true
       _other -> false
     end
@@ -261,12 +274,12 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:228:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:241:
       `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
-  def dynamic_conforms!(value, type) do
-    case dynamic_conforms(value, type) do
+  def dynamic_conforms!(value, type, options \\ TypeCheck.Options.new()) do
+    case dynamic_conforms(value, type, options) do
       {:ok, value} -> value
       {:error, exception} -> raise exception
     end
