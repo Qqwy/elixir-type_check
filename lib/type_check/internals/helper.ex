@@ -1,4 +1,6 @@
 defmodule TypeCheck.Internals.Helper do
+  @moduledoc false
+
   def prettyprint_spec(name, ast) do
     IO.puts("#{name} generated:")
     IO.puts("----------------")
