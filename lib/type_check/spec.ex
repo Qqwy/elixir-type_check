@@ -234,7 +234,8 @@ defmodule TypeCheck.Spec do
       def to_gen(s) do
         s.param_types
         |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
-        |> StreamData.fixed_list()
+        |> List.to_tuple
+        |> StreamData.tuple
       end
     end
   end

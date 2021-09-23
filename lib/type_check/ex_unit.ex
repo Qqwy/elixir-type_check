@@ -14,23 +14,41 @@ defmodule TypeCheck.ExUnit do
         for {name, arity} <- module.__type_check__(:specs) do
           spec = TypeCheck.Spec.lookup!(module, name, arity)
           body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec)
+          IO.puts(Macro.to_string(body))
 
-          # quote bind_quoted: [module: module, name: name, arity: arity, spec: spec, env: env, body: body] do
-          test_name = ExUnit.Case.register_test(env, :spectest, "#{name}/#{arity}", [:spectest])
-          IO.inspect(test_name)
-          def unquote(test_name), do: 42
-          # end
+          test_name = ExUnit.Case.register_test(env, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [:spectest])
+          def unquote(test_name)(_) do
+            import TypeCheck.Protocols.ToStreamData
+            unquote(body)
+          end
         end
       end
 
-    [req, tests]
+    quote do
+      unquote(req)
+      unquote(tests)
+    end
   end
 
   @doc false
   def __build_spectest__(module, name, arity, spec) do
+    generators =
+      spec.param_types
+      # |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
+      |> Enum.zip(Macro.generate_arguments(arity, module))
+      |> Enum.map(fn {type, arg} ->
+      quote do
+        unquote(arg) <- to_gen(unquote(Macro.escape(type)))
+      end
+      end)
+
     quote do
       require ExUnitProperties
-      ExUnitProperties.check all {unquote_splicing(Macro.generate_arguments(arity, module))} <- TypeCheck.Protocols.ToStreamData.to_gen(unquote(spec)) do
+      # arguments_generator = TypeCheck.Protocols.ToStreamData.to_gen(unquote(Macro.escape(spec)))
+      # ExUnitProperties.check all {unquote_splicing(Macro.generate_arguments(arity, module))} <- arguments_generator do
+      #   unquote(module).unquote(name)(unquote_splicing(Macro.generate_arguments(arity, module)))
+      # end
+      ExUnitProperties.check all unquote_splicing(generators) do
         unquote(module).unquote(name)(unquote_splicing(Macro.generate_arguments(arity, module)))
       end
     end

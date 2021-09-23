@@ -6,8 +6,17 @@ defmodule DebugExample do
 
   @type! myparam :: integer()
 
-  @spec! stringify(myparam) :: binary()
-  def stringify(val) do
-    to_string(val)
+  @spec! stringify(myparam, boolean()) :: binary()
+  def stringify(val, _bool) do
+    if val > 10 do
+      val
+    else
+      to_string(val)
+    end
+  end
+
+  @spec! average(list(number())) :: number()
+  def average(vals) do
+    Enum.sum(vals) / Enum.count(vals)
   end
 end
