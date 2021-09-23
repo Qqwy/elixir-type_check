@@ -4,7 +4,9 @@ defmodule DebugExample do
 
   use TypeCheck, debug: true
 
-  @spec! stringify(integer()) :: binary()
+  @type! myparam :: integer()
+
+  @spec! stringify(myparam) :: binary()
   def stringify(val) do
     to_string(val)
   end

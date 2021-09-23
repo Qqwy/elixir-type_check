@@ -165,6 +165,7 @@ defmodule TypeCheck.Macros do
       @compile {:inline_size, 1080}
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
+      Module.register_attribute(__MODULE__, TypeCheck.TypeDefNames, accumulate: true)
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
       @before_compile TypeCheck.Macros
 
@@ -176,6 +177,7 @@ defmodule TypeCheck.Macros do
 
   defmacro __before_compile__(env) do
     defs = Module.get_attribute(env.module, TypeCheck.TypeDefs)
+    typedef_names = Module.get_attribute(env.module, TypeCheck.TypeDefNames)
 
     compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, env.module)
 
@@ -198,6 +200,8 @@ defmodule TypeCheck.Macros do
     spec_defs = create_spec_defs(specs, definitions, env)
     spec_quotes = wrap_functions_with_specs(specs, definitions, env)
 
+    spec_names = specs |> Enum.map(fn {name, _, arity, _, _, _} -> {name, arity} end)
+
     # And now for the tricky bit ;-)
     quote generated: true, location: :keep do
       unquote(spec_defs)
@@ -205,6 +209,16 @@ defmodule TypeCheck.Macros do
       import unquote(compile_time_imports_module_name)
 
       unquote(spec_quotes)
+
+      @doc false
+      def __type_check__(arg)
+      def __type_check__(:specs) do
+        unquote(spec_names)
+      end
+
+      def __type_check__(:types) do
+        unquote(typedef_names)
+      end
     end
   end
 
@@ -469,6 +483,11 @@ defmodule TypeCheck.Macros do
 
     typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller, typecheck_options)
+    name_with_arity =
+      case name_with_maybe_params do
+        {name, _, context} when is_atom(context) -> {name, 0}
+        {name, _, params} when is_list(params) -> {name, length(params)}
+      end
 
     res = type_fun_definition(name_with_maybe_params, type)
 
@@ -491,6 +510,7 @@ defmodule TypeCheck.Macros do
 
       unquote(res)
       Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
+      Module.put_attribute(__MODULE__, TypeCheck.TypeDefNames, unquote(name_with_arity))
     end
   end
 
