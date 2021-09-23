@@ -2,7 +2,6 @@
 
 # TypeCheck: Fast and flexible runtime type-checking for your Elixir projects.
 
-
 [![hex.pm version](https://img.shields.io/hexpm/v/type_check.svg)](https://hex.pm/packages/type_check)
 [![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/type_check/index.html)
 [![ci](https://github.com/Qqwy/elixir-type_check/actions/workflows/ci.yml/badge.svg)](https://github.com/Qqwy/elixir-type_check/actions/workflows/ci.yml)
