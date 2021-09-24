@@ -93,7 +93,7 @@ defmodule Elixir.TypeCheck.Options.DefaultOverrides.Erlang.Inet do
 
 #   @typep! module_socket() :: {:"$inet", handler :: module(), handle :: term()}
 
-#   @type! port_number() :: 0..65535
+  @type! port_number() :: 0..65535
 
 #   @type! posix() ::
 #   :eaddrinuse
