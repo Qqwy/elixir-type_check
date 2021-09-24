@@ -33,8 +33,6 @@ defmodule TypeCheck.ExUnit do
 
         test_name = ExUnit.Case.register_test(env, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [:spectest])
         def unquote(test_name)(_) do
-          import TypeCheck.Protocols.ToStreamData
-          require ExUnitProperties
           unquote(body)
         end
       end
@@ -52,7 +50,6 @@ defmodule TypeCheck.ExUnit do
     quote [generated: true] do
       options = unquote(options)
       initial_seed = {0, 0, options[:initial_seed]}
-
 
       generator = TypeCheck.Protocols.ToStreamData.to_gen(unquote(Macro.escape(spec)))
       result = StreamData.check_all(generator, [initial_seed: initial_seed], fn unquote(Macro.generate_arguments(arity, module)) ->

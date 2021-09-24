@@ -8,15 +8,18 @@ defmodule DebugExample do
 
   @spec! stringify(myparam(), boolean()) :: binary()
   def stringify(val, _bool) do
-    if val > 10 do
-      val
-    else
+    # if val > 10 do
+    #   val
+    # else
       to_string(val)
-    end
+    # end
   end
 
-  @spec! average(list(number())) :: number()
+  @spec! average(list(number())) :: {:ok, number()} | {:error, :empty}
+  def average([]), do: {:error, :empty}
+  # def average(vals) when length(vals) < 3 do
   def average(vals) do
-    Enum.sum(vals) / Enum.count(vals)
+    res = Enum.sum(vals) / Enum.count(vals)
+    {:ok, res}
   end
 end

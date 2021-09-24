@@ -112,8 +112,8 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def wrap_function_with_spec(name, location, arity, clean_params, params_spec_code, return_spec_code, typespec) do
-    {file, line} = location
+  def wrap_function_with_spec(name, _location, arity, clean_params, params_spec_code, return_spec_code, typespec) do
+    # {file, line} = location
 
     quote generated: true, location: :keep do
       if Module.get_attribute(__MODULE__, :autogen_typespec) do
@@ -129,7 +129,6 @@ defmodule TypeCheck.Spec do
         unquote(return_spec_code)
         var!(super_result, nil)
       end
-
     end
   end
 
@@ -142,10 +141,10 @@ defmodule TypeCheck.Spec do
     {params_code, return_code}
   end
 
-  defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller, location) do
+  defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller, _location) do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
-    {file, line} = location
+    # {file, line} = location
     quote generated: true, location: :keep do end
   end
   defp params_check_code(name, arity, param_types, clean_params, caller, location) do
@@ -157,7 +156,7 @@ defmodule TypeCheck.Spec do
         param_check_code(param_type, clean_param, index, caller, location)
       end)
 
-    {file, line} = location
+    # {file, line} = location
     quote generated: true, location: :keep do
       with unquote_splicing(paired_params) do
         # Run actual code
@@ -171,22 +170,21 @@ defmodule TypeCheck.Spec do
     end
   end
 
-  defp param_check_code(param_type, clean_param, index, _caller, location) do
+  defp param_check_code(param_type, clean_param, index, _caller, _location) do
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
 
-    {file, line} = location
+    # {file, line} = location
     quote generated: true, location: :keep do
       {{:ok, _bindings}, _index, _param_type} <-
         {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
   end
 
-  defp return_check_code(name, arity, clean_params, return_type, _caller, location) do
+  defp return_check_code(name, arity, clean_params, return_type, _caller, _location) do
     return_code_check =
       TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
 
-    {file, line} = location
-    IO.inspect(location, label: :return_check_code_location)
+    # {file, line} = location
     quote generated: true, location: :keep do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
