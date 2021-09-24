@@ -9,15 +9,15 @@ defmodule TypeCheck.Options.DefaultOverrides.Date.Range do
       first: Date.t(),
       first_in_iso_days: iso_days(),
       last: Date.t(),
-      last_in_iso_days: iso_days(),
-      step: pos_integer() | neg_integer()
+      last_in_iso_days: iso_days()
     }
   else
     @type! t() :: %Elixir.Date.Range{
       first: Date.t(),
       first_in_iso_days: iso_days(),
       last: Date.t(),
-      last_in_iso_days: iso_days()
+      last_in_iso_days: iso_days(),
+      step: pos_integer() | neg_integer()
     }
   end
 end
