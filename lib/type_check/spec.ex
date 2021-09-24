@@ -115,7 +115,7 @@ defmodule TypeCheck.Spec do
   def wrap_function_with_spec(name, location, arity, clean_params, params_spec_code, return_spec_code, typespec) do
     {file, line} = location
 
-    quote generated: true, file: file, line: line do
+    quote generated: true, location: :keep do
       if Module.get_attribute(__MODULE__, :autogen_typespec) do
         @spec unquote(typespec)
       end
@@ -146,7 +146,7 @@ defmodule TypeCheck.Spec do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
     {file, line} = location
-    quote generated: true, file: file, line: line do end
+    quote generated: true, location: :keep do end
   end
   defp params_check_code(name, arity, param_types, clean_params, caller, location) do
     paired_params =
@@ -158,7 +158,7 @@ defmodule TypeCheck.Spec do
       end)
 
     {file, line} = location
-    quote file: file, line: line, generated: true do
+    quote generated: true, location: :keep do
       with unquote_splicing(paired_params) do
         # Run actual code
       else
@@ -175,7 +175,7 @@ defmodule TypeCheck.Spec do
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
 
     {file, line} = location
-    quote generated: true, file: file, line: line do
+    quote generated: true, location: :keep do
       {{:ok, _bindings}, _index, _param_type} <-
         {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
@@ -187,7 +187,7 @@ defmodule TypeCheck.Spec do
 
     {file, line} = location
     IO.inspect(location, label: :return_check_code_location)
-    quote generated: true, file: file, line: line do
+    quote generated: true, location: :keep do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
           nil
@@ -246,8 +246,9 @@ defmodule TypeCheck.Spec do
       def to_gen(s) do
         s.param_types
         |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
-        |> List.to_tuple
-        |> StreamData.tuple
+        |> StreamData.fixed_list()
+        # |> List.to_tuple
+        # |> StreamData.tuple
       end
     end
   end
