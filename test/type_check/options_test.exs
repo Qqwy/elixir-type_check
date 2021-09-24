@@ -1,5 +1,5 @@
 defmodule TypeCheck.OptionsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
 
   alias TypeCheck.Options
@@ -73,7 +73,7 @@ defmodule TypeCheck.OptionsTest do
             TypeCheck.conforms(42, integer(), debug: true)
           end)
       end)
-      assert "TypeCheck.conforms(42, #TypeCheck.Type< integer() >, %TypeCheck.Options{debug: true, overrides: []}) generated:\n----------------\n" <> _rest = output
+      assert "TypeCheck.conforms(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
     end
 
 	  test "works on TypeCheck.conforms?" do
@@ -85,7 +85,7 @@ defmodule TypeCheck.OptionsTest do
             TypeCheck.conforms?(42, integer(), debug: true)
           end)
       end)
-      assert "TypeCheck.conforms?(42, #TypeCheck.Type< integer() >, %TypeCheck.Options{debug: true, overrides: []}) generated:\n----------------\n" <> _rest = output
+      assert "TypeCheck.conforms?(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
     end
 
 	  test "works on TypeCheck.conforms!" do
@@ -97,7 +97,7 @@ defmodule TypeCheck.OptionsTest do
             TypeCheck.conforms!(42, integer(), debug: true)
           end)
       end)
-      assert "TypeCheck.conforms!(42, #TypeCheck.Type< integer() >, %TypeCheck.Options{debug: true, overrides: []}) generated:\n----------------\n" <> _rest = output
+      assert "TypeCheck.conforms!(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
     end
 
 	  test "works on TypeCheck.dynamic_conforms" do
@@ -105,7 +105,7 @@ defmodule TypeCheck.OptionsTest do
         import TypeCheck.Builtin
         TypeCheck.dynamic_conforms(42, integer(), debug: true)
       end)
-      assert "TypeCheck.dynamic_conforms(42, #TypeCheck.Type< integer() >, %TypeCheck.Options{debug: true, overrides: []}) generated:\n----------------\n" <> _rest = output
+      assert "TypeCheck.dynamic_conforms(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
     end
 
     test "works on @spec!" do

@@ -18,7 +18,7 @@ end
 
 
 defmodule TypeCheckTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
 
   import TypeCheckTest.TypeGuardExample

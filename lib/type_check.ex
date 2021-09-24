@@ -149,10 +149,10 @@ defmodule TypeCheck do
   @spec conforms(value, TypeCheck.Type.expandable_type()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
   defmacro conforms(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
-    {options, _} = Code.eval_quoted(options, [], __CALLER__)
+    {evaluated_options, _} = Code.eval_quoted(options, [], __CALLER__)
 
-    options = TypeCheck.Options.new(options)
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
+    evaluated_options = TypeCheck.Options.new(evaluated_options)
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
@@ -162,7 +162,7 @@ defmodule TypeCheck do
       end
     end
 
-    if(options.debug) do
+    if(evaluated_options.debug) do
       TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
     end
     res
@@ -175,17 +175,17 @@ defmodule TypeCheck do
   """
   @spec conforms?(value, TypeCheck.Type.expandable_type()) :: boolean()
   defmacro conforms?(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
-    {options, _} = Code.eval_quoted(options, [], __CALLER__)
+    {evaluated_options, _} = Code.eval_quoted(options, [], __CALLER__)
 
-    options = TypeCheck.Options.new(options)
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
+    evaluated_options = TypeCheck.Options.new(evaluated_options)
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
       match?({:ok, _}, unquote(check))
     end
 
-    if(options.debug) do
+    if(evaluated_options.debug) do
       TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms?(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
@@ -199,10 +199,10 @@ defmodule TypeCheck do
   """
   @spec conforms!(value, TypeCheck.Type.expandable_type()) :: value | no_return()
   defmacro conforms!(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
-    {options, _} = Code.eval_quoted(options, [], __CALLER__)
+    {evaluated_options, _} = Code.eval_quoted(options, [], __CALLER__)
 
-    options = TypeCheck.Options.new(options)
-    type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
+    evaluated_options = TypeCheck.Options.new(evaluated_options)
+    type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
@@ -212,7 +212,7 @@ defmodule TypeCheck do
       end
     end
 
-    if(options.debug) do
+    if(evaluated_options.debug) do
       TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms!(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
@@ -239,16 +239,16 @@ defmodule TypeCheck do
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At lib/type_check.ex:241:
+      "At lib/type_check.ex:258:
       `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
   def dynamic_conforms(value, type, options \\ TypeCheck.Options.new()) do
-    options = TypeCheck.Options.new(options)
+    evaluated_options = TypeCheck.Options.new(options)
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
 
-    if(options.debug) do
+    if(evaluated_options.debug) do
       TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", check_code)
     end
 
@@ -291,7 +291,7 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:241:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:258:
       `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
