@@ -44,7 +44,8 @@ end
 
 defimpl TypeCheck.Protocols.Inspect, for: Any do
   def inspect(val, opts) do
-    Elixir.Inspect.inspect(val, opts)
+    # Elixir.Inspect.inspect(val, [opts])
+    Elixir.Inspect.Any.inspect(val, opts)
   end
 end
 

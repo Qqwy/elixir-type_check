@@ -111,9 +111,20 @@ defmodule TypeCheck do
   """
 
   defmacro __using__(options) do
-    quote generated: true, location: :keep do
-      use TypeCheck.Macros, unquote(options)
-      import TypeCheck.Builtin
+    case __CALLER__.module do
+      nil ->
+        quote generated: true, location: :keep do
+          require TypeCheck
+          import TypeCheck.Builtin
+          :ok
+        end
+      _other ->
+        quote generated: true, location: :keep do
+          use TypeCheck.Macros, unquote(options)
+          require TypeCheck
+          import TypeCheck.Builtin
+          :ok
+        end
     end
   end
 
@@ -137,7 +148,9 @@ defmodule TypeCheck do
   @type value :: any()
   @spec conforms(value, TypeCheck.Type.expandable_type()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
-  defmacro conforms(value, type, options \\ TypeCheck.Options.new()) do
+  defmacro conforms(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
+    {options, _} = Code.eval_quoted(options, [], __CALLER__)
+
     options = TypeCheck.Options.new(options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
@@ -161,7 +174,9 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `conforms/2`.
   """
   @spec conforms?(value, TypeCheck.Type.expandable_type()) :: boolean()
-  defmacro conforms?(value, type, options \\ TypeCheck.Options.new()) do
+  defmacro conforms?(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
+    {options, _} = Code.eval_quoted(options, [], __CALLER__)
+
     options = TypeCheck.Options.new(options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
@@ -183,7 +198,9 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `conforms/2`.
   """
   @spec conforms!(value, TypeCheck.Type.expandable_type()) :: value | no_return()
-  defmacro conforms!(value, type, options \\ TypeCheck.Options.new()) do
+  defmacro conforms!(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
+    {options, _} = Code.eval_quoted(options, [], __CALLER__)
+
     options = TypeCheck.Options.new(options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
