@@ -44,11 +44,11 @@ defmodule TypeCheck.Options.DefaultOverrides do
   ]a
 
   for module <- @elixir_modules do
-    Code.ensure_compiled!(Elixir.Module.concat(__MODULE__, module))
+    Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
   end
 
   for module <- @erlang_modules do
-    Code.ensure_compiled!(Elixir.Module.concat(__MODULE__, module))
+    Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
   end
 
 
