@@ -70,7 +70,7 @@ defmodule TypeCheck.Options do
   defstruct [overrides: [], debug: false]
 
   def new() do
-    %__MODULE__{}
+    %__MODULE__{overrides: default_overrides()}
   end
 
   def new(already_struct = %__MODULE__{}) do
@@ -86,6 +86,14 @@ defmodule TypeCheck.Options do
 
     overrides = check_overrides!(raw_overrides)
 
+    # default_overrides =
+    #   if_recompiling? do
+    #     apply(TypeCheck.Options.DefaultOverrides, :default_overrides, [])
+    #   else
+    #     []
+    #   end
+    overrides = overrides ++ default_overrides()
+
     %__MODULE__{overrides: overrides, debug: debug}
   end
 
@@ -94,6 +102,13 @@ defmodule TypeCheck.Options do
   end
   def check_overrides!(overrides) do
     Enum.map(overrides, &check_override!/1)
+  end
+
+  defp default_overrides() do
+      case Code.ensure_loaded(TypeCheck.Options.DefaultOverrides) do
+        {:error, _problem} -> []
+        {:module, _} -> apply(TypeCheck.Options.DefaultOverrides, :default_overrides, [])
+      end
   end
 
   defp check_override!({original, override}) do
