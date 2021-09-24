@@ -1,6 +1,6 @@
 # # Overrides Erlang's `:inet` module:
-# defmodule :"Elixir.TypeCheck.Options.DefaultOverrides.inet" do
-#   use TypeCheck
+defmodule Elixir.TypeCheck.Options.DefaultOverrides.Erlang.Inet do
+  use TypeCheck
 #   @type! address_family() :: :inet | :inet6 | :local
 
 #   @type! ancillary_data() :: [tos: byte(), tclass: byte(), ttl: byte()]
@@ -160,5 +160,4 @@
 #   | :send_oct
 #   | :send_pend
 
-
-# end
+end

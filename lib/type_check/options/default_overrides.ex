@@ -2,392 +2,86 @@ defmodule TypeCheck.Options.DefaultOverrides do
   @moduledoc """
   Contains a many common types that can be used as overrides for Elixir's standard library types.
   """
-  alias TypeCheck.Options.DefaultOverrides.{
-    Access,
-    Calendar,
-    Date,
-    Collectable,
-    Enum,
-    Enumerable,
-    String,
-    Version,
+
+  Code.ensure_compiled!(TypeCheck)
+  use TypeCheck
+
+  @elixir_modules ~w[
+    Calendar
+    Collectable
+    Date
+    Date.Range
+    Enum
+    Enumerable
+    Exception
+    Float
+    Function
+    Inspect
+    MapSet
+    Module
+    NaiveDateTime
+    Range
+    Regex
+    String
+    Time
+    URI
+    Version
     Version.Requirement
-  }, warn: false
+  ]a
 
-  # Overrides Erlang's `:binary` module:
-  defmodule :"Elixir.TypeCheck.Options.DefaultOverrides.binary" do
-    use TypeCheck
-    # TODO
-    @opaque cp() :: {any(), reference()}
-    @autogen_typespec false
-    @opaque! cp() :: {'am' | 'bm', term()}
+  @erlang_modules ~w[
+    Erlang.Binary
+    Erlang.Inet
+  ]a
 
-    @opaque! part() :: {start :: non_neg_integer(), length :: integer()}
+  for module <- @elixir_modules do
+    Code.ensure_compiled!(Elixir.Module.concat(__MODULE__, module))
   end
 
-  defmodule Calendar do
-    use TypeCheck
-
-    # Since Elixir only ships with Calendar.ISO
-    # use only that one for data generation for now
-    @type calendar() :: module()
-    @autogen_typespec false
-    @type! calendar() :: Elixir.Calendar.ISO
-
-    @type! date() :: %{
-      # optional(any()) => any(),
-      :calendar => calendar(),
-      :year => year(),
-      :month => month(),
-      :day => day()
-    }
-
-    @type! datetime() :: %{
-      # optional(any()) => any(),
-      :calendar => calendar(),
-      :year => year(),
-      :month => month(),
-      :day => day(),
-      :hour => hour(),
-      :minute => minute(),
-      :second => second(),
-      :microsecond => microsecond(),
-      :time_zone => time_zone(),
-      :zone_abbr => zone_abbr(),
-      :utc_offset => utc_offset(),
-      :std_offset => std_offset()
-    }
-
-    @type! day() :: pos_integer()
-
-    @type! day_fraction() ::
-    {parts_in_day :: non_neg_integer(), parts_per_day :: pos_integer()}
-
-    @type! day_of_era() :: {day :: non_neg_integer(), era()}
-
-    @type! day_of_week() :: non_neg_integer()
-
-    @type! era() :: non_neg_integer()
-
-    @type! hour() :: non_neg_integer()
-
-    @type! iso_days() :: {days :: integer(), day_fraction()}
-
-    @type microsecond() :: {non_neg_integer(), non_neg_integer()}
-    @autogen_typespec false
-    @type! microsecond() :: {0..999_999, 0..6}
-
-    @type! minute() :: non_neg_integer()
-
-    @type! month() :: pos_integer()
-
-    @type! naive_datetime() :: %{
-      # optional(any()) => any(),
-      :calendar => calendar(),
-      :year => year(),
-      :month => month(),
-      :day => day(),
-      :hour => hour(),
-      :minute => minute(),
-      :second => second(),
-      :microsecond => microsecond()
-    }
-
-    @type! second() :: non_neg_integer()
-
-    @type! std_offset() :: integer()
-
-    @type! time() :: %{
-      # optional(any()) => any(),
-      :hour => hour(),
-      :minute => minute(),
-      :second => second(),
-      :microsecond => microsecond()
-    }
-
-    @type! time_zone() :: String.t()
-
-    @type! time_zone_database() :: module()
-
-    @type! utc_offset() :: integer()
-
-    @type! week() :: pos_integer()
-
-    @type! year() :: integer()
-
-    @type! zone_abbr() :: String.t()
+  for module <- @erlang_modules do
+    Code.ensure_compiled!(Elixir.Module.concat(__MODULE__, module))
   end
 
-  defmodule Date do
-    use TypeCheck
-    @type! t() :: %Elixir.Date{
-      calendar: Calendar.calendar(),
-      day: Calendar.day(),
-      month: Calendar.month(),
-      year: Calendar.year()
-    }
-  end
 
-  defmodule Date.Range do
-    use TypeCheck
-    @opaque! iso_days() :: Calendar.iso_days()
-
-    @type! t() :: %Elixir.Date.Range{
-      first: Date.t(),
-      first_in_iso_days: iso_days(),
-      last: Date.t(),
-      last_in_iso_days: iso_days(),
-      step: pos_integer() | neg_integer()
-    }
-  end
-
-  defmodule Range do
-    use TypeCheck
-    @type! limit() :: integer()
-
-    @type! step() :: pos_integer() | neg_integer()
-
-    @type! t() :: %Elixir.Range{first: limit(), last: limit(), step: step()}
-
-    @type! t(first, last) :: %Elixir.Range{first: first, last: last, step: step()}
-  end
-
-  defmodule Enumerable do
-    use TypeCheck
-    @type! acc() :: {:cont, term()} | {:halt, term()} | {:suspend, term()}
-
-    # TODO
-    @type continuation() :: (acc() -> result())
-    @autogen_typespec false
-    @type! continuation() :: function()
-
-    # TODO
-    @type reducer() :: (element :: term(), current_acc :: acc() -> updated_acc :: acc())
-    @autogen_typespec false
-    @type! reducer() :: function()
-
-    @type! result() ::
-    {:done, term()}
-    | {:halted, term()}
-    | {:suspended, term(), continuation()}
-
-    # TODO
-    @type slicing_fun() :: (start :: non_neg_integer(), length :: pos_integer() -> [term()])
-    @autogen_typespec false
-    @type! slicing_fun() :: function()
-
-    @type! t() :: impl(Elixir.Enumerable)
-  end
-
-  defmodule Collectable do
-    use TypeCheck
-    @type! command() :: {:cont, term()} | :done | :halt
-    @type! t() :: impl(Elixir.Collectable)
-  end
-
-  defmodule Enum do
-    use TypeCheck
-    @type! acc() :: any()
-    @type! default() :: any()
-    @type! element() :: any()
-    @type! index() :: integer()
-    @type! t() :: Enumerable.t()
-  end
-
-  defmodule Exception do
-    use TypeCheck
-    @type! arity_or_args() :: non_neg_integer() | list()
-
-    @type! kind() :: :error | non_error_kind()
-
-    @type! location() :: keyword()
-
-    # TODO
-    @type non_error_kind() :: :exit | :throw | {:EXIT, pid()}
-    @autogen_typespec false
-    @type! non_error_kind() :: :exit | :throw | {:EXIT, term()}
-
-    @type! stacktrace() :: [stacktrace_entry()]
-
-    # TODO
-    @type! stacktrace_entry() ::
-    {module(), atom(), arity_or_args(), location()}
-    | {function(), arity_or_args(), location()}
-
-    # TODO
-    @type! t() :: %{
-      :__struct__ => module(),
-      :__exception__ => true,
-      # optional(atom()) => any()
-    }
-  end
-
-  defmodule Float do
-    use TypeCheck
-    @type! precision_range() :: 0..15
-  end
-
-  defmodule Function do
-    use TypeCheck
-    @type! information() ::
-    :arity
-    | :env
-    | :index
-    | :module
-    | :name
-    | :new_index
-    | :new_uniq
-    | :pid
-    | :type
-    | :uniq
-  end
-
-  defmodule Module do
-    use TypeCheck
-    @opaque! def_kind() :: :def | :defp | :defmacro | :defmacrop
-
-    @opaque! definition() :: {atom(), arity()}
-  end
-
-  defmodule Inspect do
-    use TypeCheck
-    @type! t() :: impl(Elixir.Inspect)
-  end
-
-  defmodule MapSet do
-    use TypeCheck
-    @type! t() :: t(term())
-
-    @opaque! t(value) :: %Elixir.MapSet{map: map(value, literal([]))}
-
-    @type! value() :: term()
-  end
-
-  defmodule NaiveDateTime do
-    use TypeCheck
-    @type! t() :: %Elixir.NaiveDateTime{
-      calendar: Calendar.calendar(),
-      day: Calendar.day(),
-      hour: Calendar.hour(),
-      microsecond: Calendar.microsecond(),
-      minute: Calendar.minute(),
-      month: Calendar.month(),
-      second: Calendar.second(),
-      year: Calendar.year()
-    }
-  end
-
-  defmodule Regex do
-    use TypeCheck
-    @type! t() :: %Elixir.Regex{
-      opts: binary(),
-      re_pattern: term(),
-      re_version: term(),
-      source: binary()
-    }
-  end
-
-  defmodule String do
-    use TypeCheck
-    @type! codepoint() :: t()
-
-    @type! grapheme() :: t()
-
-    @type! pattern() :: t() | [t()] | :"Elixir.TypeCheck.Options.DefaultOverrides.binary".cp()
-
-    import TypeCheck.Type.StreamData
-    def printable_string_gen do
-      StreamData.one_of([StreamData.string(:ascii), StreamData.string(:printable)])
-    end
-
-    @type! t() :: wrap_with_gen(binary(), &String.printable_string_gen/0)
-
-  end
-
-  defmodule Time do
-    use TypeCheck
-    @type! t() :: %Elixir.Time{
-      calendar: Calendar.calendar(),
-      hour: Calendar.hour(),
-      microsecond: Calendar.microsecond(),
-      minute: Calendar.minute(),
-      second: Calendar.second()
-    }
-  end
-
-  defmodule URI do
-    use TypeCheck
-    @type! t() :: %Elixir.URI{
-      authority: nil | binary(),
-      fragment: nil | binary(),
-      host: nil | binary(),
-      path: nil | binary(),
-      # port: nil | :inet.port_number(),
-      port: nil | (port_number :: 0..65535),
-      query: nil | binary(),
-      scheme: nil | binary(),
-      userinfo: nil | binary()
-    }
-  end
-
-  defmodule Version.Requirement do
-    use TypeCheck
-    @opaque! matchable() ::
-    {Version.major(), Version.minor(), Version.patch(), Version.pre(),
-     Version.build()}
-
-    @opaque! t() :: %Elixir.Version.Requirement{
-      source: String.t(),
-      lexed: [atom | matchable()]
-    }
-  end
-
-  defmodule Version do
-    use TypeCheck
-    @type! build() :: String.t() | nil
-
-    @type! major() :: non_neg_integer()
-
-    @type! minor() :: non_neg_integer()
-
-    @type! patch() :: non_neg_integer()
-
-    # TODO
-    @type! pre() :: [String.t() | non_neg_integer()]
-
-    @type! requirement() :: String.t() | Version.Requirement.t()
-
-    # TODO
-    @type! t() :: %Elixir.Version{
-      build: build(),
-      major: major(),
-      minor: minor(),
-      patch: patch(),
-      pre: pre()
-    }
-
-    @type! version() :: String.t() | t()
-  end
-
+  @doc """
+  Lists all overridden types in {module, function, arity} format.
+  """
+  @spec default_overrides :: list(mfa())
   def default_overrides do
-    ~w[
-      String
-      Calendar
-      Collectable
-      Enumerable
-      Enum
-      Date
-      Time
-    ]a
-    |> Elixir.Enum.flat_map(&build_overrides/1)
+    elixir_overrides = Elixir.Enum.flat_map(@elixir_modules, &build_overrides/1)
+
+    erlang_overrides = Elixir.Enum.flat_map(@erlang_modules, &build_erlang_overrides/1)
+
+    elixir_overrides ++ erlang_overrides
   end
 
   defp build_overrides(module) do
-    Elixir.Module.concat(__MODULE__, module).__type_check__(:types)
+    replacement_module = Elixir.Module.concat(__MODULE__, module)
+    replacement_module.__type_check__(:types)
     |> Elixir.Enum.map(fn {type, arity} ->
       orig = {Elixir.Module.concat(Elixir, module), type, arity}
       new = {Elixir.Module.concat(__MODULE__, module), type, arity}
       {orig, new}
     end)
+  end
+
+  defp build_erlang_overrides(module) do
+    replacement_module = Elixir.Module.concat(__MODULE__, module)
+    replacement_module.__type_check__(:types)
+    |> Elixir.Enum.map(fn {type, arity} ->
+      erlang_module = semimodule_to_erlang_module(module)
+
+      orig = {erlang_module, type, arity}
+      new = {Elixir.Module.concat(__MODULE__, module), type, arity}
+      {orig, new}
+    end)
+  end
+
+  defp semimodule_to_erlang_module(semimodule) do
+    "Erlang." <> name = Atom.to_string(semimodule)
+
+    name
+    |> String.downcase
+    |> String.to_existing_atom
   end
 end

@@ -6,6 +6,7 @@ defmodule TypeCheck.Options do
   Supported options:
 
   - `:overrides`: A list of overrides for remote types. (default: `[]`)
+  - `:default_overrides`: A boolean. If false, will not include any of the overrides of the types of Elixir's standard library (c.f. `TypeCheck.Options.DefaultOverrides.default_overrides/0`). (default: `true`)
   - `:debug`: When true, will (at compile-time) print the generated TypeCheck-checking code. (default: `false`)
 
   These options are usually specified as passed to `use TypeCheck`,
@@ -55,6 +56,7 @@ defmodule TypeCheck.Options do
 
     @type! t :: %TypeCheck.Options{
       overrides: type_overrides(),
+      default_overrides: boolean(),
       debug: boolean()
     }
   else
@@ -63,11 +65,12 @@ defmodule TypeCheck.Options do
 
     @type t :: %TypeCheck.Options{
       overrides: list(type_override()),
+      default_overrides: boolean(),
       debug: boolean()
     }
   end
 
-  defstruct [overrides: [], debug: false]
+  defstruct [overrides: [], default_overrides: true, debug: false]
 
   def new() do
     %__MODULE__{overrides: default_overrides()}
@@ -85,14 +88,12 @@ defmodule TypeCheck.Options do
     debug = enum[:debug] || false
 
     overrides = check_overrides!(raw_overrides)
-
-    # default_overrides =
-    #   if_recompiling? do
-    #     apply(TypeCheck.Options.DefaultOverrides, :default_overrides, [])
-    #   else
-    #     []
-    #   end
-    overrides = overrides ++ default_overrides()
+    overrides =
+      if Access.get(enum, :default_overrides, true) do
+        overrides ++ default_overrides()
+      else
+        overrides
+      end
 
     %__MODULE__{overrides: overrides, debug: debug}
   end
