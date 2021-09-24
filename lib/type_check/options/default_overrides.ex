@@ -3,7 +3,7 @@ defmodule TypeCheck.Options.DefaultOverrides do
   Contains a many common types that can be used as overrides for Elixir's standard library types.
   """
 
-  Code.ensure_compiled!(TypeCheck)
+  Code.ensure_compiled(TypeCheck)
   use TypeCheck
 
   @elixir_modules ~w[
