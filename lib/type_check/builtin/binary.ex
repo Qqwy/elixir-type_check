@@ -29,6 +29,7 @@ defmodule TypeCheck.Builtin.Binary do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(_s) do
         StreamData.binary()
+        # StreamData.string(:ascii)
       end
     end
   end

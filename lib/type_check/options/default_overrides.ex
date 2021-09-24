@@ -255,7 +255,12 @@ defmodule TypeCheck.Options.DefaultOverrides do
   end
 
   defmodule MapSet do
+    use TypeCheck
+    @type! t() :: t(term())
 
+    @opaque! t(value) :: %Elixir.MapSet{map: map(value, literal([]))}
+
+    @type! value() :: term()
   end
 
   defmodule NaiveDateTime do
@@ -289,7 +294,14 @@ defmodule TypeCheck.Options.DefaultOverrides do
     @type! grapheme() :: t()
 
     @type! pattern() :: t() | [t()] | :"Elixir.TypeCheck.Options.DefaultOverrides.binary".cp()
-    @type! t() :: binary()
+
+    import TypeCheck.Type.StreamData
+    def printable_string_gen do
+      StreamData.one_of([StreamData.string(:ascii), StreamData.string(:printable)])
+    end
+
+    @type! t() :: wrap_with_gen(binary(), &String.printable_string_gen/0)
+
   end
 
   defmodule Time do
