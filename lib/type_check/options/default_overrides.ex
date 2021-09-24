@@ -7,6 +7,7 @@ defmodule TypeCheck.Options.DefaultOverrides do
   use TypeCheck
 
   @elixir_modules ~w[
+    Access
     Calendar
     Collectable
     Date
@@ -14,14 +15,21 @@ defmodule TypeCheck.Options.DefaultOverrides do
     Enum
     Enumerable
     Exception
+    File
+    File.Stat
+    File.Stream
     Float
     Function
     Inspect
+    IO
+    Keyword
+    Map
     MapSet
     Module
     NaiveDateTime
     Range
     Regex
+    Stream
     String
     Time
     URI
