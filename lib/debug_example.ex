@@ -2,11 +2,11 @@ defmodule DebugExample do
   @compile :inline
   @compile {:inline_size, 100}
 
-  use TypeCheck, debug: true
+  use TypeCheck, debug: false
 
   @type! myparam :: integer()
 
-  @spec! stringify(myparam, boolean()) :: binary()
+  @spec! stringify(myparam(), boolean()) :: binary()
   def stringify(val, _bool) do
     if val > 10 do
       val

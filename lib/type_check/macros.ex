@@ -223,19 +223,19 @@ defmodule TypeCheck.Macros do
   end
 
   defp create_spec_defs(specs, _definitions, caller) do
-    for {name, _line, arity, _clean_params, params_ast, return_type_ast} <- specs do
+    for {name, location, arity, _clean_params, params_ast, return_type_ast} <- specs do
       require TypeCheck.Type
 
       typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
       param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
       return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
-      TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type)
+      TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type, location)
     end
   end
 
   defp wrap_functions_with_specs(specs, definitions, caller) do
-    for {name, line, arity, clean_params, params_ast, return_type_ast} <- specs do
+    for {name, location, arity, clean_params, params_ast, return_type_ast} <- specs do
       unless {name, arity} in definitions do
         raise ArgumentError, "spec for undefined function #{name}/#{arity}"
       end
@@ -254,12 +254,13 @@ defmodule TypeCheck.Macros do
           param_types,
           clean_params,
           return_type,
-          caller
+          caller,
+          location
         )
 
       res = TypeCheck.Spec.wrap_function_with_spec(
         name,
-        line,
+        location,
         arity,
         clean_params,
         params_spec_code,
@@ -602,7 +603,7 @@ defmodule TypeCheck.Macros do
       Module.put_attribute(
         __MODULE__,
         TypeCheck.Specs,
-        {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)),
+        {unquote(name), {unquote(caller.file), unquote(caller.line)}, unquote(arity), unquote(Macro.escape(clean_params)),
          unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))}
       )
     end

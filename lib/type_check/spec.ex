@@ -1,5 +1,10 @@
 defmodule TypeCheck.Spec do
-  defstruct [:name, :param_types, :return_type]
+  defstruct [
+    :name,
+    :param_types,
+    :return_type,
+    :location
+  ]
 
   defp spec_fun_name(function, arity) do
     :"__TypeCheck spec for '#{function}/#{arity}'__"
@@ -89,7 +94,7 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def create_spec_def(name, arity, param_types, return_type) do
+  def create_spec_def(name, arity, param_types, return_type, {file, line}) do
     spec_fun_name = spec_fun_name(name, arity)
 
     quote generated: true, location: :keep do
@@ -99,16 +104,18 @@ defmodule TypeCheck.Spec do
         %TypeCheck.Spec{
           name: unquote(name),
           param_types: unquote(Macro.escape(param_types)),
-          return_type: unquote(Macro.escape(return_type))
+          return_type: unquote(Macro.escape(return_type)),
+          location: {unquote(file), unquote(line)}
         }
       end
     end
   end
 
   @doc false
-  def wrap_function_with_spec(name, line, arity, clean_params, params_spec_code, return_spec_code, typespec) do
+  def wrap_function_with_spec(name, location, arity, clean_params, params_spec_code, return_spec_code, typespec) do
+    {file, line} = location
 
-    quote generated: true, location: :keep, line: line do
+    quote generated: true, file: file, line: line do
       if Module.get_attribute(__MODULE__, :autogen_typespec) do
         @spec unquote(typespec)
       end
@@ -127,29 +134,31 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def prepare_spec_wrapper_code(name, param_types, clean_params, return_type, caller) do
+  def prepare_spec_wrapper_code(name, param_types, clean_params, return_type, caller, location) do
     arity = length(clean_params)
-    params_code = params_check_code(name, arity, param_types, clean_params, caller)
-    return_code = return_check_code(name, arity, clean_params, return_type, caller)
+    params_code = params_check_code(name, arity, param_types, clean_params, caller, location)
+    return_code = return_check_code(name, arity, clean_params, return_type, caller, location)
 
     {params_code, return_code}
   end
 
-  defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller) do
+  defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller, location) do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
-    quote generated: true, location: :keep do end
+    {file, line} = location
+    quote generated: true, file: file, line: line do end
   end
-  defp params_check_code(name, arity, param_types, clean_params, caller) do
+  defp params_check_code(name, arity, param_types, clean_params, caller, location) do
     paired_params =
       param_types
       |> Enum.zip(clean_params)
       |> Enum.with_index()
       |> Enum.map(fn {{param_type, clean_param}, index} ->
-        param_check_code(param_type, clean_param, index, caller)
+        param_check_code(param_type, clean_param, index, caller, location)
       end)
 
-    quote line: caller.line, generated: true, location: :keep do
+    {file, line} = location
+    quote file: file, line: line, generated: true do
       with unquote_splicing(paired_params) do
         # Run actual code
       else
@@ -162,20 +171,23 @@ defmodule TypeCheck.Spec do
     end
   end
 
-  defp param_check_code(param_type, clean_param, index, _caller) do
+  defp param_check_code(param_type, clean_param, index, _caller, location) do
     impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
 
-    quote generated: true, location: :keep do
+    {file, line} = location
+    quote generated: true, file: file, line: line do
       {{:ok, _bindings}, _index, _param_type} <-
         {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
     end
   end
 
-  defp return_check_code(name, arity, clean_params, return_type, _caller) do
+  defp return_check_code(name, arity, clean_params, return_type, _caller, location) do
     return_code_check =
       TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
 
-    quote generated: true, location: :keep do
+    {file, line} = location
+    IO.inspect(location, label: :return_check_code_location)
+    quote generated: true, file: file, line: line do
       case unquote(return_code_check) do
         {:ok, _bindings} ->
           nil
