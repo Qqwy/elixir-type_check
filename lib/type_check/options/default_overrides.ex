@@ -27,7 +27,12 @@ defmodule TypeCheck.Options.DefaultOverrides do
 
   defmodule Calendar do
     use TypeCheck
-    @type! calendar() :: module()
+
+    # Since Elixir only ships with Calendar.ISO
+    # use only that one for data generation for now
+    @type calendar() :: module()
+    @autogen_typespec false
+    @type! calendar() :: Elixir.Calendar.ISO
 
     @type! date() :: %{
       # optional(any()) => any(),
@@ -68,7 +73,9 @@ defmodule TypeCheck.Options.DefaultOverrides do
 
     @type! iso_days() :: {days :: integer(), day_fraction()}
 
-    @type! microsecond() :: {non_neg_integer(), non_neg_integer()}
+    @type microsecond() :: {non_neg_integer(), non_neg_integer()}
+    @autogen_typespec false
+    @type! microsecond() :: {0..999_999, 0..6}
 
     @type! minute() :: non_neg_integer()
 
