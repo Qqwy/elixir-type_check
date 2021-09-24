@@ -26,6 +26,7 @@ structs = [
   TypeCheck.Builtin.NamedType,
   TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
+  TypeCheck.Builtin.PID,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
   TypeCheck.Builtin.ImplementsProtocol,
@@ -45,11 +46,11 @@ end
 defimpl TypeCheck.Protocols.Inspect, for: Any do
   def inspect(val, opts) do
     case val do
-      map when is_map(map) ->
+      somestruct = %_struct{} ->
         # always use 'Any' implementation rather than custom struct implementation,
         # because custom struct implementation cannot, in general,
         # handle types as their field values.
-        Elixir.Inspect.Any.inspect(map, opts)
+        Elixir.Inspect.Any.inspect(somestruct, opts)
       nonmap ->
         Elixir.Inspect.inspect(nonmap, opts)
     end

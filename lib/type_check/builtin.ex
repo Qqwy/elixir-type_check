@@ -953,6 +953,14 @@ defmodule TypeCheck.Builtin do
   """
   def no_return(), do: none()
 
+  @doc typekind: :builtin
+  @doc """
+  TODO
+  """
+  def pid() do
+    build_struct(TypeCheck.Builtin.PID)
+  end
+
   @doc typekind: :extension
   @doc """
   Checks whether the given value implements the particular protocol.

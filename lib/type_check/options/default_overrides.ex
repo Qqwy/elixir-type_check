@@ -9,6 +9,7 @@ defmodule TypeCheck.Options.DefaultOverrides do
   @elixir_modules ~w[
     Access
     Calendar
+    Calendar.ISO
     Collectable
     Date
     Date.Range
