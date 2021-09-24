@@ -356,4 +356,26 @@ defmodule TypeCheck.Options.DefaultOverrides do
 
     @type! version() :: String.t() | t()
   end
+
+  def default_overrides do
+    ~w[
+      String
+      Calendar
+      Collectable
+      Enumerable
+      Enum
+      Date
+      Time
+    ]a
+    |> Elixir.Enum.flat_map(&build_overrides/1)
+  end
+
+  defp build_overrides(module) do
+    Elixir.Module.concat(__MODULE__, module).__type_check__(:types)
+    |> Elixir.Enum.map(fn {type, arity} ->
+      orig = {Elixir.Module.concat(Elixir, module), type, arity}
+      new = {Elixir.Module.concat(__MODULE__, module), type, arity}
+      {orig, new}
+    end)
+  end
 end

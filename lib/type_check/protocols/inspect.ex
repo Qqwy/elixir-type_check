@@ -44,8 +44,17 @@ end
 
 defimpl TypeCheck.Protocols.Inspect, for: Any do
   def inspect(val, opts) do
+    case val do
+      map when is_map(map) ->
+        # always use 'Any' implementation rather than custom struct implementation,
+        # because custom struct implementation cannot, in general,
+        # handle types as their field values.
+        Elixir.Inspect.Any.inspect(map, opts)
+      nonmap ->
+        Elixir.Inspect.inspect(nonmap, opts)
+    end
     # Elixir.Inspect.inspect(val, [opts])
-    Elixir.Inspect.Any.inspect(val, opts)
+    # Elixir.Inspect.Any.inspect(val, opts)
   end
 end
 
