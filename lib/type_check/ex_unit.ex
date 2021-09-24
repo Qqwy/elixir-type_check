@@ -16,7 +16,6 @@ defmodule TypeCheck.ExUnit do
     initial_seed =
       case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
         seed when is_integer(seed) ->
-          # Macro.escape({0, 0, seed})
           seed
 
         other ->
@@ -31,7 +30,6 @@ defmodule TypeCheck.ExUnit do
       for {name, arity} <- module.__type_check__(:specs) do
         spec = TypeCheck.Spec.lookup!(module, name, arity)
         body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, options)
-        # IO.puts(Macro.to_string(body))
 
         test_name = ExUnit.Case.register_test(env, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [:spectest])
         def unquote(test_name)(_) do
@@ -50,23 +48,8 @@ defmodule TypeCheck.ExUnit do
 
   @doc false
   def __build_spectest__(module, function_name, arity, spec, options) do
-    # {file, line} = spec.location
-    # IO.inspect(spec.location)
-
-    # generators =
-    #   spec.param_types
-    #   |> Enum.zip(Macro.generate_arguments(arity, module))
-    #   |> Enum.map(fn {type, arg} ->
-    #     quote [generated: true, file: file, line: line] do
-    #       unquote(arg) <- to_gen(unquote(Macro.escape(type)))
-    #     end
-    #   end)
-
 
     quote [generated: true] do
-      # ExUnitProperties.check all unquote_splicing(generators) do
-      #   unquote(module).unquote(function_name)(unquote_splicing(Macro.generate_arguments(arity, module)))
-      # end
       options = unquote(options)
       initial_seed = {0, 0, options[:initial_seed]}
 
