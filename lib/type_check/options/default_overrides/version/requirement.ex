@@ -5,7 +5,7 @@ defmodule TypeCheck.Options.DefaultOverrides.Version.Requirement do
   {Version.major(), Version.minor(), Version.patch(), Version.pre(),
    Version.build()}
 
-  if Elixir.Version.compare(System.version(), "1.10.0") == :lt do
+  if Elixir.Version.compare(System.version(), "1.11.0") == :lt do
     @opaque! t() :: %Elixir.Version.Requirement{
       source: String.t(),
     }
