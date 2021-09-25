@@ -196,6 +196,13 @@ Details:
 
 ### Changelog
 
+- 0.6.0 Addition of `spectest`:
+  - Adding `TypeCheck.ExUnit`, with the function `spectest` to test function-specifications.
+    - Possibility to use options `:except`, `:only`, `:initial_seed`.
+    - Possibility to pass custom options to StreamData.
+  - Allow `use TypeCheck` in IEx or other non-module contexts, to require `TypeCheck` and import `TypeCheck.Builtin` in the current scope (without importing/using the macros that only work at the module level.)
+  - Fixes conditional compilation warnings when optional dependency `:stream_data` was not included in your project.
+  - Fixes 
 - 0.5.0 Stability improvements:
   - Adding `Typecheck.Option` `debug: true`, which will (at compile-time) print the checks that TypeCheck is generating.
   - Actually autogenerate a `@spec`, which did not yet happen before.
