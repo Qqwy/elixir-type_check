@@ -180,6 +180,8 @@ Details:
 - [x] Make sure we handle most (if not all) of Typespec's primitive types and syntax. (With the exception of functions and binary pattern matching)
 - [x] Option to turn `@type/@opaque/@typep`-injection off for the cases in which it generates improper results.
 - [x] Manually overriding generators for user-specified types if so desired.
+- [x] Creating generators from specs
+  - [x] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 
 ### Pre-stable
 
@@ -187,8 +189,6 @@ Details:
 - [ ] Hide named types from opaque types.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
-- [ ] Creating generators from specs
-  - [ ] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 
 ### Longer-term future ideas
 
@@ -202,7 +202,6 @@ Details:
     - Possibility to pass custom options to StreamData.
   - Allow `use TypeCheck` in IEx or other non-module contexts, to require `TypeCheck` and import `TypeCheck.Builtin` in the current scope (without importing/using the macros that only work at the module level.)
   - Fixes conditional compilation warnings when optional dependency `:stream_data` was not included in your project.
-  - Fixes 
 - 0.5.0 Stability improvements:
   - Adding `Typecheck.Option` `debug: true`, which will (at compile-time) print the checks that TypeCheck is generating.
   - Actually autogenerate a `@spec`, which did not yet happen before.
