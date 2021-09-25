@@ -4,7 +4,7 @@ defmodule TypeCheck.Builtin do
 
   These are all the types described on the ['Basic Types', 'Literals' and 'Builtin Types' sections of the Elixir 'Typespecs' documentation page.](https://hexdocs.pm/elixir/typespecs.html#basic-types)
 
-  See `TypeCheck.Options.DefaultOverrides` for the 'Remote Types' supported by TypeCheck.
+  See `TypeCheck.DefaultOverrides` for the 'Remote Types' supported by TypeCheck.
 
   Usually you'd want to import this module when you're using TypeCheck.
   This is done automatically when calling `use TypeCheck`.

@@ -6,7 +6,7 @@ defmodule TypeCheck.Options do
   Supported options:
 
   - `:overrides`: A list of overrides for remote types. (default: `[]`)
-  - `:default_overrides`: A boolean. If false, will not include any of the overrides of the types of Elixir's standard library (c.f. `TypeCheck.Options.DefaultOverrides.default_overrides/0`). (default: `true`)
+  - `:default_overrides`: A boolean. If false, will not include any of the overrides of the types of Elixir's standard library (c.f. `TypeCheck.DefaultOverrides.default_overrides/0`). (default: `true`)
   - `:debug`: When true, will (at compile-time) print the generated TypeCheck-checking code. (default: `false`)
 
   These options are usually specified as passed to `use TypeCheck`,
@@ -106,9 +106,9 @@ defmodule TypeCheck.Options do
   end
 
   defp default_overrides() do
-      case Code.ensure_loaded(TypeCheck.Options.DefaultOverrides) do
+      case Code.ensure_loaded(TypeCheck.DefaultOverrides) do
         {:error, _problem} -> []
-        {:module, _} -> apply(TypeCheck.Options.DefaultOverrides, :default_overrides, [])
+        {:module, _} -> apply(TypeCheck.DefaultOverrides, :default_overrides, [])
       end
   end
 
