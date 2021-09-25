@@ -38,6 +38,8 @@ defmodule TypeCheck do
         end
       end
 
+  Finally, you can test whether your functions correctly adhere to their specs,
+  by adding a `spectest` in your testing suite. See `TypeCheck.ExUnit.spectest/2` for details.
 
   ## Types and their syntax
 

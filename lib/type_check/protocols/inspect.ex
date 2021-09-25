@@ -1,4 +1,8 @@
 defprotocol TypeCheck.Protocols.Inspect do
+  @moduledoc false
+  # This protocol can be overridden to have a different look
+  # when inspected in a type context.
+
   @fallback_to_any true
   def inspect(struct, opts)
 end
@@ -73,6 +77,7 @@ defimpl TypeCheck.Protocols.Inspect, for: Stream do
 end
 
 defmodule TypeCheck.Inspect do
+  @moduledoc false
   def inspect(type, opts \\ %Inspect.Opts{}) do
     type
     |> TypeCheck.Protocols.Inspect.inspect(opts)

@@ -14,6 +14,7 @@
 - Types and type-checks are generated at compiletime.
   - This means **type-checking code is optimized** rigorously by the compiler.
 - **Property-checking generators** can be extracted from type specifications without extra work.
+  - Automatically create a **spectest** which checks for each function if it adheres to its spec.
 - Flexibility to add **custom checks**: Subparts of a type can be named, and 'type guards' can be specified to restrict what values are allowed to match that refer to these types.
 
 
