@@ -1,5 +1,5 @@
 defmodule TypeCheck.MacrosTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
   import StreamData, only: []
   import TypeCheck.Type.StreamData

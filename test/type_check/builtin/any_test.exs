@@ -1,5 +1,5 @@
 defmodule TypeCheck.Builtin.AnyTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
   import TypeCheck.Builtin
 

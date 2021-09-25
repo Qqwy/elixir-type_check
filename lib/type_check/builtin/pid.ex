@@ -1,4 +1,4 @@
-defmodule TypeCheck.Builtin.Binary do
+defmodule TypeCheck.Builtin.PID do
   defstruct []
 
   use TypeCheck
@@ -7,9 +7,9 @@ defmodule TypeCheck.Builtin.Binary do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote generated: :true, location: :keep do
+      quote generated: true, location: :keep do
         case unquote(param) do
-          x when is_binary(x) ->
+          x when is_pid(x) ->
             {:ok, []}
 
           _ ->
@@ -21,15 +21,20 @@ defmodule TypeCheck.Builtin.Binary do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, _opts) do
-      "binary()"
+      "pid()"
     end
   end
 
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(_s) do
-        StreamData.binary()
-        # StreamData.string(:ascii)
+        partgen =
+          StreamData.integer()
+          |> StreamData.map(&abs/1)
+
+        {partgen, partgen, partgen}
+        |> StreamData.map(fn {a, b, c} -> IEx.Helpers.pid(a, b, c) end)
+
       end
     end
   end

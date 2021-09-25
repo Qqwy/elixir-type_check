@@ -1,5 +1,5 @@
 defmodule TypeCheck.Internals.ToTypespecTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "Generates typespecs which Elixir can indeed parse" do
     defmodule Example do

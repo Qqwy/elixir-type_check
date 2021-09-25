@@ -47,6 +47,7 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.Number.problem_tuple()
          | TypeCheck.Builtin.OneOf.problem_tuple()
          | TypeCheck.Builtin.PosInteger.problem_tuple()
+         | TypeCheck.Builtin.PID.problem_tuple()
          | TypeCheck.Builtin.Range.problem_tuple()
          | TypeCheck.Builtin.Tuple.problem_tuple()
 

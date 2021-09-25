@@ -173,6 +173,10 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "all possibilities failed:\n", message)
   end
 
+  def do_format({%TypeCheck.Builtin.PID{}, :no_match, _, val}) do
+    "`#{inspect(val)}` is not a pid."
+  end
+
   def do_format({s = %TypeCheck.Builtin.Range{}, :not_an_integer, _, val}) do
     compound_check(val, s, "`#{inspect(val)}` is not an integer.")
   end

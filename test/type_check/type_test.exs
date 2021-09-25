@@ -1,5 +1,5 @@
 defmodule TypeCheck.TypeTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use ExUnitProperties
   import StreamData, only: []
 

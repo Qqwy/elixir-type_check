@@ -32,11 +32,11 @@ defmodule TypeCheck.MixProject do
     case Mix.env() do
       :prod ->
         [
-          extra_applications: [:logger]
+          extra_applications: [:logger, :iex]
         ]
       _ ->
         [
-          extra_applications: [:logger, :stream_data]
+          extra_applications: [:logger, :iex, :stream_data]
         ]
     end
   end
@@ -80,13 +80,14 @@ defmodule TypeCheck.MixProject do
       extras: ["README.md", "Comparing TypeCheck and Norm.md"],
       # main: "TypeCheck",
       groups_for_modules: [
-        Main: [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec],
+        Main: [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec, TypeCheck.Options, TypeCheck.ExUnit],
         "Errors and Formatting them": ~r"^TypeCheck.TypeError",
         "Property Testing": ~r"^TypeCheck.Type.StreamData",
         "Builtin Types": ~r"^TypeCheck.Builtin",
+        "Standard Library overrides": ~r"^TypeCheck.DefaultOverrides",
         Other: ~r"^.*"
       ],
-      nest_modules_by_prefix: [TypeCheck.Builtin, TypeCheck.TypeError],
+      nest_modules_by_prefix: [TypeCheck.Builtin, TypeCheck.TypeError, TypeCheck.DefaultOverrides],
       groups_for_functions: [
         "Built-in Elixir types": &(&1[:typekind] == :builtin),
         Extensions: &(&1[:typekind] == :extension)

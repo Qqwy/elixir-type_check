@@ -1,0 +1,8 @@
+{
+    "skip_files": [
+        "lib/type_check/options/default_overrides/"
+    ],
+    "terminal_options": {
+        "file_column_width": 60
+    }
+}

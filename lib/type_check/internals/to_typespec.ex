@@ -1,4 +1,5 @@
 defmodule TypeCheck.Internals.ToTypespec do
+  @moduledoc false
   def full_rewrite(ast, env) do
     Macro.postwalk(ast, &rewrite(&1, env))
   end

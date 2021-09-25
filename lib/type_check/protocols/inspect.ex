@@ -1,4 +1,8 @@
 defprotocol TypeCheck.Protocols.Inspect do
+  @moduledoc false
+  # This protocol can be overridden to have a different look
+  # when inspected in a type context.
+
   @fallback_to_any true
   def inspect(struct, opts)
 end
@@ -26,6 +30,7 @@ structs = [
   TypeCheck.Builtin.NamedType,
   TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
+  TypeCheck.Builtin.PID,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.Tuple,
   TypeCheck.Builtin.ImplementsProtocol,
@@ -44,7 +49,17 @@ end
 
 defimpl TypeCheck.Protocols.Inspect, for: Any do
   def inspect(val, opts) do
-    Elixir.Inspect.inspect(val, opts)
+    case val do
+      somestruct = %_struct{} ->
+        # always use 'Any' implementation rather than custom struct implementation,
+        # because custom struct implementation cannot, in general,
+        # handle types as their field values.
+        Elixir.Inspect.Any.inspect(somestruct, opts)
+      nonmap ->
+        Elixir.Inspect.inspect(nonmap, opts)
+    end
+    # Elixir.Inspect.inspect(val, [opts])
+    # Elixir.Inspect.Any.inspect(val, opts)
   end
 end
 
@@ -62,6 +77,7 @@ defimpl TypeCheck.Protocols.Inspect, for: Stream do
 end
 
 defmodule TypeCheck.Inspect do
+  @moduledoc false
   def inspect(type, opts \\ %Inspect.Opts{}) do
     type
     |> TypeCheck.Protocols.Inspect.inspect(opts)
