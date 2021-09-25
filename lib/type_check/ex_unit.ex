@@ -155,7 +155,9 @@ defmodule TypeCheck.ExUnit do
       generator_options  = generator_options ++ [initial_seed: Macro.escape({0, 0, initial_seed})]
 
       env = __ENV__
-      for {name, arity} <- module.__type_check__(:specs) do
+      exposed_specs = module.__type_check__(:specs)
+      specs = (options[:only] || exposed_specs) -- (options[:except] || [])
+      for {name, arity} <- specs  do
         spec = TypeCheck.Spec.lookup!(module, name, arity)
         body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, generator_options)
 
