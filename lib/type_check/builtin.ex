@@ -1,4 +1,49 @@
 defmodule TypeCheck.Builtin do
+  @moduledoc """
+  Contains TypeCheck specifications for all 'built-in' Elixir types.
+
+  These are all the types described on the ['Basic Types', 'Literals' and 'Builtin Types' sections of the Elixir 'Typespecs' documentation page.](https://hexdocs.pm/elixir/typespecs.html#basic-types)
+
+  See `TypeCheck.Options.DefaultOverrides` for the 'Remote Types' supported by TypeCheck.
+
+  Usually you'd want to import this module when you're using TypeCheck.
+  This is done automatically when calling `use TypeCheck`.
+
+  If necessary, feel free to hide (using `import ... except: `)
+  the things you don't need.
+
+  ### Ommissions
+
+  The following types are currently still missing from this module.
+  This will change in future versions of the library.
+  The hope is to at some point support all of them, or as close to it as feasible.
+
+  From the 'Basic Types':
+
+  - `port()`
+  - `reference()`
+  - `maybe_improper_list(content_type, termination_type)`
+  - `nonempty_improper_list(content_type, termination_type)`
+  - `nonempty_maybe_improper_list(content_type, termination_type)`
+
+  From the 'Literals':
+
+  - Special function syntax. Only `function()` is currently supported.
+  - Special bitstring-patterns. Only `binary()` and `bitstring()` are currently supported.
+  - The `optional(any()) => any()` syntax in maps. Currently `fixed_map` accepts maps with extra keys.
+
+  From the 'Builtin Types':
+
+  - `nonempty_charlist()`
+  - `iodata()`
+  - `identifier()`
+  - `iolist()`
+  - `node()`
+  - `timeout()`
+
+  """
+
+
   require TypeCheck.Internals.ToTypespec
   # TypeCheck.Internals.ToTypespec.define_all()
 
@@ -7,12 +52,6 @@ defmodule TypeCheck.Builtin do
     use TypeCheck
   end
 
-  @moduledoc """
-
-  Usually you'd want to import this module when you're using TypeCheck.
-  Feel free to import only the things you need,
-  or hide (using `import ... except: `) the things you don't.
-  """
 
   @doc typekind: :builtin
   @doc """
@@ -955,11 +994,38 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
-  TODO
+  Matches any process-identifier.
+
+  Note that no checks are made to see whether the process is alive or not.
+
+  Also, the current property-generator will generate arbitrary PIDs, most of which
+  will not point to alive processes.
   """
   def pid() do
     build_struct(TypeCheck.Builtin.PID)
   end
+
+  @doc typekind: :builtin
+  @doc """
+  A nonempty_list is any list with at least one element.
+  """
+  def nonempty_list(type) do
+    guard =
+      quote do
+        length(unquote(Macro.var(:non_empty_list, nil))) > 0
+      end
+
+    guarded_by(named_type(:non_empty_list, list(type)), guard)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Shorthand for nonempty_list(any()).
+  """
+  def nonempty_list() do
+    nonempty_list(any())
+  end
+
 
   @doc typekind: :extension
   @doc """
