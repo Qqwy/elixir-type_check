@@ -51,7 +51,7 @@ defmodule TypeCheck.ExUnit do
 
   Currently does not accept any options, but this might change in the future.
   """
-  def __using__(_opts) do
+  defmacro __using__(_opts) do
     quote do
       import TypeCheck.ExUnit
     end
@@ -135,17 +135,18 @@ defmodule TypeCheck.ExUnit do
       end
     end
 
-    initial_seed =
-      case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
-        seed when is_integer(seed) ->
-          seed
-
-        other ->
-          raise ArgumentError, "expected :initial_seed to be an integer, got: #{inspect(other)}"
-      end
 
     tests =
-      quote generated: true, location: :keep, bind_quoted: [module: module, options: options, initial_seed: initial_seed] do
+      quote generated: true, location: :keep, bind_quoted: [module: module, options: options] do
+      initial_seed =
+        case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
+          seed when is_integer(seed) ->
+            seed
+
+          other ->
+            raise ArgumentError, "expected :initial_seed to be an integer, got: #{inspect(other)}"
+        end
+
       generator_options =
         case options[:generator] do
           nil -> []
