@@ -162,7 +162,6 @@ defmodule TypeCheck.Macros do
     quote generated: true, location: :keep do
       import Kernel, except: [@: 1]
       import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
-      @compile {:inline_size, 1080}
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefNames, accumulate: true)
