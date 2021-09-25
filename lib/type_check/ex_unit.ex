@@ -127,7 +127,7 @@ defmodule TypeCheck.ExUnit do
     end
   end
 
-  def do_spectest(module, options, caller) do
+  defp do_spectest(module, options, caller) do
     req =
     if is_atom(Macro.expand(module, caller)) do
       quote generated: true, location: :keep do
