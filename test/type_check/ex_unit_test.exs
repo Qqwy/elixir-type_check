@@ -1,4 +1,4 @@
-defmodule SpectestTest do
+defmodule TypeCheck.ExUnitTest do
   use ExUnit.Case
   use TypeCheck.ExUnit
   describe "spectest uses `:only` option correctly" do
@@ -42,12 +42,10 @@ defmodule SpectestTest do
                `42` is not an atom.
     """
 
-    # raptor failure is a MySpecialError
+    # raptor failure is a MySpecialError:
     assert res =~ "Spectest failed (after 0 successful runs)"
     assert res =~ "Input: SpectestTestExample.raising_raptor()"
     assert res =~ "** (SpectestTestExample.MySpecialError) Roar!"
-
-    IO.puts res
   end
 
   describe "spectest uses `:initial_seed` option correctly" do
