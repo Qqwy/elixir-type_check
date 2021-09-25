@@ -182,10 +182,11 @@ Details:
 - [x] Manually overriding generators for user-specified types if so desired.
 - [x] Creating generators from specs
   - [x] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
+- [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)**
 
 ### Pre-stable
 
-- [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.)
+- [ ] Overrides for more builtin remote types
 - [ ] Hide named types from opaque types.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
@@ -196,11 +197,20 @@ Details:
 
 ### Changelog
 
-- 0.6.0 Addition of `spectest`:
+- 0.6.0 Addition of `spectest` & 'default overrides' Elixir's standard library types:
   - Adding `TypeCheck.ExUnit`, with the function `spectest` to test function-specifications.
     - Possibility to use options `:except`, `:only`, `:initial_seed`.
     - Possibility to pass custom options to StreamData.
+  - Adding `TypeCheck.DefaultOverrides` with many sub-modules containing checked typespecs for the types in Elixir's standard library (75% done).
+    - Ensure that these types are correct also on older Elixir versions (1.9, 1.10, 1.11)
+  - By default load these 'DefaultOverrides', but have the option to turn this behaviour off in `TypeCheck.Option`. 
+  - Nice generators for `Enum.t`, `Collectable.t`, `String.t`.
+  - Support for the builtin types:
+    - `pid()`
+    - `nonempty_list()`, `nonempty_list(type)`.
   - Allow `use TypeCheck` in IEx or other non-module contexts, to require `TypeCheck` and import `TypeCheck.Builtin` in the current scope (without importing/using the macros that only work at the module level.)
+  - The introspection function `__type_check__/1` is now added to any module that contains a `use TypeCheck`.
+  - Fixes the `Inspect` implementation of custom structs, by falling back to `Any`, which is more useful than attempting to use a customized implementation that would try to read the values in the struct and failing because the struct-type containing types in the fields.
   - Fixes conditional compilation warnings when optional dependency `:stream_data` was not included in your project.
 - 0.5.0 Stability improvements:
   - Adding `Typecheck.Option` `debug: true`, which will (at compile-time) print the checks that TypeCheck is generating.
