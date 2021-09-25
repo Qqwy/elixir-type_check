@@ -164,6 +164,7 @@ defmodule TypeCheck.Macros do
       import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
 
       Module.register_attribute(__MODULE__, TypeCheck.TypeDefs, accumulate: true)
+      Module.register_attribute(__MODULE__, TypeCheck.TypeDefNames, accumulate: true)
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
       @before_compile TypeCheck.Macros
 
@@ -175,6 +176,7 @@ defmodule TypeCheck.Macros do
 
   defmacro __before_compile__(env) do
     defs = Module.get_attribute(env.module, TypeCheck.TypeDefs)
+    typedef_names = Module.get_attribute(env.module, TypeCheck.TypeDefNames)
 
     compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, env.module)
 
@@ -197,6 +199,8 @@ defmodule TypeCheck.Macros do
     spec_defs = create_spec_defs(specs, definitions, env)
     spec_quotes = wrap_functions_with_specs(specs, definitions, env)
 
+    spec_names = specs |> Enum.map(fn {name, _, arity, _, _, _} -> {name, arity} end)
+
     # And now for the tricky bit ;-)
     quote generated: true, location: :keep do
       unquote(spec_defs)
@@ -204,23 +208,33 @@ defmodule TypeCheck.Macros do
       import unquote(compile_time_imports_module_name)
 
       unquote(spec_quotes)
+
+      @doc false
+      def __type_check__(arg)
+      def __type_check__(:specs) do
+        unquote(spec_names)
+      end
+
+      def __type_check__(:types) do
+        unquote(typedef_names)
+      end
     end
   end
 
   defp create_spec_defs(specs, _definitions, caller) do
-    for {name, _line, arity, _clean_params, params_ast, return_type_ast} <- specs do
+    for {name, location, arity, _clean_params, params_ast, return_type_ast} <- specs do
       require TypeCheck.Type
 
       typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
       param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
       return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
-      TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type)
+      TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type, location)
     end
   end
 
   defp wrap_functions_with_specs(specs, definitions, caller) do
-    for {name, line, arity, clean_params, params_ast, return_type_ast} <- specs do
+    for {name, location, arity, clean_params, params_ast, return_type_ast} <- specs do
       unless {name, arity} in definitions do
         raise ArgumentError, "spec for undefined function #{name}/#{arity}"
       end
@@ -239,12 +253,13 @@ defmodule TypeCheck.Macros do
           param_types,
           clean_params,
           return_type,
-          caller
+          caller,
+          location
         )
 
       res = TypeCheck.Spec.wrap_function_with_spec(
         name,
-        line,
+        location,
         arity,
         clean_params,
         params_spec_code,
@@ -468,6 +483,11 @@ defmodule TypeCheck.Macros do
 
     typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller, typecheck_options)
+    name_with_arity =
+      case name_with_maybe_params do
+        {name, _, context} when is_atom(context) -> {name, 0}
+        {name, _, params} when is_list(params) -> {name, length(params)}
+      end
 
     res = type_fun_definition(name_with_maybe_params, type)
 
@@ -490,6 +510,7 @@ defmodule TypeCheck.Macros do
 
       unquote(res)
       Module.put_attribute(__MODULE__, TypeCheck.TypeDefs, unquote(Macro.escape(res)))
+      Module.put_attribute(__MODULE__, TypeCheck.TypeDefNames, unquote(name_with_arity))
     end
   end
 
@@ -581,7 +602,7 @@ defmodule TypeCheck.Macros do
       Module.put_attribute(
         __MODULE__,
         TypeCheck.Specs,
-        {unquote(name), unquote(caller.line), unquote(arity), unquote(Macro.escape(clean_params)),
+        {unquote(name), {unquote(caller.file), unquote(caller.line)}, unquote(arity), unquote(Macro.escape(clean_params)),
          unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))}
       )
     end

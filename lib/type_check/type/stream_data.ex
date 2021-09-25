@@ -161,5 +161,14 @@ defmodule TypeCheck.Type.StreamData do
         |> StreamData.scale(fn size -> div(size, 2) end)
       end)
     end
+
+  else
+
+    def arbitrary_type_gen() do
+      raise ArgumentError, """
+      `arbitrary_type_gen/0` depends on the optional library `:stream_data`.
+      To use this functionality, add `:stream_data` to your application's deps.
+      """
+    end
   end
 end
