@@ -1,6 +1,16 @@
-defmodule TypeCheck.Options.DefaultOverrides do
+defmodule TypeCheck.DefaultOverrides do
   @moduledoc """
-  Contains a many common types that can be used as overrides for Elixir's standard library types.
+  Contains a many common types that can be used as overrides for Elixir's standard library's 'Remote Types'.
+
+  This module complements `TypeCheck.Builtin`, contains all 'built-in' types of Elixir.
+
+  Implementing TypeSpecs for all types of Elixir's standard library is a work-in-progress.
+  Some TypeCheck-versions of the types are a little more general than the original version,
+  to make up for functionality in TypeCheck which does not exist yet.
+
+  Simply put, this means that you will never get a 'false positive' (a correct value not being accepted by a function),
+  but in very rare cases you might get a 'false negative' (an improper value passing the type-check.)
+
   """
 
   Code.ensure_compiled(TypeCheck)
