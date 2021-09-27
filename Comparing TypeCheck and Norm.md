@@ -210,6 +210,40 @@ Details:
 
 ```
 
+Another example, displaying the difference between error messages when the problem is in the value returned by the function:
+
+```elixir
+# Given the `rgb_to_hex` function as defined above, but with an implementation not adhering to its spec/contract
+  def rgb_to_hex(r, g, b) do
+    {:ok, 42}
+  end
+```
+
+```elixir
+iex> Color.rgb_to_hex(10, 20, 30)
+** (Norm.MismatchError) Could not conform input:
+val: {:ok, 42} fails: is_binary()
+    (norm 0.13.0) lib/norm.ex:65: Norm.conform!/2
+
+```
+
+```elixir
+iex> Color.rgb_to_hex(10, 20, 30)
+** (TypeCheck.TypeError) The call to `rgb_to_hex/3` failed,
+because the returned result does not adhere to the spec `(str :: binary() when String.starts_with?(str, "#"))`.
+Rather, its value is: `{:ok, 42}`.
+Details:
+  The result of calling `rgb_to_hex(10, 20, 30)`
+  does not adhere to spec `rgb_to_hex(0..255,  0..255,  0..255) :: (str :: binary() when String.starts_with?(str, "#"))`. Reason:
+    Returned result:
+      `{:ok, 42}` does not check against `(str :: binary() when String.starts_with?(str, "#"))`. Reason:
+        `{:ok, 42}` does not check against `str :: binary()`. Reason:
+          `{:ok, 42}` is not a binary.
+    (type_check_example 0.1.0) lib/type_check/spec.ex:194: Color.rgb_to_hex/3
+
+```
+
+
 ---
 
 Norm and TypeCheck are but two different dots in the datastructure-validation design space. Norm is definitely worth checking out!
