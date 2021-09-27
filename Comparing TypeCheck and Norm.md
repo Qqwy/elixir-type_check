@@ -139,7 +139,7 @@ allowing type-checking to be optimized.
 If there is overlap between the parts of your parameters being checked by TypeCheck and the logic of your function,
 the BEAM compiler will in most cases be able to combine these into a single check.
 
-¹: In normal usage. Escape hatches to work with types defined at runtime exist.
+¹: In normal usage. Escape hatches to work with types defined at runtime exist. (c.f. `TypeCheck.dynamic_conforms/2` and variants)
 
 #### Documentation
 
