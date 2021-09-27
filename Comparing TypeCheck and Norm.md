@@ -134,7 +134,7 @@ all contracts and specs are resolved at runtime.
 This makes Norm's internals less metaprogramming-heavy and easily allows specs to be created and manipulated dynamically at runtime, 
 but it does mean that the compiler is not able to optimize the type-checking code at all, and specs are re-evaluated every time a function is called.
 
-TypeCheck requires¹ types to be defined at compile-time and injects the type-checking code to your functions and modules before they are compiled, 
+TypeCheck requires¹ types to be defined at compile-time and injects the type-checking code into your functions and modules before they are compiled, 
 allowing type-checking to be optimized.
 If there is overlap between the parts of your parameters being checked by TypeCheck and the logic of your function,
 the BEAM compiler will in most cases be able to combine these into a single check.
