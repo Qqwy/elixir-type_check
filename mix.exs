@@ -69,7 +69,8 @@ defmodule TypeCheck.MixProject do
       {:ex_doc, "~> 0.22", only: :docs, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dialize], runtime: false},
       {:benchee, "~> 1.0", only: :bench},
-      {:excoveralls, "~> 0.10", only: :test}
+      {:excoveralls, "~> 0.10", only: :test},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false}
     ]
   end
 
