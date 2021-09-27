@@ -127,51 +127,6 @@ defmodule User do
 end
 ```
 
-#### Execution
-
-In Norm, while wrapping functions with a contract happens at compile-time, 
-all contracts and specs are resolved at runtime.
-This makes Norm's internals less metaprogramming-heavy and easily allows specs to be created and manipulated dynamically at runtime, 
-but it does mean that the compiler is not able to optimize the type-checking code at all, and specs are re-evaluated every time a function is called.
-
-TypeCheck requires¹ types to be defined at compile-time and injects the type-checking code into your functions and modules before they are compiled, 
-allowing type-checking to be optimized.
-If there is overlap between the parts of your parameters being checked by TypeCheck and the logic of your function,
-the BEAM compiler will in most cases be able to combine these into a single check.
-
-¹: In normal usage. Escape hatches to work with types defined at runtime exist. (c.f. `TypeCheck.dynamic_conforms/2` and variants)
-
-#### Documentation
-
-Norm does not focus on dcumentation.
-Norm's `spec`s are normal functions which you can document manually using `@doc` if you wish. 
-Norm's `@contract`s are not used for documentation purposes.
-
-TypeCheck adds `@type`/`@typep`/`@opaque` attributes for the types you specify, making them show up in your documentation 
-and allowing you to use the same type definitions for tools like `Dialyzer`. 
-You can also use the `t` helper to look them up in IEx. 
-Documentation can be added to these types by using `@typedoc` (just like for normal typespecs).
-
-Function-specifications created with TypeCheck will also add `@spec`-attributes, which will end up in the documentation of your functions and are similarly useful for e.g. `Dialyzer`.
-
-#### Data Generation
-
-It is very useful to generate examples of good data to be used for property testing.
-Both Norm and TypeCheck have this capability, by using `:stream_data` as an optional dependency.
-
-Norm's generators (only) work when the first predicate in a `spec(...)` is one of (a subset of) Elixir's built-in guard-clauses. 
-If your spec is too restrictive, you'll have to manually provide a custom data generator as well.
-
-TypeCheck builds more complicated generators out of simple ones just as it builds complicated types out of simple ones. 
-This means that virtually all Elixir types can be turned into generators without extra effort of the user. 
-It is only when 'type guards' are used to add arbitrary checks to a type that you might up with a generator that is too restrictive. 
-TypeCheck supports nearly all of Elixir's builtin types, as well as many of the remote types that are part of Elixir's standard library (`Range.t`, `MapSet.t`, `List.t`, `Enum.t` etc.)
-
-Furthermore, TypeCheck allows overriding the generator for a type (c.f. the `TypeCheck.Type.StreamData.wrap_with_gen/2` macro).
-
-Finally and maybe most importantly, TypeCheck ships with the `spectest` macro 
-which will automatically run a property-test to check for each `@spec!`-ced function in a module, whether it correctly follows its spec.
-
 #### Error messages
 
 Norm does not particulary focus on readable error messages (although that might change in the future).
@@ -242,6 +197,54 @@ Details:
     (type_check_example 0.1.0) lib/type_check/spec.ex:194: Color.rgb_to_hex/3
 
 ```
+
+
+#### Execution & Efficiency
+
+In Norm, while wrapping functions with a contract happens at compile-time, 
+all contracts and specs are resolved at runtime.
+This makes Norm's internals less metaprogramming-heavy and easily allows specs to be created and manipulated dynamically at runtime, 
+but it does mean that the compiler is not able to optimize the type-checking code at all, and specs are re-evaluated every time a function is called.
+
+TypeCheck requires¹ types to be defined at compile-time and injects the type-checking code into your functions and modules before they are compiled, 
+allowing type-checking to be optimized.
+If there is overlap between the parts of your parameters being checked by TypeCheck and the logic of your function,
+the BEAM compiler will in most cases be able to combine these into a single check.
+
+¹: In normal usage. Escape hatches to work with types defined at runtime exist. (c.f. `TypeCheck.dynamic_conforms/2` and variants)
+
+#### Documentation
+
+Norm does not focus on dcumentation.
+Norm's `spec`s are normal functions which you can document manually using `@doc` if you wish. 
+Norm's `@contract`s are not used for documentation purposes.
+
+TypeCheck adds `@type`/`@typep`/`@opaque` attributes for the types you specify, making them show up in your documentation 
+and allowing you to use the same type definitions for tools like `Dialyzer`. 
+You can also use the `t` helper to look them up in IEx. 
+Documentation can be added to these types by using `@typedoc` (just like for normal typespecs).
+
+Function-specifications created with TypeCheck will also add `@spec`-attributes, which will end up in the documentation of your functions and are similarly useful for e.g. `Dialyzer`.
+
+#### Data Generation & Testing
+
+It is very useful to generate examples of good data to be used for property testing.
+Both Norm and TypeCheck have this capability, by using `:stream_data` as an optional dependency.
+
+Norm's generators (only) work when the first predicate in a `spec(...)` is one of (a subset of) Elixir's built-in guard-clauses. 
+If your spec is too restrictive, you'll have to manually provide a custom data generator as well.
+
+TypeCheck builds more complicated generators out of simple ones just as it builds complicated types out of simple ones. 
+This means that virtually all Elixir types can be turned into generators without extra effort of the user. 
+It is only when 'type guards' are used to add arbitrary checks to a type that you might up with a generator that is too restrictive. 
+TypeCheck supports nearly all of Elixir's builtin types, as well as many of the remote types that are part of Elixir's standard library (`Range.t`, `MapSet.t`, `List.t`, `Enum.t` etc.)
+
+Furthermore, TypeCheck allows overriding the generator for a type (c.f. the `TypeCheck.Type.StreamData.wrap_with_gen/2` macro).
+
+Finally and maybe most importantly, TypeCheck ships with the `spectest` macro. (c.f. `TypeCheck.ExUnit.spectest/2`)
+`spectest` works similarly to `doctest` but rather than testing all code snippets in the module's documentation,
+it will automatically run a property-test to check for each `@spec!`-ced function in a module, whether it correctly follows its spec.
+
 
 
 ---
