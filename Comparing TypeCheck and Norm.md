@@ -64,7 +64,7 @@ defmodule Color do
   @type! rgb :: 0..255
   @type! hex :: (str :: binary() when String.starts_with?(str, "#"))
   
-  @spec! rgb_to_hex(rgb, rgb, rgb) :: hex
+  @spec! rgb_to_hex(rgb(), rgb(), rgb()) :: hex()
   def rgb_to_hex(r, g, b) do
     # ...
   end
