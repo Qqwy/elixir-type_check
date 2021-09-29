@@ -78,7 +78,11 @@ defmodule TypeCheck.MixProject do
     [
       main: "readme",
       logo: "media/type_check_logo_icon_flat_small.svg",
-      extras: ["README.md", "Comparing TypeCheck and Norm.md"],
+      extras: [
+        "README.md": [title: "Guide/Readme"],
+        "Type-checking and spec-testing with TypeCheck.md": [title: "Introducing TypeCheck"],
+        "Comparing TypeCheck and Norm.md": [],
+      ],
       # main: "TypeCheck",
       groups_for_modules: [
         Main: [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec, TypeCheck.Options, TypeCheck.ExUnit],
