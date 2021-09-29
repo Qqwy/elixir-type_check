@@ -293,14 +293,15 @@ and for each of these, check whether the function:
 Spectests are given its own test-category in ExUnit, for easier recognition
 (Just like 'doctests' and 'properties' are different from normal tests, so are 'spectests'.)
 
-¹: Because of the nature of property-based testing, we can never know for 100% sure
-that a function is correct. However, with every new randomly-generated
-test-case, the level of confidence grows a little. So while we
-can never by _fully_ sure, we are able to get asymptotically close to it.
+
 
 
 If you're new to property-based testing, then ['Overview of Property-based testing'](https://hexdocs.pm/stream_data/ExUnitProperties.html#module-overview-of-property-based-testing)-section of the ExUnitProperties' documentation
 might be a good place for a general overview.
+
+<small>
+¹: Because of the nature of property-based testing, we can never know for 100% sure that a function is correct. However, with every new randomly-generated test-case, the level of confidence grows a little. So while we can never by <em>fully</em> sure, we are able to get asymptotically close to it.
+</small>
 
 ### Spectesting our example
 
@@ -371,7 +372,7 @@ While spectests are a very simple and code-light way to test your functions,
 it is also possible to generate arbitrary values from any type outside of a `spectest`, for use in other, more specialized property-based tests.
 See [TypeCheck.Type.StreamData.to_gen/1](https://hexdocs.pm/type_check/TypeCheck.Type.StreamData.html#to_gen/1) for more info.
 
-## Summary
+## There is more
 
 We have covered the most important features of TypeCheck,
 but there is more to discover, such as:
@@ -382,13 +383,17 @@ but there is more to discover, such as:
 - TypeCheck supports ['type guards'](https://hexdocs.pm/type_check/TypeCheck.Builtin.html#guarded_by/2) for if you want to add extra custom constraints to any particular type.
 - TypeCheck supports ['unquote fragments'](https://hexdocs.pm/type_check/TypeCheck.Macros.html#module-typecheck-and-metaprogramming) for when you want to go ham with metaprogramming.
 
+## Summary
 
 In this guide, you have seen how TypeCheck can be used and what value it can add to your projects.
+We have seen how TypeCheck can be used in a general project to add runtime checks to your functions,
+as well as how to use the `spectest` macro to get automatic property-tests that check whether your functions 
+follow their specs.
 
 TypeCheck currently is at version 0.6.0 and in active development.
 Feedback, issues and pull requests [are very welcome](https://github.com/Qqwy/elixir-type_check)!
 
-
-Have a wonderful day,
+Thank you very much for sticking through this long read with me 💚.
+I wish you a wonderful day!
 
 ~Marten/Qqwy
