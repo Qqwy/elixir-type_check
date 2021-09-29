@@ -142,10 +142,11 @@ defmodule TypeCheck.OptionsTest do
       defmodule EnableRuntimeChecksExample2 do
         use TypeCheck, enable_runtime_checks: false
         @spec! broken(number()) :: String.t()
-        def broken(val) do
+        def broken(_val) do
           false
         end
       end
+
 
       assert false == EnableRuntimeChecksExample2.broken(42)
     end

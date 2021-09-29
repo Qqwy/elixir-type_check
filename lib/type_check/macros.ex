@@ -198,6 +198,7 @@ defmodule TypeCheck.Macros do
     definitions = Module.definitions_in(env.module)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
     spec_defs = create_spec_defs(specs, definitions, env)
+
     spec_quotes =
       if options.enable_runtime_checks do
         wrap_functions_with_specs(specs, definitions, env)

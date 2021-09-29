@@ -106,8 +106,9 @@ defmodule TypeCheck.Options do
     @spec! new(enum :: any()) :: t()
   end
   def new(enum) do
-    raw_overrides = enum[:overrides] || []
-    debug = enum[:debug] || false
+    raw_overrides = Keyword.get(enum, :overrides, [])
+    debug = Keyword.get(enum, :debug, false)
+    enable_runtime_checks = Keyword.get(enum, :enable_runtime_checks, true)
 
     overrides = check_overrides!(raw_overrides)
     overrides =
@@ -117,7 +118,11 @@ defmodule TypeCheck.Options do
         overrides
       end
 
-    %__MODULE__{overrides: overrides, debug: debug}
+    %__MODULE__{
+      overrides: overrides,
+      enable_runtime_checks: enable_runtime_checks,
+      debug: debug
+    }
   end
 
   if_recompiling? do
