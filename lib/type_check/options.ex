@@ -7,7 +7,8 @@ defmodule TypeCheck.Options do
 
   - `:overrides`: A list of overrides for remote types. (default: `[]`)
   - `:default_overrides`: A boolean. If false, will not include any of the overrides of the types of Elixir's standard library (c.f. `TypeCheck.DefaultOverrides.default_overrides/0`). (default: `true`)
-  - `:debug`: When true, will (at compile-time) print the generated TypeCheck-checking code. (default: `false`)
+  - `:enable_runtime_checks`: When true, functions that contain a `@spec!` will be wrapped with a runtime check which will check the input to and result returned from the function. (Default: `true`).
+  - `:debug`: When true, will (at compile-time) print the generated TypeCheck-checking code. (Default: `false`)
 
   These options are usually specified as passed to `use TypeCheck`,
   although they may also be passed in direct calls to `TypeCheck.conforms/3` (and its variants).
@@ -35,6 +36,25 @@ defmodule TypeCheck.Options do
     {&Ecto.Schema.t/0, &MyProject.TypeCheckOverrides.Ecto.Schema.t/0}
   ]
 
+
+  ### Enabling/Disabling runtime checks
+
+  By default, runtime checks are enabled.
+
+  In the case where the runtime checks turn out to be too slow (for instance, because of working with very large or deeply nested collections) in a particular module,
+  they can be turned off completely.
+
+  It is recommended to:
+
+  - Only turn them off after benchmarking has shown that this will make a significant difference.
+  - Only turn them off in e.g. the production environment, keeping them on in the development and test environments.
+
+  An example:
+
+  ```elixir
+  use TypeCheck, enable_runtime_checks: Mix.env() != :prod
+  ```
+
   ### Debugging
 
   Passing the option `debug: true` will at compile-time print the generated code
@@ -57,7 +77,8 @@ defmodule TypeCheck.Options do
     @type! t :: %TypeCheck.Options{
       overrides: type_overrides(),
       default_overrides: boolean(),
-      debug: boolean()
+      enable_runtime_checks: boolean(),
+      debug: boolean(),
     }
   else
     @type remote_type() :: mfa | function
@@ -66,11 +87,12 @@ defmodule TypeCheck.Options do
     @type t :: %TypeCheck.Options{
       overrides: list(type_override()),
       default_overrides: boolean(),
-      debug: boolean()
+      enable_runtime_checks: boolean(),
+      debug: boolean(),
     }
   end
 
-  defstruct [overrides: [], default_overrides: true, debug: false]
+  defstruct [overrides: [], default_overrides: true, enable_runtime_checks: true, debug: false]
 
   def new() do
     %__MODULE__{overrides: default_overrides()}
@@ -84,8 +106,9 @@ defmodule TypeCheck.Options do
     @spec! new(enum :: any()) :: t()
   end
   def new(enum) do
-    raw_overrides = enum[:overrides] || []
-    debug = enum[:debug] || false
+    raw_overrides = Keyword.get(enum, :overrides, [])
+    debug = Keyword.get(enum, :debug, false)
+    enable_runtime_checks = Keyword.get(enum, :enable_runtime_checks, true)
 
     overrides = check_overrides!(raw_overrides)
     overrides =
@@ -95,7 +118,11 @@ defmodule TypeCheck.Options do
         overrides
       end
 
-    %__MODULE__{overrides: overrides, debug: debug}
+    %__MODULE__{
+      overrides: overrides,
+      enable_runtime_checks: enable_runtime_checks,
+      debug: debug
+    }
   end
 
   if_recompiling? do

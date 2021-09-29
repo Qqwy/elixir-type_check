@@ -123,4 +123,32 @@ defmodule TypeCheck.OptionsTest do
       assert "TypeCheck.Macros @spec generated:\n----------------\n" <> _rest = output
     end
   end
+
+  describe "enable_runtime_checks: false" do
+    test "functions now accept malformed data" do
+      defmodule EnableRuntimeChecksExample do
+        use TypeCheck, enable_runtime_checks: false
+        @spec! foo(number()) :: String.t()
+        def foo(val) do
+          to_string(val)
+        end
+      end
+
+      not_a_number = "Hello"
+      assert "Hello" == EnableRuntimeChecksExample.foo(not_a_number)
+    end
+
+    test "functions now can return malformed data" do
+      defmodule EnableRuntimeChecksExample2 do
+        use TypeCheck, enable_runtime_checks: false
+        @spec! broken(number()) :: String.t()
+        def broken(_val) do
+          false
+        end
+      end
+
+
+      assert false == EnableRuntimeChecksExample2.broken(42)
+    end
+  end
 end
