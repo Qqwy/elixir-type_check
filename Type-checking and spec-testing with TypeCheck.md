@@ -6,7 +6,7 @@
 
 Elixir is a strong, dynamically typed programming language. 
 'Strong' (as opposed to 'weak') means that when we try to perform an unsupported operation on a value (like 'multiplying strings'), we get an error, rather than silent faulty behaviour.
-'Dynamic' means that which operations we do with our values is not checked at compile-time, but only once the program itself is running.
+'Dynamic' (as opposed to 'Static') means that which operations we do with our values is not checked at compile-time, but only once the program itself is running.
 
 However, when such a failure happens at runtime, the resulting error (and more importantly: what the _cause_ was of an error) is not always very clear.
 Is it a bug in your code? Or a bug in a library you are using?
