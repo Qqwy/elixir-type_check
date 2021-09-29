@@ -57,7 +57,8 @@ defmodule TypeCheck.Options do
     @type! t :: %TypeCheck.Options{
       overrides: type_overrides(),
       default_overrides: boolean(),
-      debug: boolean()
+      enable_runtime_checks: boolean(),
+      debug: boolean(),
     }
   else
     @type remote_type() :: mfa | function
@@ -66,11 +67,12 @@ defmodule TypeCheck.Options do
     @type t :: %TypeCheck.Options{
       overrides: list(type_override()),
       default_overrides: boolean(),
-      debug: boolean()
+      enable_runtime_checks: boolean(),
+      debug: boolean(),
     }
   end
 
-  defstruct [overrides: [], default_overrides: true, debug: false]
+  defstruct [overrides: [], default_overrides: true, enable_runtime_checks: true, debug: false]
 
   def new() do
     %__MODULE__{overrides: default_overrides()}

@@ -177,6 +177,7 @@ defmodule TypeCheck.Macros do
   defmacro __before_compile__(env) do
     defs = Module.get_attribute(env.module, TypeCheck.TypeDefs)
     typedef_names = Module.get_attribute(env.module, TypeCheck.TypeDefNames)
+    options = Module.get_attribute(env.module, TypeCheck.Options)
 
     compile_time_imports_module_name = Module.concat(TypeCheck.Internals.UserTypes, env.module)
 
@@ -197,7 +198,12 @@ defmodule TypeCheck.Macros do
     definitions = Module.definitions_in(env.module)
     specs = Module.get_attribute(env.module, TypeCheck.Specs)
     spec_defs = create_spec_defs(specs, definitions, env)
-    spec_quotes = wrap_functions_with_specs(specs, definitions, env)
+    spec_quotes =
+      if options.enable_runtime_checks do
+        wrap_functions_with_specs(specs, definitions, env)
+      else
+        quote do end
+      end
 
     spec_names = specs |> Enum.map(fn {name, _, arity, _, _, _} -> {name, arity} end)
 
