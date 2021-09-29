@@ -264,7 +264,6 @@ all parameters to a function. In the case of for instance a large collection or 
 
 In those cases, you might want to turn off TypeCheck in certain environments (such as production) while still keeping it available in the development and testing environments.
 Be sure to benchmark before making the decision to turn TypeCheck off, as there is a high probability that the bottlenecks in your code are actually found elsewhere.
-_(Note: Turning off checks conditionally is a feature which [is currently being worked on](https://github.com/Qqwy/elixir-type_check/issues/52). It will be available in the next minor version of the library.)_
 
 And finally, regardless of whether the checks are used or not, there is one more way in which TypeCheck's types and specs are useful: Automated testing.
 
@@ -390,7 +389,7 @@ We have seen how TypeCheck can be used in a general project to add runtime check
 as well as how to use the `spectest` macro to get automatic property-tests that check whether your functions 
 follow their specs.
 
-TypeCheck currently is at version 0.6.0 and in active development.
+TypeCheck currently is at version 0.7.0 and in active development.
 Feedback, issues and pull requests [are very welcome](https://github.com/Qqwy/elixir-type_check)!
 
 Thank you very much for sticking through this long read with me 💚.
