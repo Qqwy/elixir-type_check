@@ -23,6 +23,7 @@ defmodule TypeCheck.DefaultOverrides do
     Collectable
     Date
     Date.Range
+    DateTime
     Enum
     Enumerable
     Exception
