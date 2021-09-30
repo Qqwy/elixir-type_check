@@ -203,6 +203,7 @@ Details:
   - Addition of `require TypeCheck.Type` to `use TypeCheck` so there no longer is a need to call this manually if you want to e.g. use `TypeCheck.Type.build/1`.
   - Pretty-printing of types and TypeError output in multiple colors.
   - Nicer indentation of errors.
+  - named types are now printed in abbreviated fashion if they are repeated multiple times in an error message. This makes a nested error message much easier to read, especially for larger specs.
 - 0.7.0 - Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
   - Adding `DateTime.t` to the default overrides, as it was still missing.
 - 0.6.0 - Addition of `spectest` & 'default overrides' Elixir's standard library types:
