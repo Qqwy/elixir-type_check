@@ -78,13 +78,27 @@ end
 
 defmodule TypeCheck.Inspect do
   @moduledoc false
-  def inspect(type, opts \\ %Inspect.Opts{}) do
+  import Kernel, except: [inspect: 2]
+
+  def inspect(type, opts \\ %Inspect.Opts{})
+  def inspect(type, opts) when is_list(opts) do
+    opts = struct(Inspect.Opts, opts)
+    inspect(type, opts)
+  end
+
+  def inspect(type, opts = %Inspect.Opts{}) do
     type
     |> TypeCheck.Protocols.Inspect.inspect(opts)
     |> Inspect.Algebra.format(opts.width)
   end
 
-  def inspect_binary(type, opts \\ %Inspect.Opts{}) do
+  def inspect_binary(type, opts \\ %Inspect.Opts{})
+  def inspect_binary(type, opts) when is_list(opts) do
+    opts = struct(Inspect.Opts, opts)
+    inspect_binary(type, opts)
+  end
+
+  def inspect_binary(type, opts = %Inspect.Opts{}) do
     TypeCheck.Inspect.inspect(type, opts)
     |> IO.iodata_to_binary()
   end

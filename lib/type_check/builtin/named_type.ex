@@ -29,10 +29,14 @@ defmodule TypeCheck.Builtin.NamedType do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(literal, opts) do
-      stringify_name(literal.name, opts)
-      |> Inspect.Algebra.glue("::")
-      |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(literal.type, opts))
-      |> Inspect.Algebra.group()
+      if Map.get(opts, :hide_long_named_type, false) do
+        stringify_name(literal.name, opts)
+      else
+        stringify_name(literal.name, opts)
+        |> Inspect.Algebra.glue("::")
+        |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(literal.type, opts))
+        |> Inspect.Algebra.group()
+      end
     end
     defp stringify_name(atom, _) when is_atom(atom), do: to_string(atom)
     defp stringify_name(str, _) when is_binary(str), do: to_string(str)

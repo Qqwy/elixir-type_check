@@ -147,7 +147,15 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format({s = %TypeCheck.Builtin.NamedType{}, :named_type, %{problem: problem}, val}) do
-    compound_check(val, s, do_format(problem))
+    child_str =
+      indent(do_format(problem))
+
+    """
+    `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s, show_long_named_type: true)}`. Reason:
+    #{child_str}
+    """
+
+    # compound_check(val, s, do_format(problem))
   end
 
   def do_format({%TypeCheck.Builtin.None{}, :no_match, _, val}) do
@@ -262,7 +270,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       end
 
     """
-    `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
+    `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s, hide_long_named_type: true)}`. Reason:
     #{child_str}
     """
   end
