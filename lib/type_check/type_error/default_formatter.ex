@@ -250,7 +250,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   def do_format(
         {s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}
       ) do
-    function_with_arity = IO.ANSI.format([:white, "#{s.name}/#{Enum.count(arguments)}", :red])
+    function_with_arity = IO.ANSI.format_fragment([:white, "#{s.name}/#{Enum.count(arguments)}", :red])
     result_spec = s.return_type |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
     arguments_str = arguments |> Enum.map(fn val -> inspect(val, inspect_type_opts()) end) |> Enum.join(", ")
     call = IO.ANSI.format_fragment([:white, "#{s.name}(#{arguments_str})", :red])
