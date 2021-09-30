@@ -56,10 +56,10 @@ defmodule TypeCheck.Macros do
 
   ```
   iex> MetaExample.joe
-  #TypeCheck.Type< %{coolness_level: :high, name: :joe} >
+  #TypeCheck.Type< TypeCheck.MacrosTest.MetaExample.joe() :: %{coolness_level: :high, name: :joe} >
 
   iex> MetaExample.mike
-  #TypeCheck.Type< %{coolness_level: :high, name: :mike} >
+  #TypeCheck.Type< TypeCheck.MacrosTest.MetaExample.mike() :: %{coolness_level: :high, name: :mike} >
 
   ```
 
@@ -107,14 +107,14 @@ defmodule TypeCheck.Macros do
 
   iex> GreeterExample.hi(42)
   ** (TypeCheck.TypeError) At test/type_check/macros_test.exs:32:
-  The call to `hi/1` failed,
-  because parameter no. 1 does not adhere to the spec `binary()`.
-  Rather, its value is: `42`.
-  Details:
-    The call `hi(42)`
-    does not adhere to spec `hi(binary()) :: binary()`. Reason:
-      parameter no. 1:
-        `42` is not a binary.
+      The call to `hi/1` failed,
+      because parameter no. 1 does not adhere to the spec `binary()`.
+      Rather, its value is: `42`.
+      Details:
+        The call `hi(42)`
+        does not adhere to spec `hi(binary()) :: binary()`. Reason:
+          parameter no. 1:
+            `42` is not a binary.
 
   ```
 
@@ -496,7 +496,7 @@ defmodule TypeCheck.Macros do
         {name, _, params} when is_list(params) -> {name, length(params)}
       end
 
-    res = type_fun_definition(name_with_maybe_params, type)
+    res = type_fun_definition(name_with_maybe_params, type, caller.module, typecheck_options.overrides)
 
     quote generated: true, location: :keep do
       if Module.get_attribute(__MODULE__, :autogen_typespec) do
@@ -550,7 +550,7 @@ defmodule TypeCheck.Macros do
     end
   end
 
-  defp type_fun_definition(name_with_params, type) do
+  defp type_fun_definition(name_with_params, type, module_name, overrides) do
     {_name, params} = Macro.decompose_call(name_with_params)
 
     params_check_code =
@@ -561,13 +561,26 @@ defmodule TypeCheck.Macros do
         end
       end)
 
+      overridden_modules = overrides |> Enum.map(fn {{m1, _f1, _a1}, {m2, _f2, _a2}} -> {m2, m1} end)
+
+      pretty_module_name = Keyword.get(overridden_modules, module_name, module_name)
+      pretty_module_name =
+        case Module.split(pretty_module_name) do
+          ["TypeCheck", "DefaultOverrides" | rest] ->
+            Module.concat(rest)
+          _ ->
+            pretty_module_name
+        end
+
+      pretty_type_name = "#{inspect(pretty_module_name)}.#{Macro.to_string(name_with_params)}"
+
     quote generated: true, location: :keep do
       @doc false
       def unquote(name_with_params) do
         unquote_splicing(params_check_code)
         # import TypeCheck.Builtin
         unquote(type_expansion_loop_prevention_code(name_with_params))
-        unquote(type)
+        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type))
       end
     end
   end

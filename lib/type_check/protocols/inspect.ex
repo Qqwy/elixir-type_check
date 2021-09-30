@@ -39,6 +39,8 @@ structs = [
 for struct <- structs do
   defimpl Inspect, for: struct do
     def inspect(val, opts) do
+        opts = Map.put(opts, :show_long_named_type, true)
+
       "#TypeCheck.Type<"
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(val, opts))
       |> Inspect.Algebra.glue(">")
@@ -78,14 +80,59 @@ end
 
 defmodule TypeCheck.Inspect do
   @moduledoc false
-  def inspect(type, opts \\ %Inspect.Opts{}) do
+  import Kernel, except: [inspect: 2]
+
+  def inspect(type, opts \\ %Inspect.Opts{})
+  def inspect(type, opts) when is_list(opts) do
+    opts =
+      if IO.ANSI.enabled? do
+        opts ++ [syntax_colors: default_colors()]
+      else
+        opts
+      end
+      |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+    inspect(type, opts)
+  end
+
+  def inspect(type, opts = %Inspect.Opts{}) do
     type
     |> TypeCheck.Protocols.Inspect.inspect(opts)
     |> Inspect.Algebra.format(opts.width)
   end
 
-  def inspect_binary(type, opts \\ %Inspect.Opts{}) do
+  def inspect_binary(type, opts \\ %Inspect.Opts{})
+  def inspect_binary(type, opts) when is_list(opts) do
+    opts =
+      if IO.ANSI.enabled? do
+        opts ++ [syntax_colors: default_colors() ++ [reset: opts[:reset_color] || :default_color]]
+      else
+        opts
+      end
+      |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+    inspect_binary(type, opts)
+  end
+
+  def inspect_binary(type, opts = %Inspect.Opts{}) do
     TypeCheck.Inspect.inspect(type, opts)
     |> IO.iodata_to_binary()
+  end
+
+  @doc false
+  def default_colors() do
+    [
+      atom: :cyan,
+      string: :yellow,
+      list: :white,
+      boolean: :magenta,
+      nil: :light_magenta,
+      tuple: :white,
+      binary: :green,
+      map: :white,
+      number: :yellow,
+      range: :yellow,
+      default: :white,
+      named_type: :white,
+      builtin_type: :white
+    ]
   end
 end

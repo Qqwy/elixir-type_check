@@ -5,7 +5,8 @@ defmodule TypeCheck.Builtin.AnyTest do
 
   test "t() has the appropriate structure" do
     subject =  TypeCheck.Builtin.Any.t()
-    assert subject.__struct__ == TypeCheck.Builtin.FixedMap
-    assert subject.keypairs == [__struct__: literal(TypeCheck.Builtin.Any)]
+    assert subject.__struct__ == TypeCheck.Builtin.NamedType
+    assert subject.type.__struct__ == TypeCheck.Builtin.FixedMap
+    assert subject.type.keypairs == [__struct__: literal(TypeCheck.Builtin.Any)]
   end
 end

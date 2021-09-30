@@ -85,6 +85,7 @@ defmodule TypeCheck.Builtin.Map do
         separator: ",",
         break: :maybe
       )
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

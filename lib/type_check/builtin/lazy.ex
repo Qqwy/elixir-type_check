@@ -38,6 +38,7 @@ defmodule TypeCheck.Builtin.Lazy do
       |> Inspect.Algebra.concat("#{inspect(s.module)}.#{s.function}(")
       |> Inspect.Algebra.concat(inspected_arguments)
       |> Inspect.Algebra.concat(")")
+      |> Inspect.Algebra.color(:builtin_type, opts)
 
       # "lazy( #{s.module}.#{s.function}(#{inspected_arguments}) )"
     end

@@ -33,14 +33,14 @@ defmodule TypeCheck.ExUnitTest do
       assert res =~ "Spectest failed (after 0 successful runs)"
       assert res =~ "Input: SpectestTestExample.mischievous_mannequin()"
       assert res =~ """
-           ** (TypeCheck.TypeError) The call to `mischievous_mannequin/0` failed,
-           because the returned result does not adhere to the spec `atom()`.
-           Rather, its value is: `42`.
-           Details:
-             The result of calling `mischievous_mannequin()`
-             does not adhere to spec `mischievous_mannequin() :: atom()`. Reason:
-               Returned result:
-                 `42` is not an atom.
+      ** (TypeCheck.TypeError) The call to `mischievous_mannequin/0` failed,
+               because the returned result does not adhere to the spec `atom()`.
+               Rather, its value is: `42`.
+               Details:
+                 The result of calling `mischievous_mannequin()`
+                 does not adhere to spec `mischievous_mannequin() :: atom()`. Reason:
+                   Returned result:
+                     `42` is not an atom.
       """
 
       # raptor failure is a MySpecialError:

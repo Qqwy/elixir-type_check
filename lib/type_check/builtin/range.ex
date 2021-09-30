@@ -2,7 +2,12 @@ defmodule TypeCheck.Builtin.Range do
   defstruct [:range]
 
   use TypeCheck
-  @type! t :: %__MODULE__{range: %Range{}}
+
+  if Version.compare(System.version(), "1.12.0") == :lt do
+    @type! t :: %__MODULE__{range: %Range{first: integer(), last: integer()}}
+  else
+    @type! t :: %__MODULE__{range: %Range{first: integer(), last: integer(), step: 1}}
+  end
 
   @type! problem_tuple ::
          {t(), :not_an_integer, %{}, any()}
@@ -28,6 +33,7 @@ defmodule TypeCheck.Builtin.Range do
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(struct, opts) do
       Inspect.Range.inspect(struct.range, opts)
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

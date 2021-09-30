@@ -30,6 +30,7 @@ defmodule TypeCheck.Builtin.Literal do
         _ ->
           Inspect.Algebra.to_doc(literal.value, opts)
       end
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

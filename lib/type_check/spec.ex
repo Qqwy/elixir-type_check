@@ -30,7 +30,7 @@ defmodule TypeCheck.Spec do
       ...(6)>
       ...(7)> {:ok, spec} = TypeCheck.Spec.lookup(Example, :greeter, 1)
       ...(8)> spec
-      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+      #TypeCheck.Spec<  greeter(name) :: binary() >
 
       iex> TypeCheck.Spec.lookup(Example, :nonexistent, 0)
       {:error, :not_found}
@@ -60,7 +60,7 @@ defmodule TypeCheck.Spec do
       ...(5)> end
       ...(6)>
       ...(7)> TypeCheck.Spec.lookup!(Example2, :greeter, 1)
-      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+      #TypeCheck.Spec<  greeter(name) :: binary() >
 
       iex> TypeCheck.Spec.lookup!(Example2, :nonexistent, 0)
       ** (ArgumentError) No spec found for `Example2.nonexistent/0`
@@ -211,21 +211,25 @@ defmodule TypeCheck.Spec do
     def inspect(struct, opts) do
       body =
         Inspect.Algebra.container_doc(
-          "(",
+          Inspect.Algebra.color("(", :named_type, opts),
           struct.param_types,
-          ")",
+          Inspect.Algebra.color(")", :named_type, opts),
           opts,
           &TypeCheck.Protocols.Inspect.inspect/2,
           separator: ", ",
           break: :maybe
         )
         |> Inspect.Algebra.group()
+        |> Inspect.Algebra.color(:named_type, opts)
 
       to_string(struct.name)
+      |> Inspect.Algebra.color(:named_type, opts)
       |> Inspect.Algebra.concat(body)
-      |> Inspect.Algebra.glue("::")
+      |> Inspect.Algebra.glue(Inspect.Algebra.color("::", :named_type, opts))
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
+      |> Inspect.Algebra.color(:named_type, opts)
       |> Inspect.Algebra.group()
+      |> Inspect.Algebra.color(:named_type, opts)
     end
   end
 
@@ -235,6 +239,7 @@ defmodule TypeCheck.Spec do
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct, opts))
       |> Inspect.Algebra.glue(">")
       |> Inspect.Algebra.group()
+      |> Inspect.Algebra.color(:named_type, opts)
     end
   end
 

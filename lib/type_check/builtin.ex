@@ -149,7 +149,7 @@ defmodule TypeCheck.Builtin do
       1
       iex> TypeCheck.conforms!(1000, arity())
       ** (TypeCheck.TypeError) `1000` does not check against `0..255`. Reason:
-        `1000` falls outside the range 0..255.
+            `1000` falls outside the range 0..255.
   """
   if_recompiling? do
     @spec! arity() :: TypeCheck.Builtin.Range.t()
@@ -213,7 +213,7 @@ defmodule TypeCheck.Builtin do
       255
       iex> TypeCheck.conforms!(256, byte())
       ** (TypeCheck.TypeError) `256` does not check against `0..255`. Reason:
-        `256` falls outside the range 0..255.
+            `256` falls outside the range 0..255.
   """
   if_recompiling? do
     @spec! byte() :: TypeCheck.Builtin.Range.t()
@@ -232,7 +232,7 @@ defmodule TypeCheck.Builtin do
       97
       iex> TypeCheck.conforms!(-1, char())
       ** (TypeCheck.TypeError) `-1` does not check against `0..1114111`. Reason:
-        `-1` falls outside the range 0..1114111.
+            `-1` falls outside the range 0..1114111.
   """
   if_recompiling? do
     @spec! char() :: TypeCheck.Builtin.Range.t()
@@ -251,7 +251,7 @@ defmodule TypeCheck.Builtin do
       'hello world'
       iex> TypeCheck.conforms!("hello world", charlist())
       ** (TypeCheck.TypeError) `"hello world"` does not check against `list(0..1114111)`. Reason:
-        `"hello world"` is not a list.
+            `"hello world"` is not a list.
   """
   if_recompiling? do
     @spec! charlist() :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.Range.t())
@@ -410,12 +410,12 @@ defmodule TypeCheck.Builtin do
 
       iex> TypeCheck.conforms!(:foo, list(integer()))
       ** (TypeCheck.TypeError) `:foo` does not check against `list(integer())`. Reason:
-        `:foo` is not a list.
+            `:foo` is not a list.
 
       iex> TypeCheck.conforms!([1, 2, 3.3], list(integer()))
       ** (TypeCheck.TypeError) `[1, 2, 3.3]` does not check against `list(integer())`. Reason:
-        at index 2:
-          `3.3` is not an integer.
+            at index 2:
+              `3.3` is not an integer.
   """
   if_recompiling? do
     @spec! list(a :: TypeCheck.Type.t()) :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())
@@ -438,9 +438,9 @@ defmodule TypeCheck.Builtin do
       iex> y = [a: 1, b: 2] ++ [3, 4]
       iex> TypeCheck.conforms!(y, keyword())
       ** (TypeCheck.TypeError) `[{:a, 1}, {:b, 2}, 3, 4]` does not check against `list({atom(), any()})`. Reason:
-        at index 2:
-          `3` does not check against `{atom(), any()}`. Reason:
-            `3` is not a tuple.
+            at index 2:
+              `3` does not check against `{atom(), any()}`. Reason:
+                `3` is not a tuple.
   """
   if_recompiling? do
     @spec! keyword() :: TypeCheck.Builtin.List.t(TypeCheck.Builtin.FixedTuple.t())
@@ -822,7 +822,7 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `type` (without the name) instead.
   """
   if_recompiling? do
-    @spec! named_type(name :: atom(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
+    # @spec! named_type(name :: atom() | String.t(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
   end
   def named_type(name, type) do
     TypeCheck.Type.ensure_type!(type)
