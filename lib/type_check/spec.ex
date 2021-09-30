@@ -226,6 +226,7 @@ defmodule TypeCheck.Spec do
       |> Inspect.Algebra.glue("::")
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
       |> Inspect.Algebra.group()
+      |> Inspect.Algebra.color(:named_type, opts)
     end
   end
 
