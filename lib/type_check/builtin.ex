@@ -830,6 +830,7 @@ defmodule TypeCheck.Builtin do
     build_struct(TypeCheck.Builtin.NamedType)
     |> Map.put(:name, name)
     |> Map.put(:type, type)
+    |> Map.put(:local, true)
   end
 
   @doc typekind: :extension

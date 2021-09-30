@@ -90,8 +90,10 @@ defmodule TypeCheck do
       {10, 20}
       iex> TypeCheck.conforms!({20, 10}, sorted_pair)
       ** (TypeCheck.TypeError) `{20, 10}` does not match the definition of the named type `TypeCheckTest.TypeGuardExample.sorted_pair`
-          which is: `TypeCheckTest.TypeGuardExample.sorted_pair :: (sorted_pair when lower <= higher)`. Reason:
-            `{20, 10}` does not check against `(sorted_pair when lower <= higher)`. Reason:
+          which is: `TypeCheckTest.TypeGuardExample.sorted_pair
+          ::
+          (sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher)`. Reason:
+            `{20, 10}` does not check against `(sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher)`. Reason:
               type guard:
                 `lower <= higher` evaluated to false or nil.
                 bound values: %{higher: 10, lower: 20, sorted_pair: {20, 10}}
@@ -245,7 +247,7 @@ defmodule TypeCheck do
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At lib/type_check.ex:264:
+      "At lib/type_check.ex:266:
           `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
@@ -297,7 +299,7 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:264:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:266:
           `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()

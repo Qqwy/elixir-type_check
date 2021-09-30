@@ -580,7 +580,7 @@ defmodule TypeCheck.Macros do
         unquote_splicing(params_check_code)
         # import TypeCheck.Builtin
         unquote(type_expansion_loop_prevention_code(name_with_params))
-        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type))
+        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type)) |> Map.put(:local, false)
       end
     end
   end
