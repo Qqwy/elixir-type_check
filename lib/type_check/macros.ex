@@ -56,10 +56,10 @@ defmodule TypeCheck.Macros do
 
   ```
   iex> MetaExample.joe
-  #TypeCheck.Type< %{coolness_level: :high, name: :joe} >
+  #TypeCheck.Type< %{TypeCheck.MacrosTest.MetaExample.joe() :: coolness_level: :high, name: :joe} >
 
   iex> MetaExample.mike
-  #TypeCheck.Type< %{coolness_level: :high, name: :mike} >
+  #TypeCheck.Type< TypeCheck.MacrosTest.MetaExample.mike() :: %{coolness_level: :high, name: :mike} >
 
   ```
 
@@ -107,14 +107,14 @@ defmodule TypeCheck.Macros do
 
   iex> GreeterExample.hi(42)
   ** (TypeCheck.TypeError) At test/type_check/macros_test.exs:32:
-  The call to `hi/1` failed,
-  because parameter no. 1 does not adhere to the spec `binary()`.
-  Rather, its value is: `42`.
-  Details:
-    The call `hi(42)`
-    does not adhere to spec `hi(binary()) :: binary()`. Reason:
-      parameter no. 1:
-        `42` is not a binary.
+      The call to `hi/1` failed,
+      because parameter no. 1 does not adhere to the spec `binary()`.
+      Rather, its value is: `42`.
+      Details:
+        The call `hi(42)`
+        does not adhere to spec `hi(binary()) :: binary()`. Reason:
+          parameter no. 1:
+            `42` is not a binary.
 
   ```
 

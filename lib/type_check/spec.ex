@@ -30,7 +30,7 @@ defmodule TypeCheck.Spec do
       ...(6)>
       ...(7)> {:ok, spec} = TypeCheck.Spec.lookup(Example, :greeter, 1)
       ...(8)> spec
-      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+      #TypeCheck.Spec<  greeter(name) :: binary() >
 
       iex> TypeCheck.Spec.lookup(Example, :nonexistent, 0)
       {:error, :not_found}
@@ -60,7 +60,7 @@ defmodule TypeCheck.Spec do
       ...(5)> end
       ...(6)>
       ...(7)> TypeCheck.Spec.lookup!(Example2, :greeter, 1)
-      #TypeCheck.Spec<  greeter(name :: binary()) :: binary() >
+      #TypeCheck.Spec<  greeter(name) :: binary() >
 
       iex> TypeCheck.Spec.lookup!(Example2, :nonexistent, 0)
       ** (ArgumentError) No spec found for `Example2.nonexistent/0`
