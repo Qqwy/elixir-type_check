@@ -89,10 +89,12 @@ defmodule TypeCheck do
       iex> TypeCheck.conforms!({10, 20}, sorted_pair)
       {10, 20}
       iex> TypeCheck.conforms!({20, 10}, sorted_pair)
-      ** (TypeCheck.TypeError) `{20, 10}` does not check against `(sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher)`. Reason:
-            type guard:
-              `lower <= higher` evaluated to false or nil.
-              bound values: %{higher: 10, lower: 20, sorted_pair: {20, 10}}
+      ** (TypeCheck.TypeError) `{20, 10}` does not match the definition of the named type `TypeCheckTest.TypeGuardExample.sorted_pair`
+          which is: `TypeCheckTest.TypeGuardExample.sorted_pair :: (sorted_pair when lower <= higher)`. Reason:
+            `{20, 10}` does not check against `(sorted_pair when lower <= higher)`. Reason:
+              type guard:
+                `lower <= higher` evaluated to false or nil.
+                bound values: %{higher: 10, lower: 20, sorted_pair: {20, 10}}
 
   Named types are available in your guard even from the (both local and remote) types that you are using in your time, as long as those types are not defined as _opaque_ types.
 
@@ -244,7 +246,7 @@ defmodule TypeCheck do
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
       "At lib/type_check.ex:262:
-      `20` is not the same value as `42`."
+          `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}

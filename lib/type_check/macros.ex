@@ -56,7 +56,7 @@ defmodule TypeCheck.Macros do
 
   ```
   iex> MetaExample.joe
-  #TypeCheck.Type< %{TypeCheck.MacrosTest.MetaExample.joe() :: coolness_level: :high, name: :joe} >
+  #TypeCheck.Type< TypeCheck.MacrosTest.MetaExample.joe() :: %{coolness_level: :high, name: :joe} >
 
   iex> MetaExample.mike
   #TypeCheck.Type< TypeCheck.MacrosTest.MetaExample.mike() :: %{coolness_level: :high, name: :mike} >
