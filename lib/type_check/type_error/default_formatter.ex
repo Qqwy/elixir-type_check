@@ -6,7 +6,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       do_format(problem_tuple)
       |> indent() # Ensure we start with four spaces, which multi-line exception pretty-printing expects
       |> indent()
-      |> String.trim_trailing()
+      |> String.trim()
 
     location_string(location) <> res
   end
@@ -289,10 +289,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   defp inspect_value_opts() do
     # [reset_color: :red, syntax_colors: ([reset: :white] ++ TypeCheck.Inspect.default_colors())]
-    [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+    if IO.ANSI.enabled? do
+      [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+    else
+      []
+    end
   end
 
   defp inspect_type_opts() do
-    [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+    if IO.ANSI.enabled? do
+      [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+    else
+      []
+    end
   end
 end

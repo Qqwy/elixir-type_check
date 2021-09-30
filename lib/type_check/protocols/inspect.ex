@@ -85,8 +85,12 @@ defmodule TypeCheck.Inspect do
   def inspect(type, opts \\ %Inspect.Opts{})
   def inspect(type, opts) when is_list(opts) do
     opts =
-      opts ++ [syntax_colors: default_colors()]
-      Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+      if IO.ANSI.enabled? do
+        opts ++ [syntax_colors: default_colors()]
+      else
+        opts
+      end
+      |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
     inspect(type, opts)
   end
 
@@ -99,7 +103,11 @@ defmodule TypeCheck.Inspect do
   def inspect_binary(type, opts \\ %Inspect.Opts{})
   def inspect_binary(type, opts) when is_list(opts) do
     opts =
-      opts ++ [syntax_colors: default_colors() ++ [reset: opts[:reset_color] || :default_color]]
+      if IO.ANSI.enabled? do
+        opts ++ [syntax_colors: default_colors() ++ [reset: opts[:reset_color] || :default_color]]
+      else
+        opts
+      end
       |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
     inspect_binary(type, opts)
   end
