@@ -227,15 +227,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   def do_format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", do_format(problem))
-    function_with_arity = "#{s.name}/#{Enum.count(val)}"
+    function_with_arity = IO.ANSI.format_fragment([:white, "#{s.name}/#{Enum.count(val)}", :red])
     param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
     arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
-    call = "#{s.name}(#{arguments})"
+    call = IO.ANSI.format_fragment([:white, "#{s.name}(#{arguments})", :red])
+
+    value = Enum.at(val, index)
+    value_str = inspect(value, inspect_value_opts())
 
     """
     The call to `#{function_with_arity}` failed,
     because parameter no. #{index + 1} does not adhere to the spec `#{param_spec}`.
-    Rather, its value is: `#{inspect(Enum.at(val, index), inspect_type_opts())}`.
+    Rather, its value is: `#{value_str}`.
     Details:
       The call `#{call}`
       does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s, inspect_type_opts())}`. Reason:
@@ -247,15 +250,17 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   def do_format(
         {s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}
       ) do
-    function_with_arity = "#{s.name}/#{Enum.count(arguments)}"
+    function_with_arity = IO.ANSI.format([:white, "#{s.name}/#{Enum.count(arguments)}"])
     result_spec = s.return_type |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
-    arguments_str = arguments |> Enum.map(&inspect/1) |> Enum.join(", ")
-    call = "#{s.name}(#{arguments_str})"
+    arguments_str = arguments |> Enum.map(fn val -> inspect(val, inspect_type_opts()) end) |> Enum.join(", ")
+    call = IO.ANSI.format_fragment([:white, "#{s.name}(#{arguments_str})", :red])
+
+    val_str = inspect(val, inspect_value_opts())
 
     """
     The call to `#{function_with_arity}` failed,
     because the returned result does not adhere to the spec `#{result_spec}`.
-    Rather, its value is: `#{inspect(val, inspect_value_opts())}`.
+    Rather, its value is: `#{val_str}`.
     Details:
       The result of calling `#{call}`
       does not adhere to spec `#{TypeCheck.Inspect.inspect_binary(s, inspect_type_opts())}`. Reason:

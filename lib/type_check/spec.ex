@@ -211,20 +211,23 @@ defmodule TypeCheck.Spec do
     def inspect(struct, opts) do
       body =
         Inspect.Algebra.container_doc(
-          "(",
+          Inspect.Algebra.color("(", :named_type, opts),
           struct.param_types,
-          ")",
+          Inspect.Algebra.color(")", :named_type, opts),
           opts,
           &TypeCheck.Protocols.Inspect.inspect/2,
           separator: ", ",
           break: :maybe
         )
         |> Inspect.Algebra.group()
+        |> Inspect.Algebra.color(:named_type, opts)
 
       to_string(struct.name)
+      |> Inspect.Algebra.color(:named_type, opts)
       |> Inspect.Algebra.concat(body)
-      |> Inspect.Algebra.glue("::")
+      |> Inspect.Algebra.glue(Inspect.Algebra.color("::", :named_type, opts))
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct.return_type, opts))
+      |> Inspect.Algebra.color(:named_type, opts)
       |> Inspect.Algebra.group()
       |> Inspect.Algebra.color(:named_type, opts)
     end
@@ -236,6 +239,7 @@ defmodule TypeCheck.Spec do
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(struct, opts))
       |> Inspect.Algebra.glue(">")
       |> Inspect.Algebra.group()
+      |> Inspect.Algebra.color(:named_type, opts)
     end
   end
 

@@ -8,8 +8,8 @@ defmodule TypeCheck.Builtin.NamedType do
          {t(), :named_type, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())},
           any()}
 
-  def stringify_name(atom, _) when is_atom(atom), do: to_string(atom)
-  def stringify_name(str, _) when is_binary(str), do: to_string(str)
+  def stringify_name(atom, _opts) when is_atom(atom), do: to_string(atom)
+  def stringify_name(str, _opts) when is_binary(str), do: to_string(str)
   def stringify_name(other, opts), do: TypeCheck.Protocols.Inspect.inspect(other, opts)
 
   defimpl TypeCheck.Protocols.ToCheck do

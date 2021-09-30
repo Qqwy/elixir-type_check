@@ -64,9 +64,9 @@ defmodule TypeCheck.Builtin.List do
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do
       Inspect.Algebra.container_doc(
-        "list(",
+        Inspect.Algebra.color("list(", :builtin_type, opts),
         [TypeCheck.Protocols.Inspect.inspect(list.element_type, opts)],
-        ")",
+        Inspect.Algebra.color(")", :builtin_type, opts),
         opts,
         fn x, _ -> x end,
         separator: "",
