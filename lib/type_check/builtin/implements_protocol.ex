@@ -25,7 +25,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
   end
 
   defimpl TypeCheck.Protocols.Inspect do
-    def inspect(s, _opts) do
+    def inspect(s, opts) do
       "impl(#{inspect(s.protocol)})"
       |> Inspect.Algebra.color(:builtin_type, opts)
     end
