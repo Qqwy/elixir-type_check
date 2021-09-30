@@ -86,6 +86,7 @@ defmodule TypeCheck.Builtin.Map do
         break: :maybe
       )
     end
+    |> Inspect.Algebra.color(:builtin_type, opts)
   end
 
   if Code.ensure_loaded?(StreamData) do

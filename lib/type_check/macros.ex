@@ -572,8 +572,6 @@ defmodule TypeCheck.Macros do
             pretty_module_name
         end
 
-      IO.inspect({pretty_module_name, overridden_modules}, label: :pretty_module_name)
-
       pretty_type_name = "#{inspect(pretty_module_name)}.#{Macro.to_string(name_with_params)}"
 
     quote generated: true, location: :keep do

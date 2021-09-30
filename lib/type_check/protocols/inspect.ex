@@ -85,7 +85,8 @@ defmodule TypeCheck.Inspect do
   def inspect(type, opts \\ %Inspect.Opts{})
   def inspect(type, opts) when is_list(opts) do
     opts =
-      Enum.reduce(opts, struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+      opts ++ [syntax_colors: default_colors()]
+      Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
     inspect(type, opts)
   end
 
@@ -98,14 +99,32 @@ defmodule TypeCheck.Inspect do
   def inspect_binary(type, opts \\ %Inspect.Opts{})
   def inspect_binary(type, opts) when is_list(opts) do
     opts =
-      Enum.reduce(opts, struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
-    # opts = struct(Inspect.Opts, opts)
-    # struct(Inspect.Opts)
+      opts ++ [syntax_colors: default_colors() ++ [reset: opts[:reset_color] || :default_color]]
+      |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
     inspect_binary(type, opts)
   end
 
   def inspect_binary(type, opts = %Inspect.Opts{}) do
     TypeCheck.Inspect.inspect(type, opts)
     |> IO.iodata_to_binary()
+  end
+
+  @doc false
+  def default_colors() do
+    [
+      atom: :cyan,
+      string: :yellow,
+      list: :white,
+      boolean: :magenta,
+      nil: :light_magenta,
+      tuple: :white,
+      binary: :green,
+      map: :white,
+      number: :yellow,
+      range: :yellow,
+      default: :white,
+      named_type: :white,
+      builtin_type: :white
+    ]
   end
 end

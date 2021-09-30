@@ -28,6 +28,7 @@ defmodule TypeCheck.Builtin.Range do
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(struct, opts) do
       Inspect.Range.inspect(struct.range, opts)
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

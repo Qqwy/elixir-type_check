@@ -41,6 +41,7 @@ defmodule TypeCheck.Builtin.NamedType do
       else
         @for.stringify_name(literal.name, opts)
       end
+      |> Inspect.Algebra.color(:named_type, opts)
     end
   end
 

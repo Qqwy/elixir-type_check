@@ -26,8 +26,9 @@ defmodule TypeCheck.Builtin.Tuple do
   end
 
   defimpl TypeCheck.Protocols.Inspect do
-    def inspect(_, _opts) do
+    def inspect(_, opts) do
       "tuple()"
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

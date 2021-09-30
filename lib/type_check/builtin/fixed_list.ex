@@ -85,6 +85,7 @@ defmodule TypeCheck.Builtin.FixedList do
         opts
         | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2
       })
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

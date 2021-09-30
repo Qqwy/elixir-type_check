@@ -46,6 +46,7 @@ defmodule TypeCheck.Builtin.OneOf do
         separator: " |",
         break: :maybe
       )
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

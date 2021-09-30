@@ -27,6 +27,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, _opts) do
       "impl(#{inspect(s.protocol)})"
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
   if Code.ensure_loaded?(StreamData) do

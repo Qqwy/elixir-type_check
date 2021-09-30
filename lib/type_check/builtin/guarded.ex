@@ -104,6 +104,7 @@ defmodule TypeCheck.Builtin.Guarded do
       |> Inspect.Algebra.glue(Macro.to_string(s.guard))
       |> Inspect.Algebra.concat(")")
       |> Inspect.Algebra.group()
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 

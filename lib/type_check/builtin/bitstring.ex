@@ -20,8 +20,9 @@ defmodule TypeCheck.Builtin.Bitstring do
   end
 
   defimpl TypeCheck.Protocols.Inspect do
-    def inspect(_, _opts) do
+    def inspect(_, opts) do
       "bitstring()"
+      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 
