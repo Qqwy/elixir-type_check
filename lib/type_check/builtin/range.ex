@@ -27,7 +27,7 @@ defmodule TypeCheck.Builtin.Range do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(struct, opts) do
-      Inspect.Algebra.to_doc(struct.range, opts)
+      Inspect.Range.inspect(struct.range, opts)
     end
   end
 

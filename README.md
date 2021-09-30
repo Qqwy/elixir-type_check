@@ -198,10 +198,11 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
-
-- 0.7.0 Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
+- master -
+  - Fixes prettyprinting of `TypeCheck.Builtin.Range`.
+- 0.7.0 - Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
   - Adding `DateTime.t` to the default overrides, as it was still missing.
-- 0.6.0 Addition of `spectest` & 'default overrides' Elixir's standard library types:
+- 0.6.0 - Addition of `spectest` & 'default overrides' Elixir's standard library types:
   - Adding `TypeCheck.ExUnit`, with the function `spectest` to test function-specifications.
     - Possibility to use options `:except`, `:only`, `:initial_seed`.
     - Possibility to pass custom options to StreamData.
@@ -216,7 +217,7 @@ Details:
   - The introspection function `__type_check__/1` is now added to any module that contains a `use TypeCheck`.
   - Fixes the `Inspect` implementation of custom structs, by falling back to `Any`, which is more useful than attempting to use a customized implementation that would try to read the values in the struct and failing because the struct-type containing types in the fields.
   - Fixes conditional compilation warnings when optional dependency `:stream_data` was not included in your project.
-- 0.5.0 Stability improvements:
+- 0.5.0 - Stability improvements:
   - Adding `Typecheck.Option` `debug: true`, which will (at compile-time) print the checks that TypeCheck is generating.
   - Actually autogenerate a `@spec`, which did not yet happen before.
   - When writing `@autogen_typespec false`, no typespec is exported for the next `@type!`/`@opaque`/`@spec!` encountered in a module.
@@ -224,19 +225,19 @@ Details:
   - Bugfixes w.r.t. generating typespecs
   - Fixes compiler-warnings on unused named types when using a type guard. (c.f. #25)
   - Fixes any warnings that were triggered during the test suite before.
-- 0.4.0 Support for `impl(ProtocolName)` to accept any type implementing a particular protocol.
+- 0.4.0 - Support for `impl(ProtocolName)` to accept any type implementing a particular protocol.
   - Also adds rudimentary support for overriding remote types.
   - Bugfix when inspecting `lazy( ...)`-types.
-- 0.3.2 Support for unquote fragments inside types and specs. (c.f. #39)
-- 0.3.1 Fixed link in the documentation.
-- 0.3.0 Improve DefaultFormatter output when used with long function- or type-signatures (c.f. #32). Also, bugfix for `Builtin.tuple/1`.
-- 0.2.3 Bugfix release: Ensure TypeCheck compiles on Elixir v1.11 (#30), Ensure StreamData truly is an optional dependency (#27).
-- 0.2.2 Support for literal strings should no longer break in Elixir's builtin typespecs.
-- 0.2.1 Improved parsing of types that have a type-guard at the root level. (c.f. #24), support for custom generators.
-- 0.2.0 Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead, support named types in specs.
-- 0.1.2 Added missing `keyword` type to TypeCheck.Builtin (#20)
-- 0.1.1 Fixing some documentation typos
-- 0.1.0 Initial Release
+- 0.3.2 - Support for unquote fragments inside types and specs. (c.f. #39)
+- 0.3.1 - Fixed link in the documentation.
+- 0.3.0 - Improve DefaultFormatter output when used with long function- or type-signatures (c.f. #32). Also, bugfix for `Builtin.tuple/1`.
+- 0.2.3 - Bugfix release: Ensure TypeCheck compiles on Elixir v1.11 (#30), Ensure StreamData truly is an optional dependency (#27).
+- 0.2.2 - Support for literal strings should no longer break in Elixir's builtin typespecs.
+- 0.2.1 - Improved parsing of types that have a type-guard at the root level. (c.f. #24), support for custom generators.
+- 0.2.0 - Improved (and changed) API that works better with the Elixir formatter: Use `@type!`/`@spec!` instead, support named types in specs.
+- 0.1.2 - Added missing `keyword` type to TypeCheck.Builtin (#20)
+- 0.1.1 - Fixing some documentation typos
+- 0.1.0 - Initial Release
 
 ## Installation
 
