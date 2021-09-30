@@ -55,7 +55,10 @@ defmodule TypeCheck.Builtin.OneOf do
       def to_gen(s) do
         choice_gens =
           s.choices
-          |> Enum.reject(fn choice -> match?(%TypeCheck.Builtin.None{}, choice) end)
+          |> Enum.reject(fn choice ->
+          match?(%TypeCheck.Builtin.None{}, choice)
+          || match?(%TypeCheck.Builtin.NamedType{type: %TypeCheck.Builtin.None{}}, choice)
+        end)
           |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
 
         case choice_gens do
