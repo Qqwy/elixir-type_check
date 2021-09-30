@@ -200,6 +200,7 @@ Details:
 ### Changelog
 
 - 0.7.0 Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
+  - Adding `DateTime.t` to the default overrides, as it was still missing.
 - 0.6.0 Addition of `spectest` & 'default overrides' Elixir's standard library types:
   - Adding `TypeCheck.ExUnit`, with the function `spectest` to test function-specifications.
     - Possibility to use options `:except`, `:only`, `:initial_seed`.
