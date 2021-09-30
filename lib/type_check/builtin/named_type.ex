@@ -8,6 +8,10 @@ defmodule TypeCheck.Builtin.NamedType do
          {t(), :named_type, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())},
           any()}
 
+  def stringify_name(atom, _) when is_atom(atom), do: to_string(atom)
+  def stringify_name(str, _) when is_binary(str), do: to_string(str)
+  def stringify_name(other, opts), do: TypeCheck.Protocols.Inspect.inspect(other, opts)
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
@@ -29,19 +33,17 @@ defmodule TypeCheck.Builtin.NamedType do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(literal, opts) do
-      if Map.get(opts, :hide_long_named_type, false) do
-        stringify_name(literal.name, opts)
-      else
-        stringify_name(literal.name, opts)
+      if Map.get(opts, :show_long_named_type, false) do
+        @for.stringify_name(literal.name, opts)
         |> Inspect.Algebra.glue("::")
         |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(literal.type, opts))
         |> Inspect.Algebra.group()
+      else
+        @for.stringify_name(literal.name, opts) <> " :: _"
       end
     end
-    defp stringify_name(atom, _) when is_atom(atom), do: to_string(atom)
-    defp stringify_name(str, _) when is_binary(str), do: to_string(str)
-    defp stringify_name(other, opts), do: TypeCheck.Protocols.Inspect.inspect(other, opts)
   end
+
 
 
   if Code.ensure_loaded?(StreamData) do

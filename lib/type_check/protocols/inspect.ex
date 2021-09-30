@@ -39,6 +39,8 @@ structs = [
 for struct <- structs do
   defimpl Inspect, for: struct do
     def inspect(val, opts) do
+        opts = Map.put(opts, :show_long_named_type, true)
+
       "#TypeCheck.Type<"
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(val, opts))
       |> Inspect.Algebra.glue(">")
@@ -82,7 +84,8 @@ defmodule TypeCheck.Inspect do
 
   def inspect(type, opts \\ %Inspect.Opts{})
   def inspect(type, opts) when is_list(opts) do
-    opts = struct(Inspect.Opts, opts)
+    opts =
+      Enum.reduce(opts, struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
     inspect(type, opts)
   end
 
@@ -94,7 +97,10 @@ defmodule TypeCheck.Inspect do
 
   def inspect_binary(type, opts \\ %Inspect.Opts{})
   def inspect_binary(type, opts) when is_list(opts) do
-    opts = struct(Inspect.Opts, opts)
+    opts =
+      Enum.reduce(opts, struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+    # opts = struct(Inspect.Opts, opts)
+    # struct(Inspect.Opts)
     inspect_binary(type, opts)
   end
 

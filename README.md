@@ -200,6 +200,7 @@ Details:
 ### Changelog
 - master -
   - Fixes prettyprinting of `TypeCheck.Builtin.Range`.
+  - Addition of `require TypeCheck.Type` to `use TypeCheck` so there no longer is a need to call this manually if you want to e.g. use `TypeCheck.Type.build/1`.
 - 0.7.0 - Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
   - Adding `DateTime.t` to the default overrides, as it was still missing.
 - 0.6.0 - Addition of `spectest` & 'default overrides' Elixir's standard library types:

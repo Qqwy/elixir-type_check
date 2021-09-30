@@ -151,7 +151,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       indent(do_format(problem))
 
     """
-    `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s, show_long_named_type: true)}`. Reason:
+    `#{inspect(val)}` does not match the definition of the named type `#{s.name}`
+    which is: `#{TypeCheck.Inspect.inspect_binary(s, show_long_named_type: true)}`. Reason:
     #{child_str}
     """
 
@@ -270,7 +271,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       end
 
     """
-    `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s, hide_long_named_type: true)}`. Reason:
+    `#{inspect(val)}` does not check against `#{TypeCheck.Inspect.inspect_binary(s)}`. Reason:
     #{child_str}
     """
   end

@@ -117,6 +117,7 @@ defmodule TypeCheck do
       nil ->
         quote generated: true, location: :keep do
           require TypeCheck
+          require TypeCheck.Type
           import TypeCheck.Builtin
           :ok
         end
@@ -124,6 +125,7 @@ defmodule TypeCheck do
         quote generated: true, location: :keep do
           use TypeCheck.Macros, unquote(options)
           require TypeCheck
+          require TypeCheck.Type
           import TypeCheck.Builtin
           :ok
         end
