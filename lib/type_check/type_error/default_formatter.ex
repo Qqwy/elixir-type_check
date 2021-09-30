@@ -4,6 +4,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   def format(problem_tuple, location \\ []) do
     res =
       do_format(problem_tuple)
+      |> indent() # Ensure we start with four spaces, which multi-line exception pretty-printing expects
+      |> indent()
       |> String.trim_trailing()
 
     location_string(location) <> res

@@ -822,7 +822,7 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `type` (without the name) instead.
   """
   if_recompiling? do
-    @spec! named_type(name :: atom(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
+    # @spec! named_type(name :: atom() | String.t(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
   end
   def named_type(name, type) do
     TypeCheck.Type.ensure_type!(type)

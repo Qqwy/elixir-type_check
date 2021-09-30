@@ -36,10 +36,10 @@ defmodule TypeCheck.Builtin.NamedType do
       if Map.get(opts, :show_long_named_type, false) do
         @for.stringify_name(literal.name, opts)
         |> Inspect.Algebra.glue("::")
-        |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(literal.type, opts))
+        |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(literal.type, Map.put(opts, :show_long_named_type, false)))
         |> Inspect.Algebra.group()
       else
-        @for.stringify_name(literal.name, opts) <> " :: _"
+        @for.stringify_name(literal.name, opts)
       end
     end
   end
