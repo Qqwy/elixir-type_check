@@ -84,6 +84,15 @@ defmodule TypeCheck.Internals.PreExpander do
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))
                end
+             other ->
+               raise """
+               TypeCheck does not support the list literal `#{Macro.to_string(other)}`
+               Currently supported are:
+               - [] -> empty list
+               - [type] -> list(type)
+               - [...] -> nonempty_list()
+               - [type, ...] -> nonempty_list(type)
+               """
            end
         # rewritten_values =
         #   list
