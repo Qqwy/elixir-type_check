@@ -199,6 +199,7 @@ Details:
 
 ### Changelog
 - master -
+- 0.8.0 -
   - Fixes prettyprinting of `TypeCheck.Builtin.Range`.
   - Addition of `require TypeCheck.Type` to `use TypeCheck` so there no longer is a need to call this manually if you want to e.g. use `TypeCheck.Type.build/1`.
   - Pretty-printing of types and TypeError output in multiple colors.
