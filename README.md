@@ -207,6 +207,7 @@ Details:
   - `[type]` no longer creates a `fixed_list(type)` but instead a `list(type)` (just as Elixir's own typespecs.)
   - Support for `[...]` and `[type, ...]`as alias for `nonempty_list()` and `nonempty_list(type)` respectively.
   - Remove support for list literals with multiple elements.
+  - Improved documentation. Thank you, @0ourobor0s!
 - 0.7.0 - Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
   - Adding `DateTime.t` to the default overrides, as it was still missing.
 - 0.6.0 - Addition of `spectest` & 'default overrides' Elixir's standard library types:
