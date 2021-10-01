@@ -4,7 +4,7 @@
 
 [TypeCheck](https://hex.pm/packages/type_check) is an elixir library to, you guessed it, check the types of the values, variables and functions in your Elixir projects.
 
-Elixir is a strong, dynamically typed programming language. 
+Elixir is a strong, dynamically typed programming language.
 'Strong' (as opposed to 'weak') means that when we try to perform an unsupported operation on a value (like 'multiplying strings'), we get an error, rather than silent faulty behaviour.
 'Dynamic' (as opposed to 'Static') means that which operations we do with our values is not checked at compile-time, but only once the program itself is running.
 
@@ -21,7 +21,7 @@ TypeCheck gives you the handholds to tackle this situation.
 ## What about Elixir's built-in typespecs and Dialyzer?
 
 Elixir (and Erlang) come with a nice description for the types of the values passed between functions, called ['Typespecs'](https://hexdocs.pm/elixir/master/typespecs.html).
-However, by default these typespecs are just used for documentation. 
+However, by default these typespecs are just used for documentation.
 They are not used in any way to restrict, or even warn when your code is not following them correctly.
 
 Somewhat more recently, tools like [Dialyzer / Dialyzir](https://github.com/jeremyjh/dialyxir) have been introduced in the ecosystem.
@@ -46,7 +46,7 @@ For each type-specification ('type') and function-specification ('spec') which i
 3. Run-time type checks for all parameters to a function (if there is a failure, the function is used improperly) and of the returned value (if this fails, the function has a mistake).
 4. Data generators for all types (and specs), for usage in testing, especially property-tests and spectests (explained below).
 
-Let's take a look at how TypeCheck can be used in practice. 
+Let's take a look at how TypeCheck can be used in practice.
 This will help to see how the run-time type checks work, as well as how you can use TypeCheck's spectests to supercharge your testing.
 
 
@@ -58,7 +58,7 @@ Let's say we are writing a module to work with five-star ratings.
 defmodule Rating do
   @type t() :: %Rating{value: 1..5, author: String.t()}
   defstruct [:value, :author]
-  
+
   @spec average(list(t())) :: number()
   def average(ratings) do
     values = Enum.map(ratings, &(&1.value))
@@ -113,16 +113,16 @@ iex> Rating.average([1, 2, 3])
 
 And finally, there is nothing preventing the creation of malformed rating-objects.
 While we have specified in our type that the rating's value should only ever be in the range 1..5,
-this is not constrained anywhere in the code. 
+this is not constrained anywhere in the code.
 
-And if someone passes a `nil` rating, we'd get a `** (ArithmeticError) bad argument in arithmetic expression: nil + 0` error. 
+And if someone passes a `nil` rating, we'd get a `** (ArithmeticError) bad argument in arithmetic expression: nil + 0` error.
 Also not very clear.
 
 While we could sprinkle checks for this everywhere, this would in the best case result in extremely 'defensive' and badly readable code.
-And in the worst case, we might forget to add a the check at certain places, still not giving us certainty.
+And in the worst case, we might forget to add a check at certain places, still not giving us certainty.
 
 
-Let's see how TypeCheck can improve this situation. 
+Let's see how TypeCheck can improve this situation.
 
 
 ## Adding TypeCheck
@@ -141,7 +141,7 @@ defmodule Rating do
 
   @type! t() :: %Rating{value: 1..5, author: String.t()}
   defstruct [:value, :author]
-  
+
   @spec! average(list(t())) :: number()
   def average(ratings) do
     values = Enum.map(ratings, &(&1.value))
@@ -255,8 +255,8 @@ In this case, you can clearly see that the problem is caused by the return value
 
 TypeCheck adds its runtime checks by wrapping your functions (using [`defoverridable`](https://hexdocs.pm/elixir/1.9.1/Kernel.html?#defoverridable/1)).
 This means that the Elixir and Erlang compilers are able to optimize the checks to their liking.
-Therefore, code addd by TypeCheck is at the very least not slower than any hand-written parameter-checking code.
-In many cases, the compiler is even smart enough to combine the type-check with a `case`, `if` or `cond`-expression that your function implementation itself contains, 
+Therefore, code added by TypeCheck is at the very least not slower than any hand-written parameter-checking code.
+In many cases, the compiler is even smart enough to combine the type-check with a `case`, `if` or `cond`-expression that your function implementation itself contains,
 so even in those cases no duplicate checks are done.
 
 That said, there are certain cases in which the type-checks might still be too slow, since by default TypeCheck performs a deep check for
@@ -281,7 +281,7 @@ This is where 'function-specification tests', or _spectests_ for short, come in.
 ### What is a spectest?
 
 A spectest is a property-based test in which
-we check whether the function adheres to its specifcation's _invariants_
+we check whether the function adheres to its specification's _invariants_
 (also known as the function's _contract_ or its _preconditions and postconditions_).
 
 This is done by generating a large amount of possible function inputs,
@@ -328,11 +328,11 @@ $ mix test
   1) spectest average(list(%Rating{author: binary(), value: 1..5})) :: number() (RatingTest)
      test/rating_test.exs:5
      Spectest failed (after 0 successful runs)
-     
+
      Input: Rating.average([])
-     
+
      ** (ArithmeticError) bad argument in arithmetic expression
-     
+
      code: #TypeCheck.Spec<  average(list(%Rating{author: binary(), value: 1..5})) :: number() >
      stacktrace:
        (type_check_guide 0.1.0) lib/rating.ex:10: Rating."average (overridable 1)"/1
@@ -355,10 +355,10 @@ However, I'm sure that _some_ of you will have been surprised by this problem ðŸ
 Of course this is only an educational example of the kind of issues one might encounter in a _real_ codebase.
 
 We might resolve this issue in two ways:
-- Decide that an empty list should never be passed, and therefore testrict the parameter types further. 
+- Decide that an empty list should never be passed, and therefore restrict the parameter types further.
   For instance, we could change it from a `list(Rating.t())` to a `nonempty_list(Rating.t())`.
   This means that when someone tries passing it an empty list, they will immediately be notified that this is not supported,
-  using the clear error messages as seen in the earlier examples. 
+  using the clear error messages as seen in the earlier examples.
   Changing the spec this way will also make the spectest pass, as empty lists will no longer be generated.
 - Decide that empty lists are a correct input, but that the output will be changed from `number()` to `{:ok, number()} | {:error, :empty}`,
   asking code which uses `average` to handle the possibility of an error-result being returned.
@@ -386,7 +386,7 @@ but there is more to discover, such as:
 
 In this guide, you have seen how TypeCheck can be used and what value it can add to your projects.
 We have seen how TypeCheck can be used in a general project to add runtime checks to your functions,
-as well as how to use the `spectest` macro to get automatic property-tests that check whether your functions 
+as well as how to use the `spectest` macro to get automatic property-tests that check whether your functions
 follow their specs.
 
 TypeCheck currently is at version 0.7.0 and in active development.
