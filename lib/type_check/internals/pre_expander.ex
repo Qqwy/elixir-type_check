@@ -33,6 +33,19 @@ defmodule TypeCheck.Internals.PreExpander do
           {:tuple, meta, [rewrite(value, env, options)]}
         end
 
+      {list_taking_fun, meta, [arg]} when is_list(arg) and list_taking_fun in [:fixed_list, :fixed_tuple, :one_of] ->
+        if {list_taking_fun, 1} in builtin_imports do
+            rewritten_arg = arg
+            |> Enum.map(&rewrite(&1, env, options))
+
+          quote generated: true, location: :keep do
+            TypeCheck.Builtin.unquote(list_taking_fun)(unquote(rewritten_arg))
+          end
+
+        else
+          {list_taking_fun, meta, [rewrite(arg, env, options)]}
+        end
+
       ast = {:impl, meta, [module]} ->
          # Do not expand arguments to `impl/1` further
          if {:impl, 1} in builtin_imports do
@@ -62,12 +75,12 @@ defmodule TypeCheck.Internals.PreExpander do
                end
 
              [element_type] ->
-               rewritten_element_type = rewrite(singleton_list, env, options)
+               rewritten_element_type = rewrite(element_type, env, options)
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.list(unquote(rewritten_element_type))
                end
              [element_type, {:..., _, Elixir}] ->
-               rewritten_element_type = rewrite(singleton_list, env, options)
+               rewritten_element_type = rewrite(element_type, env, options)
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))
                end

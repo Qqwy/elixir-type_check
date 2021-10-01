@@ -29,7 +29,7 @@ defmodule TypeCheck.BuiltinTest do
         float()
       end => TypeCheck.Builtin.Float,
       quote do
-        [1, 2]
+        fixed_list([1, 2])
       end => TypeCheck.Builtin.FixedList,
       quote do
         %{a: 1, b: integer()}
@@ -53,7 +53,7 @@ defmodule TypeCheck.BuiltinTest do
         map(atom(), any())
       end => TypeCheck.Builtin.Map,
       quote do
-        list()
+        [integer()]
       end => TypeCheck.Builtin.List,
       quote do
         literal(42)
