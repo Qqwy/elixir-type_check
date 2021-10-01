@@ -40,7 +40,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocolTest do
         def foo(_impl)
       end
 
-      assert_raise(RuntimeError, "values of the type #TypeCheck.Type< impl(TypeCheck.Builtin.ImplementsProtocolTest.ThisProtocolIsNotConsolidated) > can only be generated when the protocol is consolidated.", fn ->
+      assert_raise(TypeCheck.CompileError, "values of the type #TypeCheck.Type< impl(TypeCheck.Builtin.ImplementsProtocolTest.ThisProtocolIsNotConsolidated) > can only be generated when the protocol is consolidated.", fn ->
         TypeCheck.Protocols.ToStreamData.to_gen(impl(ThisProtocolIsNotConsolidated))
       end)
     end

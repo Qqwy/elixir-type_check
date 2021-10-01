@@ -17,6 +17,6 @@ defmodule TypeCheck.TypeTest do
   end
 
   test "ensure_type! raises on non-types with a descriptive message" do
-    assert_raise(RuntimeError, ~r{^Invalid value passed to a function expecting a type!}, fn -> TypeCheck.Type.ensure_type!(42) end)
+    assert_raise(TypeCheck.CompileError, ~r{^Invalid value passed to a function expecting a type!}, fn -> TypeCheck.Type.ensure_type!(42) end)
   end
 end
