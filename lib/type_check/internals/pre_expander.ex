@@ -85,7 +85,7 @@ defmodule TypeCheck.Internals.PreExpander do
                  TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))
                end
              other ->
-               raise """
+               raise TypeCheck.CompileError, """
                TypeCheck does not support the list literal `#{Macro.to_string(other)}`
                Currently supported are:
                - [] -> empty list
@@ -119,7 +119,7 @@ defmodule TypeCheck.Internals.PreExpander do
         end
 
       ast = {:when, _, [_type, list]} when is_list(list) ->
-        raise ArgumentError, """
+        raise TypeCheck.CompileError, """
         Unsupported `when` with keyword arguments in the type description `#{Macro.to_string(ast)}`
 
         TypeCheck currently does not allow the `function(foo, bar) :: foo | bar when foo: some_type(), bar: other_type()` syntax.

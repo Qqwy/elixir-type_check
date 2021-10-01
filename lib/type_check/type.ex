@@ -105,7 +105,7 @@ defmodule TypeCheck.Type do
   def ensure_type!(possibly_a_type) do
     case TypeCheck.Protocols.ToCheck.impl_for(possibly_a_type) do
       nil ->
-        raise """
+        raise TypeCheck.CompileError, """
         Invalid value passed to a function expecting a type!
         `#{inspect(possibly_a_type)}` is not a valid TypeCheck type.
         You probably tried to use a TypeCheck type as a function directly.

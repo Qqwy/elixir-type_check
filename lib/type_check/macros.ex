@@ -243,7 +243,7 @@ defmodule TypeCheck.Macros do
   defp wrap_functions_with_specs(specs, definitions, caller) do
     for {name, location, arity, clean_params, params_ast, return_type_ast} <- specs do
       unless {name, arity} in definitions do
-        raise ArgumentError, "spec for undefined function #{name}/#{arity}"
+        raise TypeCheck.CompileError, "spec for undefined function #{name}/#{arity}"
       end
 
       require TypeCheck.Type

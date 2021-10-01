@@ -39,7 +39,7 @@ defmodule TypeCheck.Builtin.Guarded do
           |> Enum.into(%MapSet{})
 
         if MapSet.size(names) > 1 do
-          raise """
+          raise TypeCheck.CompileError, """
           Attempted to construct a union type
           containing named types where one or multiple names
           do not exist in all of the possibilities:
