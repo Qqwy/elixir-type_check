@@ -35,7 +35,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
       def to_gen(s) do
         case s.protocol.__protocol__(:impls) do
           :not_consolidated ->
-            raise "values of the type #{inspect(s)} can only be generated when the protocol is consolidated."
+            raise TypeCheck.CompileError, "values of the type #{inspect(s)} can only be generated when the protocol is consolidated."
           {:consolidated, implementations} ->
             # Extract all implementations that have their own ToStreamData implementation.
             # raise "TODO #{inspect(implementations)}"

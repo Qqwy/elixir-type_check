@@ -98,8 +98,10 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format({s = %TypeCheck.Builtin.Guarded{}, :guard_failed, %{bindings: bindings}, val}) do
+    guard_str = Inspect.Algebra.format(Inspect.Algebra.color(Macro.to_string(s.guard), :builtin_type, struct(Inspect.Opts, inspect_type_opts())), 80)
+
     problem = """
-    `#{Macro.to_string(s.guard)}` evaluated to false or nil.
+    `#{guard_str}` evaluated to false or nil.
     bound values: #{inspect(bindings, inspect_type_opts())}
     """
 

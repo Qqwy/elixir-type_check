@@ -143,7 +143,7 @@ defmodule TypeCheck.Options do
     {module_k, function_k, arity_k} = ensure_external_function!(original)
     {module_v, function_v, arity_v} = ensure_external_function!(override)
     if arity_k != arity_v do
-      raise "Error while parsing TypeCheck overides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
+      raise TypeCheck.CompileError, "Error while parsing TypeCheck overides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
     else
       {
         {module_k, function_k, arity_k},
@@ -152,7 +152,7 @@ defmodule TypeCheck.Options do
     end
   end
   defp check_override!(other) do
-    raise ArgumentError, "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `#{inspect(other)}`."
+    raise TypeCheck.CompileError, "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `#{inspect(other)}`."
   end
 
   defp ensure_external_function!(fun) when is_function(fun) do
@@ -161,13 +161,13 @@ defmodule TypeCheck.Options do
         info = Function.info(fun)
         {info[:module], info[:name], info[:arity]}
       _other ->
-        raise "Error while parsing TypeCheck overides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
+        raise TypeCheck.CompileError, "Error while parsing TypeCheck overides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
     end
   end
   defp ensure_external_function!({module, function, arity}) when is_atom(module) and is_atom(function) and arity >= 0 do
     {module, function, arity}
   end
   defp ensure_external_function!(fun) do
-    raise "Error while parsing TypeCheck overides: #{inspect(fun)} is not a function!"
+    raise TypeCheck.CompileError, "Error while parsing TypeCheck overides: #{inspect(fun)} is not a function!"
   end
 end

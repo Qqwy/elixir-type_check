@@ -756,7 +756,7 @@ defmodule TypeCheck.Builtin do
 
       tuple = %{__struct__: TypeCheck.Builtin.FixedTuple, element_types: element_types}
       when length(element_types) != 2 ->
-        raise "Improper type passed to `fixed_map/1` #{inspect(tuple)}"
+        raise TypeCheck.CompileError, "Improper type passed to `fixed_map/1` #{inspect(tuple)}"
 
       thing ->
         TypeCheck.Type.ensure_type!(thing)

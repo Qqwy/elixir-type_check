@@ -63,7 +63,7 @@ defmodule TypeCheck.Builtin.OneOf do
 
         case choice_gens do
           [] ->
-            raise "Cannot create a generator for `#{inspect(s)}` since it has no inhabiting values."
+            raise TypeCheck.CompileError, "Cannot create a generator for `#{inspect(s)}` since it has no inhabiting values."
 
           _ ->
             StreamData.one_of(choice_gens)

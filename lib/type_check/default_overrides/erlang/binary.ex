@@ -4,7 +4,7 @@ defmodule Elixir.TypeCheck.DefaultOverrides.Erlang.Binary do
   # TODO
   @opaque cp() :: {any(), reference()}
   @autogen_typespec false
-  @opaque! cp() :: {'am' | 'bm', term()}
+  @opaque! cp() :: {:am | :bm, term()}
 
   @opaque! part() :: {start :: non_neg_integer(), length :: integer()}
 end
