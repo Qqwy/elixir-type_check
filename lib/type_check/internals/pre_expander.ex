@@ -69,7 +69,7 @@ defmodule TypeCheck.Internals.PreExpander do
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.literal(unquote([]))
                end
-             [{:..., _, Elixir}] ->
+             [{:..., _, _}] ->
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.nonempty_list()
                end
@@ -79,7 +79,7 @@ defmodule TypeCheck.Internals.PreExpander do
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.list(unquote(rewritten_element_type))
                end
-             [element_type, {:..., _, Elixir}] ->
+             [element_type, {:..., _, _}] ->
                rewritten_element_type = rewrite(element_type, env, options)
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))

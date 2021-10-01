@@ -98,13 +98,12 @@ defmodule TypeCheck.Builtin.Guarded do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      "("
+      ("(" |> Inspect.Algebra.color(:builtin_type, opts))
       |> Inspect.Algebra.concat(TypeCheck.Protocols.Inspect.inspect(s.type, opts))
-      |> Inspect.Algebra.glue("when")
-      |> Inspect.Algebra.glue(Macro.to_string(s.guard))
-      |> Inspect.Algebra.concat(")")
+      |> Inspect.Algebra.glue("when" |> Inspect.Algebra.color(:builtin_type, opts))
+      |> Inspect.Algebra.glue(Macro.to_string(s.guard) |> Inspect.Algebra.color(:builtin_type, opts))
+      |> Inspect.Algebra.concat(")"|> Inspect.Algebra.color(:builtin_type, opts))
       |> Inspect.Algebra.group()
-      |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
 
