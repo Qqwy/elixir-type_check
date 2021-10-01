@@ -204,6 +204,9 @@ Details:
   - Pretty-printing of types and TypeError output in multiple colors.
   - Nicer indentation of errors.
   - named types are now printed in abbreviated fashion if they are repeated multiple times in an error message. This makes a nested error message much easier to read, especially for larger specs.
+  - `[type]` no longer creates a `fixed_list(type)` but instead a `list(type)` (just as Elixir's own typespecs.)
+  - Support for `[...]` and `[type, ...]`as alias for `nonempty_list()` and `nonempty_list(type)` respectively.
+  - Remove support for list literals with multiple elements.
 - 0.7.0 - Addition of the option `enable_runtime_checks`. When false, all runtime checks in the given module are completely disabled.
   - Adding `DateTime.t` to the default overrides, as it was still missing.
 - 0.6.0 - Addition of `spectest` & 'default overrides' Elixir's standard library types:

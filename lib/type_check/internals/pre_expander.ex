@@ -50,15 +50,35 @@ defmodule TypeCheck.Internals.PreExpander do
         quote generated: true, location: :keep do
           TypeCheck.Builtin.literal(unquote(x))
         end
-
       list when is_list(list) ->
-        rewritten_values =
-          list
-          |> Enum.map(&rewrite(&1, env, options))
+           case list do
+             [] ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.literal(unquote([]))
+               end
+             [{:..., _, Elixir}] ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.nonempty_list()
+               end
 
-        quote generated: true, location: :keep do
-          TypeCheck.Builtin.fixed_list(unquote(rewritten_values))
-        end
+             [element_type] ->
+               rewritten_element_type = rewrite(singleton_list, env, options)
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.list(unquote(rewritten_element_type))
+               end
+             [element_type, {:..., _, Elixir}] ->
+               rewritten_element_type = rewrite(singleton_list, env, options)
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))
+               end
+           end
+        # rewritten_values =
+        #   list
+        #   |> Enum.map(&rewrite(&1, env, options))
+
+        # quote generated: true, location: :keep do
+        #   TypeCheck.Builtin.fixed_list(unquote(rewritten_values))
+        # end
 
       {:|, _, [lhs, rhs]} ->
         quote generated: true, location: :keep do
