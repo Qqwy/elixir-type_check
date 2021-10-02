@@ -180,7 +180,9 @@ TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
 # TypeCheck
 @type! dict(key, value) :: [{key, value}]
 ```
+
 🚀 **Type Guards**
+
 To add extra custom checks to a type, you can use a so-called 'type guard'. This is arbitrary code that is executed during a type-check once the type itself already matches.
 
 You can use "named types" to refer to (parts of) the value that matched the type, and refer to these from a type-guard:
@@ -189,7 +191,7 @@ You can use "named types" to refer to (parts of) the value that matched the type
 type sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
 ```
 
-## Remote Types
+## 🟨 Remote Types
 
 From time to time we need to interface with modules written in other libraries (or the Elixir standard library) which do not expose their types through TypeCheck yet.
 We want to be able to use those types in our checks, but they exist in modules that we cannot change ourselves.
@@ -218,7 +220,7 @@ defmodule Example do
 end
 ```
 
-### 🟨 Elixir Standard Library Types
+### Elixir Standard Library Types
 
 TypeCheck helpfully ships with the majority of the types in Elixir's Standard Library already implemented as default overrides. This means that your `@spec!` definitions can reference types like `Date.t()` and `Range.t()` out of the box.
 
