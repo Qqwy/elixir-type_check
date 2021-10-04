@@ -61,7 +61,7 @@ In the tables below:
 | %SomeStruct{}                       | ✅         | struct with all fields of any type                 |
 | %SomeStruct{key: value_type}        | ✅         | struct with required key :key of value_type        |
 | {}                                  | ✅         | empty tuple                                        |
-| {:ok, type}                         | ✅         | two-element tuple with an atom and any type        |
+| \{:ok, type\}                       | ✅         | two-element tuple with an atom and any type        |
 
 ¹: Supporting function-arguments is tricky. However, it definitely is a desired feature.
 Help or ideas to make this work are greatly appreciated. [This feature is discussed here](https://github.com/Qqwy/elixir-type_check/issues/6).
@@ -103,13 +103,14 @@ Help or ideas to make this work are greatly appreciated. [This feature is discus
 
 TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
 
-| Type                      | Notes                                                                  |
-|---------------------------+------------------------------------------------------------------------|
-| impl(protocol_name)       | Checks whether the given value implements the particular protocol      |
-| fixed_list(element_types) | Fixed size where element_types dictate types                           |
-| tuple(size)               | Any types, but which has exactly size elements                         |
-| map(key_type, value_type) | Zero or more keys of key_type and values of value_type                 |
-| type when guard           | A 'type guard', allowing an extra check implemented in arbitrary code. |
+
+| Type                      | Notes                                                                    |
+|---------------------------|--------------------------------------------------------------------------|
+| impl(protocol_name)       | Checks whether the given value implements the particular protocol        |
+| fixed_list(element_types) | Fixed size where element_types dictate types                             |
+| tuple(size)               | Any types, but which has exactly size elements                           |
+| map(key_type, value_type) | Zero or more keys of key_type and values of value_type                   |
+| type when guard           | A 'type guard', an extra check implemented in arbitrary code (see below) |
 
 ## Defining Specifications
 
@@ -141,7 +142,7 @@ TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
 # TypeCheck - unsupported
 ```
 
-TypeCheck currently solely allows the usage of `when` to specify `type guards`.
+TypeCheck currently solely allows the usage of `when` to specify 'type guards' (see below).
 Support for spec guards could be added. However:
 - Their usage is quite rare.
 - Each place where it is used, it matches 'exactly the same value'. Building this check is relatively tricky.
