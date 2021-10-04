@@ -184,7 +184,7 @@ Details:
 - [x] Creating generators from specs
   - [x] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 - [x] Option to turn the generation of runtime checks off for a given module in a particular environment (`enable_runtime_checks`).
-- [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)**
+- [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
 
 ### Pre-stable
 
