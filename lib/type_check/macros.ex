@@ -481,8 +481,10 @@ defmodule TypeCheck.Macros do
           append_typedoc(caller, """
 
 
-          This type is managed by `TypeCheck`,
-          which allows checking values against the type at runtime.
+          _(This type is managed by `TypeCheck`,
+          which allows checking values against the type at runtime.)_
+
+
 
           Full definition:
 
@@ -545,8 +547,8 @@ defmodule TypeCheck.Macros do
         end)
 
       """
-      ```
-      #{head} :: #{Macro.to_string(type_ast)}
+      ```elixir
+      #{head} :: #{Code.format_string!(Macro.to_string(type_ast))}
       ```
       """
     end
