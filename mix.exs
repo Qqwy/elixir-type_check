@@ -81,6 +81,7 @@ defmodule TypeCheck.MixProject do
       extras: [
         "README.md": [title: "Guide/Readme"],
         "Type-checking and spec-testing with TypeCheck.md": [title: "Introducing TypeCheck"],
+        "Comparing TypeCheck and Elixir Typespecs.md": [],
         "Comparing TypeCheck and Norm.md": [],
       ],
       # main: "TypeCheck",

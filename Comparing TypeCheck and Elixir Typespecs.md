@@ -2,6 +2,11 @@
 
 TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all typespec syntax is supported in TypeCheck, but the majority of common syntax is and this gap continues to shrink. Below is a breakdown of supported typespec syntax in TypeCheck.
 
+In the tables below:
+- '✅' indicates that something is supported
+- '❌' indicates that something is not supported.
+- '⌛' indicates that something is not currently supported, but there are plans to add support for it in the near future.
+
 
 ## Basic Types
 
@@ -12,8 +17,8 @@ TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all ty
 | atom()                                                       | ✅         |                                    |
 | map()                                                        | ✅         | any map                            |
 | pid()                                                        | ✅         | process identifier                 |
-| port()                                                       | ❌         | port identifier                    |
-| reference()                                                  | ❌         |                                    |
+| port()                                                       | ⌛         | port identifier                    |
+| reference()                                                  | ⌛         |                                    |
 | tuple()                                                      | ✅         | tuple of any size                  |
 | float()                                                      | ✅         |                                    |
 | integer()                                                    | ✅         |                                    |
@@ -22,9 +27,9 @@ TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all ty
 | pos_integer()                                                | ✅         | 1, 2, 3, ...                       |
 | list(type)                                                   | ✅         | proper list                        |
 | nonempty_list(type)                                          | ✅         | non-empty proper list              |
-| maybe_improper_list(content_type, termination_type)          | ❌         | proper or improper list            |
-| nonempty_improper_list(content_type, termination_type)       | ❌         | improper list                      |
-| nonempty_maybe_improper_list(content_type, termination_type) | ❌         | non-empty proper or improper list  |
+| maybe_improper_list(content_type, termination_type)          | ⌛         | proper or improper list            |
+| nonempty_improper_list(content_type, termination_type)       | ⌛         | improper list                      |
+| nonempty_maybe_improper_list(content_type, termination_type) | ⌛         | non-empty proper or improper list  |
 
 ## Literals
 
@@ -34,13 +39,13 @@ TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all ty
 | true                                | ✅         |                                                    |
 | false                               | ✅         |                                                    |
 | nil                                 | ✅         |                                                    |
-| <<>>                                | ❌         | empty bitstring                                    |
-| <<_::size>                          | ❌         | size is 0 or a positive integer                    |
-| <<_::_*unit>>                       | ❌         | unit is an integer from 1 to 256                   |
-| <<_::size, _::_*unit>>              | ❌         |                                                    |
-| (-> type)                           | ❌         | 0-arity, returns type                              |
-| (type1, type2 -> type)              | ❌         | 2-arity, returns type                              |
-| (... -> type)                       | ❌         | any arity, returns type                            |
+| <<>>                                | ⌛         | empty bitstring                                    |
+| <<_::size>                          | ⌛         | size is 0 or a positive integer                    |
+| <<_::_*unit>>                       | ⌛         | unit is an integer from 1 to 256                   |
+| <<_::size, _::_*unit>>              | ⌛         |                                                    |
+| (-> type)                           | ❌¹        | 0-arity, returns type                              |
+| (type1, type2 -> type)              | ❌¹        | 2-arity, returns type                              |
+| (... -> type)                       | ❌¹        | any arity, returns type                            |
 | 1                                   | ✅         | integer                                            |
 | 1..10                               | ✅         | range                                              |
 | [type]                              | ✅         | list with any number of type elements              |
@@ -50,13 +55,16 @@ TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all ty
 | [key: value_type]                   | ✅         | keyword list with key :key of value_type           |
 | %{}                                 | ✅         | empty map                                          |
 | %{key: value_type}                  | ✅         | map with required key :key of value_type           |
-| %{key_type => value_type}           | ❌         | map with required pairs of key_type and value_type |
-| %{required(key_type) => value_type} | ❌         | map with required pairs of key_type and value_type |
-| %{optional(key_type) => value_type} | ❌         | map with optional pairs of key_type and value_type |
+| %{key_type => value_type}           | ⌛         | map with required pairs of key_type and value_type |
+| %{required(key_type) => value_type} | ⌛         | map with required pairs of key_type and value_type |
+| %{optional(key_type) => value_type} | ⌛         | map with optional pairs of key_type and value_type |
 | %SomeStruct{}                       | ✅         | struct with all fields of any type                 |
 | %SomeStruct{key: value_type}        | ✅         | struct with required key :key of value_type        |
 | {}                                  | ✅         | empty tuple                                        |
 | {:ok, type}                         | ✅         | two-element tuple with an atom and any type        |
+
+¹: Supporting function-arguments is tricky. However, it definitely is a desired feature.
+Help or ideas to make this work are greatly appreciated. [This feature is discussed here](https://github.com/Qqwy/elixir-type_check/issues/6).
 
 ## Built-in types
 
@@ -71,37 +79,37 @@ TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all ty
 | byte()                         | ✅         | 0..255                                                              |
 | char()                         | ✅         | 0..0x10FFFF                                                         |
 | charlist()                     | ✅         | [char()]                                                            |
-| nonempty_charlist()            | ❌         | [char(), ...]                                                       |
+| nonempty_charlist()            | ⌛         | [char(), ...]                                                       |
 | fun()                          | ✅         | (... -> any)                                                        |
 | function()                     | ✅         | fun()                                                               |
-| identifier()                   | ❌         | pid() \| port() \| reference()                                      |
-| iodata()                       | ❌         | iolist() \| binary()                                                |
-| iolist()                       | ❌         | maybe_improper_list(byte() \| binary() \| iolist(), binary() \| []) |
+| identifier()                   | ⌛         | pid() \| port() \| reference()                                      |
+| iodata()                       | ⌛         | iolist() \| binary()                                                |
+| iolist()                       | ⌛         | maybe_improper_list(byte() \| binary() \| iolist(), binary() \| []) |
 | keyword()                      | ✅         | [{atom(), any()}]                                                   |
 | keyword(t)                     | ✅         | [{atom(), t}]                                                       |
 | list()                         | ✅         | [any()]                                                             |
 | nonempty_list()                | ✅         | nonempty_list(any())                                                |
-| maybe_improper_list()          | ❌         | maybe_improper_list(any(), any())                                   |
-| nonempty_maybe_improper_list() | ❌         | nonempty_maybe_improper_list(any(), any())                          |
+| maybe_improper_list()          | ⌛         | maybe_improper_list(any(), any())                                   |
+| nonempty_maybe_improper_list() | ⌛         | nonempty_maybe_improper_list(any(), any())                          |
 | mfa()                          | ✅         | {module(), atom(), arity()}                                         |
 | module()                       | ✅         | atom()                                                              |
 | no_return()                    | ✅         | none()                                                              |
-| node()                         | ❌         | atom()                                                              |
+| node()                         | ⌛         | atom()                                                              |
 | number()                       | ✅         | integer() \| float()                                                |
-| struct()                       | ❌         | %{:__struct__ => atom(), optional(atom()) => any()}                 |
-| timeout()                      | ❌         | :infinity \| non_neg_integer()                                      |
+| struct()                       | ⌛         | %{:__struct__ => atom(), optional(atom()) => any()}                 |
+| timeout()                      | ⌛         | :infinity \| non_neg_integer()                                      |
 
 ## 🚀 TypeCheck Additions
 
 TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
 
-| Type                      | Notes                                                             |
-|---------------------------|-------------------------------------------------------------------|
-| impl(protocol_name)       | Checks whether the given value implements the particular protocol |
-| fixed_list(element_types) | fixed size where element_types dictate types                      |
-| tuple(size)               | any types, but which has exactly size elements                    |
-| map(key_type, value_type) | zero or more keys of key_type and values of value_type            |
-
+| Type                      | Notes                                                                  |
+|---------------------------+------------------------------------------------------------------------|
+| impl(protocol_name)       | Checks whether the given value implements the particular protocol      |
+| fixed_list(element_types) | Fixed size where element_types dictate types                           |
+| tuple(size)               | Any types, but which has exactly size elements                         |
+| map(key_type, value_type) | Zero or more keys of key_type and values of value_type                 |
+| type when guard           | A 'type guard', allowing an extra check implemented in arbitrary code. |
 
 ## Defining Specifications
 
@@ -133,6 +141,13 @@ TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
 # TypeCheck - unsupported
 ```
 
+TypeCheck currently solely allows the usage of `when` to specify `type guards`.
+Support for spec guards could be added. However:
+- Their usage is quite rare.
+- Each place where it is used, it matches 'exactly the same value'. Building this check is relatively tricky.
+
+If you have a strong desire for this feature, please open an issue for it.
+
 ✅ **Named Arguments**
 
 ```elixir
@@ -154,6 +169,10 @@ TypeCheck adds the following extensions on Elixir's builtin typespec syntax:
 
 # TypeCheck - unsupported
 ```
+
+There is no intention to support this.
+The implementation would be very difficult, and it is arguably good practice to have a single specification anyway.
+
 
 ### User Defined Types
 
@@ -188,10 +207,49 @@ To add extra custom checks to a type, you can use a so-called 'type guard'. This
 You can use "named types" to refer to (parts of) the value that matched the type, and refer to these from a type-guard:
 
 ```elixir
-type sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
+# typespecs - unsupported
+
+# TypeCheck
+@type! sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
 ```
 
 ## 🟨 Remote Types
+
+It is often useful to refer to types defined in other modules. These are called 'Remote types'.
+Elixir's typespecs and TypeCheck both support remote types.
+
+```elixir
+# typespecs
+defmodule User do
+  @type t() :: %User{name: String.t(), age: non_negative_integer()}
+end
+
+defmodule Greeter do
+  @spec greet(User.t()) :: String.t()
+  def greet(user) do
+   # ... 
+  end
+end
+
+# TypeCheck
+defmodule User do
+  use TypeCheck
+
+  @type! t() :: %User{name: String.t(), age: non_negative_integer()}
+end
+
+defmodule Greeter do
+  use TypeCheck
+
+  @spec! greet(User.t()) :: String.t()
+  def greet(user) do
+   # ... 
+  end
+end
+```
+
+
+### Remote Type Overrides
 
 From time to time we need to interface with modules written in other libraries (or the Elixir standard library) which do not expose their types through TypeCheck yet.
 We want to be able to use those types in our checks, but they exist in modules that we cannot change ourselves.
@@ -222,25 +280,25 @@ end
 
 ### Elixir Standard Library Types
 
-TypeCheck helpfully ships with the majority of the types in Elixir's Standard Library already implemented as default overrides. This means that your `@spec!` definitions can reference types like `Date.t()` and `Range.t()` out of the box.
+TypeCheck helpfully ships with the majority of the types in Elixir's Standard Library already implemented as default overrides. This means that your `@spec!` definitions can reference types like `String.t()`, `Date.t()` and `Range.t()` out of the box.
 
 
 | Type                      | Supported? | Notes      |
 |---------------------------|------------|------------|
 | Access                    | ✅         |            |
-| Agent                     | ❌         |            |
-| Application               | ❌         |            |
+| Agent                     | ⌛         |            |
+| Application               | ⌛         |            |
 | Calendar                  | ✅         |            |
 | Calendar.ISO              | ✅         |            |
-| Calendar.TimeZoneDatabase | ❌         |            |
-| Code                      | ❌         |            |
+| Calendar.TimeZoneDatabase | ⌛         |            |
+| Code                      | ⌛         |            |
 | Collectable               | ✅         |            |
-| Config.Provider           | ❌         |            |
+| Config.Provider           | ⌛         |            |
 | Date                      | ✅         |            |
 | Date.Range                | ✅         |            |
 | DateTime                  | ✅         |            |
 | Dict                      | ❌         | deprecated |
-| DynamicSupervisor         | ❌         |            |
+| DynamicSupervisor         | ⌛         |            |
 | Enum                      | ✅         |            |
 | Enumerable                | ✅         |            |
 | Exception                 | ✅         |            |
@@ -250,39 +308,39 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Float                     | ✅         |            |
 | Function                  | ✅         |            |
 | GenEvent                  | ❌         | deprecated |
-| GenServer                 | ❌         |            |
+| GenServer                 | ⌛         |            |
 | HashDict                  | ❌         | deprecated |
 | HashSet                   | ❌         | deprecated |
 | IO                        | ✅         |            |
-| IO.ANSI                   | ❌         |            |
-| IO.Stream                 | ❌         |            |
+| IO.ANSI                   | ⌛         |            |
+| IO.Stream                 | ⌛         |            |
 | Inspect                   | ✅         |            |
-| Inspect.Algebra           | ❌         |            |
-| Inspect.Opts              | ❌         |            |
+| Inspect.Algebra           | ⌛         |            |
+| Inspect.Opts              | ⌛         |            |
 | Keyword                   | ✅         |            |
-| List.Chars                | ❌         |            |
-| Macro                     | ❌         |            |
-| Macro.Env                 | ❌         |            |
+| List.Chars                | ⌛         |            |
+| Macro                     | ⌛         |            |
+| Macro.Env                 | ⌛         |            |
 | Map                       | ✅         |            |
 | MapSet                    | ✅         |            |
 | NaiveDateTime             | ✅         |            |
-| Node                      | ❌         |            |
-| OptionParser              | ❌         |            |
-| Path                      | ❌         |            |
-| Port                      | ❌         |            |
-| Process                   | ❌         |            |
+| Node                      | ⌛         |            |
+| OptionParser              | ⌛         |            |
+| Path                      | ⌛         |            |
+| Port                      | ⌛         |            |
+| Process                   | ⌛         |            |
 | Range                     | ✅         |            |
 | Regex                     | ✅         |            |
-| Registry                  | ❌         |            |
+| Registry                  | ⌛         |            |
 | Set                       | ❌         | deprecated |
 | Stream                    | ✅         |            |
 | String                    | ✅         |            |
-| String.Chars              | ❌         |            |
-| Supervisor                | ❌         |            |
+| String.Chars              | ⌛         |            |
+| Supervisor                | ⌛         |            |
 | Supervisor.Spec           | ❌         | deprecated |
-| System                    | ❌         |            |
-| Task                      | ❌         |            |
-| Task.Supervisor           | ❌         |            |
+| System                    | ⌛         |            |
+| Task                      | ⌛         |            |
+| Task.Supervisor           | ⌛         |            |
 | Time                      | ✅         |            |
 | URI                       | ✅         |            |
 | Version                   | ✅         |            |
