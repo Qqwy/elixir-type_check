@@ -93,4 +93,14 @@ defmodule TypeCheckTest do
       refute TypeCheck.conforms?(69, TypeCheckTest.TypeWithGuardExample.magic_num)
     end
   end
+
+  describe "StreamData is optional" do
+    {stdout, 0} = System.cmd("mix", ["deps.compile", "--force"],
+      cd: "./test/support/depending_project",
+      stderr_to_stdout: true
+    )
+
+    refute stdout =~ "warning: StreamData"
+    refute stdout =~ "warning: "
+  end
 end
