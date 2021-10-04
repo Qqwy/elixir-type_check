@@ -199,6 +199,8 @@ Details:
 
 ### Changelog
 - master -
+- 0.8.1 - 
+  - Improved documentation with a page comparing TypeCheck with Elixir's plain typespecs. (Thank you very much, @baldwindavid )
 - 0.8.0 -
   - Fixes prettyprinting of `TypeCheck.Builtin.Range`.
   - Addition of `require TypeCheck.Type` to `use TypeCheck` so there no longer is a need to call this manually if you want to e.g. use `TypeCheck.Type.build/1`.
