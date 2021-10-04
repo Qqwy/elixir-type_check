@@ -94,7 +94,7 @@ defmodule TypeCheckTest do
     end
   end
 
-  describe "StreamData is optional" do
+  test "StreamData is optional" do
     {stdout, 0} = System.cmd("mix", ["deps.compile", "--force"],
       cd: "./test/support/depending_project",
       stderr_to_stdout: true
