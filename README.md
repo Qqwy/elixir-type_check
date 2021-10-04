@@ -201,6 +201,7 @@ Details:
 - master -
 - 0.8.2 - 
   - Fixed compiler warnings when optional dependency StreamData is not installed.
+  - Fixed pretty-printing of typedoc of opaque types.
 - 0.8.1 - 
   - Improved documentation with a page comparing TypeCheck with Elixir's plain typespecs. (Thank you very much, @baldwindavid )
   - Addition of missing override for the type `Range.t/0`. (Thank you very much, @baldwindavid )
