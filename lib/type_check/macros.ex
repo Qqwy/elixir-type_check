@@ -533,7 +533,7 @@ defmodule TypeCheck.Macros do
 
     if kind == :opaque do
       """
-      `head` _(opaque type)_
+      `#{head}` _(opaque type)_
       """
     else
       type_ast =
