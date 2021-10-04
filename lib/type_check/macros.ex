@@ -479,6 +479,8 @@ defmodule TypeCheck.Macros do
 
         _ ->
           append_typedoc(caller, """
+
+
           This type is managed by `TypeCheck`,
           which allows checking values against the type at runtime.
 
