@@ -175,6 +175,17 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  A binary which contains at least one byte.
+  """
+  if_recompiling? do
+    @spec! nonempty_binary() :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def nonempty_binary() do
+    sized_bitstring(8, 8)
+  end
+
+  @doc typekind: :builtin
+  @doc """
   Any bitstring
 
   c.f. `TypeCheck.Builtin.Bitstring`
@@ -184,6 +195,17 @@ defmodule TypeCheck.Builtin do
   end
   def bitstring() do
     build_struct(TypeCheck.Builtin.Bitstring)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  A bitstring which contains at least one bit.
+  """
+  if_recompiling? do
+    @spec! nonempty_bitstring() :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def nonempty_bitstring() do
+    sized_bitstring(1, 1)
   end
 
   @doc typekind: :builtin
@@ -807,6 +829,15 @@ defmodule TypeCheck.Builtin do
   defp do_fixed_list(element_types) do
     build_struct(TypeCheck.Builtin.FixedList)
     |> Map.put(:element_types, element_types)
+  end
+
+  if_recompiling? do
+    @spec! sized_bitstring(prefix_size :: non_neg_integer(), unit_size :: nil | 1..256) :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def sized_bitstring(prefix_size, unit_size) do
+    build_struct(TypeCheck.Builtin.SizedBitstring)
+    |> Map.put(:prefix_size, prefix_size)
+    |> Map.put(:unit_size, unit_size)
   end
 
   @doc typekind: :extension
