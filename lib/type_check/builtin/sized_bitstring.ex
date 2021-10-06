@@ -55,8 +55,14 @@ defmodule TypeCheck.Builtin.SizedBitstring do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-        # TODO
-        raise "TODO"
+          if s.unit_size == nil do
+            StreamData.bitstring(length: s.prefix_size)
+          else
+            StreamData.positive_integer()
+            |> StreamData.bind(fn int ->
+              StreamData.bitstring(length: s.prefix_size + int * s.unit_size)
+            end)
+          end
       end
     end
   end

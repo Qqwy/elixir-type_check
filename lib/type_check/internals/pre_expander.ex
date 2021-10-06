@@ -94,7 +94,7 @@ defmodule TypeCheck.Internals.PreExpander do
                - [type, ...] -> nonempty_list(type)
                """
            end
-      {:<<>>, _, args} ->
+      bitstring = {:<<>>, _, args} ->
            case args do
              [] ->
                # Empty bitstring
@@ -117,9 +117,9 @@ defmodule TypeCheck.Internals.PreExpander do
                quote generated: true, location: :keep do
                  TypeCheck.Builtin.sized_bitstring(unquote(size), unquote(unit))
                end
-             other ->
+             _other ->
                raise TypeCheck.CompileError, """
-               TypeCheck does not support the bitstring literal `#{Macro.to_string(other)}`
+               TypeCheck does not support the bitstring literal `#{Macro.to_string(bitstring)}`
                Currently supported are:
                - <<>> -> empty bitstring
                - <<_ :: size >> -> a bitstring of exactly `size` bytes long
