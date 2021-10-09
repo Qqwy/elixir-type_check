@@ -57,4 +57,18 @@ defmodule TypeCheck.Builtin.SizedBitstringTest do
       end
     end
   end
+
+  test "Bitstring syntax is expanded correctly" do
+    defmodule BitstringExample do
+      use TypeCheck
+
+      @type! empty :: <<>>
+      @type! prefix_sized :: <<_ :: 10>>
+      @type! unit_sized :: << _ :: _ * 13 >>
+      @type! both_sized :: << _ :: 11, _ :: _ * 15 >>
+    end
+
+    assert [both_sized: 0, empty: 0, prefix_sized: 0, unit_sized: 0] =
+      BitstringExample.__type_check__(:types) |> Enum.sort()
+  end
 end
