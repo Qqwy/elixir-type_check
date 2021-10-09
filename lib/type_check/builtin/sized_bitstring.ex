@@ -46,7 +46,7 @@ defmodule TypeCheck.Builtin.SizedBitstring do
         s.prefix_size == 0 ->
           "<<_::_*#{unit_size}>>"
         true ->
-          "<<_::#{prefix_size}, _*#{unit_size}>>"
+          "<<_::#{prefix_size}, _::_*#{unit_size}>>"
       end
       |> Inspect.Algebra.color(:binary, opts)
     end

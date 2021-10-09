@@ -70,5 +70,10 @@ defmodule TypeCheck.Builtin.SizedBitstringTest do
 
     assert [both_sized: 0, empty: 0, prefix_sized: 0, unit_sized: 0] =
       BitstringExample.__type_check__(:types) |> Enum.sort()
+
+    assert "#TypeCheck.Type< TypeCheck.Builtin.SizedBitstringTest.BitstringExample.empty :: \"\" >" == inspect(BitstringExample.empty)
+    assert "#TypeCheck.Type< TypeCheck.Builtin.SizedBitstringTest.BitstringExample.prefix_sized :: <<_::10>> >" == inspect(BitstringExample.prefix_sized)
+    assert "#TypeCheck.Type< TypeCheck.Builtin.SizedBitstringTest.BitstringExample.unit_sized :: <<_::_*13>> >" == inspect(BitstringExample.unit_sized)
+    assert "#TypeCheck.Type< TypeCheck.Builtin.SizedBitstringTest.BitstringExample.both_sized :: <<_::11, _::_*15>> >" == inspect(BitstringExample.both_sized)
   end
 end
