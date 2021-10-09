@@ -834,7 +834,7 @@ defmodule TypeCheck.Builtin do
   if_recompiling? do
     @spec! sized_bitstring(prefix_size :: non_neg_integer(), unit_size :: nil | 1..256) :: TypeCheck.Builtin.SizedBitstring.t()
   end
-  def sized_bitstring(prefix_size, unit_size) do
+  def sized_bitstring(prefix_size, unit_size \\ nil) do
     build_struct(TypeCheck.Builtin.SizedBitstring)
     |> Map.put(:prefix_size, prefix_size)
     |> Map.put(:unit_size, unit_size)

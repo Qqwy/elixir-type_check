@@ -76,6 +76,9 @@ defmodule TypeCheck.BuiltinTest do
       quote do
         impl(Enumerable)
       end => TypeCheck.Builtin.ImplementsProtocol,
+      quote do
+        <<_ :: 4 >>
+      end => TypeCheck.Builtin.SizedBitstring,
     }
 
     for {type, module} <- possibilities do

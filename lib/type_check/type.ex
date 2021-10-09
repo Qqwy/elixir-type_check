@@ -68,7 +68,7 @@ defmodule TypeCheck.Type do
 
     type_ast
     |> build_unescaped(__CALLER__, options)
-    |> Macro.escape()
+    |> Macro.escape(unquote: true)
   end
 
   @doc false
