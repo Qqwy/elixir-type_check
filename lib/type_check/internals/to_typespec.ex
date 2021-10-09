@@ -37,9 +37,9 @@ defmodule TypeCheck.Internals.ToTypespec do
           ast
         end
 
-      {:"::", _, [_name, type_ast]} ->
-        # Hide inner named types from the typespec.
-        type_ast
+      # {:"::", _, [_name, type_ast]} ->
+      #   # Hide inner named types from the typespec.
+      #   type_ast
 
       ast = {:named_type, _, [_name, type_ast]} ->
         if {:named_type, 2} in builtin_imports do
@@ -136,10 +136,6 @@ defmodule TypeCheck.Internals.ToTypespec do
         end
 
       # Relax these types that Elixir's builtin typespecs does not accept
-      binary when is_binary(binary) ->
-        quote generated: true, location: :keep do
-          binary()
-        end
       float when is_float(float) ->
         quote generated: true, location: :keep do
           float()

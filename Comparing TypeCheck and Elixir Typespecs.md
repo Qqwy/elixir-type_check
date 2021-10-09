@@ -39,10 +39,10 @@ In the tables below:
 | true                                | ✅         |                                                    |
 | false                               | ✅         |                                                    |
 | nil                                 | ✅         |                                                    |
-| <<>>                                | ⌛         | empty bitstring                                    |
-| <<_::size>                          | ⌛         | size is 0 or a positive integer                    |
-| <<_::_*unit>>                       | ⌛         | unit is an integer from 1 to 256                   |
-| <<_::size, _::_*unit>>              | ⌛         |                                                    |
+| <<>>                                | ✅         | empty bitstring                                    |
+| <<_::size>                          | ✅         | size is 0 or a positive integer                    |
+| <<_::_*unit>>                       | ✅         | unit is an integer from 1 to 256                   |
+| <<_::size, _::_*unit>>              | ✅         |                                                    |
 | (-> type)                           | ❌¹        | 0-arity, returns type                              |
 | (type1, type2 -> type)              | ❌¹        | 2-arity, returns type                              |
 | (... -> type)                       | ❌¹        | any arity, returns type                            |
@@ -54,7 +54,7 @@ In the tables below:
 | [type, ...]                         | ✅         | shorthand for nonempty_list(type)                  |
 | [key: value_type]                   | ✅         | keyword list with key :key of value_type           |
 | %{}                                 | ✅         | empty map                                          |
-| %{key: value_type}                  | ✅         | map with required key :key of value_type           |
+| %{key: value_type}                  | ✅         | map with required (atom) key :key of value_type    |
 | %{key_type => value_type}           | ⌛         | map with required pairs of key_type and value_type |
 | %{required(key_type) => value_type} | ⌛         | map with required pairs of key_type and value_type |
 | %{optional(key_type) => value_type} | ⌛         | map with optional pairs of key_type and value_type |
@@ -214,7 +214,7 @@ You can use "named types" to refer to (parts of) the value that matched the type
 @type! sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
 ```
 
-## 🟨 Remote Types
+## ⌛ Remote Types
 
 It is often useful to refer to types defined in other modules. These are called 'Remote types'.
 Elixir's typespecs and TypeCheck both support remote types.

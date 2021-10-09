@@ -94,13 +94,39 @@ defmodule TypeCheck.Internals.PreExpander do
                - [type, ...] -> nonempty_list(type)
                """
            end
-        # rewritten_values =
-        #   list
-        #   |> Enum.map(&rewrite(&1, env, options))
-
-        # quote generated: true, location: :keep do
-        #   TypeCheck.Builtin.fixed_list(unquote(rewritten_values))
-        # end
+      bitstring = {:<<>>, _, args} ->
+           case args do
+             [] ->
+               # Empty bitstring
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.literal(unquote(<<>>))
+               end
+             [{:"::", _, [{:_, _, _}, size]}] when is_integer(size) ->
+               # <<_ :: size >>
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.sized_bitstring(unquote(size), nil)
+               end
+             [{:"::", _, [{:_, _, _}, {:*, _, [{:_, _, _}, unit]}]}] when is_integer(unit) ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.sized_bitstring(0, unquote(unit))
+               end
+            [
+              {:"::", _, [{:_, _, _}, size]},
+              {:"::", _, [{:_, _, _}, {:*, _, [{:_, _, _}, unit]}]}
+            ] ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.sized_bitstring(unquote(size), unquote(unit))
+               end
+             _other ->
+               raise TypeCheck.CompileError, """
+               TypeCheck does not support the bitstring literal `#{Macro.to_string(bitstring)}`
+               Currently supported are:
+               - <<>> -> empty bitstring
+               - <<_ :: size >> -> a bitstring of exactly `size` bytes long
+               - <<_ :: _ * unit >> -> a bitstring whose length is divisible by `unit`.
+               - <<_ :: size, _ * unit >> -> a bitstring whose (length - `size`) is divisible by `unit`.
+               """
+           end
 
       {:|, _, [lhs, rhs]} ->
         quote generated: true, location: :keep do

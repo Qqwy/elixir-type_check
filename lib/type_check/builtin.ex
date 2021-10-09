@@ -14,32 +14,15 @@ defmodule TypeCheck.Builtin do
 
   ### Ommissions
 
-  The following types are currently still missing from this module.
-  This will change in future versions of the library.
-  The hope is to at some point support all of them, or as close to it as feasible.
+  TypeCheck strives to implement all of the syntax and builtin types
+  which Elixir itself also supports.
+  Most of them are supported today.
+  The rest will hopefully be supported in the near future.
 
-  From the 'Basic Types':
+  For an up-to-date comparison of what types TypeCheck
+  does and does not support w.r.t. Elixir's builtin typespecs,
+  see 
 
-  - `port()`
-  - `reference()`
-  - `maybe_improper_list(content_type, termination_type)`
-  - `nonempty_improper_list(content_type, termination_type)`
-  - `nonempty_maybe_improper_list(content_type, termination_type)`
-
-  From the 'Literals':
-
-  - Special function syntax. Only `function()` is currently supported.
-  - Special bitstring-patterns. Only `binary()` and `bitstring()` are currently supported.
-  - The `optional(any()) => any()` syntax in maps. Currently `fixed_map` accepts maps with extra keys.
-
-  From the 'Builtin Types':
-
-  - `nonempty_charlist()`
-  - `iodata()`
-  - `identifier()`
-  - `iolist()`
-  - `node()`
-  - `timeout()`
 
   """
 
@@ -175,6 +158,19 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  A binary which contains at least one byte.
+
+  Shorthand for `sized_bitstring(8, 8)`.
+  """
+  if_recompiling? do
+    @spec! nonempty_binary() :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def nonempty_binary() do
+    sized_bitstring(8, 8)
+  end
+
+  @doc typekind: :builtin
+  @doc """
   Any bitstring
 
   c.f. `TypeCheck.Builtin.Bitstring`
@@ -184,6 +180,19 @@ defmodule TypeCheck.Builtin do
   end
   def bitstring() do
     build_struct(TypeCheck.Builtin.Bitstring)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  A bitstring which contains at least one bit.
+
+  Shorthand for `sized_bitstring(1, 1)`.
+  """
+  if_recompiling? do
+    @spec! nonempty_bitstring() :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def nonempty_bitstring() do
+    sized_bitstring(1, 1)
   end
 
   @doc typekind: :builtin
@@ -807,6 +816,63 @@ defmodule TypeCheck.Builtin do
   defp do_fixed_list(element_types) do
     build_struct(TypeCheck.Builtin.FixedList)
     |> Map.put(:element_types, element_types)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  A bitstring of fixed size.
+
+  Desugaring of bitstring types like `<< _ :: size>>`.
+
+  c.f. `TypeCheck.Builtin.SizedBitstring`.
+  """
+  if_recompiling? do
+    @spec! sized_bitstring(prefix_size :: non_neg_integer()) :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def sized_bitstring(size) do
+    sized_bitstring(size, nil)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  A bitstring with a fixed `prefix_size` (which might be `0`), followed by zero or repetitions of `unit_size`.
+
+  Desugaring of bitstring types like `<< _ :: _ * unit_size>>` and `<< _ :: prefix_size, _ :: _ * unit_size>>`.
+
+      iex> TypeCheck.conforms!("hi", <<_ :: 16>>)
+      "hi"
+
+      iex> TypeCheck.conforms!("bye", <<_ :: 16>>)
+      ** (TypeCheck.TypeError) `"bye"` has a different bit_size (24) than expected (16).
+
+      iex> TypeCheck.conforms!(<<1 :: size(2)>>, <<_ :: 2>>)
+      <<1 :: size(2)>>
+
+      iex> TypeCheck.conforms!(<<1 :: size(3)>>, <<_ :: 2>>)
+      ** (TypeCheck.TypeError) `<<1::size(3)>>` has a different bit_size (3) than expected (2).
+
+      iex> ["ab", "abcd", "abcdef"] |> Enum.map(&TypeCheck.conforms!(&1, <<_ :: _ * 16>>))
+      ["ab", "abcd", "abcdef"]
+
+      iex> TypeCheck.conforms!("abc",  <<_ :: _ * 16>>)
+      ** (TypeCheck.TypeError) `"abc"` has a different bit_size (24) than expected (_ * 16).
+
+      iex> ["a", "abc", "abcde"] |> Enum.map(&TypeCheck.conforms!(&1, <<_ :: 8, _ :: _ * 16>>))
+      ["a", "abc", "abcde"]
+
+      iex> TypeCheck.conforms!("ab",  <<_ :: 8, _ :: _ * 16>>)
+      ** (TypeCheck.TypeError) `"ab"` has a different bit_size (16) than expected (8 + _ * 16).
+
+
+  c.f. `TypeCheck.Builtin.SizedBitstring`.
+  """
+  if_recompiling? do
+    @spec! sized_bitstring(prefix_size :: non_neg_integer(), unit_size :: nil | 1..256) :: TypeCheck.Builtin.SizedBitstring.t()
+  end
+  def sized_bitstring(prefix_size, unit_size) do
+    build_struct(TypeCheck.Builtin.SizedBitstring)
+    |> Map.put(:prefix_size, prefix_size)
+    |> Map.put(:unit_size, unit_size)
   end
 
   @doc typekind: :extension

@@ -40,6 +40,21 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val, inspect_value_opts())}` is not a bitstring."
   end
 
+  def do_format({%TypeCheck.Builtin.SizedBitstring{}, :no_match, _, val}) do
+    "`#{inspect(val, inspect_value_opts())}` is not a bitstring."
+  end
+
+  def do_format({s = %TypeCheck.Builtin.SizedBitstring{}, :wrong_size, _, val}) do
+    cond do
+      s.unit_size == nil ->
+        "`#{inspect(val, inspect_value_opts())}` has a different bit_size (#{bit_size(val)}) than expected (#{s.prefix_size})."
+      s.prefix_size == 0 ->
+        "`#{inspect(val, inspect_value_opts())}` has a different bit_size (#{bit_size(val)}) than expected (_ * #{s.unit_size})."
+        true ->
+        "`#{inspect(val, inspect_value_opts())}` has a different bit_size (#{bit_size(val)}) than expected (#{s.prefix_size} + _ * #{s.unit_size})."
+    end
+  end
+
   def do_format({%TypeCheck.Builtin.Boolean{}, :no_match, _, val}) do
     "`#{inspect(val, inspect_value_opts())}` is not a boolean."
   end
