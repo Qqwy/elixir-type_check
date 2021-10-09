@@ -164,6 +164,7 @@ Details:
   - [x] Maps with keys => types
   - [x] Structs with keys => types
   - [x] More map/list-based structures.
+  - [x] Bitstring type syntax (`<<>>`, `<<_ :: size>>`, `<<_ :: _ * unit>>`, `<<_ :: size, _ :: _ * unit>>`)
 - [x] A `when` to add guards to typedefs for more power.
 - [x] Make errors raised when types do not match humanly readable
   - [x] Improve readability of spec-errors by repeating spec and which parameter did not match.
@@ -199,6 +200,8 @@ Details:
 
 ### Changelog
 - master -
+- 0.9.0 - 
+  - Support for bitstring type syntax: `<<>>`, `<<_ :: size>>`, `<<_ :: _ * unit>>`, `<<_ :: size, _ :: _ * unit>>` (both as types and as generators)
 - 0.8.2 - 
   - Fixed compiler warnings when optional dependency StreamData is not installed.
   - Fixed pretty-printing of typedoc of opaque types.
