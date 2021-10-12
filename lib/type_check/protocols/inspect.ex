@@ -19,6 +19,7 @@ structs = [
   TypeCheck.Builtin.FixedList,
   TypeCheck.Builtin.FixedTuple,
   TypeCheck.Builtin.Float,
+  TypeCheck.Builtin.Function,
   TypeCheck.Builtin.Integer,
   TypeCheck.Builtin.PosInteger,
   TypeCheck.Builtin.NegInteger,
