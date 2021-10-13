@@ -166,6 +166,7 @@ defmodule TypeCheck do
   (Calling `use TypeCheck` will already do this; see the module documentation of `TypeCheck` for more information))
   """
   @type value :: any()
+  # Note: Below spec highlights how the macro functions when it is _used_:
   @spec conforms(value, TypeCheck.Type.expandable_type()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
   defmacro conforms(value, type, options \\ Macro.escape(TypeCheck.Options.new())) do
