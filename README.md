@@ -200,6 +200,10 @@ Details:
 
 ### Changelog
 - master -
+  - Fixes:
+    - Wrapping private functions no longer make the function public. (c.f. #64)
+    - Wrapping macros now works correctly. (also related to #64)
+    - Using `__MODULE__` inside a struct inside a type now expands correctly. (c.f. #66)
 - 0.9.0 - 
   - Support for bitstring type syntax: `<<>>`, `<<_ :: size>>`, `<<_ :: _ * unit>>`, `<<_ :: size, _ :: _ * unit>>` (both as types and as generators)
 - 0.8.2 - 
