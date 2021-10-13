@@ -128,4 +128,7 @@ defmodule TypeCheck.MacrosTest do
       PrivateFunctionSpecExample.public("not an integer")
     end)
   end
+
+  test "specs can be added to macros" do
+  end
 end
