@@ -130,5 +130,29 @@ defmodule TypeCheck.MacrosTest do
   end
 
   test "specs can be added to macros" do
+    defmodule MacroSpecExample do
+      use TypeCheck
+
+      @spec! compile_time_atom_to_string(atom()) :: String.t()
+      defmacro compile_time_atom_to_string(atom) do
+        to_string(atom)
+      end
+    end
+
+    defmodule Example do
+      require MacroSpecExample
+      def example do
+        MacroSpecExample.compile_time_atom_to_string(:baz)
+      end
+    end
+
+    assert_raise(TypeCheck.TypeError, fn ->
+      defmodule Example2 do
+        require MacroSpecExample
+        def example do
+          MacroSpecExample.compile_time_atom_to_string(42)
+        end
+      end
+    end)
   end
 end
