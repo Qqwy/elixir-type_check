@@ -112,23 +112,43 @@ defmodule TypeCheck.Spec do
   end
 
   @doc false
-  def wrap_function_with_spec(name, _location, arity, clean_params, params_spec_code, return_spec_code, typespec) do
+  def check_function_kind(module, function, arity) do
+    cond do
+      Module.defines?(module, {function, arity}, :def) ->
+        :def
+      Module.defines?(module, {function, arity}, :defp) ->
+        :defp
+      Module.defines?(module, {function, arity}, :defmacro) ->
+        :defmacro
+      Module.defines?(module, {function, arity}, :defmacrop) ->
+        :defmacrop
+      true ->
+        raise TypeCheck.CompileError, "cannot add spec to #{to_string(module)}.#{inspect(function)}/#{inspect(arity)} because it was not defined"
+    end
+  end
+
+  @doc false
+  def wrap_function_with_spec(name, _location, arity, clean_params, params_spec_code, return_spec_code, typespec, caller) do
     # {file, line} = location
+
+    body = quote do
+      unquote(params_spec_code)
+      var!(super_result, nil) = super(unquote_splicing(clean_params))
+      unquote(return_spec_code)
+      var!(super_result, nil)
+    end
+
+    # Check if original function is public or private
+    function_kind = TypeCheck.Spec.check_function_kind(caller.module, name, arity)
 
     quote generated: true, location: :keep do
       if Module.get_attribute(__MODULE__, :autogen_typespec) do
         @spec unquote(typespec)
       end
+
       defoverridable([{unquote(name), unquote(arity)}])
 
-      def unquote(name)(unquote_splicing(clean_params)) do
-        # import TypeCheck.Builtin
-
-        unquote(params_spec_code)
-        var!(super_result, nil) = super(unquote_splicing(clean_params))
-        unquote(return_spec_code)
-        var!(super_result, nil)
-      end
+      unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
     end
   end
 
@@ -144,9 +164,9 @@ defmodule TypeCheck.Spec do
   defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller, _location) do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
-    # {file, line} = location
     quote generated: true, location: :keep do end
   end
+
   defp params_check_code(name, arity, param_types, clean_params, caller, location) do
     paired_params =
       param_types
@@ -156,7 +176,6 @@ defmodule TypeCheck.Spec do
         param_check_code(param_type, clean_param, index, caller, location)
       end)
 
-    # {file, line} = location
     quote generated: true, location: :keep do
       with unquote_splicing(paired_params) do
         # Run actual code

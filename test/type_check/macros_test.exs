@@ -105,7 +105,54 @@ defmodule TypeCheck.MacrosTest do
     end
   end
 
-  describe "@autogen_typespec false" do
-    
+  test "specs can be added to private functions" do
+    defmodule PrivateFunctionSpecExample do
+      use TypeCheck
+
+      @spec! secret(integer()) :: integer()
+      defp secret(_), do: 42
+
+      def public(val) do
+        secret(val)
+      end
+    end
+
+    assert TypeCheck.Spec.defined?(PrivateFunctionSpecExample, :secret, 1)
+    assert [secret: 1] == PrivateFunctionSpecExample.__type_check__(:specs)
+
+    # importantly, {secret: 1} is not in there:
+    assert ["__TypeCheck spec for 'secret/1'__": 0, __type_check__: 1, public: 1] = PrivateFunctionSpecExample.__info__(:functions)
+
+    assert PrivateFunctionSpecExample.public(10) == 42
+    assert_raise(TypeCheck.TypeError, fn ->
+      PrivateFunctionSpecExample.public("not an integer")
+    end)
+  end
+
+  test "specs can be added to macros" do
+    defmodule MacroSpecExample do
+      use TypeCheck
+
+      @spec! compile_time_atom_to_string(atom()) :: String.t()
+      defmacro compile_time_atom_to_string(atom) do
+        to_string(atom)
+      end
+    end
+
+    defmodule Example do
+      require MacroSpecExample
+      def example do
+        MacroSpecExample.compile_time_atom_to_string(:baz)
+      end
+    end
+
+    assert_raise(TypeCheck.TypeError, fn ->
+      defmodule Example2 do
+        require MacroSpecExample
+        def example do
+          MacroSpecExample.compile_time_atom_to_string(42)
+        end
+      end
+    end)
   end
 end
