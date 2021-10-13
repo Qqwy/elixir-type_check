@@ -114,6 +114,18 @@ defmodule TypeCheck do
   `dynamic_conforms/2` and variants.
   Because these variants have to evaluate the type-checking code at runtime,
   these checks are not optimized by the compiler.
+
+  ### Introspection
+
+  To allow checking what types and specs exist,
+  the introspection function `__type_check__/1` will be added to a module when `use TypeCheck` is used.
+
+  - `YourModule.__type_check__(:types)` returns a keyword list of all `{type_name, arity}`
+    pairs for all types defined in the module using `@type!`/`@typep!` or `@opaque!`.
+  - `YourModule.__type_check__(:specs)` returns a keyword list of all `{function_name, arity}`
+    pairs for all functions in the module wrapped with a spec using `@spec!`.
+
+  Note that these lists might also contain private types / private function names.
   """
 
   defmacro __using__(options) do
