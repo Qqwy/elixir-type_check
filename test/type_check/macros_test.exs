@@ -104,8 +104,4 @@ defmodule TypeCheck.MacrosTest do
       end)
     end
   end
-
-  describe "@autogen_typespec false" do
-    
-  end
 end
