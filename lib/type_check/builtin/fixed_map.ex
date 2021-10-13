@@ -29,8 +29,8 @@ defmodule TypeCheck.Builtin.FixedMap do
       quote generated: true, location: :keep do
         with {:ok, []} <- unquote(map_check(param, s)),
              {:ok, []} <- unquote(build_keys_presence_ast(s, param)),
-             {:ok, bindings3} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
-          {:ok, bindings3}
+             {:ok, bindings3, altered_param} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+          {:ok, bindings3, altered_param}
         end
       end
     end
@@ -80,17 +80,20 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           quote generated: true, location: :keep do
             [
-              {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
-              bindings = value_bindings ++ bindings
+              {{:ok, value_bindings, altered_element}, _key} <- {unquote(value_check), unquote(key)},
+              bindings = value_bindings ++ bindings,
+              altered_keypair = [{unquote(key)}, altered_element]
             ]
           end
         end)
 
       quote generated: true, location: :keep do
         bindings = []
+        altered_keypairs = []
 
-        with unquote_splicing(keypair_checks) do
-          {:ok, bindings}
+        with unquote_splicing(keypair_checks),
+        altered_param = :maps.from_list(altered_keypairs) do
+          {:ok, bindings, altered_param}
         else
           {{:error, error}, key} ->
             {:error,

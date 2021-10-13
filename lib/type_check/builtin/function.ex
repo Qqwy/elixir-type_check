@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.Function do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when is_function(x) ->
-            {:ok, []}
+            {:ok, [], unquote(param)}
 
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}

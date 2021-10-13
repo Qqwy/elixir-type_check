@@ -16,7 +16,7 @@ defmodule TypeCheck.Builtin.Tuple do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when is_tuple(x) ->
-            {:ok, []}
+            {:ok, [], unquote(param)}
 
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}

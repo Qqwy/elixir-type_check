@@ -18,7 +18,7 @@ defmodule TypeCheck.Builtin.SizedBitstring do
             x when bit_size(x) != unquote(s.prefix_size) ->
               {:error, {unquote(Macro.escape(s)), :wrong_size, %{}, unquote(param)}}
             _ ->
-              {:ok, []}
+              {:ok, [], unquote(param)}
           end
         end
       else
@@ -29,7 +29,7 @@ defmodule TypeCheck.Builtin.SizedBitstring do
             x when bit_size(x) < unquote(s.prefix_size) or rem(bit_size(x) - unquote(s.prefix_size), unquote(s.unit_size)) != 0 ->
               {:error, {unquote(Macro.escape(s)), :wrong_size, %{}, unquote(param)}}
             _ ->
-              {:ok, []}
+              {:ok, [], unquote(param)}
           end
         end
       end

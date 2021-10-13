@@ -74,14 +74,14 @@ defmodule TypeCheck.Builtin.Guarded do
 
       quote generated: true, location: :keep do
         case unquote(type_check) do
-          {:ok, bindings} ->
+          {:ok, bindings, altered_param} ->
             # Shadows all but the most recently-bound value for each name
             bindings_map = Enum.into(bindings, %{})
 
             unquote(names_map) = bindings_map
 
             if unquote(s.guard) do
-              {:ok, bindings}
+              {:ok, bindings, altered_param}
             else
               {:error,
                {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map},

@@ -56,18 +56,22 @@ defmodule TypeCheck.Builtin.FixedList do
 
           quote generated: true, location: :keep do
             [
-              {{:ok, element_bindings}, index, var!(rest, unquote(__MODULE__))} <-
-                {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))},
-              bindings = element_bindings ++ bindings
+              {{:ok, element_bindings, altered_element}, index, var!(rest, unquote(__MODULE__))} <- {unquote(impl), unquote(index), tl(var!(rest, unquote(__MODULE__)))},
+              bindings = element_bindings ++ bindings,
+              altered_param = [altered_element | altered_param]
             ]
           end
         end)
 
       quote generated: true, location: :keep do
         bindings = []
+        altered_param = []
 
-        with var!(rest, unquote(__MODULE__)) = unquote(param), unquote_splicing(element_checks) do
-          {:ok, bindings}
+        with var!(rest, unquote(__MODULE__)) = unquote(param),
+             unquote_splicing(element_checks),
+             altered_param = :lists.reverse(altered_param)
+          do
+          {:ok, bindings, altered_param}
         else
           {{:error, error}, index, _rest} ->
             {:error,

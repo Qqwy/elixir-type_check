@@ -18,11 +18,11 @@ defmodule TypeCheck.Builtin.NamedType do
 
       quote generated: true, location: :keep do
         case unquote(inner_check) do
-          {:ok, bindings} ->
+          {:ok, bindings, altered_inner} ->
             # Write it to a non-hygienic variable
             # that we can read from more outer-level types
             # unquote(Macro.var(s.name, TypeCheck.Builtin.NamedType)) = unquote(param)
-            {:ok, [{unquote(s.name), unquote(param)} | bindings]}
+            {:ok, [{unquote(s.name), unquote(param)} | bindings], altered_inner}
 
           {:error, problem} ->
             {:error, {unquote(Macro.escape(s)), :named_type, %{problem: problem}, unquote(param)}}

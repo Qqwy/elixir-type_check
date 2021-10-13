@@ -18,7 +18,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
           nil ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
           _ ->
-          {:ok, []}
+          {:ok, [], unquote(param)}
         end
       end
     end

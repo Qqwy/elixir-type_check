@@ -6,9 +6,9 @@ defmodule TypeCheck.Builtin.Any do
   @type! problem_tuple :: none()
 
   defimpl TypeCheck.Protocols.ToCheck do
-    def to_check(_, _param) do
+    def to_check(_, param) do
       quote generated: :true, location: :keep do
-        {:ok, []}
+        {:ok, [], unquote(param)}
       end
     end
   end

@@ -47,17 +47,19 @@ defmodule TypeCheck.Builtin.FixedTuple do
 
           quote generated: true, location: :keep do
             [
-              {{:ok, element_bindings}, _index} <- {unquote(impl), unquote(index)},
-              bindings = element_bindings ++ bindings
+              {{:ok, element_bindings, altered_element}, _index} <- {unquote(impl), unquote(index)},
+              bindings = element_bindings ++ bindings,
+              altered_param = Tuple.append(altered_param, altered_element)
             ]
           end
         end)
 
       quote generated: true, location: :keep do
         bindings = []
+        altered_param = {}
 
         with unquote_splicing(element_checks) do
-          {:ok, bindings}
+          {:ok, bindings, altered_param}
         else
           {{:error, error}, index} ->
             {:error,

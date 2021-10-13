@@ -135,7 +135,6 @@ defmodule TypeCheck.Spec do
       unquote(params_spec_code)
       var!(super_result, nil) = super(unquote_splicing(clean_params))
       unquote(return_spec_code)
-      var!(super_result, nil)
     end
 
     # Check if original function is public or private
@@ -172,7 +171,7 @@ defmodule TypeCheck.Spec do
       param_types
       |> Enum.zip(clean_params)
       |> Enum.with_index()
-      |> Enum.map(fn {{param_type, clean_param}, index} ->
+      |> Enum.flat_map(fn {{param_type, clean_param}, index} ->
         param_check_code(param_type, clean_param, index, caller, location)
       end)
 
@@ -194,8 +193,10 @@ defmodule TypeCheck.Spec do
 
     # {file, line} = location
     quote generated: true, location: :keep do
-      {{:ok, _bindings}, _index, _param_type} <-
-        {unquote(impl), unquote(index), unquote(Macro.escape(param_type))}
+      [
+        {{:ok, _bindings, altered_param}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))},
+        clean_param = altered_param
+       ]
     end
   end
 
@@ -206,8 +207,8 @@ defmodule TypeCheck.Spec do
     # {file, line} = location
     quote generated: true, location: :keep do
       case unquote(return_code_check) do
-        {:ok, _bindings} ->
-          nil
+        {:ok, _bindings, altered_return_value} ->
+          altered_return_value
 
         {:error, problem} ->
           raise TypeCheck.TypeError,

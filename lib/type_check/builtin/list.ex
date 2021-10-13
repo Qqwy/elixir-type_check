@@ -26,9 +26,9 @@ defmodule TypeCheck.Builtin.List do
       end
     end
 
-    defp build_element_check(%TypeCheck.Builtin.Any{}, _param, _s) do
+    defp build_element_check(%TypeCheck.Builtin.Any{}, param, _s) do
       quote generated: true, location: :keep do
-        {:ok, []}
+        {:ok, [], unquote(param)}
       end
     end
 
@@ -39,24 +39,30 @@ defmodule TypeCheck.Builtin.List do
       quote generated: true, location: :keep do
         orig_param = unquote(param)
 
-        orig_param
-        |> Enum.with_index()
-        |> Enum.reduce_while({:ok, []}, fn {input, index}, {:ok, bindings} ->
-          var!(single_param, unquote(__MODULE__)) = input
+        res =
+          orig_param
+          |> Enum.with_index()
+          |> Enum.reduce_while({:ok, [], orig_param}, fn {input, index}, {:ok, bindings, altered_param} ->
+            var!(single_param, unquote(__MODULE__)) = input
 
-          case unquote(element_check) do
-            {:ok, element_bindings} ->
-              {:cont, {:ok, element_bindings ++ bindings}}
+            case unquote(element_check) do
+              {:ok, element_bindings, altered_element} ->
+                {:cont, {:ok, element_bindings ++ bindings, [altered_element | altered_param]}}
 
-            {:error, problem} ->
-              problem =
-                {:error,
-                 {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
-                  orig_param}}
+              {:error, problem} ->
+                problem =
+                  {:error,
+                  {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                    orig_param}}
 
-              {:halt, problem}
+                {:halt, problem}
+            end
+          end)
+
+          case res do
+            {:ok, bindings, altered_param} -> {:ok, bindings, :lists.reverse(altered_param)}
+            other -> other
           end
-        end)
       end
     end
   end

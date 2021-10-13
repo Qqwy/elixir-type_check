@@ -28,8 +28,8 @@ defmodule TypeCheck.Builtin.OneOf do
            {unquote(Macro.escape(x)), :all_failed, %{problems: Enum.reverse(problems)},
             unquote(param)}}
         else
-          {:ok, bindings} ->
-            {:ok, bindings}
+          {:ok, bindings, altered_param} ->
+            {:ok, bindings, altered_param}
         end
       end
     end

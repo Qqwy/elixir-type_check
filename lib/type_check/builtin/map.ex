@@ -24,8 +24,10 @@ defmodule TypeCheck.Builtin.Map do
       end
     end
 
-    defp build_keypairs_check(%TypeCheck.Builtin.Any{}, %TypeCheck.Builtin.Any{}, _param, _s) do
-      {:ok, []}
+    defp build_keypairs_check(%TypeCheck.Builtin.Any{}, %TypeCheck.Builtin.Any{}, param, _s) do
+      quote generated: true, location: :keep do
+        {:ok, [], unquote(param)}
+      end
     end
 
     defp build_keypairs_check(key_type, value_type, param, s) do
@@ -41,32 +43,39 @@ defmodule TypeCheck.Builtin.Map do
       quote generated: true, location: :keep do
         orig_param = unquote(param)
 
-        orig_param
-        |> Enum.reduce_while({:ok, []}, fn {key, value}, {:ok, bindings} ->
-          var!(single_field_key, unquote(__MODULE__)) = key
-          var!(single_field_value, unquote(__MODULE__)) = value
+        res =
+          orig_param
+          |> Enum.reduce_while({:ok, [], orig_param}, fn {key, value}, {:ok, bindings, altered_param} ->
+            var!(single_field_key, unquote(__MODULE__)) = key
+            var!(single_field_value, unquote(__MODULE__)) = value
 
-          case {unquote(key_check), unquote(value_check)} do
-            {{:ok, key_bindings}, {:ok, value_bindings}} ->
-              res = {:ok, value_bindings ++ key_bindings ++ bindings}
-              {:cont, res}
+            case {unquote(key_check), unquote(value_check)} do
+              {{:ok, key_bindings, altered_key}, {:ok, value_bindings, altered_value}} ->
+                altered_param = [{altered_key, altered_value} | altered_param]
+                res = {:ok, value_bindings ++ key_bindings ++ bindings, altered_param}
+                {:cont, res}
 
-            {{:error, problem}, _} ->
-              res =
-                {:error,
-                 {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key}, orig_param}}
+              {{:error, problem}, _} ->
+                res =
+                  {:error,
+                  {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key}, orig_param}}
 
-              {:halt, res}
+                {:halt, res}
 
-            {_, {:error, problem}} ->
-              res =
-                {:error,
-                 {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key},
-                  orig_param}}
+              {_, {:error, problem}} ->
+                res =
+                  {:error,
+                  {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key},
+                    orig_param}}
 
-              {:halt, res}
-          end
-        end)
+                {:halt, res}
+            end
+          end)
+        case res do
+          {:ok, bindings, altered_param} ->
+            {:ok, bindings, :maps.from_list(altered_param)}
+          other -> other
+        end
       end
     end
   end
