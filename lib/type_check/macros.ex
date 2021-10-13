@@ -271,7 +271,8 @@ defmodule TypeCheck.Macros do
         clean_params,
         params_spec_code,
         return_spec_code,
-        clean_specdef
+        clean_specdef,
+        caller
       )
 
       if typecheck_options.debug do
