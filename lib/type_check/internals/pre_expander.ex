@@ -243,7 +243,7 @@ defmodule TypeCheck.Internals.PreExpander do
     # TODO wrap in struct-checker
     quote generated: true, location: :keep do
       TypeCheck.Builtin.fixed_map(
-        [__struct__: TypeCheck.Builtin.literal(unquote(struct_name))] ++ unquote(field_types)
+        [__struct__: unquote(rewrite(struct_name, env, options))] ++ unquote(field_types)
       )
     end
   end
