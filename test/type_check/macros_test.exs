@@ -155,4 +155,23 @@ defmodule TypeCheck.MacrosTest do
       end
     end)
   end
+
+  test "__MODULE__ is expanded correctly" do
+    defmodule ModuleExpansion do
+      use TypeCheck
+
+      @type! t :: %__MODULE__{name: String.t()}
+      defstruct [:name]
+
+      @spec! build(String.t()) :: t()
+      def build(name) do
+        %__MODULE__{name: name}
+      end
+    end
+
+    assert ModuleExpansion.build("hello") == %{__struct__: ModuleExpansion, name: "hello"}
+    assert_raise TypeCheck.TypeError, fn ->
+      ModuleExpansion.build(:not_a_string)
+    end
+  end
 end

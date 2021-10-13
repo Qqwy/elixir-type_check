@@ -10,6 +10,10 @@ defmodule TypeCheck.Internals.PreExpander do
     |> Macro.expand(env)
     |> TypeCheck.Internals.Overrides.rewrite_if_override(options.overrides, env)
     |> case do
+      {:__MODULE__, _meta, Elixir} ->
+        # Necessary to ensure that inside the 'TypeCheck.Internals.UserTypes' module
+        # we expand this still to the original module.
+        env.module
       ast = {:lazy_explicit, meta, args}  ->
         if {:lazy_explicit, 3} in builtin_imports do
           ast
