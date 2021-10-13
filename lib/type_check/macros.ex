@@ -526,6 +526,18 @@ defmodule TypeCheck.Macros do
     end
   end
 
+  def define_type(other, kind, caller) do
+    raise TypeCheck.CompileError, """
+    Compilation error encountered while attempting to create a `#{to_string(kind)}`
+    in `#{to_string(caller.module)}`.
+
+    Cannot parse syntax:
+    #{Macro.to_string(other)}
+
+    Maybe you forgot to give the type a name?
+    """
+  end
+
   defp append_typedoc(caller, extra_doc) do
     {_line, old_doc} = Module.get_attribute(caller.module, :typedoc) || {0, ""}
     newdoc = old_doc <> extra_doc
