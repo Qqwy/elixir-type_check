@@ -45,7 +45,7 @@ defmodule TypeCheck.Builtin.Map do
 
         res =
           orig_param
-          |> Enum.reduce_while({:ok, [], orig_param}, fn {key, value}, {:ok, bindings, altered_param} ->
+          |> Enum.reduce_while({:ok, [], []}, fn {key, value}, {:ok, bindings, altered_param} ->
             var!(single_field_key, unquote(__MODULE__)) = key
             var!(single_field_value, unquote(__MODULE__)) = value
 
