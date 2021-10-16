@@ -43,9 +43,9 @@ In the tables below:
 | <<_::size>                          | ✅         | size is 0 or a positive integer                    |
 | <<_::_*unit>>                       | ✅         | unit is an integer from 1 to 256                   |
 | <<_::size, _::_*unit>>              | ✅         |                                                    |
-| (-> type)                           | ❌¹        | 0-arity, returns type                              |
-| (type1, type2 -> type)              | ❌¹        | 2-arity, returns type                              |
-| (... -> type)                       | ❌¹        | any arity, returns type                            |
+| (-> type)                           | ✅¹        | 0-arity, returns type                              |
+| (type1, type2 -> type)              | ✅¹        | 2-arity, returns type                              |
+| (... -> type)                       | ✅¹        | any arity, returns type                            |
 | 1                                   | ✅         | integer                                            |
 | 1..10                               | ✅         | range                                              |
 | [type]                              | ✅         | list with any number of type elements              |
@@ -63,8 +63,9 @@ In the tables below:
 | {}                                  | ✅         | empty tuple                                        |
 | \{:ok, type\}                       | ✅         | two-element tuple with an atom and any type        |
 
-¹: Supporting function-arguments is tricky. However, it definitely is a desired feature.
-Help or ideas to make this work are greatly appreciated. [This feature is discussed here](https://github.com/Qqwy/elixir-type_check/issues/6).
+¹: Functions passed as parameters can only be fully checked once they are called. 
+TypeCheck wraps them in a 'wrapper function' which performs the correct check on their input/output.
+This wrapper will only run once the the function actually is called.
 
 ## Built-in types
 
