@@ -13,6 +13,8 @@ jobs:
         exclude: 
           - otp: '24.x'
             elixir: '1.9.x'
+          - otp: '24.x'
+            elixir: '1.10.x'
     env:
       MIX_ENV: test
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
