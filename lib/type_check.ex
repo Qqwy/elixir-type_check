@@ -184,7 +184,8 @@ defmodule TypeCheck do
     end
 
     if(evaluated_options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+      value_str = value |> Macro.to_string |> Code.format_string!
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms(#{value_str}, #{inspect(type)}, #{inspect(options)})", res)
     end
     res
   end
@@ -207,7 +208,8 @@ defmodule TypeCheck do
     end
 
     if(evaluated_options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms?(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+      value_str = value |> Macro.to_string |> Code.format_string!
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms?(#{value_str}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
     res
@@ -234,7 +236,8 @@ defmodule TypeCheck do
     end
 
     if(evaluated_options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms!(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", res)
+      value_str = value |> Macro.to_string |> Code.format_string!
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms!(#{value_str}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
     res

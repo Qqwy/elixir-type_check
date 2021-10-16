@@ -42,9 +42,31 @@ defmodule TypeCheck.Builtin.Function do
         original
       %{param_types: [], return_type: %TypeCheck.Builtin.Any{}} ->
         original
-      %{param_types: nil, return_type: _type} ->
-        # TODO. How to construct an arbitrary-arity function?
-        original
+      %{param_types: nil, return_type: return_type} ->
+        # TODO. How to construct an arbitrary-arity function wrapper?
+        quote generated: true, location: :keep, bind_quoted: [fun: original, s: Macro.escape(s), return_type: Macro.escape(return_type)] do
+          {:arity, arity} = Function.info(fun, :arity)
+          clean_params = Macro.generate_arguments(arity, __MODULE__)
+          return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:result, nil))
+
+          wrapper_ast =
+            quote do
+              fn unquote_splicing(clean_params) ->
+                var!(result, nil) = var!(fun).(unquote_splicing(clean_params))
+                case unquote(return_code_check) do
+                  {:ok, _bindings, altered_return_value} ->
+                    altered_return_value
+                  {:error, problem} ->
+                    raise TypeCheck.TypeError,
+                    {unquote(Macro.escape(s)), :return_error,
+                    %{problem: problem, arguments: unquote(clean_params)}, var!(result, nil)}
+                end
+              end
+            end
+          {fun, _} = Code.eval_quoted(wrapper_ast, [fun: fun], __ENV__)
+
+          fun
+        end
       %{param_types: [], return_type: return_type} ->
         return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:result, nil))
 
@@ -114,6 +136,14 @@ defmodule TypeCheck.Builtin.Function do
         %{param_types: nil, return_type: %TypeCheck.Builtin.Any{}} ->
           "function()"
           |> Inspect.Algebra.color(:builtin_type, opts)
+        %{param_types: nil, return_type: return_type} ->
+          inspected_return_type = TypeCheck.Protocols.Inspect.inspect(return_type, opts)
+
+          "(..."
+          |> Inspect.Algebra.color(:builtin_type, opts)
+          |> Inspect.Algebra.glue(Inspect.Algebra.color("->", :builtin_type, opts))
+          |> Inspect.Algebra.glue(inspected_return_type)
+          |> Inspect.Algebra.concat(Inspect.Algebra.color(")", :builtin_type, opts))
         %{param_types: types, return_type: return_type} ->
           inspected_param_types =
             types
