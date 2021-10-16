@@ -40,10 +40,11 @@ defmodule TypeCheck.Builtin.FixedMap do
 
     defp map_check(param, s) do
       quote generated: true, location: :keep do
-        if is_map(unquote(param)) do
-          :ok
+        x = unquote(param)
+        if is_map(x) do
+          {:ok, [], x}
         else
-          {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, unquote(param)}}
+          {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, x}}
         end
       end
     end
