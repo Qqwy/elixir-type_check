@@ -104,6 +104,11 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val, inspect_value_opts())}` is not a float."
   end
 
+  def do_format({%TypeCheck.Builtin.Function{param_types: list}, :no_match, _, val}) when is_list(list) and is_function(val) do
+    {:arity, arity} = Function.info(val, :arity)
+    "`#{inspect(val, inspect_value_opts())}` (arity #{arity}) is not a function of arity `#{length(list)}`."
+  end
+
   def do_format({%TypeCheck.Builtin.Function{}, :no_match, _, val}) do
     "`#{inspect(val, inspect_value_opts())}` is not a function."
   end
@@ -242,12 +247,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val, inspect_value_opts())}` does not implement the protocol `#{protocol_name}`"
   end
 
-  def do_format({s = %TypeCheck.Spec{}, :param_error, %{index: index, problem: problem}, val}) do
+  def do_format({s = %mod{}, :param_error, %{index: index, problem: problem}, val}) when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", do_format(problem))
-    function_with_arity = IO.ANSI.format_fragment([:white, "#{s.name}/#{Enum.count(val)}", :red])
+    name = Map.get(s, :name, "#Function<...>")
+    function_with_arity = IO.ANSI.format_fragment([:white, "#{name}/#{Enum.count(val)}", :red])
     param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
     arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
-    call = IO.ANSI.format_fragment([:white, "#{s.name}(#{arguments})", :red])
+    raw_call = if mod == TypeCheck.Builtin.Function do
+      "#{name}.(#{arguments})"
+    else
+      "#{name}(#{arguments})"
+    end
+    call = IO.ANSI.format_fragment([:white, raw_call, :red])
 
     value = Enum.at(val, index)
     value_str = inspect(value, inspect_value_opts())
@@ -265,12 +276,19 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format(
-        {s = %TypeCheck.Spec{}, :return_error, %{problem: problem, arguments: arguments}, val}
-      ) do
-    function_with_arity = IO.ANSI.format_fragment([:white, "#{s.name}/#{Enum.count(arguments)}", :red])
+        {s = %mod{}, :return_error, %{problem: problem, arguments: arguments}, val}
+      ) when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
+    name = Map.get(s, :name, "#Function<...>")
+    function_with_arity = IO.ANSI.format_fragment([:white, "#{name}/#{Enum.count(arguments)}", :red])
     result_spec = s.return_type |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
-    arguments_str = arguments |> Enum.map(fn val -> inspect(val, inspect_type_opts()) end) |> Enum.join(", ")
-    call = IO.ANSI.format_fragment([:white, "#{s.name}(#{arguments_str})", :red])
+    arguments_str = arguments |> Enum.map(fn val -> inspect(val, inspect_value_opts()) end) |> Enum.join(", ")
+    arguments_str = IO.ANSI.format_fragment([:white, arguments_str, :white])
+    raw_call = if mod == TypeCheck.Builtin.Function do
+      "#{name}.(#{arguments_str})"
+    else
+      "#{name}(#{arguments_str})"
+    end
+    call = IO.ANSI.format_fragment([:white, raw_call, :red])
 
     val_str = inspect(val, inspect_value_opts())
 
