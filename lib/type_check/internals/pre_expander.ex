@@ -8,7 +8,7 @@ defmodule TypeCheck.Internals.PreExpander do
     builtin_imports = env.functions[TypeCheck.Builtin] || []
     ast
     |> Macro.expand(env)
-    |> TypeCheck.Internals.Overrides.rewrite_if_override(options.overrides, env)
+    |> TypeCheck.Internals.Overrides.rewrite_if_override(Map.get(options, :overrides, []), env)
     |> case do
       ast = {:lazy_explicit, meta, args}  ->
         if {:lazy_explicit, 3} in builtin_imports do

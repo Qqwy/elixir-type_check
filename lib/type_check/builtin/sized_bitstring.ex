@@ -25,11 +25,11 @@ defmodule TypeCheck.Builtin.SizedBitstring do
         quote generated: true, location: :keep do
           case unquote(param) do
             x when not is_bitstring(x) ->
-              {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
+              {:error, {unquote(Macro.escape(s)), :no_match, %{}, x}}
             x when bit_size(x) < unquote(s.prefix_size) or rem(bit_size(x) - unquote(s.prefix_size), unquote(s.unit_size)) != 0 ->
-              {:error, {unquote(Macro.escape(s)), :wrong_size, %{}, unquote(param)}}
-            _ ->
-              {:ok, [], unquote(param)}
+              {:error, {unquote(Macro.escape(s)), :wrong_size, %{}, x}}
+            correct_value ->
+              {:ok, [], correct_value}
           end
         end
       end

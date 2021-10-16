@@ -26,19 +26,22 @@ defmodule TypeCheck.Builtin.FixedMap do
     end
 
     def to_check(s, param) do
-      quote generated: true, location: :keep do
-        with {:ok, []} <- unquote(map_check(param, s)),
-             {:ok, []} <- unquote(build_keys_presence_ast(s, param)),
+      res = quote generated: true, location: :keep do
+        with :ok <- unquote(map_check(param, s)),
+             :ok <- unquote(build_keys_presence_ast(s, param)),
              {:ok, bindings3, altered_param} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
           {:ok, bindings3, altered_param}
         end
       end
+
+      IO.puts(Macro.to_string(res) |> Code.format_string!())
+      res
     end
 
     defp map_check(param, s) do
       quote generated: true, location: :keep do
         if is_map(unquote(param)) do
-          {:ok, []}
+          :ok
         else
           {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, unquote(param)}}
         end
@@ -57,7 +60,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
         case unquote(required_keys) -- actual_keys do
           [] ->
-            {:ok, []}
+            :ok
 
           missing_keys ->
             {:error,
@@ -82,7 +85,7 @@ defmodule TypeCheck.Builtin.FixedMap do
             [
               {{:ok, value_bindings, altered_element}, _key} <- {unquote(value_check), unquote(key)},
               bindings = value_bindings ++ bindings,
-              altered_keypair = [{unquote(key)}, altered_element]
+              altered_keypairs = [{unquote(key), altered_element} | altered_keypairs]
             ]
           end
         end)

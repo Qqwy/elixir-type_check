@@ -178,7 +178,7 @@ defmodule TypeCheck do
 
     res = quote generated: true, location: :keep do
       case unquote(check) do
-        {:ok, bindings} -> {:ok, unquote(value)}
+        {:ok, bindings, altered_value} -> {:ok, altered_value}
         {:error, problem} -> {:error, TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})}
       end
     end
@@ -203,7 +203,7 @@ defmodule TypeCheck do
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
-      match?({:ok, _}, unquote(check))
+      match?({:ok, _, _}, unquote(check))
     end
 
     if(evaluated_options.debug) do
@@ -228,7 +228,7 @@ defmodule TypeCheck do
 
     res = quote generated: true, location: :keep do
       case unquote(check) do
-        {:ok, _bindings} -> unquote(value)
+        {:ok, _bindings, altered_value} -> altered_value
         {:error, other} -> raise TypeCheck.TypeError, other
       end
     end

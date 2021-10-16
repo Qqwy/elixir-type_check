@@ -14,11 +14,12 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote generated: true, location: :keep do
-        case unquote(s.protocol).impl_for(unquote(param)) do
+        x = unquote(param)
+        case unquote(s.protocol).impl_for(x) do
           nil ->
-            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
+            {:error, {unquote(Macro.escape(s)), :no_match, %{}, x}}
           _ ->
-          {:ok, [], unquote(param)}
+          {:ok, [], x}
         end
       end
     end

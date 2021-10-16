@@ -200,7 +200,7 @@ defmodule TypeCheck.Macros do
     spec_defs = create_spec_defs(specs, definitions, env)
 
     spec_quotes =
-      if options.enable_runtime_checks do
+      if Map.get(options, :enable_runtime_checks) do
         wrap_functions_with_specs(specs, definitions, env)
       else
         quote do end

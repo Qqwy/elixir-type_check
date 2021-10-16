@@ -17,7 +17,8 @@ defmodule TypeCheck.Builtin.NamedType do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
 
       quote generated: true, location: :keep do
-        case unquote(inner_check) do
+        inner_res = unquote(inner_check)
+        case inner_res do
           {:ok, bindings, altered_inner} ->
             # Write it to a non-hygienic variable
             # that we can read from more outer-level types

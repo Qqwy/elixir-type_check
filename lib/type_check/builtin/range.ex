@@ -23,8 +23,8 @@ defmodule TypeCheck.Builtin.Range do
           x when x not in unquote(Macro.escape(range)) ->
             {:error, {unquote(Macro.escape(s)), :not_in_range, %{}, unquote(param)}}
 
-          _ ->
-            {:ok, [], unquote(param)}
+          correct_value ->
+            {:ok, [], correct_value}
         end
       end
     end
