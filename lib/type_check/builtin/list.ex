@@ -42,7 +42,7 @@ defmodule TypeCheck.Builtin.List do
         res =
           orig_param
           |> Enum.with_index()
-          |> Enum.reduce_while({:ok, [], orig_param}, fn {input, index}, {:ok, bindings, altered_param} ->
+          |> Enum.reduce_while({:ok, [], []}, fn {input, index}, {:ok, bindings, altered_param} ->
             var!(single_param, unquote(__MODULE__)) = input
 
             case unquote(element_check) do

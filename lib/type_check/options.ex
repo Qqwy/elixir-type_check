@@ -99,7 +99,7 @@ defmodule TypeCheck.Options do
   end
 
   def new(already_struct = %__MODULE__{}) do
-    IO.inspect(already_struct, label: "Inside first new clause")
+    # IO.inspect(already_struct, label: "Inside first new clause")
     already_struct
   end
 
@@ -107,7 +107,7 @@ defmodule TypeCheck.Options do
     @spec! new(enum :: any()) :: t()
   end
   def new(enum) do
-    IO.inspect(enum, label: "Inside second new clause")
+    # IO.inspect(enum, label: "Inside second new clause")
     raw_overrides = Keyword.get(enum, :overrides, [])
     debug = Keyword.get(enum, :debug, false)
     enable_runtime_checks = Keyword.get(enum, :enable_runtime_checks, true)

@@ -34,7 +34,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         end
       end
 
-      IO.puts(Macro.to_string(res) |> Code.format_string!())
+      # IO.puts(Macro.to_string(res) |> Code.format_string!())
       res
     end
 

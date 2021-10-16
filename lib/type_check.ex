@@ -274,7 +274,7 @@ defmodule TypeCheck do
     end
 
     case Code.eval_quoted(check_code, value: value) do
-      {{:ok, _}, _} -> {:ok, value}
+      {{:ok, _, altered_value}, _} -> {:ok, altered_value}
       {{:error, problem}, _} ->
         {:current_stacktrace, [_ , caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)

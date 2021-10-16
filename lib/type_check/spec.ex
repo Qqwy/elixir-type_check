@@ -134,7 +134,7 @@ defmodule TypeCheck.Spec do
     body = quote do
       unquote(params_spec_code)
       var!(super_result, nil) = super(unquote_splicing(clean_params))
-      IO.inspect(var!(super_result, nil), label: :super_result)
+      # IO.inspect(var!(super_result, nil), label: :super_result)
       unquote(return_spec_code)
     end
 
@@ -209,8 +209,8 @@ defmodule TypeCheck.Spec do
     quote generated: true, location: :keep do
       case unquote(return_code_check) do
         {:ok, _bindings, altered_return_value} ->
-          IO.inspect(unquote(return_code_check), label: :return_check_code1, limit: :infinity)
-          IO.inspect(altered_return_value, label: :return_check_code2)
+          # IO.inspect(unquote(return_code_check), label: :return_check_code1, limit: :infinity)
+          # IO.inspect(altered_return_value, label: :return_check_code2)
           altered_return_value
 
         {:error, problem} ->
