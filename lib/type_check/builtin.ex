@@ -291,6 +291,35 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  A function (of any arity) returning `return_type`.
+
+  c.f. `TypeCheck.Builtin.Function`
+  """
+  if_recompiling? do
+    @spec! function(return_type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.Function.t()
+  end
+  def function(return_type) do
+    build_struct(TypeCheck.Builtin.Function)
+    |> Map.put(:return_type, return_type)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  A function taking `param_types` as parameters, returning `return_type`.
+
+  c.f. `TypeCheck.Builtin.Function`
+  """
+  if_recompiling? do
+    @spec! function(param_types :: list(TypeCheck.Type.t()), return_type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.Function.t()
+  end
+  def function(param_types, return_type) do
+    build_struct(TypeCheck.Builtin.Function)
+    |> Map.put(:param_types, param_types)
+    |> Map.put(:return_type, return_type)
+  end
+
+  @doc typekind: :builtin
+  @doc """
   Alias for `function/0`.
 
       iex> TypeCheck.conforms!(&div/2, fun())

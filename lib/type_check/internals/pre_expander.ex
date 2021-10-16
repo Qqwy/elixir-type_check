@@ -63,6 +63,22 @@ defmodule TypeCheck.Internals.PreExpander do
         quote generated: true, location: :keep do
           TypeCheck.Builtin.literal(unquote(x))
         end
+
+      [{:->, _, args}] ->
+        case args do
+          [{:"...", _, module}, return_type] when is_atom(module) ->
+            quote generated: true, location: :keep do
+              TypeCheck.Builtin.function(unquote(rewrite(return_type, env, options)))
+            end
+          [param_types, return_type] ->
+            rewritten_params =
+              param_types
+              |> Enum.map(&rewrite(&1, env, options))
+            quote generated: true, location: :keep do
+              TypeCheck.Builtin.function(unquote(rewritten_params), unquote(rewrite(return_type, env, options)))
+            end
+        end
+
       list when is_list(list) ->
            case list do
              [] ->

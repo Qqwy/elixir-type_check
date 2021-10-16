@@ -45,6 +45,22 @@ defmodule TypeCheck.Builtin.Function do
       %{param_types: nil, return_type: _type} ->
         # TODO. How to construct an arbitrary-arity function?
         original
+      %{param_types: [], return_type: return_type} ->
+        return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:result, nil))
+
+        quote generated: true, location: :keep do
+          fn ->
+            var!(result, nil) = unquote(original).()
+            case unquote(return_code_check) do
+              {:ok, _bindings, altered_return_value} ->
+                altered_return_value
+              {:error, problem} ->
+                raise TypeCheck.TypeError,
+                  {unquote(Macro.escape(s)), :return_error,
+                  %{problem: problem, arguments: []}, var!(result, nil)}
+            end
+          end
+        end
       %{param_types: param_types, return_type: return_type} ->
         clean_params = Macro.generate_arguments(length(param_types), __MODULE__)
         param_checks =
