@@ -43,7 +43,6 @@ defmodule TypeCheck.Builtin.Function do
       %{param_types: [], return_type: %TypeCheck.Builtin.Any{}} ->
         original
       %{param_types: nil, return_type: return_type} ->
-        # TODO. How to construct an arbitrary-arity function wrapper?
         quote generated: true, location: :keep, bind_quoted: [fun: original, s: Macro.escape(s), return_type: Macro.escape(return_type)] do
           {:arity, arity} = Function.info(fun, :arity)
           clean_params = Macro.generate_arguments(arity, __MODULE__)
