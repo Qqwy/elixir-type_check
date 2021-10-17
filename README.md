@@ -189,7 +189,6 @@ Details:
   - `(-> result_type)`
   - `(...-> result_type)`
   - `(param_type, param2_type -> result_type)`
-
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
 
 ### Pre-stable
