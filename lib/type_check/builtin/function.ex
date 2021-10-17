@@ -163,7 +163,7 @@ defmodule TypeCheck.Builtin.Function do
     end
   end
 
-  if Code.ensure_loaded?(StreamData) do
+  if Code.ensure_loaded?(StreamData) && Code.ensure_loaded(Murmur) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
         case s do

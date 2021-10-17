@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.9.0",
+      version: "0.10.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -63,10 +63,12 @@ defmodule TypeCheck.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
-      {:murmur, "~> 1.0"},
+      # Used for spectesting and property-tests in general:
       {:stream_data, "~> 0.5.0", optional: true},
+      # Used for spectesting and property-test generators for function-types:
+      {:murmur, "~> 1.0", optional: true},
+
+      # For documentation purposes:
       {:ex_doc, "~> 0.22", only: :docs, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dialize], runtime: false},
       {:benchee, "~> 1.0", only: :bench},
