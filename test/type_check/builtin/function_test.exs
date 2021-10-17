@@ -22,7 +22,7 @@ defmodule TypeCheck.Builtin.FunctionTest do
   property "Raises on input which is not a function" do
     check all input <- StreamData.term(),
               not is_function(input) do
-      {error, problem} = TypeCheck.conforms(input, (boolean(), binary() -> integer()))
+      {:error, problem} = TypeCheck.conforms(input, (boolean(), binary() -> integer()))
       assert {_, :no_match, _, ^input} = problem.raw
     end
   end
