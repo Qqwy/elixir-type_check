@@ -185,11 +185,17 @@ Details:
 - [x] Creating generators from specs
   - [x] Wrap spec-generators so you have a single statement to call in the test suite which will prop-test your function against all allowed inputs/outputs.
 - [x] Option to turn the generation of runtime checks off for a given module in a particular environment (`enable_runtime_checks`).
+- [x] Support for function-types (for typechecks as well as property-testing generators):
+  - `(-> result_type)`
+  - `(...-> result_type)`
+  - `(param_type, param2_type -> result_type)`
+
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
 
 ### Pre-stable
 
 - [ ] Overrides for more builtin remote types
+- [ ] Support for maps with mixed `required(type)` and `optional(type)` syntaxes.
 - [ ] Hide named types from opaque types.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
@@ -199,7 +205,12 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
-- master -
+- 0.10.0 -
+  - Additions
+    - Support for function-types (for typechecks as well as property-testing generators):
+      - `(-> result_type)`
+      - `(...-> result_type)`
+      - `(param_type, param2_type -> result_type)`
   - Fixes:
     - Wrapping private functions no longer make the function public. (c.f. #64)
     - Wrapping macros now works correctly. (also related to #64)
@@ -269,7 +280,11 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.5.0"}
+    {:type_check, "~> 0.9.0"},
+    # Optional, to allow spectesting and property-testing data generators:
+    {:stream_data, "~> 0.5.0", only: :test}, 
+    # Optional, to allow spectesting/property-testing for higher-order function-types specifically:
+    {:murmur, "~> 1.0", only: :test},
   ]
 end
 ```

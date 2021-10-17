@@ -293,6 +293,10 @@ defmodule TypeCheck.Builtin do
   @doc """
   A function (of any arity) returning `return_type`.
 
+  Desugaring of `(... -> return_type)`
+
+  See `function/2` for more info.
+
   c.f. `TypeCheck.Builtin.Function`
   """
   if_recompiling? do
@@ -306,6 +310,39 @@ defmodule TypeCheck.Builtin do
   @doc typekind: :builtin
   @doc """
   A function taking `param_types` as parameters, returning `return_type`.
+
+  Desugaring of `(param_type -> return_type)`,
+  `(param_type, param_type2 -> return_type)`,
+  `(param_type, param_type2, param_type3 -> return_type)` etc.
+
+  Type-checking a function value against a function-type works a bit differently from most other types.
+  The reason for this is that we can only ascertain whether the function-value works correctly when the function-value is called.
+
+  Specifically:
+  - When a call to `TypeCheck.conforms/3` (and variants) or a function wrapped with a `@spec!` is called, we can immediately check whether a particular parameter:
+    - is a function
+    - accepts the expected arity
+  - Then, the parameter-which-is-a-function is wrapped in a 'wrapper function' which, when called:
+    - typechecks whether the passed parameters are of the expected types (_This checks whether *your* function uses the parameter-function correctly_.)
+    - calls the original function with the parameters.
+    - typechecks whether the result is of the expected type. (_This checks whether the *parameter-function* works correctly_.)
+    - returns the result.
+
+  In other words, the 'wrapper function' which is added for a type `(param_type, param_type2 -> result_type)` works similarly
+  to a named function with the spec `@spec! myfunction(param_type, param_type2) :: result_type`.
+
+      iex> # The following passes the first check...
+      iex> fun = TypeCheck.conforms!(&div/2, (integer(), integer() -> boolean()))
+      iex> # ... but once the function returns, the wrapper will raise
+      iex> fun.(20, 5)
+      ** (TypeCheck.TypeError) The call to `#Function<...>/2` failed,
+          because the returned result does not adhere to the spec `boolean()`.
+          Rather, its value is: `4`.
+          Details:
+            The result of calling `#Function<...>.(20, 5)`
+            does not adhere to spec `(integer(), integer() -> boolean())`. Reason:
+              Returned result:
+                `4` is not a boolean.
 
   c.f. `TypeCheck.Builtin.Function`
   """

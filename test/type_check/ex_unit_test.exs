@@ -13,7 +13,6 @@ defmodule TypeCheck.ExUnitTest do
 
   # This test is nice, but only works on recent Elixir versions.
   unless Elixir.Version.compare(System.version(), "1.12.0") == :lt do
-    import ExUnit.CaptureIO
     test "Spectest describes failures correctly" do
       defmodule SpectestTestExampleTest do
         use ExUnit.Case
@@ -22,7 +21,8 @@ defmodule TypeCheck.ExUnitTest do
         spectest SpectestTestExample, except: [picky_pineapple: 1]
       end
 
-      res = capture_io(fn ->
+      require ExUnit.CaptureIO
+      res = ExUnit.CaptureIO.capture_io(fn ->
         ExUnit.configure(colors: [enabled: false])
         ExUnit.run()
       end)

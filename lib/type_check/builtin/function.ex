@@ -163,11 +163,45 @@ defmodule TypeCheck.Builtin.Function do
     end
   end
 
-  # if Code.ensure_loaded?(StreamData) do
-  #   defimpl TypeCheck.Protocols.ToStreamData do
-  #     def to_gen(_s) do
-  #       raise "Not implemented yet. PRs are welcome!"
-  #     end
-  #   end
-  # end
+  if Code.ensure_loaded?(StreamData) && Code.ensure_loaded(Murmur) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        case s do
+          %{param_types: nil, return_type: result_type} ->
+            {StreamData.positive_integer(), StreamData.positive_integer()}
+            |> StreamData.bind(fn {arity, seed} ->
+              create_wrapper(result_type, arity, seed)
+            end)
+          %{param_types: param_types, return_type: result_type} when is_list(param_types) ->
+            arity = length(param_types)
+
+            StreamData.positive_integer()
+            |> StreamData.bind(fn seed ->
+              create_wrapper(result_type, arity, seed)
+            end)
+        end
+      end
+
+      defp create_wrapper(result_type, arity, hash_seed) do
+        clean_params = Macro.generate_arguments(arity, __MODULE__)
+        wrapper_ast =
+          quote do
+          fn unquote_splicing(clean_params) ->
+            persistent_seed =
+              unquote(clean_params)
+              |> :erlang.term_to_binary()
+              |> Murmur.hash_x86_32(unquote(hash_seed))
+
+            unquote(Macro.escape(result_type))
+            |> TypeCheck.Protocols.ToStreamData.to_gen()
+            |> StreamData.seeded(persistent_seed)
+            |> Enum.take(1)
+            |> List.first
+          end
+        end
+        {fun, _} = Code.eval_quoted(wrapper_ast)
+        StreamData.constant(fun)
+      end
+    end
+  end
 end
