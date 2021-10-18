@@ -163,7 +163,7 @@ defmodule TypeCheck.Builtin.Function do
     end
   end
 
-  if Code.ensure_loaded?(StreamData) && Code.ensure_loaded(Murmur) do
+  if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
         case s do
@@ -187,10 +187,7 @@ defmodule TypeCheck.Builtin.Function do
         wrapper_ast =
           quote do
           fn unquote_splicing(clean_params) ->
-            persistent_seed =
-              unquote(clean_params)
-              |> :erlang.term_to_binary()
-              |> Murmur.hash_x86_32(unquote(hash_seed))
+            persistent_seed = :erlang.phash(unquote(clean_params), unquote(hash_seed))
 
             unquote(Macro.escape(result_type))
             |> TypeCheck.Protocols.ToStreamData.to_gen()

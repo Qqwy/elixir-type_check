@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.10.0",
+      version: "0.10.1",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -65,8 +65,6 @@ defmodule TypeCheck.MixProject do
     [
       # Used for spectesting and property-tests in general:
       {:stream_data, "~> 0.5.0", optional: true},
-      # Used for spectesting and property-test generators for function-types:
-      {:murmur, "~> 1.0", optional: true},
 
       # For documentation purposes:
       {:ex_doc, "~> 0.22", only: :docs, runtime: false},
