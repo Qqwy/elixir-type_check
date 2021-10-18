@@ -206,7 +206,7 @@ Details:
 ### Changelog
 - 0.10.1 - 
   - Fixes:
-    - Swaps `Murmur` out for Erlang's builtin `:erlang.phash/2` to generate data for function-types, allowing the removal of the optional dependency on the `:murmur` library.
+    - Swaps `Murmur` out for Erlang's builtin `:erlang.phash2/2` to generate data for function-types, allowing the removal of the optional dependency on the `:murmur` library.
 - 0.10.0 -
   - Additions
     - Support for function-types (for typechecks as well as property-testing generators):

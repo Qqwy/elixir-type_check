@@ -187,7 +187,7 @@ defmodule TypeCheck.Builtin.Function do
         wrapper_ast =
           quote do
           fn unquote_splicing(clean_params) ->
-            persistent_seed = :erlang.phash(unquote(clean_params), unquote(hash_seed))
+            persistent_seed = :erlang.phash2(unquote(clean_params), unquote(hash_seed))
 
             unquote(Macro.escape(result_type))
             |> TypeCheck.Protocols.ToStreamData.to_gen()
