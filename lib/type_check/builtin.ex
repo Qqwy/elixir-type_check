@@ -21,7 +21,7 @@ defmodule TypeCheck.Builtin do
 
   For an up-to-date comparison of what types TypeCheck
   does and does not support w.r.t. Elixir's builtin typespecs,
-  see 
+  see [Comparison to Plain Typespecs](comparing-typecheck-and-elixir-typespecs.html).
 
 
   """
