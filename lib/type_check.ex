@@ -58,9 +58,6 @@ defmodule TypeCheck do
 
   The following typespec syntax can _not_ currently be used in TypeCheck. This will hopefully change in future versions of the library.
 
-  - Binary pattern-matches containing size-references like `<<_ :: size>>`.
-  - (Anonymous) function types like `( -> result_type)` and `(type1, type2 -> result_type)`.
-  - Shorthand nonempty list syntax (`[some_type, ...]`)
   - Literal maps with `required(...)` and `optional(...)` keys. (TypeCheck does already support literal maps with a fixed set of keys, as well as maps with any number of key-value-pairs of fixed types. It is the special syntax that might mix these approaches that is not supported yet.)
 
   ### Extensions
