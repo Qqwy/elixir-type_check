@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.1 - 
+  - Fixes:
+    - Swaps `Murmur` out for Erlang's builtin `:erlang.phash/2` to generate data for function-types, allowing the removal of the optional dependency on the `:murmur` library.
 - 0.10.0 -
   - Additions
     - Support for function-types (for typechecks as well as property-testing generators):
@@ -280,10 +283,8 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 def deps do
   [
     {:type_check, "~> 0.9.0"},
-    # Optional, to allow spectesting and property-testing data generators:
+    # To allow spectesting and property-testing data generators (optional):
     {:stream_data, "~> 0.5.0", only: :test}, 
-    # Optional, to allow spectesting/property-testing for higher-order function-types specifically:
-    {:murmur, "~> 1.0", only: :test},
   ]
 end
 ```
