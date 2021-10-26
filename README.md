@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.2 - 
+  - Fixes:
+    - Fixes issue where FixedMaps would accept maps any maps (even those missing the required keys) sometimes. (c.f. #74)
 - 0.10.1 - 
   - Fixes:
     - Swaps `Murmur` out for Erlang's builtin `:erlang.phash2/2` to generate data for function-types, allowing the removal of the optional dependency on the `:murmur` library.

@@ -27,8 +27,8 @@ defmodule TypeCheck.Builtin.FixedMap do
 
     def to_check(s, param) do
       res = quote generated: true, location: :keep do
-        with :ok <- unquote(map_check(param, s)),
-             :ok <- unquote(build_keys_presence_ast(s, param)),
+        with {:ok, _, _} <- unquote(map_check(param, s)),
+             {:ok, _, _} <- unquote(build_keys_presence_ast(s, param)),
              {:ok, bindings3, altered_param} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
           {:ok, bindings3, altered_param}
         end
@@ -61,7 +61,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
         case unquote(required_keys) -- actual_keys do
           [] ->
-            :ok
+            {:ok, [], unquote(param)}
 
           missing_keys ->
             {:error,
