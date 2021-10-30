@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.3 - 
+  - Fixes:
+    - Fixes issue when TypeCheck specs were used inside a defprotocol module or other modules where the normal `def`/`defp` macros are hidden/overridden.
 - 0.10.2 - 
   - Fixes:
     - Fixes issue where FixedMaps would accept maps any maps (even those missing the required keys) sometimes. (c.f. #74)
