@@ -148,7 +148,7 @@ defmodule TypeCheck.Spec do
 
       defoverridable([{unquote(name), unquote(arity)}])
 
-      unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
+      Kernel.unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
     end
   end
 
