@@ -215,7 +215,7 @@ the BEAM compiler will in most cases be able to combine these into a single chec
 
 #### Documentation
 
-Norm does not focus on dcumentation.
+Norm does not focus on documentation.
 Norm's `spec`s are normal functions which you can document manually using `@doc` if you wish. 
 Norm's `@contract`s are not used for documentation purposes.
 
