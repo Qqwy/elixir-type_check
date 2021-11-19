@@ -262,12 +262,7 @@ defmodule TypeCheck.Internals.PreExpander do
     # The following is necessary because `%Foo{}` does not equal the type `%{__struct__: Foo}`
     # but  rather `%{__struct__: Foo, some_key: any(), some_other_key: any()}`
     # (using the keys from the `defstruct`)
-    default_fields =
-      if Module.open?(expanded_struct_name) do
-        Module.get_attribute(expanded_struct_name, :__struct__, %{__struct__: expanded_struct_name})
-      else
-        expanded_struct_name.__struct__()
-      end
+    default_fields = Macro.struct!(expanded_struct_name, env)
     default_field_types =
       default_fields
       |> Map.from_struct()

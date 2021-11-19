@@ -160,8 +160,8 @@ defmodule TypeCheck.MacrosTest do
     defmodule ModuleExpansion do
       use TypeCheck
 
-      @type! t :: %__MODULE__{name: String.t()}
       defstruct [:name]
+      @type! t :: %__MODULE__{name: String.t()}
 
       @spec! build(String.t()) :: t()
       def build(name) do
