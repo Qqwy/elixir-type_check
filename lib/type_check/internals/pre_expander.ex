@@ -251,11 +251,30 @@ defmodule TypeCheck.Internals.PreExpander do
   end
 
   defp rewrite_struct(struct_name, fields, env, options) do
-    field_types = Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
-    # TODO wrap in struct-checker
+    explicit_field_types = Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
+    rewritten_struct_name = rewrite(struct_name, env, options)
+
+    # The following is necessary because `%Foo{}` does not equal the type `%{__struct__: Foo}`
+    # but  rather `%{__struct__: Foo, some_key: any(), some_other_key: any()}`
+    # (using the keys from the `defstruct`)
+    default_fields =
+      if Module.open?(rewritten_struct_name) do
+        Module.get_attribute(rewritten_struct_name, :__struct__, %{__struct__: rewritten_struct_name})
+      else
+        rewritten_struct_name.__struct__()
+      end
+    default_field_types =
+      default_fields
+      |> Map.from_struct()
+      |> Map.keys()
+      |> Enum.map(fn key -> {key, TypeCheck.Builtin.any()} end)
+      |> Enum.into(%{})
+
+    field_types = Map.merge(default_field_types, explicit_field_types)
+
     quote generated: true, location: :keep do
       TypeCheck.Builtin.fixed_map(
-        [__struct__: unquote(rewrite(struct_name, env, options))] ++ unquote(field_types)
+        [__struct__: unquote(rewritten_struct_name)] ++ unquote(field_types)
       )
     end
   end
