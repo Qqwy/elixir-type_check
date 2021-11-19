@@ -35,7 +35,7 @@ defmodule TypeCheck.Options do
   use TypeCheck, overrides: [
     {&Ecto.Schema.t/0, &MyProject.TypeCheckOverrides.Ecto.Schema.t/0}
   ]
-
+  ```
 
   ### Enabling/Disabling runtime checks
 
@@ -59,7 +59,6 @@ defmodule TypeCheck.Options do
 
   Passing the option `debug: true` will at compile-time print the generated code
   for all added `@spec`s, as well as `TypeCheck.conforms/3`/`TypeCheck.conforms?/3`/`TypeCheck.conforms!/3` calls.
-  ```
   """
 
   if_recompiling? do
