@@ -251,26 +251,31 @@ defmodule TypeCheck.Internals.PreExpander do
   end
 
   defp rewrite_struct(struct_name, fields, env, options) do
-    explicit_field_types = Enum.map(fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
+    explicit_field_types =
+      fields
+      |> Enum.map(fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
+      |> Enum.into(%{})
+
+    expanded_struct_name = Macro.expand(struct_name, env)
     rewritten_struct_name = rewrite(struct_name, env, options)
 
     # The following is necessary because `%Foo{}` does not equal the type `%{__struct__: Foo}`
     # but  rather `%{__struct__: Foo, some_key: any(), some_other_key: any()}`
     # (using the keys from the `defstruct`)
     default_fields =
-      if Module.open?(rewritten_struct_name) do
-        Module.get_attribute(rewritten_struct_name, :__struct__, %{__struct__: rewritten_struct_name})
+      if Module.open?(expanded_struct_name) do
+        Module.get_attribute(expanded_struct_name, :__struct__, %{__struct__: expanded_struct_name})
       else
-        rewritten_struct_name.__struct__()
+        expanded_struct_name.__struct__()
       end
     default_field_types =
       default_fields
       |> Map.from_struct()
       |> Map.keys()
-      |> Enum.map(fn key -> {key, TypeCheck.Builtin.any()} end)
+      |> Enum.map(fn key -> {key, quote do TypeCheck.Builtin.any() end} end)
       |> Enum.into(%{})
 
-    field_types = Map.merge(default_field_types, explicit_field_types)
+    field_types = Map.merge(default_field_types, explicit_field_types) |> Enum.to_list()
 
     quote generated: true, location: :keep do
       TypeCheck.Builtin.fixed_map(
