@@ -174,4 +174,18 @@ defmodule TypeCheck.MacrosTest do
       ModuleExpansion.build(:not_a_string)
     end
   end
+
+  test "Using a struct-type before `defstruct` fails with a descriptive CompileError" do
+    assert_raise(
+      CompileError,
+      ~r"Could not look up default fields for struct type",
+      fn ->
+        defmodule Problematic do
+          use TypeCheck
+
+          @type! t :: %__MODULE__{name: String.t()}
+          defstruct [:name]
+        end
+      end)
+  end
 end

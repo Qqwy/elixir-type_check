@@ -262,7 +262,40 @@ defmodule TypeCheck.Internals.PreExpander do
     # The following is necessary because `%Foo{}` does not equal the type `%{__struct__: Foo}`
     # but  rather `%{__struct__: Foo, some_key: any(), some_other_key: any()}`
     # (using the keys from the `defstruct`)
-    default_fields = Macro.struct!(expanded_struct_name, env)
+    default_fields =
+      try do
+        Macro.struct!(expanded_struct_name, env)
+      rescue
+        err in [CompileError] ->
+          pretty_type = quote do %unquote(struct_name){unquote_splicing(fields)} end
+          description = """
+
+          Could not look up default fields for struct type #{Macro.to_string(pretty_type)}.
+          This usually means that the type is used in the same module
+          as the `defstruct`, but before it.
+
+          Try changing e.g.
+          ```
+          @type! t() :: %__MODULE__{}
+          defstruct [:some, :fields]
+          ```
+
+          to:
+          ```
+          defstruct [:some, :fields]
+          @type! t() :: %__MODULE__{}
+          ```
+
+          See https://github.com/Qqwy/elixir-type_check/issues/83
+          for more information.
+          """
+          fields =
+            err
+            |> Map.from_struct()
+            |> Map.to_list()
+            |> Keyword.replace(:description, description)
+          raise CompileError, fields
+      end
     default_field_types =
       default_fields
       |> Map.from_struct()
