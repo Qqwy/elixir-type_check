@@ -188,4 +188,20 @@ defmodule TypeCheck.MacrosTest do
         end
       end)
   end
+
+  test "Specs for struct types don't truncate fields (regression-test for https://github.com/Qqwy/elixir-type_check/issues/78)" do
+    defmodule DontTruncate do
+      use TypeCheck
+
+      defstruct name: "Foo", age: 42
+
+      @spec! from_map(%{}) :: %__MODULE__{}
+      def from_map(map) do
+        struct(__MODULE__, map)
+      end
+    end
+
+    res = DontTruncate.from_map(%{name: "asdf", age: 33})
+    assert struct(DontTruncate, %{name: "asdf", age: 33}) == res
+  end
 end
