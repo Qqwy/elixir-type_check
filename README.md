@@ -204,6 +204,10 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.4 -
+  - Fixes:
+    - Fixes issue where sometimes results of specs returning a struct would remove some or all struct fields. (c.f. #78)
+    - Related: Ensures that when a `@type!` containing a `%__MODULE__{}` is used before that module's `defstruct`, a clear CompileError is created (c.f. #83).
 - 0.10.3 - 
   - Fixes:
     - Fixes issue when TypeCheck specs were used inside a defprotocol module or other modules where the normal `def`/`defp` macros are hidden/overridden.
