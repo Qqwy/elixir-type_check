@@ -8,11 +8,12 @@ jobs:
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
       matrix:
-        otp: ['24.x', '23.x', '22.x']
-        # Turn off 1.9 and 1.10 for now since they keep time-outing on GH Actions
+        otp: ['24.x']
+        # Turn off older Elixir and OTP versions for now since they keep time-outing on GH Actions
         # even though they run the suite perfectly fine locally
+        # otp: ['24.x', '23.x', '22.x']
         # elixir: ['1.12.x', '1.11.x', '1.10.x', '1.9.x']
-        elixir: ['1.12.x', '1.11.x']
+        elixir: ['1.12.x']
         exclude: 
           - otp: '24.x'
             elixir: '1.9.x'
