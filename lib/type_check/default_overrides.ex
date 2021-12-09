@@ -43,6 +43,7 @@ defmodule TypeCheck.DefaultOverrides do
     Regex
     Stream
     String
+    System
     Time
     URI
     Version
