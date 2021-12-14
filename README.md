@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.5 - 
+  - Additions:
+    - Support for the builtin types of the `System` module. Thank you, @paulswartz!
 - 0.10.4 -
   - Fixes:
     - Fixes issue where sometimes results of specs returning a struct would remove some or all struct fields. (c.f. #78)
