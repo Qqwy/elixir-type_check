@@ -24,7 +24,7 @@ Elixir (and Erlang) come with a nice description for the types of the values pas
 However, by default these typespecs are just used for documentation.
 They are not used in any way to restrict, or even warn when your code is not following them correctly.
 
-Somewhat more recently, tools like [Dialyzer / Dialyzir](https://github.com/jeremyjh/dialyxir) have been introduced in the ecosystem.
+Somewhat more recently, tools like [Dialyzer / Dialyxir](https://github.com/jeremyjh/dialyxir) have been introduced in the ecosystem.
 These perform a static check of the source-code (that is, they look at the code as written without executing it) to catch some potential mis-uses.
 Dialyzer has however three commonly mentioned drawbacks:
 
