@@ -154,7 +154,7 @@ defmodule TypeCheck.Spec do
       @compile {:inline, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
       @dialyzer {:nowarn_function, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
 
-      Kernel.def unquote(return_spec_fun_name)(var!(super_result, nil), unquote_splicing(clean_params)) do
+      Kernel.defp unquote(return_spec_fun_name)(var!(super_result, nil), unquote_splicing(clean_params)) do
         unquote(return_spec_code)
       end
     end
