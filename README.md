@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.6 - 
+  - Fixes:
+    - Fixes issue where Dialyzer would sometimes complain about the generated return-type checking code if the implementation of the function itself was trivial. (c.f. #85).
 - 0.10.5 - 
   - Additions:
     - Support for the builtin types of the `System` module. Thank you, @paulswartz!
