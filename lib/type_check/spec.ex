@@ -129,13 +129,12 @@ defmodule TypeCheck.Spec do
 
   @doc false
   def wrap_function_with_spec(name, _location, arity, clean_params, params_spec_code, return_spec_code, typespec, caller) do
-    # {file, line} = location
+    return_spec_fun_name = :"__#{name}__type_check_return_spec__"
 
     body = quote do
       unquote(params_spec_code)
-      var!(super_result, nil) = super(unquote_splicing(clean_params))
-      # IO.inspect(var!(super_result, nil), label: :super_result)
-      unquote(return_spec_code)
+      super_result = super(unquote_splicing(clean_params))
+      unquote(return_spec_fun_name)(super_result, unquote_splicing(clean_params))
     end
 
     # Check if original function is public or private
@@ -149,6 +148,15 @@ defmodule TypeCheck.Spec do
       defoverridable([{unquote(name), unquote(arity)}])
 
       Kernel.unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
+
+      # The result is checed in a separate function
+      # This ensures we can convince Dialyzer to skip it. c.f. #85
+      @compile {:inline, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
+      @dialyzer {:nowarn_function, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
+
+      Kernel.defp unquote(return_spec_fun_name)(var!(super_result, nil), unquote_splicing(clean_params)) do
+        unquote(return_spec_code)
+      end
     end
   end
 
