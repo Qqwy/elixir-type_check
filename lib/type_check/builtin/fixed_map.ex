@@ -13,10 +13,11 @@ defmodule TypeCheck.Builtin.FixedMap do
   @type! t :: %__MODULE__{keypairs: list({term(), TypeCheck.Type.t()})}
 
   @type! problem_tuple ::
-         {t(), :not_a_map, %{}, any()}
-         | {t(), :missing_keys, %{keys: list(atom())}, map()}
-         | {t(), :value_error,
-            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
+           {t(), :not_a_map, %{}, any()}
+           | {t(), :missing_keys, %{keys: list(atom())}, map()}
+           | {t(), :superfluous_keys, %{keys: list(atom())}, map()}
+           | {t(), :value_error,
+              %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
@@ -26,15 +27,17 @@ defmodule TypeCheck.Builtin.FixedMap do
     end
 
     def to_check(s, param) do
-      res = quote generated: true, location: :keep do
-        with {:ok, _, _} <- unquote(map_check(param, s)),
-             {:ok, _, _} <- unquote(build_keys_presence_ast(s, param)),
-             {:ok, bindings3, altered_param} <- unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
-          {:ok, bindings3, altered_param}
+      res =
+        quote generated: true, location: :keep do
+          with {:ok, _, _} <- unquote(map_check(param, s)),
+               {:ok, _, _} <- unquote(build_keys_presence_ast(s, param)),
+               {:ok, _, _} <- unquote(build_superfluous_keys_ast(s, param)),
+               {:ok, bindings3, altered_param} <-
+                 unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+            {:ok, bindings3, altered_param}
+          end
         end
-      end
 
-      # IO.puts(Macro.to_string(res) |> Code.format_string!())
       res
     end
 
@@ -66,6 +69,27 @@ defmodule TypeCheck.Builtin.FixedMap do
           missing_keys ->
             {:error,
              {unquote(Macro.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
+        end
+      end
+    end
+
+    defp build_superfluous_keys_ast(s, param) do
+      required_keys =
+        s.keypairs
+        |> Enum.into(%{})
+        |> Map.keys()
+
+      quote generated: true, location: :keep do
+        actual_keys = unquote(param) |> Map.keys()
+
+        case actual_keys -- unquote(required_keys) do
+          [] ->
+            {:ok, [], unquote(param)}
+
+          superfluous_keys ->
+            {:error,
+             {unquote(Macro.escape(s)), :superfluous_keys, %{keys: superfluous_keys},
+              unquote(param)}}
         end
       end
     end
