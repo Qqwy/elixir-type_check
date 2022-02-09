@@ -5,6 +5,7 @@ defmodule TypeCheck.Builtin.FixedMap do
   On failure returns a problem tuple with:
   - `:not_a_map` if the value is not a map
   - `:missing_keys` if the value does not have all of the expected keys. The extra information contains in this case `:keys` with a list of keys that are missing.
+  - `:superfluous_keys` if the value have any keys other than the expected keys. The extra information contains in this case `:keys` with a list of keys that are superfluous.
   - `:value_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:key` to indicate what and where the problem occured.
   """
   defstruct [:keypairs]
