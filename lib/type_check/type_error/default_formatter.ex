@@ -91,6 +91,19 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
       |> Enum.join(", ")
 
     problem = "`#{inspect(val, inspect_value_opts())}` is missing the following required key(s): `#{keys_str}`."
+
+    compound_check(val, s, problem)
+  end
+  
+  def do_format({s = %TypeCheck.Builtin.FixedMap{}, :superfluous_keys, %{keys: keys}, val}) do
+    keys_str =
+      keys
+      |> Enum.map(&inspect/1)
+      |> Enum.join(", ")
+
+    problem =
+      "`#{inspect(val, inspect_value_opts())}` contains the following superfluous key(s): `#{keys_str}`."
+
     compound_check(val, s, problem)
   end
 
