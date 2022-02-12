@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.7 - 
+  - Fixes:
+    - Ensures fixed-maps are checked for superfluous keys (c.f. #96). Thank you very much, @spatrik!
 - 0.10.6 - 
   - Fixes:
     - Fixes issue where Dialyzer would sometimes complain about the generated return-type checking code if the implementation of the function itself was trivial. (c.f. #85).
