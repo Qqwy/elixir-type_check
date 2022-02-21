@@ -224,18 +224,21 @@ defmodule TypeCheck.Internals.PreExpander do
     end
   end
 
-  defp rewrite_map_or_struct(struct_fields, orig_ast, env, options) do
-    case struct_fields[:__struct__] do
+  defp rewrite_map_or_struct(map_fields, orig_ast, env, options) do
+    case map_fields[:__struct__] do
       Range ->
         quote generated: true, location: :keep do
           TypeCheck.Builtin.range(unquote(orig_ast))
         end
 
       nil ->
+        res = rewrite_map_fields(map_fields, env, options)
+        res[:requireds] |> Macro.to_string() |> IO.puts
+        res[:optionals] |> Macro.to_string() |> IO.puts
         # A map with fixed fields
         # Keys are expected to be literal values
         field_types =
-          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
+          Enum.map(map_fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
 
         quote generated: true, location: :keep do
           TypeCheck.Builtin.fixed_map(unquote(field_types))
@@ -248,6 +251,25 @@ defmodule TypeCheck.Internals.PreExpander do
           TypeCheck.Builtin.literal(unquote(orig_ast))
         end
     end
+  end
+
+  defp rewrite_map_fields(fields, env, options) do
+    Enum.reduce(fields, %{requireds: [], optionals: []}, fn field, acc ->
+      case field do
+        {literal_key, v} when is_binary(literal_key) or is_integer(literal_key) or is_atom(literal_key) ->
+          k = TypeCheck.Builtin.literal(literal_key)
+          v = rewrite(v, env, options)
+          update_in(acc[:requireds], &[{k, v} | &1])
+        {{:required, _, [k]}, v} ->
+          k = rewrite(k, env, options)
+          v = rewrite(v, env, options)
+          update_in(acc[:requireds], &[{k, v} | &1])
+        {{:optional, _, [k]}, v} ->
+          k = rewrite(k, env, options)
+          v = rewrite(v, env, options)
+          update_in(acc[:optionals], &[{k, v} | &1])
+      end
+    end)
   end
 
   defp rewrite_struct(struct_name, fields, env, options) do
