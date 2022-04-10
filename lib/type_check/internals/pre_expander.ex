@@ -138,7 +138,7 @@ defmodule TypeCheck.Internals.PreExpander do
                TypeCheck does not support the bitstring literal `#{Macro.to_string(bitstring)}`
                Currently supported are:
                - <<>> -> empty bitstring
-               - <<_ :: size >> -> a bitstring of exactly `size` bytes long
+               - <<_ :: size >> -> a bitstring of exactly `size` bits long
                - <<_ :: _ * unit >> -> a bitstring whose length is divisible by `unit`.
                - <<_ :: size, _ * unit >> -> a bitstring whose (length - `size`) is divisible by `unit`.
                """
