@@ -204,6 +204,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.10.8 - 
+  - Fixes:
+    - Ensures that the `Inspect` protocol is properly implemented for sized bitstring types (c.f. #104). Thank you very much, @trarbr!
 - 0.10.7 - 
   - Fixes:
     - Ensures fixed-maps are checked for superfluous keys (c.f. #96). Thank you very much, @spatrik!
