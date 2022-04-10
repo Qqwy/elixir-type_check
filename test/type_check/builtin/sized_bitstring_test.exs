@@ -76,4 +76,24 @@ defmodule TypeCheck.Builtin.SizedBitstringTest do
     assert "#TypeCheck.Type< TypeCheck.Builtin.SizedBitstringTest.BitstringExample.unit_sized :: <<_::_*13>> >" == inspect(BitstringExample.unit_sized)
     assert "#TypeCheck.Type< TypeCheck.Builtin.SizedBitstringTest.BitstringExample.both_sized :: <<_::11, _::_*15>> >" == inspect(BitstringExample.both_sized)
   end
+
+  test "sided bitstring types can be printed correctly in errors (regression for issue #104)" do
+    defmodule Example.Diacheck.Frame do
+      use TypeCheck
+
+      @type! status() :: byte()
+
+      @spec! decode(<<_::8>>) :: status()
+      def decode(<<status>>) do
+        status
+      end
+    end
+
+    # Success case:
+    assert Example.Diacheck.Frame.decode(<<40>>) == 40
+
+    # Failure case:
+    exception = assert_raise(TypeCheck.TypeError, fn -> Example.Diacheck.Frame.decode(<<40, 1>>) end)
+    assert Exception.message(exception) =~ "`<<40, 1>>` has a different bit_size (16) than expected (8)."
+  end
 end
