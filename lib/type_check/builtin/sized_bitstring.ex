@@ -42,11 +42,19 @@ defmodule TypeCheck.Builtin.SizedBitstring do
       unit_size = s.unit_size |> to_string() |> Inspect.Algebra.color(:number, opts)
       cond do
         s.unit_size == nil ->
-          "<<_::#{prefix_size}>>"
+          "<<_::"
+          |> Inspect.Algebra.concat(prefix_size)
+          |> Inspect.Algebra.concat(Inspect.Algebra.color(">>", :binary, opts))
         s.prefix_size == 0 ->
-          "<<_::_*#{unit_size}>>"
+          "<<_::_*"
+          |> Inspect.Algebra.concat(unit_size)
+          |> Inspect.Algebra.concat(Inspect.Algebra.color(">>", :binary, opts))
         true ->
-          "<<_::#{prefix_size}, _::_*#{unit_size}>>"
+          "<<_::"
+          |> Inspect.Algebra.concat(prefix_size)
+          |> Inspect.Algebra.concat(Inspect.Algebra.color(", _::_*", :binary, opts))
+          |> Inspect.Algebra.concat(unit_size)
+          |> Inspect.Algebra.concat(Inspect.Algebra.color(">>", :binary, opts))
       end
       |> Inspect.Algebra.color(:binary, opts)
     end
