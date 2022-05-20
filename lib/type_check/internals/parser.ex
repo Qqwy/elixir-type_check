@@ -1,8 +1,18 @@
 defmodule TypeCheck.Internals.Parser do
-  @moduledoc false
+  @moduledoc """
+  The parser for the default Elixir/Erlang `@spec`.
+
+  Experimental!
+  """
 
   alias TypeCheck.Builtin, as: B
 
+  @doc """
+  Extract raw spec for the given MFA.
+
+      iex> import TypeCheck.Internals.Parser
+      iex> {:ok, _} = fetch_spec(Kernel, :node, 1)
+  """
   @spec fetch_spec(atom() | list(), atom(), non_neg_integer()) ::
           {:error, String.t()} | {:ok, tuple()}
   def fetch_spec(module, function, arity) when is_atom(module) do
@@ -21,9 +31,18 @@ defmodule TypeCheck.Internals.Parser do
     end
   end
 
+  @doc """
+  Convert the raw spec extracted by `fetch_spec/3` into type_check type.
+
+      iex> import TypeCheck.Builtin
+      iex> import TypeCheck.Internals.Parser
+      iex> {:ok, spec} = fetch_spec(Kernel, :is_atom, 1)
+      iex> expected = function([term()], boolean())
+      iex> ^expected = convert(spec)
+  """
   # TODO(@orsinium):
   #  as_boolean
-  #  map(a, b),
+  #  map(a, b)
   #  mfa
   #  keyword(t)
   #  identifier

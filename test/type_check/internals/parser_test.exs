@@ -1,5 +1,6 @@
 defmodule TypeCheck.Internals.ParserTest do
   use ExUnit.Case, async: true
+  doctest TypeCheck.Internals.Parser
 
   alias TypeCheck.Internals.Parser
   alias TypeCheck.Builtin, as: B
