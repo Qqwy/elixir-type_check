@@ -34,6 +34,8 @@ defmodule TypeCheck.Internals.Parser do
   @doc """
   Convert the raw spec extracted by `fetch_spec/3` into type_check type.
 
+  The function is optimistic. If the type is not known, it assumes `any()`.
+
       iex> import TypeCheck.Builtin
       iex> import TypeCheck.Internals.Parser
       iex> {:ok, spec} = fetch_spec(Kernel, :is_atom, 1)
@@ -41,7 +43,6 @@ defmodule TypeCheck.Internals.Parser do
       iex> ^expected = convert(spec)
   """
   # TODO(@orsinium):
-  #  as_boolean
   #  map(a, b)
   #  mfa
   #  keyword(t)
@@ -126,6 +127,9 @@ defmodule TypeCheck.Internals.Parser do
 
   def convert({:remote_type, _, [{:atom, _, :elixir}, {:atom, _, :keyword}, [t]]}),
     do: B.keyword(convert(t))
+
+  def convert({:remote_type, _, [{:atom, _, :elixir}, {:atom, _, :as_boolean}, [t]]}),
+    do: B.as_boolean(convert(t))
 
   def convert({:remote_type, _, [{:atom, _, :String}, {:atom, _, :t}, []]}),
     do: B.bitstring()
