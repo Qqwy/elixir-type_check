@@ -2,6 +2,7 @@ defmodule TypeCheck.Internals.ParserTest do
   use ExUnit.Case, async: true
 
   alias TypeCheck.Internals.Parser
+  alias TypeCheck.Builtin, as: B
 
   # test that fetch_spec doesn't explode and all specs are supported
   describe "fetch_spec smoke" do
@@ -18,6 +19,7 @@ defmodule TypeCheck.Internals.ParserTest do
     end
   end
 
+  # test that for every valid spec convert/1 returns a valid function.
   describe "convert smoke" do
     for module <- [Kernel, String, List, Enum, DateTime] do
       @module module
@@ -34,6 +36,38 @@ defmodule TypeCheck.Internals.ParserTest do
               nil
           end
         end
+      end
+    end
+  end
+
+  # test convert using specs of some functions from stdlib
+  describe "convert stdlib" do
+    cases = [
+      {Kernel, :abs, 1, [B.number()], B.number()},
+      {Kernel, :binary_part, 3, [B.binary(), B.non_neg_integer(), B.integer()], B.binary()},
+      {Kernel, :bit_size, 1, [B.bitstring()], B.non_neg_integer()},
+      {Kernel, :ceil, 1, [B.number()], B.integer()},
+      {Kernel, :div, 2, [B.integer(), B.one_of([B.neg_integer(), B.pos_integer()])], B.integer()},
+      {Kernel, :elem, 2, [B.tuple(), B.non_neg_integer()], B.term()},
+      {Kernel, :hd, 1, [B.nonempty_list(B.any())], B.any()},
+      {Kernel, :is_atom, 1, [B.term()], B.boolean()},
+      # TODO(@orsinium): update when reference and port are supported
+      {Kernel, :node, 1, [B.one_of([B.pid(), B.any(), B.any()])], B.atom()},
+      {Kernel, :tl, 1, [B.nonempty_list()], B.one_of([B.list(), B.any()])},
+      {Kernel, :tuple_size, 1, [B.tuple()], B.non_neg_integer()},
+      {Kernel, :apply, 2, [B.fun(), B.list()], B.any()}
+    ]
+
+    for {module, func, arity, exp_args, exp_result} <- cases do
+      @module module
+      @func func
+      @arity arity
+      @exp_args exp_args
+      @exp_result exp_result
+      test "#{module}.#{func}/#{arity}" do
+        {:ok, spec} = Parser.fetch_spec(@module, @func, @arity)
+        exp = B.function(@exp_args, @exp_result)
+        assert ^exp = Parser.convert(spec)
       end
     end
   end

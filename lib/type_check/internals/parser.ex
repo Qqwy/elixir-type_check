@@ -21,8 +21,18 @@ defmodule TypeCheck.Internals.Parser do
     end
   end
 
-  # TODO(@orsinium): as_boolean, bounded_fun, fun(), mfa, half-open range, map(a, b),
-  # sized bitstring, none, no_return
+  # TODO(@orsinium):
+  #  as_boolean
+  #  bounded_fun
+  #  fun()
+  #  map(a, b),
+  #  mfa
+  #  no_return
+  #  none
+  #  keyword(t)
+  #  identifier
+  #  sized bitstring
+  #  structs
   @spec convert(tuple()) :: TypeCheck.Type.t()
 
   # basic types
@@ -31,12 +41,19 @@ defmodule TypeCheck.Internals.Parser do
   def convert({:type, _, :binary, []}), do: B.binary()
   def convert({:type, _, :bitstring, []}), do: B.bitstring()
   def convert({:type, _, :boolean, []}), do: B.boolean()
-  def convert({:type, _, :integer, []}), do: B.integer()
-  def convert({:type, _, :non_neg_integer, []}), do: B.non_neg_integer()
-  def convert({:type, _, :pos_integer, []}), do: B.pos_integer()
-  def convert({:type, _, :float, []}), do: B.float()
-  def convert({:type, _, :number, []}), do: B.number()
   def convert({:type, _, :pid, []}), do: B.pid()
+
+  # unsupported by type_check yet
+  def convert({:type, _, :reference, []}), do: B.any()
+  def convert({:type, _, :port, []}), do: B.any()
+
+  # numbers
+  def convert({:type, _, :float, []}), do: B.float()
+  def convert({:type, _, :integer, []}), do: B.integer()
+  def convert({:type, _, :neg_integer, []}), do: B.neg_integer()
+  def convert({:type, _, :non_neg_integer, []}), do: B.non_neg_integer()
+  def convert({:type, _, :number, []}), do: B.number()
+  def convert({:type, _, :pos_integer, []}), do: B.pos_integer()
 
   # literals
   def convert({:atom, _, val}), do: B.literal(val)
@@ -53,13 +70,18 @@ defmodule TypeCheck.Internals.Parser do
   def convert({:type, _, :nonempty_bitstring, []}), do: B.nonempty_bitstring()
   def convert({:type, _, :byte, []}), do: B.byte()
   def convert({:type, _, :char, []}), do: B.char()
+  def convert({:type, _, :node, []}), do: B.atom()
   def convert({:type, _, :charlist, []}), do: B.charlist()
 
   # shothands for generics
+  def convert({:type, _, :fun, []}), do: B.function()
   def convert({:type, _, :fun, [{:type, _, :any}, ret_type]}), do: B.function(convert(ret_type))
   def convert({:type, _, :list, []}), do: B.list()
-  def convert({:type, _, :nonempty_list, []}), do: B.nonempty_list()
   def convert({:type, _, :map, :any}), do: B.map()
+  def convert({:type, _, :nonempty_list, []}), do: B.nonempty_list()
+  # improper lists are cursed, restrict it to regular lists
+  def convert({:type, _, :nonempty_maybe_improper_list, []}), do: B.nonempty_list()
+  def convert({:type, _, :tuple, :any}), do: B.tuple()
 
   # generics
   def convert({:type, _, :fun, [{:type, _, :product, arg_types}, ret_type]}),
@@ -70,11 +92,16 @@ defmodule TypeCheck.Internals.Parser do
     do: convert(t)
 
   def convert({:type, _, :list, [t]}), do: B.list(convert(t))
+  def convert({:type, _, :maybe_improper_list, [t, _tail]}), do: B.list(convert(t))
+  def convert({:type, _, :nonempty_list, [t]}), do: B.nonempty_list(convert(t))
 
-  def convert({:type, 0, :tuple, types}),
+  def convert({:type, _, :nonempty_maybe_improper_list, [t, _tail]}),
+    do: B.nonempty_list(convert(t))
+
+  def convert({:type, _, :tuple, types}),
     do: B.fixed_tuple(Enum.map(types, &convert/1))
 
-  def convert({:type, 0, :union, types}),
+  def convert({:type, _, :union, types}),
     do: B.one_of(Enum.map(types, &convert/1))
 
   # elixir types
