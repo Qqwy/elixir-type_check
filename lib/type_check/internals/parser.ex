@@ -23,12 +23,8 @@ defmodule TypeCheck.Internals.Parser do
 
   # TODO(@orsinium):
   #  as_boolean
-  #  bounded_fun
-  #  fun()
   #  map(a, b),
   #  mfa
-  #  no_return
-  #  none
   #  keyword(t)
   #  identifier
   #  sized bitstring
@@ -42,6 +38,8 @@ defmodule TypeCheck.Internals.Parser do
   def convert({:type, _, :bitstring, []}), do: B.bitstring()
   def convert({:type, _, :boolean, []}), do: B.boolean()
   def convert({:type, _, :pid, []}), do: B.pid()
+  def convert({:type, _, :no_return, []}), do: B.none()
+  def convert({:type, _, :none, []}), do: B.none()
 
   # unsupported by type_check yet
   def convert({:type, _, :reference, []}), do: B.any()
@@ -98,11 +96,9 @@ defmodule TypeCheck.Internals.Parser do
   def convert({:type, _, :nonempty_maybe_improper_list, [t, _tail]}),
     do: B.nonempty_list(convert(t))
 
-  def convert({:type, _, :tuple, types}),
-    do: B.fixed_tuple(Enum.map(types, &convert/1))
-
-  def convert({:type, _, :union, types}),
-    do: B.one_of(Enum.map(types, &convert/1))
+  def convert({:type, _, :tuple, types}), do: B.fixed_tuple(Enum.map(types, &convert/1))
+  def convert({:type, _, :union, types}), do: B.one_of(Enum.map(types, &convert/1))
+  def convert({:ann_type, _, [_var, t]}), do: convert(t)
 
   # elixir types
 

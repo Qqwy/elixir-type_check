@@ -55,7 +55,11 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :node, 1, [B.one_of([B.pid(), B.any(), B.any()])], B.atom()},
       {Kernel, :tl, 1, [B.nonempty_list()], B.one_of([B.list(), B.any()])},
       {Kernel, :tuple_size, 1, [B.tuple()], B.non_neg_integer()},
-      {Kernel, :apply, 2, [B.fun(), B.list()], B.any()}
+      {Kernel, :apply, 2, [B.fun(), B.list()], B.any()},
+      {Kernel, :apply, 3, [B.module(), B.atom(), B.list()], B.any()},
+      {Kernel, :exit, 1, [B.term()], B.none()},
+      {Kernel, :function_exported?, 3, [B.module(), B.atom(), B.arity()], B.boolean()},
+      {Kernel, :get_in, 2, [B.any(), B.nonempty_list(B.term())], B.term()}
     ]
 
     for {module, func, arity, exp_args, exp_result} <- cases do
