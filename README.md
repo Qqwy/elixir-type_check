@@ -189,6 +189,7 @@ Details:
   - `(-> result_type)`
   - `(...-> result_type)`
   - `(param_type, param2_type -> result_type)`
+- [x] Basic support for maps with a single `required(type)` or `optional(type)`.
 - [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
 
 ### Pre-stable
@@ -204,6 +205,15 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.11.0 - 
+  Additions:
+    - Basic support `%{required(key_type) => value_type}` and `%{optional(key_type) => value_type}` syntaxes using the new `TypeCheck.Builtin.fancy_map` function.
+      Still has some limitations:
+        - Only a single required or optional can be used per map. 
+        - It is not yet possible to combine them with fixed keys.
+      Because of this, the inspection of the builtin type `map(key, value)` has been changed to look the same as an optional map. _This is a minor backwards-incompatible change._
+    - Desugaring `%{}` has changed from 'any map' to 'the empty map' in line with Elixir's Typespecs. _This is a minor backwards-incompatible change._
+  
 - 0.10.8 - 
   - Fixes:
     - Ensures that the `Inspect` protocol is properly implemented for sized bitstring types (c.f. #104). Thank you very much, @trarbr!
