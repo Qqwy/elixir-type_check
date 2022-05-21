@@ -198,7 +198,7 @@ defmodule TypeCheck.Spec do
   end
 
   defp param_check_code(param_type, clean_param, index, _caller, _location) do
-    impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
+    impl = TypeCheck.ToCheck.to_check(param_type, clean_param)
 
     # {file, line} = location
     quote generated: true, location: :keep do
@@ -211,7 +211,7 @@ defmodule TypeCheck.Spec do
 
   defp return_check_code(name, arity, clean_params, return_type, _caller, _location) do
     return_code_check =
-      TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
+      TypeCheck.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
 
     # {file, line} = location
     quote generated: true, location: :keep do

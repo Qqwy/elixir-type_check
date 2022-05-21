@@ -85,7 +85,7 @@ defmodule TypeCheck.Builtin.List do
 
       defp build_element_check_fast(element_type, param, s) do
         element_check =
-          TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
+          TypeCheck.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
 
         quote generated: true, location: :keep do
           orig_param = unquote(param)
