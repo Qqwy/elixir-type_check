@@ -82,6 +82,11 @@ defmodule TypeCheck.Builtin.Map do
         end
       end
     end
+
+    def needs_slow_check?(s) do
+      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.key_type) ||
+      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.value_type)
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

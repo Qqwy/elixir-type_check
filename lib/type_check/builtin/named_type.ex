@@ -30,6 +30,10 @@ defmodule TypeCheck.Builtin.NamedType do
         end
       end
     end
+
+    def needs_slow_check?(s) do
+      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.type)
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

@@ -21,6 +21,10 @@ defmodule TypeCheck.Builtin.Lazy do
         res
       end
     end
+
+    def needs_slow_check?(_) do
+      true # Err on the side of caution
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

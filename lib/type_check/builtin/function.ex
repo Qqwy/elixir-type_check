@@ -22,6 +22,8 @@ defmodule TypeCheck.Builtin.Function do
       end
     end
 
+    def needs_slow_check?(_), do: true
+
     defp is_function_check(s) do
       case s.param_types do
         nil ->

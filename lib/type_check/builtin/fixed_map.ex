@@ -42,6 +42,37 @@ defmodule TypeCheck.Builtin.FixedMap do
       res
     end
 
+    def needs_slow_check?(%TypeCheck.Builtin.FixedMap{keypairs: keypairs}) when keypairs == [], do: false
+    def needs_slow_check?(%TypeCheck.Builtin.FixedMap{keypairs: keypairs}) do
+      keypairs
+      |> Enum.any?(fn {key_type, value_type} ->
+        TypeCheck.Protocols.ToCheck.needs_slow_check?(key_type) ||
+        TypeCheck.Protocols.ToCheck.needs_slow_check?(value_type)
+      end)
+    end
+
+    # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
+             # TODO probably can be removed alltogether
+    def to_check_slow(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param)
+    when keypairs == [] do
+      map_check(param, s)
+    end
+
+    def to_check_slow(s, param) do
+      res =
+        quote generated: true, location: :keep do
+        with {:ok, _, _} <- unquote(map_check(param, s)),
+             {:ok, _, _} <- unquote(build_keys_presence_ast(s, param)),
+             {:ok, _, _} <- unquote(build_superfluous_keys_ast(s, param)),
+             {:ok, bindings3, altered_param} <-
+        unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+          {:ok, bindings3, altered_param}
+        end
+      end
+
+      res
+    end
+
     defp map_check(param, s) do
       quote generated: true, location: :keep do
         case unquote(param) do
@@ -129,6 +160,39 @@ defmodule TypeCheck.Builtin.FixedMap do
              {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
         end
       end
+    end
+
+    defp build_keypairs_checks_ast_fast(keypairs, param, s) do
+      keypair_checks =
+        keypairs
+        |> Enum.flat_map(fn {key, value_type} ->
+        value_check =
+          TypeCheck.Protocols.ToCheck.to_check(
+            value_type,
+            quote generated: true, location: :keep do
+              Map.fetch!(unquote(param), unquote(key))
+            end
+          )
+
+        quote generated: true, location: :keep do
+          [
+            {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
+            bindings = value_bindings ++ bindings
+          ]
+        end
+      end)
+
+        quote generated: true, location: :keep do
+          bindings = []
+
+          with unquote_splicing(keypair_checks) do
+            {:ok, bindings, unquote(param)}
+          else
+            {{:error, error}, key} ->
+              {:error,
+               {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+          end
+        end
     end
   end
 

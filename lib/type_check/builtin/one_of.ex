@@ -33,6 +33,11 @@ defmodule TypeCheck.Builtin.OneOf do
         end
       end
     end
+
+    def needs_slow_check?(%{choices: choices}) do
+      choices
+      |> Enum.any?(&TypeCheck.Protocols.ToCheck.needs_slow_check?(&1))
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

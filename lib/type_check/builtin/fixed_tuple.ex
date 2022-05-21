@@ -32,6 +32,11 @@ defmodule TypeCheck.Builtin.FixedTuple do
       end
     end
 
+    def needs_slow_check?(%{element_types: element_types}) do
+      element_types
+      |> Enum.any?(&TypeCheck.Protocols.ToCheck.needs_slow_check?(&1))
+    end
+
     defp build_element_checks_ast(types_list, param, s) do
       element_checks =
         types_list
