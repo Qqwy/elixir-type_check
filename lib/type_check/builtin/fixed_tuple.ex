@@ -13,7 +13,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_types: types_list}, param) do
-      element_checks_ast = build_element_checks_ast(types_list, param, s)
+      element_checks_ast = build_element_checks_ast_fast(types_list, param, s)
       expected_size = length(types_list)
 
       quote generated: true, location: :keep do
@@ -32,9 +32,24 @@ defmodule TypeCheck.Builtin.FixedTuple do
       end
     end
 
-    def to_check_slow(s, param) do
-      # TODO
-      to_check(s, param)
+    def to_check_slow(s = %{element_types: types_list}, param) do
+      element_checks_ast = build_element_checks_ast_slow(types_list, param, s)
+      expected_size = length(types_list)
+
+      quote generated: true, location: :keep do
+        case unquote(param) do
+          x when not is_tuple(x) ->
+            {:error, {unquote(Macro.escape(s)), :not_a_tuple, %{}, x}}
+
+          x when tuple_size(x) != unquote(expected_size) ->
+            {:error,
+             {unquote(Macro.escape(s)), :different_size, %{expected_size: unquote(expected_size)},
+              x}}
+
+          _ ->
+            unquote(element_checks_ast)
+        end
+      end
     end
 
     def needs_slow_check?(%{element_types: element_types}) do
@@ -42,7 +57,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
       |> Enum.any?(&TypeCheck.ToCheck.needs_slow_check?(&1))
     end
 
-    defp build_element_checks_ast(types_list, param, s) do
+    defp build_element_checks_ast_slow(types_list, param, s) do
       element_checks =
         types_list
         |> Enum.with_index()
@@ -78,6 +93,42 @@ defmodule TypeCheck.Builtin.FixedTuple do
         end
       end
     end
+
+    defp build_element_checks_ast_fast(types_list, param, s) do
+      element_checks =
+        types_list
+        |> Enum.with_index()
+        |> Enum.flat_map(fn {element_type, index} ->
+          impl =
+            TypeCheck.Protocols.ToCheck.to_check(
+              element_type,
+              quote generated: true, location: :keep do
+                elem(unquote(param), unquote(index))
+              end
+            )
+
+          quote generated: true, location: :keep do
+            [
+              {{:ok, element_bindings, _inner_param}, _index} <- {unquote(impl), unquote(index)},
+              bindings = element_bindings ++ bindings
+            ]
+          end
+        end)
+
+      quote generated: true, location: :keep do
+        bindings = []
+
+        with unquote_splicing(element_checks) do
+          {:ok, bindings, unquote(param)}
+        else
+          {{:error, error}, index} ->
+            {:error,
+             {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+              unquote(param)}}
+        end
+      end
+    end
+
   end
 
   defimpl TypeCheck.Protocols.Inspect do
