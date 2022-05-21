@@ -48,6 +48,14 @@ defmodule TypeCheck.Type.StreamData do
     def to_check(s, param) do
       TypeCheck.Protocols.ToCheck.to_check(s.type, param)
     end
+
+    def needs_slow_check?(s) do
+      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.type)
+    end
+
+    def to_check_slow(s, param) do
+      TypeCheck.Protocols.ToCheck.to_check_slow(s.type, param)
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do

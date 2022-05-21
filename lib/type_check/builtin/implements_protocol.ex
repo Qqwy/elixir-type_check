@@ -23,6 +23,10 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
         end
       end
     end
+
+    def needs_slow_check?(s) do
+      false
+    end
   end
 
   defimpl TypeCheck.Protocols.Inspect do
