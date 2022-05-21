@@ -23,6 +23,9 @@ defmodule TypeCheck.Builtin.None do
         {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
       end
     end
+
+    def needs_slow_check?(_), do: false
+    def to_check_slow(t, param), do: to_check(t, param)
   end
 
   defimpl TypeCheck.Protocols.Inspect do

@@ -11,6 +11,9 @@ defmodule TypeCheck.Builtin.Any do
         {:ok, [], unquote(param)}
       end
     end
+
+    def needs_slow_check?(_), do: false
+    def to_check_slow(t, param), do: to_check(t, param)
   end
 
   defimpl TypeCheck.Protocols.Inspect do
