@@ -97,6 +97,32 @@ defmodule TypeCheck.Builtin.Guarded do
   end
 
   defimpl TypeCheck.Protocols.Inspect do
+
+    @map_with_single_required_key_type %{
+      __struct__: TypeCheck.Builtin.Guarded,
+      guard: {:>=, [context: TypeCheck.Builtin, import: Kernel],
+              [
+                {:map_size, [context: TypeCheck.Builtin, import: Kernel],
+                 [{:map, [], nil}]},
+                1
+              ]},
+      type: %{
+        __struct__: TypeCheck.Builtin.NamedType,
+        local: true,
+        name: :map,
+        type: %{
+          __struct__: TypeCheck.Builtin.Map,
+          key_type: %{__struct__: TypeCheck.Builtin.Number},
+          value_type: %{__struct__: TypeCheck.Builtin.Boolean}
+        }
+      }
+}
+    def inspect(s = @map_with_single_required_key_type, opts) do
+      key_inspect = TypeCheck.Protocols.Inspect.inspect(s.type.type.key_type, opts)
+      value_inspect = TypeCheck.Protocols.Inspect.inspect(s.type.type.value_type, opts)
+      "%{required(#{key_inspect}) => #{value_inspect}}"
+    end
+
     def inspect(s, opts) do
       ("(" |> Inspect.Algebra.color(:builtin_type, opts))
       |> Inspect.Algebra.concat(TypeCheck.Protocols.Inspect.inspect(s.type, opts))

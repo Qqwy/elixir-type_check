@@ -5,11 +5,11 @@ defmodule TypeCheck.Builtin.Map do
   @opaque! t :: %__MODULE__{key_type: TypeCheck.Type.t(), value_type: TypeCheck.Type.t()}
 
   @type! problem_tuple ::
-         {t(), :not_a_map, %{}, any()}
-         | {t(), :key_error,
-            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
-         | {t(), :value_error,
-            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
+           {t(), :not_a_map, %{}, any()}
+           | {t(), :key_error,
+              %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
+           | {t(), :value_error,
+              %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
@@ -58,23 +58,27 @@ defmodule TypeCheck.Builtin.Map do
               {{:error, problem}, _} ->
                 res =
                   {:error,
-                  {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key}, orig_param}}
+                   {unquote(Macro.escape(s)), :key_error, %{problem: problem, key: key},
+                    orig_param}}
 
                 {:halt, res}
 
               {_, {:error, problem}} ->
                 res =
                   {:error,
-                  {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key},
+                   {unquote(Macro.escape(s)), :value_error, %{problem: problem, key: key},
                     orig_param}}
 
                 {:halt, res}
             end
           end)
+
         case res do
           {:ok, bindings, altered_param} ->
             {:ok, bindings, :maps.from_list(altered_param)}
-          other -> other
+
+          other ->
+            other
         end
       end
     end
@@ -82,18 +86,10 @@ defmodule TypeCheck.Builtin.Map do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do
-      Inspect.Algebra.container_doc(
-        "map(",
-        [
-          TypeCheck.Protocols.Inspect.inspect(list.key_type, opts),
-          TypeCheck.Protocols.Inspect.inspect(list.value_type, opts)
-        ],
-        ")",
-        opts,
-        fn x, _ -> x end,
-        separator: ",",
-        break: :maybe
-      )
+      ("%{optional(" <>
+         TypeCheck.Protocols.Inspect.inspect(list.key_type, opts) <>
+         ") => " <>
+         TypeCheck.Protocols.Inspect.inspect(list.value_type, opts) <> "}")
       |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end

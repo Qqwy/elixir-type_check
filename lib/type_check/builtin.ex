@@ -778,7 +778,10 @@ defmodule TypeCheck.Builtin do
   @doc """
   Any map containing zero or more keys of `key_type` and values of `value_type`.
 
-  Represented in Elixir's builtin Typespecs as `%{optional(key_type) => value_type}`.
+  Represented in Elixir's builtin Typespecs as `%{optional(key_type) => value_type}`,
+  and indeed a desugaring of this.
+
+  Note that multiple optional keypairs are not (yet) supported.
 
   C.f. `TypeCheck.Builtin.Map`
   """
@@ -854,11 +857,30 @@ defmodule TypeCheck.Builtin do
   @doc """
   WIP
   """
-  def fancy_map(fixed_keypairs, required_keypairs, optional_keypairs) do
-    build_struct(TypeCheck.Builtin.FancyMap)
-    |> Map.put(:fixed_keypairs, Enum.into(fixed_keypairs, []))
-    |> Map.put(:required_keypairs, Enum.into(required_keypairs, []))
-    |> Map.put(:optional_keypairs, Enum.into(optional_keypairs, []))
+  def fancy_map(fixed_keypairs, [], []) do
+    fixed_map(fixed_keypairs)
+  end
+
+  def fancy_map([], [], [{optional_key_type, value_type}]) do
+    map(optional_key_type, value_type)
+  end
+
+  def fancy_map([], [{required_key_type, value_type}], []) do
+    guard =
+      quote do
+        map_size(unquote(Macro.var(:map, nil))) >= 1
+      end
+
+    named_type(:map, map(required_key_type, value_type))
+    |> guarded_by(guard)
+  end
+
+  def fancy_map(_fixed_keypairs, _required_keypairs, _optional_keypairs) do
+    raise "TODO! Maps with combinations of multiple required  and/or optional keypairs are not supported yet!"
+    # build_struct(TypeCheck.Builtin.FancyMap)
+    # |> Map.put(:fixed_keypairs, Enum.into(fixed_keypairs, []))
+    # |> Map.put(:required_keypairs, Enum.into(required_keypairs, []))
+    # |> Map.put(:optional_keypairs, Enum.into(optional_keypairs, []))
   end
 
   @doc typekind: :extension
