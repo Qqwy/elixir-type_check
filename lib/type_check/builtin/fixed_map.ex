@@ -45,9 +45,9 @@ defmodule TypeCheck.Builtin.FixedMap do
     def needs_slow_check?(%TypeCheck.Builtin.FixedMap{keypairs: keypairs}) when keypairs == [], do: false
     def needs_slow_check?(%TypeCheck.Builtin.FixedMap{keypairs: keypairs}) do
       keypairs
-      |> Enum.any?(fn {key_type, value_type} ->
-        TypeCheck.Protocols.ToCheck.needs_slow_check?(key_type) ||
-        TypeCheck.Protocols.ToCheck.needs_slow_check?(value_type)
+      |> Enum.any?(fn {_key_literal, value_type} ->
+        # TypeCheck.ToCheck.needs_slow_check?(key_type) ||
+        TypeCheck.ToCheck.needs_slow_check?(value_type)
       end)
     end
 
@@ -131,7 +131,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         keypairs
         |> Enum.flat_map(fn {key, value_type} ->
           value_check =
-            TypeCheck.Protocols.ToCheck.to_check(
+            TypeCheck.ToCheck.to_check(
               value_type,
               quote generated: true, location: :keep do
                 Map.fetch!(unquote(param), unquote(key))
@@ -167,7 +167,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         keypairs
         |> Enum.flat_map(fn {key, value_type} ->
         value_check =
-          TypeCheck.Protocols.ToCheck.to_check(
+          TypeCheck.ToCheck.to_check(
             value_type,
             quote generated: true, location: :keep do
               Map.fetch!(unquote(param), unquote(key))

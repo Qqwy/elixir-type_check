@@ -32,9 +32,14 @@ defmodule TypeCheck.Builtin.FixedTuple do
       end
     end
 
+    def to_check_slow(s, param) do
+      # TODO
+      to_check(s, param)
+    end
+
     def needs_slow_check?(%{element_types: element_types}) do
       element_types
-      |> Enum.any?(&TypeCheck.Protocols.ToCheck.needs_slow_check?(&1))
+      |> Enum.any?(&TypeCheck.ToCheck.needs_slow_check?(&1))
     end
 
     defp build_element_checks_ast(types_list, param, s) do
@@ -43,7 +48,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
         |> Enum.with_index()
         |> Enum.flat_map(fn {element_type, index} ->
           impl =
-            TypeCheck.Protocols.ToCheck.to_check(
+            TypeCheck.ToCheck.to_check(
               element_type,
               quote generated: true, location: :keep do
                 elem(unquote(param), unquote(index))

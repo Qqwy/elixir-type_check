@@ -24,7 +24,11 @@ defmodule TypeCheck.Builtin.Tuple do
       end
     end
 
-    def needs_slow_check?(s) do
+    def to_check_slow(s, param) do
+      to_check(s, param)
+    end
+
+    def needs_slow_check?(_) do
       false
     end
   end

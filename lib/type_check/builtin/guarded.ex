@@ -60,7 +60,7 @@ defmodule TypeCheck.Builtin.Guarded do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      type_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
+      type_check = TypeCheck.ToCheck.to_check(s.type, param)
 
       type_names = MapSet.new(TypeCheck.Builtin.Guarded.extract_names(s.type))
       guard_names = TypeCheck.Internals.Helper.extract_vars_from_ast(s.guard)
@@ -95,8 +95,13 @@ defmodule TypeCheck.Builtin.Guarded do
       end
     end
 
+    def to_check_slow(s, param) do
+      # TODO
+      to_check(s, param)
+    end
+
     def needs_slow_check?(s) do
-      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.type)
+      TypeCheck.ToCheck.needs_slow_check?(s.type)
     end
   end
 

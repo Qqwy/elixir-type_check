@@ -10,7 +10,7 @@ defmodule TypeCheck.Builtin.OneOf do
       snippets =
         choices
         |> Enum.flat_map(fn choice ->
-          choice_check = TypeCheck.Protocols.ToCheck.to_check(choice, param)
+          choice_check = TypeCheck.ToCheck.to_check(choice, param)
 
           quote generated: true, location: :keep do
             [
@@ -34,9 +34,13 @@ defmodule TypeCheck.Builtin.OneOf do
       end
     end
 
+    def to_check_slow(s, param) do
+      to_check(s, param)
+    end
+
     def needs_slow_check?(%{choices: choices}) do
       choices
-      |> Enum.any?(&TypeCheck.Protocols.ToCheck.needs_slow_check?(&1))
+      |> Enum.any?(&TypeCheck.ToCheck.needs_slow_check?(&1))
     end
   end
 

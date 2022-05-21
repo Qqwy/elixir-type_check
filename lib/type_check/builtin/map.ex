@@ -32,10 +32,10 @@ defmodule TypeCheck.Builtin.Map do
 
     defp build_keypairs_check(key_type, value_type, param, s) do
       key_check =
-        TypeCheck.Protocols.ToCheck.to_check(key_type, Macro.var(:single_field_key, __MODULE__))
+        TypeCheck.ToCheck.to_check(key_type, Macro.var(:single_field_key, __MODULE__))
 
       value_check =
-        TypeCheck.Protocols.ToCheck.to_check(
+        TypeCheck.ToCheck.to_check(
           value_type,
           Macro.var(:single_field_value, __MODULE__)
         )
@@ -83,9 +83,14 @@ defmodule TypeCheck.Builtin.Map do
       end
     end
 
+    def to_check_slow(s, param) do
+      # TODO
+      to_check(s, param)
+    end
+
     def needs_slow_check?(s) do
-      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.key_type) ||
-      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.value_type)
+      TypeCheck.ToCheck.needs_slow_check?(s.key_type) ||
+      TypeCheck.ToCheck.needs_slow_check?(s.value_type)
     end
   end
 

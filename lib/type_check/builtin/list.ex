@@ -66,6 +66,11 @@ defmodule TypeCheck.Builtin.List do
       end
     end
 
+    def to_check_slow(s, param) do
+      # TODO
+      to_check(s, param)
+    end
+
     def needs_slow_check?(s) do
       TypeCheck.Protocols.ToCheck.needs_slow_check?(s.element_type)
     end

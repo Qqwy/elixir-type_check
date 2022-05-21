@@ -14,7 +14,7 @@ defmodule TypeCheck.Builtin.NamedType do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
+      inner_check = TypeCheck.ToCheck.to_check(s.type, param)
 
       quote generated: true, location: :keep do
         inner_res = unquote(inner_check)
@@ -31,8 +31,12 @@ defmodule TypeCheck.Builtin.NamedType do
       end
     end
 
+    def to_check_slow(s, param) do
+      to_check(s, param)
+    end
+
     def needs_slow_check?(s) do
-      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.type)
+      TypeCheck.ToCheck.needs_slow_check?(s.type)
     end
   end
 

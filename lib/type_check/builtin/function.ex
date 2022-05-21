@@ -22,6 +22,13 @@ defmodule TypeCheck.Builtin.Function do
       end
     end
 
+    def to_check_slow(s, param) do
+      # TODO
+      to_check(s, param)
+    end
+
+    def needs_slow_check?(%TypeCheck.Builtin.Function{param_types: nil, return_type: %TypeCheck.Builtin.Any{}}), do: false
+    def needs_slow_check?(%TypeCheck.Builtin.Function{param_types: [], return_type: %TypeCheck.Builtin.Any{}}), do: false
     def needs_slow_check?(_), do: true
 
     defp is_function_check(s) do
@@ -48,7 +55,7 @@ defmodule TypeCheck.Builtin.Function do
         quote generated: true, location: :keep, bind_quoted: [fun: original, s: Macro.escape(s), return_type: Macro.escape(return_type)] do
           {:arity, arity} = Function.info(fun, :arity)
           clean_params = Macro.generate_arguments(arity, __MODULE__)
-          return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:result, nil))
+          return_code_check = TypeCheck.ToCheck.to_check(return_type, Macro.var(:result, nil))
 
           wrapper_ast =
             quote do
@@ -69,7 +76,7 @@ defmodule TypeCheck.Builtin.Function do
           fun
         end
       %{param_types: [], return_type: return_type} ->
-        return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:result, nil))
+        return_code_check = TypeCheck.ToCheck.to_check(return_type, Macro.var(:result, nil))
 
         quote generated: true, location: :keep do
           fn ->
@@ -94,7 +101,7 @@ defmodule TypeCheck.Builtin.Function do
             param_check_code(param_type, clean_param, index)
           end)
 
-        return_code_check = TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:result, nil))
+        return_code_check = TypeCheck.ToCheck.to_check(return_type, Macro.var(:result, nil))
 
         quote do
           fn unquote_splicing(clean_params) ->
@@ -122,7 +129,7 @@ defmodule TypeCheck.Builtin.Function do
   end
 
   def param_check_code(param_type, clean_param, index) do
-    impl = TypeCheck.Protocols.ToCheck.to_check(param_type, clean_param)
+    impl = TypeCheck.ToCheck.to_check(param_type, clean_param)
     quote generated: true, location: :keep do
       [
         {{:ok, _bindings, altered_param}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))},
