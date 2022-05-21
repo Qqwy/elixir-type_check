@@ -141,7 +141,6 @@ defmodule TypeCheck.Builtin.FixedList do
         end
       end
     end
-
   end
 
   defimpl TypeCheck.Protocols.Inspect do

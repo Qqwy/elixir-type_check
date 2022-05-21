@@ -21,20 +21,36 @@ defmodule TypeCheck.Builtin.List do
             {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, unquote(param)}}
 
           _ ->
-            unquote(build_element_check(element_type, param, s))
+            unquote(build_element_check_fast(element_type, param, s))
         end
       end
     end
 
-    defp build_element_check(%TypeCheck.Builtin.Any{}, param, _s) do
+    def to_check_slow(s = %{element_type: element_type}, param) do
+      quote generated: true, location: :keep do
+        case unquote(param) do
+          x when not is_list(x) ->
+            {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, unquote(param)}}
+
+          _ ->
+            unquote(build_element_check_slow(element_type, param, s))
+        end
+      end
+    end
+
+    def needs_slow_check?(s) do
+      TypeCheck.ToCheck.needs_slow_check?(s.element_type)
+    end
+
+    defp build_element_check_slow(%TypeCheck.Builtin.Any{}, param, _s) do
       quote generated: true, location: :keep do
         {:ok, [], unquote(param)}
       end
     end
 
-    defp build_element_check(element_type, param, s) do
+    defp build_element_check_slow(element_type, param, s) do
       element_check =
-        TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
+        TypeCheck.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
 
       quote generated: true, location: :keep do
         orig_param = unquote(param)
@@ -67,15 +83,34 @@ defmodule TypeCheck.Builtin.List do
       end
     end
 
-    def to_check_slow(s, param) do
-      # TODO
-      to_check(s, param)
-    end
+      defp build_element_check_fast(element_type, param, s) do
+        element_check =
+          TypeCheck.Protocols.ToCheck.to_check(element_type, Macro.var(:single_param, __MODULE__))
 
-    def needs_slow_check?(s) do
-      TypeCheck.Protocols.ToCheck.needs_slow_check?(s.element_type)
-    end
-  end
+        quote generated: true, location: :keep do
+          orig_param = unquote(param)
+
+          orig_param
+          |> Enum.with_index()
+          |> Enum.reduce_while({:ok, [], orig_param}, fn {input, index}, {:ok, bindings, param} ->
+            var!(single_param, unquote(__MODULE__)) = input
+            element_check_result = unquote(element_check)
+            case element_check_result do
+              {:ok, element_bindings, _inner_param} ->
+                {:cont, {:ok, element_bindings ++ bindings, param}}
+
+              {:error, problem} ->
+                problem =
+                  {:error,
+                   {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                    orig_param}}
+
+                {:halt, problem}
+            end
+          end)
+        end
+      end
+           end
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do

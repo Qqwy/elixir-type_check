@@ -171,7 +171,7 @@ defmodule TypeCheck do
 
     evaluated_options = TypeCheck.Options.new(evaluated_options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
-    check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+    check = TypeCheck.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
       case unquote(check) do
@@ -198,7 +198,7 @@ defmodule TypeCheck do
 
     evaluated_options = TypeCheck.Options.new(evaluated_options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
-    check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+    check = TypeCheck.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
       match?({:ok, _, _}, unquote(check))
@@ -223,7 +223,7 @@ defmodule TypeCheck do
 
     evaluated_options = TypeCheck.Options.new(evaluated_options)
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
-    check = TypeCheck.Protocols.ToCheck.to_check(type, value)
+    check = TypeCheck.ToCheck.to_check(type, value)
 
     res = quote generated: true, location: :keep do
       case unquote(check) do
@@ -267,7 +267,7 @@ defmodule TypeCheck do
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
   def dynamic_conforms(value, type, options \\ TypeCheck.Options.new()) do
     evaluated_options = TypeCheck.Options.new(options)
-    check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
+    check_code = TypeCheck.ToCheck.to_check(type, Macro.var(:value, nil))
 
     if(evaluated_options.debug) do
       TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", check_code)
