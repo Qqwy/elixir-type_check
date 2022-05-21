@@ -23,7 +23,7 @@ defmodule TypeCheck.Builtin.FixedList do
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       expected_length = length(s.element_types)
-      element_checks_ast = build_element_checks_ast(s.element_types, param, s)
+      element_checks_ast = build_element_checks_ast_slow(s.element_types, param, s)
 
       quote generated: :true, location: :keep do
         case unquote(param) do
@@ -46,7 +46,7 @@ defmodule TypeCheck.Builtin.FixedList do
       |> Enum.any?(&TypeCheck.Protocols.ToCheck.needs_slow_check?(&1))
     end
 
-    def build_element_checks_ast(element_types, param, s) do
+    def build_element_checks_ast_slow(element_types, param, s) do
       element_checks =
         element_types
         |> Enum.with_index()
