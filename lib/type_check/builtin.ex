@@ -852,6 +852,17 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
+  WIP
+  """
+  def fancy_map(fixed_keypairs, required_keypairs, optional_keypairs) do
+    build_struct(TypeCheck.Builtin.FancyMap)
+    |> Map.put(:fixed_keypairs, Enum.into(fixed_keypairs, []))
+    |> Map.put(:required_keypairs, Enum.into(required_keypairs, []))
+    |> Map.put(:optional_keypairs, Enum.into(optional_keypairs, []))
+  end
+
+  @doc typekind: :extension
+  @doc """
   A list of fixed size where `element_types` dictates the types
   of each of the respective elements.
 

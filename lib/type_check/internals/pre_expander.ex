@@ -149,6 +149,12 @@ defmodule TypeCheck.Internals.PreExpander do
           TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env, options)), unquote(rewrite(rhs, env, options)))
         end
 
+      ast = {:%{}, _, []} ->
+        # Short-circuit for the empty map type.
+        quote generated: true, location: :keep do
+          TypeCheck.Builtin.literal(unquote(ast))
+        end
+
       ast = {:%{}, _, fields} ->
         rewrite_map_or_struct(fields, ast, env, options)
 
@@ -235,10 +241,35 @@ defmodule TypeCheck.Internals.PreExpander do
         # A map with fixed fields
         # Keys are expected to be literal values
         field_types =
-          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
+          Enum.reduce(struct_fields, %{fixed: [], required: [], optional: []}, fn
+            foo = {{:required, _, [key_type]}, value_type}, acc ->
+              IO.puts("Found required! #{inspect(foo)}")
+              req = {rewrite(key_type, env, options), rewrite(value_type, env, options)}
+              update_in(acc.required, fn requireds -> [req | requireds] end)
+            foo = {{:optional, _, [key_type]}, value_type}, acc->
+              IO.puts("Found optional! #{inspect(foo)}")
+              opt = {rewrite(key_type, env, options), rewrite(value_type, env, options)}
+              update_in(acc.optional, fn optionals -> [opt | optionals] end)
+            {key, value_type}, acc ->
+              fix = {key, rewrite(value_type, env, options)}
+              update_in(acc.fixed, fn fixeds -> [fix | fixeds] end)
+          end)
 
-        quote generated: true, location: :keep do
-          TypeCheck.Builtin.fixed_map(unquote(field_types))
+        case field_types do
+          %{fixed: fixed_field_types, required: [], optional: []} ->
+            quote generated: true, location: :keep do
+              TypeCheck.Builtin.fixed_map(unquote(fixed_field_types))
+            end
+            %{fixed: fixed_field_types, required: required_field_types, optional: optional_field_types} ->
+              quote generated: true, location: :keep do
+                TypeCheck.Builtin.fancy_map(unquote(fixed_field_types), unquote(required_field_types), unquote(optional_field_types))
+              end
+            _other ->
+                raise """
+                Currently unsupported map syntax.
+                Work in progress to add support for require and optional to TypeCheck.
+                #{inspect(field_types)}
+                """
         end
 
       _other ->
