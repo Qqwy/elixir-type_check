@@ -34,7 +34,7 @@ defmodule TypeCheck.Builtin.FixedMap do
                {:ok, _, _} <- unquote(build_keys_presence_ast(s, param)),
                {:ok, _, _} <- unquote(build_superfluous_keys_ast(s, param)),
                {:ok, bindings3, altered_param} <-
-                 unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+                 unquote(build_keypairs_checks_ast_fast(s.keypairs, param, s)) do
             {:ok, bindings3, altered_param}
           end
         end
@@ -65,7 +65,7 @@ defmodule TypeCheck.Builtin.FixedMap do
              {:ok, _, _} <- unquote(build_keys_presence_ast(s, param)),
              {:ok, _, _} <- unquote(build_superfluous_keys_ast(s, param)),
              {:ok, bindings3, altered_param} <-
-        unquote(build_keypairs_checks_ast(s.keypairs, param, s)) do
+        unquote(build_keypairs_checks_ast_slow(s.keypairs, param, s)) do
           {:ok, bindings3, altered_param}
         end
       end
@@ -126,7 +126,7 @@ defmodule TypeCheck.Builtin.FixedMap do
       end
     end
 
-    defp build_keypairs_checks_ast(keypairs, param, s) do
+    defp build_keypairs_checks_ast_slow(keypairs, param, s) do
       keypair_checks =
         keypairs
         |> Enum.flat_map(fn {key, value_type} ->
@@ -176,7 +176,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
         quote generated: true, location: :keep do
           [
-            {{:ok, value_bindings}, _key} <- {unquote(value_check), unquote(key)},
+            {{:ok, value_bindings, _unaltered}, _key} <- {unquote(value_check), unquote(key)},
             bindings = value_bindings ++ bindings
           ]
         end
