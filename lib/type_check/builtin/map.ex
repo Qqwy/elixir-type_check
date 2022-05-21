@@ -86,10 +86,10 @@ defmodule TypeCheck.Builtin.Map do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(list, opts) do
-      ("%{optional(" <>
-         TypeCheck.Protocols.Inspect.inspect(list.key_type, opts) <>
-         ") => " <>
-         TypeCheck.Protocols.Inspect.inspect(list.value_type, opts) <> "}")
+      key_str = TypeCheck.Protocols.Inspect.inspect(list.key_type, opts)
+      val_str = TypeCheck.Protocols.Inspect.inspect(list.value_type, opts)
+      ["%{optional(", key_str, ") => ", val_str, "}"]
+      |> Inspect.Algebra.concat()
       |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
