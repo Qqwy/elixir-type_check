@@ -876,11 +876,20 @@ defmodule TypeCheck.Builtin do
   end
 
   def fancy_map(_fixed_keypairs, _required_keypairs, _optional_keypairs) do
-    raise "TODO! Maps with combinations of multiple required  and/or optional keypairs are not supported yet!"
-    # build_struct(TypeCheck.Builtin.FancyMap)
-    # |> Map.put(:fixed_keypairs, Enum.into(fixed_keypairs, []))
-    # |> Map.put(:required_keypairs, Enum.into(required_keypairs, []))
-    # |> Map.put(:optional_keypairs, Enum.into(optional_keypairs, []))
+    raise """
+    TODO!
+    Maps with complex combinations of multiple
+    fixed and/or required(...) and/or optional(...) keypairs
+    are not supported by TypeCheck yet.
+
+    Supported are:
+    - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
+    - maps with a single required keypair (`%{required(key_type) => value_type}`)
+    - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+
+    Help with extending this support is very welcome.
+    c.f. https://github.com/Qqwy/elixir-type_check/issues/7
+    """
   end
 
   @doc typekind: :extension
