@@ -6,12 +6,12 @@ defmodule TypeCheck.Builtin.List do
   @type! t(element_type) :: %__MODULE__{element_type: element_type}
 
   @type! problem_tuple ::
-         {t(), :not_a_list, %{}, any()}
-         | {t(), :element_error,
-            %{
-              problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()),
-              index: non_neg_integer()
-            }, any()}
+           {t(), :not_a_list, %{}, any()}
+           | {t(), :element_error,
+              %{
+                problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()),
+                index: non_neg_integer()
+              }, any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_type: element_type}, param) do
@@ -44,25 +44,26 @@ defmodule TypeCheck.Builtin.List do
           |> Enum.with_index()
           |> Enum.reduce_while({:ok, [], []}, fn {input, index}, {:ok, bindings, altered_param} ->
             var!(single_param, unquote(__MODULE__)) = input
+            element_check_result = unquote(element_check)
 
-            case unquote(element_check) do
+            case element_check_result do
               {:ok, element_bindings, altered_element} ->
                 {:cont, {:ok, element_bindings ++ bindings, [altered_element | altered_param]}}
 
               {:error, problem} ->
                 problem =
                   {:error,
-                  {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                   {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
                     orig_param}}
 
                 {:halt, problem}
             end
           end)
 
-          case res do
-            {:ok, bindings, altered_param} -> {:ok, bindings, :lists.reverse(altered_param)}
-            other -> other
-          end
+        case res do
+          {:ok, bindings, altered_param} -> {:ok, bindings, :lists.reverse(altered_param)}
+          other -> other
+        end
       end
     end
 
