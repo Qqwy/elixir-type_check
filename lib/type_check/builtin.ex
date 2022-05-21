@@ -774,7 +774,7 @@ defmodule TypeCheck.Builtin do
     |> Map.put(:value_type, any())
   end
 
-  @doc typekind: :extension
+  @doc typekind: :builtin
   @doc """
   Any map containing zero or more keys of `key_type` and values of `value_type`.
 
