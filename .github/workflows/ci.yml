@@ -8,19 +8,19 @@ jobs:
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
       matrix:
-        otp: ['24.x']
+        otp: ['24.x', '25.x']
         # Turn off older Elixir and OTP versions for now since they keep time-outing on GH Actions
         # even though they run the suite perfectly fine locally
         # otp: ['24.x', '23.x', '22.x']
         # elixir: ['1.12.x', '1.11.x', '1.10.x', '1.9.x']
-        elixir: ['v1.13.0-rc.1', '1.12.x']
-        exclude: 
-          - otp: '24.x'
-            elixir: '1.9.x'
-          - otp: '24.x'
-            elixir: '1.10.x'
-          - otp: '24.x'
-            elixir: '1.11.x'
+        elixir: ['v1.13.x', '1.12.x']
+        #exclude: 
+          #- otp: '24.x'
+            #elixir: '1.9.x'
+          #- otp: '24.x'
+              #elixir: '1.10.x'
+          #- otp: '24.x'
+             #elixir: '1.11.x'
     env:
       MIX_ENV: test
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
