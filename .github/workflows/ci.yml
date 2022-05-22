@@ -14,6 +14,9 @@ jobs:
         # otp: ['24.x', '23.x', '22.x']
         # elixir: ['1.12.x', '1.11.x', '1.10.x', '1.9.x']
         elixir: ['v1.13.x', '1.12.x']
+        exclude:
+          - otp: '25.x'
+            elixir: '1.12.x'
         #exclude: 
           #- otp: '24.x'
             #elixir: '1.9.x'
