@@ -15,7 +15,7 @@ defmodule TypeCheck.ToCheck do
   @spec to_check(TypeCheck.Type.t() , Macro.input()) :: Macro.output()
   def to_check(type_struct, param_ast) do
     if TypeCheck.Protocols.ToCheck.needs_slow_check?(type_struct) do
-      IO.inspect("Using slow check for #{inspect(type_struct)}")
+      # IO.inspect("Using slow check for #{inspect(type_struct)}")
       TypeCheck.Protocols.ToCheck.to_check_slow(type_struct, param_ast)
     else
       TypeCheck.Protocols.ToCheck.to_check(type_struct, param_ast)
