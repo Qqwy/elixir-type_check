@@ -661,29 +661,7 @@ defmodule TypeCheck.Builtin do
   if_recompiling? do
     @spec! one_of(left :: TypeCheck.Type.t(), right :: TypeCheck.Type.t()) :: TypeCheck.Builtin.OneOf.t()
   end
-  def one_of(left, right)
-
-  # Prevents nesting
-  # for nicer error messages on failure.
-  def one_of(left = %{__struct__: TypeCheck.Builtin.OneOf}, right = %{__struct__: TypeCheck.Builtin.OneOf}) do
-    one_of(left.choices ++ right.choices)
-  end
-
-  def one_of(left = %{__struct__: TypeCheck.Builtin.OneOf}, right) do
-    one_of(left.choices ++ [right])
-  end
-
-  def one_of(left, right = %{__struct__: TypeCheck.Builtin.OneOf}) do
-    one_of([left] ++ right.choices)
-  end
-
-  def one_of(%{__struct__: TypeCheck.Builtin.Any}, %{__struct__: TypeCheck.Builtin.Any}) do
-    any()
-  end
-
-  def one_of(left, right) do
-    one_of([left, right])
-  end
+  def one_of(left, right), do: one_of([left, right])
 
   @doc typekind: :builtin
   @doc """
@@ -702,15 +680,32 @@ defmodule TypeCheck.Builtin do
   end
   def one_of(list_of_possibilities)
 
+  # unwrap nested unions
+  def one_of([left = %{__struct__: TypeCheck.Builtin.OneOf}, right = %{__struct__: TypeCheck.Builtin.OneOf}]) do
+    one_of(left.choices ++ right.choices)
+  end
+
+  def one_of([left = %{__struct__: TypeCheck.Builtin.OneOf}, right]) do
+    one_of(left.choices ++ [right])
+  end
+
+  def one_of([left, right = %{__struct__: TypeCheck.Builtin.OneOf}]) do
+    one_of([left] ++ right.choices)
+  end
+
   # Fix double expansion
   def one_of(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     one_of(list.element_types)
   end
 
   def one_of(list_of_possibilities) when is_list(list_of_possibilities) do
-    # %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
-    build_struct(TypeCheck.Builtin.OneOf)
-    |> Map.put(:choices, list_of_possibilities)
+    if list_of_possibilities |> Enum.uniq |> length == 1 do
+      List.first(list_of_possibilities)
+    else
+      # %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
+      build_struct(TypeCheck.Builtin.OneOf)
+      |> Map.put(:choices, list_of_possibilities)
+    end
   end
 
   @doc typekind: :builtin

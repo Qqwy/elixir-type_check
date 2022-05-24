@@ -48,20 +48,19 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :binary_part, 3, [B.binary(), B.non_neg_integer(), B.integer()], B.binary()},
       {Kernel, :bit_size, 1, [B.bitstring()], B.non_neg_integer()},
       {Kernel, :ceil, 1, [B.number()], B.integer()},
-      {Kernel, :div, 2, [B.integer(), B.one_of([B.neg_integer(), B.pos_integer()])], B.integer()},
+      {Kernel, :div, 2, [B.integer(), B.one_of(B.neg_integer(), B.pos_integer())], B.integer()},
       {Kernel, :elem, 2, [B.tuple(), B.non_neg_integer()], B.term()},
       {Kernel, :hd, 1, [B.nonempty_list(B.any())], B.any()},
       {Kernel, :is_atom, 1, [B.term()], B.boolean()},
       # TODO(@orsinium): update when reference and port are supported
       {Kernel, :node, 1, [B.one_of([B.pid(), B.any(), B.any()])], B.atom()},
-      {Kernel, :tl, 1, [B.nonempty_list()], B.one_of([B.list(), B.any()])},
+      {Kernel, :tl, 1, [B.nonempty_list()], B.one_of(B.list(), B.any())},
       {Kernel, :tuple_size, 1, [B.tuple()], B.non_neg_integer()},
       {Kernel, :apply, 2, [B.fun(), B.list()], B.any()},
       {Kernel, :apply, 3, [B.module(), B.atom(), B.list()], B.any()},
       {Kernel, :exit, 1, [B.term()], B.none()},
       {Kernel, :function_exported?, 3, [B.module(), B.atom(), B.arity()], B.boolean()},
-      {Kernel, :get_in, 2, [B.one_of([B.any(), B.any(), B.any()]), B.nonempty_list(B.term())],
-       B.term()},
+      {Kernel, :get_in, 2, [B.any(), B.nonempty_list(B.term())], B.term()},
       {Enum, :all?, 2, [B.any(), B.function([B.any()], B.as_boolean(B.term()))], B.boolean()}
     ]
 
