@@ -60,7 +60,8 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :apply, 3, [B.module(), B.atom(), B.list()], B.any()},
       {Kernel, :exit, 1, [B.term()], B.none()},
       {Kernel, :function_exported?, 3, [B.module(), B.atom(), B.arity()], B.boolean()},
-      {Kernel, :get_in, 2, [B.any(), B.nonempty_list(B.term())], B.term()},
+      {Kernel, :get_in, 2, [B.one_of([B.any(), B.any(), B.any()]), B.nonempty_list(B.term())],
+       B.term()},
       {Enum, :all?, 2, [B.any(), B.function([B.any()], B.as_boolean(B.term()))], B.boolean()}
     ]
 

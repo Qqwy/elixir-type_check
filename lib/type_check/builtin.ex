@@ -677,6 +677,10 @@ defmodule TypeCheck.Builtin do
     one_of([left] ++ right.choices)
   end
 
+  def one_of(%{__struct__: TypeCheck.Builtin.Any}, %{__struct__: TypeCheck.Builtin.Any}) do
+    any()
+  end
+
   def one_of(left, right) do
     one_of([left, right])
   end

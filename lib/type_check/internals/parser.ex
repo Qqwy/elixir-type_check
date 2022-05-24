@@ -31,6 +31,21 @@ defmodule TypeCheck.Internals.Parser do
     end
   end
 
+  def fetch_type(module, type) when is_atom(module) do
+    case Code.Typespec.fetch_types(module) do
+      {:ok, types} -> fetch_type(types, type)
+      :error -> {:error, "cannot fetch types from the module"}
+    end
+  end
+
+  def fetch_type(types, type) when is_list(types) do
+    case types |> Enum.find(fn {_, {name, _, _}} -> name == type end) do
+      # TODO(@orsinium): support generics
+      {_, {_, spec, _}} -> {:ok, spec}
+      nil -> {:error, "cannot find type"}
+    end
+  end
+
   @doc """
   Convert the raw spec extracted by `fetch_spec/3` into type_check type.
 
@@ -122,20 +137,12 @@ defmodule TypeCheck.Internals.Parser do
 
   # elixir types
 
-  def convert({:remote_type, _, [{:atom, _, :elixir}, {:atom, _, :keyword}, []]}),
-    do: B.keyword()
-
-  def convert({:remote_type, _, [{:atom, _, :elixir}, {:atom, _, :keyword}, [t]]}),
-    do: B.keyword(convert(t))
-
-  def convert({:remote_type, _, [{:atom, _, :elixir}, {:atom, _, :as_boolean}, [t]]}),
-    do: B.as_boolean(convert(t))
-
-  def convert({:remote_type, _, [{:atom, _, :String}, {:atom, _, :t}, []]}),
-    do: B.bitstring()
-
-  def convert({:remote_type, _, [{:atom, _, :"List.Chars"}, {:atom, _, :t}, []]}),
-    do: B.charlist()
+  def convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, []]}) do
+    case fetch_type(module, type) do
+      {:ok, spec} -> convert(spec)
+      {:error, _} -> B.any()
+    end
+  end
 
   def convert(_), do: B.any()
 end
