@@ -213,6 +213,7 @@ Details:
         - It is not yet possible to combine them with fixed keys.
       Because of this, the inspection of the builtin type `map(key, value)` has been changed to look the same as an optional map. _This is a minor backwards-incompatible change._
     - Desugaring `%{}` has changed from 'any map' to 'the empty map' in line with Elixir's Typespecs. _This is a minor backwards-incompatible change._
+    - Support for `port()`, `reference()` and `identifier()`.
   
 - 0.10.8 - 
   - Fixes:
