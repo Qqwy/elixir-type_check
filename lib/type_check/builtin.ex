@@ -1208,7 +1208,7 @@ defmodule TypeCheck.Builtin do
 
   iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
   true
-  iex> some_port = Port.open({:spawn, "echo hello"}, [:binary])
+  iex> some_port = Port.open({:spawn, "cat"}, [:binary])
   ...> TypeCheck.conforms?(some_port, port())
   true
   """
