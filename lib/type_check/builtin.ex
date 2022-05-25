@@ -1186,11 +1186,11 @@ defmodule TypeCheck.Builtin do
 
   c.f. `TypeCheck.Builtin.Reference`
 
-  iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
-  true
-  iex> some_ref = IEx.Helpers.ref(0, 749884137, 111673345, 43386)
-  ...> TypeCheck.conforms!(some_ref, reference())
-  #Reference<0.749884137.111673345.43386>
+      iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
+      true
+      iex> some_ref = IEx.Helpers.ref(0, 749884137, 111673345, 43386)
+      ...> TypeCheck.conforms!(some_ref, reference())
+      #Reference<0.749884137.111673345.43386>
   """
   if_recompiling? do
     @spec! reference() :: TypeCheck.Builtin.Reference.t()
@@ -1206,17 +1206,30 @@ defmodule TypeCheck.Builtin do
 
   c.f. `TypeCheck.Builtin.Port`
 
-  iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
-  true
-  iex> some_port = Port.open({:spawn, "cat"}, [:binary])
-  ...> TypeCheck.conforms?(some_port, port())
-  true
+      iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
+      true
+      iex> some_port = Port.open({:spawn, "cat"}, [:binary])
+      ...> TypeCheck.conforms?(some_port, port())
+      true
   """
   if_recompiling? do
     @spec! port() :: TypeCheck.Builtin.Port.t()
   end
   def port() do
     build_struct(TypeCheck.Builtin.Port)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Syntactic sugar for `pid() | port() | reference()`
+
+      iex> TypeCheck.conforms?(self(), identifier())
+      true
+  """
+  def identifier() do
+    named_type(:identifier,
+      one_of([pid(), port(), reference()])
+    )
   end
 
   @doc typekind: :builtin
