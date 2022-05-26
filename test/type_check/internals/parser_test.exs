@@ -61,7 +61,9 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :exit, 1, [B.term()], B.none()},
       {Kernel, :function_exported?, 3, [B.module(), B.atom(), B.arity()], B.boolean()},
       {Kernel, :get_in, 2, [B.any(), B.nonempty_list(B.term())], B.term()},
-      {Enum, :all?, 2, [B.any(), B.function([B.any()], B.as_boolean(B.term()))], B.boolean()}
+      {Kernel, :max, 2, [B.term(), B.term()], B.one_of([B.term(), B.term()])},
+      {Enum, :all?, 2, [B.any(), B.function([B.any()], B.as_boolean(B.term()))], B.boolean()},
+      {Macro, :var, 2, [B.atom(), B.atom()], B.fixed_tuple([B.atom(), B.any(), B.atom()])}
     ]
 
     for {module, func, arity, exp_args, exp_result} <- cases do

@@ -105,11 +105,22 @@ defmodule TypeCheck.Internals.Parser do
   defp convert({:atom, _, val}, _), do: B.literal(val)
   defp convert({:integer, _, val}, _), do: B.literal(val)
   defp convert({:ann_type, _, [_var, t]}, ctx), do: convert(t, ctx)
+  defp convert({:var, _, name}, ctx), do: Map.get(ctx.vars, name, ctx.default)
 
   defp convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}, ctx) do
     case fetch_type(module, type, length(vars)) do
-      {:ok, spec, _} -> convert(spec, ctx)
-      {:error, _} -> ctx.default
+      {:ok, spec, var_names} ->
+        # extract names of vars from raw spec
+        var_names = var_names |> Enum.map(fn {:var, _, name} -> name end)
+        # convert values from raw spec to type_check types
+        vars = vars |> Enum.map(&convert(&1, ctx))
+        # add new key-value pairs into existing vars
+        vars = Enum.zip(var_names, vars) |> Map.new()
+        vars = Map.merge(ctx.vars, vars)
+        convert(spec, %{ctx | vars: vars})
+
+      {:error, _} ->
+        ctx.default
     end
   end
 
@@ -169,9 +180,17 @@ defmodule TypeCheck.Internals.Parser do
   defp convert_type(:fun, [{:type, _, :product, arg_types}, ret_type], ctx),
     do: B.function(Enum.map(arg_types, &convert(&1, ctx)), convert(ret_type, ctx))
 
-  defp convert_type(:bounded_fun, [t, _], ctx),
-    # TODO(@orsinium): can we support constraints?
-    do: convert(t, ctx)
+  defp convert_type(:bounded_fun, [t, vars], ctx) do
+    vars =
+      vars
+      |> Enum.map(fn {:type, _, :constraint, [{:atom, _, :is_subtype}, [{:var, _, name}, type]]} ->
+        {name, convert(type, ctx)}
+      end)
+      |> Map.new()
+
+    vars = Map.merge(ctx.vars, vars)
+    convert(t, %{ctx | vars: vars})
+  end
 
   defp convert_type(:list, [t], ctx), do: B.list(convert(t, ctx))
   defp convert_type(:maybe_improper_list, [t, _tail], ctx), do: B.list(convert(t, ctx))
