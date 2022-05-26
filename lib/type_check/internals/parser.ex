@@ -13,8 +13,7 @@ defmodule TypeCheck.Internals.Parser do
       iex> import TypeCheck.Internals.Parser
       iex> {:ok, _} = fetch_spec(Kernel, :node, 1)
   """
-  @spec fetch_spec(atom() | list(), atom(), non_neg_integer()) ::
-          {:error, String.t()} | {:ok, tuple()}
+  @spec fetch_spec(module() | list(), atom(), arity()) :: {:error, String.t()} | {:ok, tuple()}
   def fetch_spec(module, function, arity) when is_atom(module) do
     case Code.Typespec.fetch_specs(module) do
       {:ok, specs} -> fetch_spec(specs, function, arity)
@@ -24,26 +23,51 @@ defmodule TypeCheck.Internals.Parser do
 
   def fetch_spec(specs, function, arity) when is_list(specs) do
     case specs |> Enum.find(fn {func, _spec} -> func == {function, arity} end) do
-      {_func, [spec]} -> {:ok, spec}
-      {_func, [_ | _]} -> {:error, "multiple specs for function"}
-      {_func, _spec} -> {:error, "unsupported spec"}
+      {_, [spec]} -> {:ok, spec}
+      {_, [_ | _]} -> {:error, "multiple specs for function"}
+      {_, _spec} -> {:error, "unsupported spec"}
       nil -> {:error, "cannot find spec for function"}
     end
   end
 
-  def fetch_type(module, type) when is_atom(module) do
+  @doc """
+  Fetch raw type definition for the given type with the given number of generic variables.
+  """
+  @spec fetch_type(module(), atom(), arity()) :: {:error, String.t()} | {:ok, any(), list()}
+  def fetch_type(module, type, arity) do
+    case fetch_types(module, type) do
+      {:ok, []} -> {:error, "cannot find type with the given name"}
+      {:ok, types} -> fetch_type(types, arity)
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  @spec fetch_type(list(), arity()) :: {:error, String.t()} | {:ok, any(), list()}
+  defp fetch_type(types, arity) when is_list(types) do
+    case types |> Enum.find(fn {_, {_, _, vars}} -> length(vars) == arity end) do
+      {_, {_, spec, vars}} -> {:ok, spec, vars}
+      nil -> {:error, "cannot find type with the given arity"}
+    end
+  end
+
+  @doc """
+  Get list of all types from the module matching the given name.
+
+  If no types found, empty list is returned.
+  It is possible for list to contain multiple types if there are multiple type
+  definitions with the same name but different amount of generic arguments.
+  """
+  @spec fetch_types(module() | list(), atom()) :: {:error, String.t()} | {:ok, list()}
+  def fetch_types(module, type) when is_atom(module) do
     case Code.Typespec.fetch_types(module) do
-      {:ok, types} -> fetch_type(types, type)
+      {:ok, types} -> fetch_types(types, type)
       :error -> {:error, "cannot fetch types from the module"}
     end
   end
 
-  def fetch_type(types, type) when is_list(types) do
-    case types |> Enum.find(fn {_, {name, _, _}} -> name == type end) do
-      # TODO(@orsinium): support generics
-      {_, {_, spec, _}} -> {:ok, spec}
-      nil -> {:error, "cannot find type"}
-    end
+  def fetch_types(types, type) when is_list(types) do
+    filtered = types |> Enum.filter(fn {_, {name, _, _}} -> name == type end)
+    {:ok, filtered}
   end
 
   @doc """
@@ -137,9 +161,9 @@ defmodule TypeCheck.Internals.Parser do
 
   # elixir types
 
-  def convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, []]}) do
-    case fetch_type(module, type) do
-      {:ok, spec} -> convert(spec)
+  def convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}) do
+    case fetch_type(module, type, length(vars)) do
+      {:ok, spec, _} -> convert(spec)
       {:error, _} -> B.any()
     end
   end
