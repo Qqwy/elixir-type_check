@@ -101,81 +101,10 @@ defmodule TypeCheck.Internals.Parser do
 
   @spec convert(tuple(), Context.t()) :: TypeCheck.Type.t()
 
-  # basic types
-  defp convert({:type, _, :any, []}, _), do: B.any()
-  defp convert({:type, _, :atom, []}, _), do: B.atom()
-  defp convert({:type, _, :binary, []}, _), do: B.binary()
-  defp convert({:type, _, :bitstring, []}, _), do: B.bitstring()
-  defp convert({:type, _, :boolean, []}, _), do: B.boolean()
-  defp convert({:type, _, :pid, []}, _), do: B.pid()
-  defp convert({:type, _, :no_return, []}, _), do: B.none()
-  defp convert({:type, _, :none, []}, _), do: B.none()
-
-  # unsupported by type_check yet
-  defp convert({:type, _, :reference, []}, _), do: B.any()
-  defp convert({:type, _, :port, []}, _), do: B.any()
-
-  # numbers
-  defp convert({:type, _, :float, []}, _), do: B.float()
-  defp convert({:type, _, :integer, []}, _), do: B.integer()
-  defp convert({:type, _, :neg_integer, []}, _), do: B.neg_integer()
-  defp convert({:type, _, :non_neg_integer, []}, _), do: B.non_neg_integer()
-  defp convert({:type, _, :number, []}, _), do: B.number()
-  defp convert({:type, _, :pos_integer, []}, _), do: B.pos_integer()
-
-  # literals
+  defp convert({:type, _, name, vars}, ctx), do: convert_type(name, vars, ctx)
   defp convert({:atom, _, val}, _), do: B.literal(val)
   defp convert({:integer, _, val}, _), do: B.literal(val)
-
-  defp convert({:type, _, :range, [{:integer, _, left}, {:integer, _, right}]}, _),
-    do: B.range(left, right)
-
-  # aliases
-  defp convert({:type, _, :term, []}, _), do: B.term()
-  defp convert({:type, _, :arity, []}, _), do: B.arity()
-  defp convert({:type, _, :module, []}, _), do: B.module()
-  defp convert({:type, _, :nonempty_binary, []}, _), do: B.nonempty_binary()
-  defp convert({:type, _, :nonempty_bitstring, []}, _), do: B.nonempty_bitstring()
-  defp convert({:type, _, :byte, []}, _), do: B.byte()
-  defp convert({:type, _, :char, []}, _), do: B.char()
-  defp convert({:type, _, :node, []}, _), do: B.atom()
-  defp convert({:type, _, :charlist, []}, _), do: B.charlist()
-
-  # shothands for generics
-  defp convert({:type, _, :fun, []}, _), do: B.function()
-
-  defp convert({:type, _, :fun, [{:type, _, :any}, ret_type]}, ctx),
-    do: B.function(convert(ret_type, ctx))
-
-  defp convert({:type, _, :list, []}, _), do: B.list()
-  defp convert({:type, _, :map, :any}, _), do: B.map()
-  defp convert({:type, _, :nonempty_list, []}, _), do: B.nonempty_list()
-  # improper lists are cursed, restrict it to regular lists
-  defp convert({:type, _, :nonempty_maybe_improper_list, []}, _), do: B.nonempty_list()
-  defp convert({:type, _, :tuple, :any}, _), do: B.tuple()
-
-  # generics
-  defp convert({:type, _, :fun, [{:type, _, :product, arg_types}, ret_type]}, ctx),
-    do: B.function(Enum.map(arg_types, &convert(&1, ctx)), convert(ret_type, ctx))
-
-  defp convert({:type, _, :bounded_fun, [t, _]}, ctx),
-    # TODO(@orsinium): can we support constraints?
-    do: convert(t, ctx)
-
-  defp convert({:type, _, :list, [t]}, ctx), do: B.list(convert(t, ctx))
-  defp convert({:type, _, :maybe_improper_list, [t, _tail]}, ctx), do: B.list(convert(t, ctx))
-  defp convert({:type, _, :nonempty_list, [t]}, ctx), do: B.nonempty_list(convert(t, ctx))
-
-  defp convert({:type, _, :nonempty_maybe_improper_list, [t, _tail]}, ctx),
-    do: B.nonempty_list(convert(t, ctx))
-
-  defp convert({:type, _, :tuple, types}, ctx),
-    do: B.fixed_tuple(Enum.map(types, &convert(&1, ctx)))
-
-  defp convert({:type, _, :union, types}, ctx), do: B.one_of(Enum.map(types, &convert(&1, ctx)))
   defp convert({:ann_type, _, [_var, t]}, ctx), do: convert(t, ctx)
-
-  # elixir types
 
   defp convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}, ctx) do
     case fetch_type(module, type, length(vars)) do
@@ -185,4 +114,75 @@ defmodule TypeCheck.Internals.Parser do
   end
 
   defp convert(_, ctx), do: ctx.default
+
+  @spec convert_type(atom(), list() | atom(), Context.t()) :: TypeCheck.Type.t()
+  # basic types
+  defp convert_type(:any, [], _), do: B.any()
+  defp convert_type(:atom, [], _), do: B.atom()
+  defp convert_type(:binary, [], _), do: B.binary()
+  defp convert_type(:bitstring, [], _), do: B.bitstring()
+  defp convert_type(:boolean, [], _), do: B.boolean()
+  defp convert_type(:pid, [], _), do: B.pid()
+  defp convert_type(:no_return, [], _), do: B.none()
+  defp convert_type(:none, [], _), do: B.none()
+
+  # unsupported by type_check yet
+  defp convert_type(:reference, [], ctx), do: ctx.default
+  defp convert_type(:port, [], ctx), do: ctx.default
+
+  # numbers
+  defp convert_type(:float, [], _), do: B.float()
+  defp convert_type(:integer, [], _), do: B.integer()
+  defp convert_type(:neg_integer, [], _), do: B.neg_integer()
+  defp convert_type(:non_neg_integer, [], _), do: B.non_neg_integer()
+  defp convert_type(:number, [], _), do: B.number()
+  defp convert_type(:pos_integer, [], _), do: B.pos_integer()
+
+  defp convert_type(:range, [{:integer, _, left}, {:integer, _, right}], _),
+    do: B.range(left, right)
+
+  # aliases
+  defp convert_type(:term, [], _), do: B.term()
+  defp convert_type(:arity, [], _), do: B.arity()
+  defp convert_type(:module, [], _), do: B.module()
+  defp convert_type(:nonempty_binary, [], _), do: B.nonempty_binary()
+  defp convert_type(:nonempty_bitstring, [], _), do: B.nonempty_bitstring()
+  defp convert_type(:byte, [], _), do: B.byte()
+  defp convert_type(:char, [], _), do: B.char()
+  defp convert_type(:node, [], _), do: B.atom()
+  defp convert_type(:charlist, [], _), do: B.charlist()
+
+  # shothands for generics
+  defp convert_type(:fun, [], _), do: B.function()
+
+  defp convert_type(:fun, [{:type, _, :any}, ret_type], ctx),
+    do: B.function(convert(ret_type, ctx))
+
+  defp convert_type(:list, [], _), do: B.list()
+  defp convert_type(:map, :any, _), do: B.map()
+  defp convert_type(:nonempty_list, [], _), do: B.nonempty_list()
+  # improper lists are cursed, restrict it to regular lists
+  defp convert_type(:nonempty_maybe_improper_list, [], _), do: B.nonempty_list()
+  defp convert_type(:tuple, :any, _), do: B.tuple()
+
+  # generics
+  defp convert_type(:fun, [{:type, _, :product, arg_types}, ret_type], ctx),
+    do: B.function(Enum.map(arg_types, &convert(&1, ctx)), convert(ret_type, ctx))
+
+  defp convert_type(:bounded_fun, [t, _], ctx),
+    # TODO(@orsinium): can we support constraints?
+    do: convert(t, ctx)
+
+  defp convert_type(:list, [t], ctx), do: B.list(convert(t, ctx))
+  defp convert_type(:maybe_improper_list, [t, _tail], ctx), do: B.list(convert(t, ctx))
+  defp convert_type(:nonempty_list, [t], ctx), do: B.nonempty_list(convert(t, ctx))
+
+  defp convert_type(:nonempty_maybe_improper_list, [t, _tail], ctx),
+    do: B.nonempty_list(convert(t, ctx))
+
+  defp convert_type(:tuple, types, ctx),
+    do: B.fixed_tuple(Enum.map(types, &convert(&1, ctx)))
+
+  defp convert_type(:union, types, ctx), do: B.one_of(Enum.map(types, &convert(&1, ctx)))
+  defp convert_type(_, _, ctx), do: ctx.default
 end
