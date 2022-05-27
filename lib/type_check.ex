@@ -377,4 +377,45 @@ defmodule TypeCheck do
     dynamic_conforms!(result, rtype)
     result
   end
+  
+  @doc """
+  Extract TypeCheck type from the `@spec` of the given function.
+  
+  ## Examples
+  
+      iex> {:ok, type} = TypeCheck.fetch_spec(Kernel, :abs, 1)
+      iex> type
+      #TypeCheck.Type< (number() -> number()) >
+      iex> {:ok, type} = TypeCheck.fetch_spec(Atom, :to_string, 1)
+      iex> type
+      #TypeCheck.Type< (atom() -> binary()) >
+      iex> TypeCheck.fetch_spec(Kernel, :non_existent, 1)
+      {:error, "cannot find spec for function"}
+  """
+  @spec fetch_spec(module(), atom(), arity()) :: TypeCheck.Type.t()
+  def fetch_spec(module, function, arity) do
+    case Parser.fetch_spec(module, function, arity) do
+      {:ok, spec} -> {:ok, Parser.convert(spec)}
+      {:error, err} -> {:error, err}
+    end
+  end
+  
+  @doc """
+  Extract TypeCheck type from the `@type` with the given name.
+  
+  ## Examples
+  
+      iex> {:ok, type} = TypeCheck.fetch_type(String, :t, 0)
+      iex> type
+      #TypeCheck.Type< binary() >
+      iex> TypeCheck.fetch_type(String, :non_existent, 0)
+      {:error, "cannot find type with the given name"}
+  """
+  @spec fetch_type(module(), atom(), arity()) :: TypeCheck.Type.t()
+  def fetch_type(module, type, arity) do
+    case Parser.fetch_type(module, type, arity) do
+      {:ok, type, _} -> {:ok, Parser.convert(type)}
+      {:error, err} -> {:error, err}
+    end
+  end
 end
