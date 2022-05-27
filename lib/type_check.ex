@@ -1,5 +1,6 @@
 defmodule TypeCheck do
   require TypeCheck.Type
+  alias TypeCheck.Internals.Parser
 
   @moduledoc """
   Fast and flexible runtime type-checking.
@@ -260,7 +261,7 @@ defmodule TypeCheck do
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At lib/type_check.ex:279:
+      "At lib/type_check.ex:280:
           `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
@@ -312,7 +313,7 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:279:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:280:
           `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
@@ -321,5 +322,59 @@ defmodule TypeCheck do
       {:ok, value} -> value
       {:error, exception} -> raise exception
     end
+  end
+  
+  @doc """
+  Ensure at runtime that arguments at result of function call conform the function spec.
+  
+  The function spec is extracted at compile time from the regular Elixir (oe Erlang) `@spec`.
+
+  ## Experimental
+  
+  This macro is experimental. Use it at your own risk only in a test-covered code.
+  If it explodes, please, [open an issue](https://github.com/Qqwy/elixir-type_check/issues).
+  
+  ## Examples
+  
+      iex> TypeCheck.ensure_types!(Kernel.abs(-13))
+      13
+      iex> TypeCheck.ensure_types!(Kernel.abs("hi"))
+      ** (TypeCheck.TypeError) At lib/type_check.ex:280:
+          `"hi"` is not a number.
+  """
+  @spec ensure_types!(Macro.t) :: Macro.t
+  defmacro ensure_types!(expr) do
+    {module, function, args} = Parser.ast_to_mfa(expr)
+    {:ok, spec} = Parser.fetch_spec(module, function, length(args))
+    type = Parser.convert(spec) |> Macro.escape()
+    quote do
+      TypeCheck.apply!(unquote(type), unquote(module), unquote(function), unquote(args))
+    end
+  end
+  
+  @doc """
+  The same as `Kernel.apply/3` but ensures that values conform the given type.
+  
+  The first argument must be a function type of the function to be called.
+  
+  ## Examples
+      
+      iex> alias TypeCheck.Builtin, as: B
+      iex> type = B.function([B.number], B.number)
+      iex> TypeCheck.apply!(type, Kernel, :abs, [-13]) 
+      13
+      iex> TypeCheck.apply!(type, Kernel, :abs, ["hello"])
+      ** (TypeCheck.TypeError) At lib/type_check.ex:280:
+          `"hello"` is not a number.
+
+  """
+  @spec apply!(TypeCheck.Type.t(), module(), atom(), list()) :: any()
+  def apply!(%{param_types: ptypes, return_type: rtype}, module, function, args) do
+    Enum.zip(args, ptypes) |> Enum.each(fn 
+      {avalue, atype} -> dynamic_conforms!(avalue, atype) 
+    end)
+    result = Kernel.apply(module, function, args)
+    dynamic_conforms!(result, rtype)
+    result
   end
 end
