@@ -81,6 +81,41 @@ defmodule TypeCheck.Internals.Parser do
   end
 
   @doc """
+  Extract module name, function name, and arguments from quoted expression of a function call.
+
+  ## Examples
+
+      iex> import TypeCheck.Internals.Parser
+      iex> ast_to_mfa(quote do: abs(1))
+      {Kernel, :abs, [1]}
+      iex> ast_to_mfa(quote do: Kernel.abs(1))
+      {Kernel, :abs, [1]}
+      iex> ast_to_mfa(quote do: Date.diff(1, 2))
+      {Date, :diff, [1, 2]}
+      iex> alias Date, as: D
+      iex> ast_to_mfa(quote do: D.diff(1, 2))
+      {Date, :diff, [1, 2]}
+  """
+  @spec ast_to_mfa(Macro.t()) :: {module(), atom(), [Macro.t()]}
+  def ast_to_mfa({func, [context: _, import: module], args}) do
+    {module, func, args}
+  end
+
+  def ast_to_mfa({target, _, args}) do
+    case target do
+      {:., _, [{:__aliases__, [alias: false], [mod]}, func]} -> {elixir_module(mod), func, args}
+      {:., _, [{:__aliases__, [alias: mod], _}, func]} -> {mod, func, args}
+      {:., _, [{:__aliases__, _, [mod]}, func]} -> {elixir_module(mod), func, args}
+      {:., _, [mod, func]} when is_atom(mod) -> {mod, func, args}
+      _ -> raise("cannot infer function")
+    end
+  end
+
+  def ast_to_mfa(_), do: raise("not a function call")
+
+  defp elixir_module(module), do: String.to_atom("Elixir.#{module}")
+
+  @doc """
   Convert the raw spec extracted by `fetch_spec/3` into type_check type.
 
   The function is optimistic. If the type is not known, it assumes `any()`.
