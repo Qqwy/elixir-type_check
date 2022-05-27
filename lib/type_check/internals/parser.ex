@@ -21,8 +21,9 @@ defmodule TypeCheck.Internals.Parser do
       iex> import TypeCheck.Internals.Parser
       iex> {:ok, _} = fetch_spec(Kernel, :node, 1)
   """
-  @spec fetch_spec(module() | list(), atom(), arity()) :: {:error, String.t()} | {:ok, tuple()}
-  def fetch_spec(module, function, arity) when is_atom(module) do
+  @spec fetch_spec(module() | binary() | list(), atom(), arity()) ::
+          {:error, String.t()} | {:ok, tuple()}
+  def fetch_spec(module, function, arity) when is_atom(module) or is_binary(module) do
     case Code.Typespec.fetch_specs(module) do
       {:ok, specs} -> fetch_spec(specs, function, arity)
       :error -> {:error, "cannot fetch specs from the module"}
@@ -41,7 +42,8 @@ defmodule TypeCheck.Internals.Parser do
   @doc """
   Fetch raw type definition for the given type with the given number of generic variables.
   """
-  @spec fetch_type(module(), atom(), arity()) :: {:error, String.t()} | {:ok, any(), list()}
+  @spec fetch_type(module() | binary(), atom(), arity()) ::
+          {:error, String.t()} | {:ok, any(), list()}
   def fetch_type(module, type, arity) do
     case fetch_types(module, type) do
       {:ok, []} -> {:error, "cannot find type with the given name"}
@@ -65,8 +67,8 @@ defmodule TypeCheck.Internals.Parser do
   It is possible for list to contain multiple types if there are multiple type
   definitions with the same name but different amount of generic arguments.
   """
-  @spec fetch_types(module() | list(), atom()) :: {:error, String.t()} | {:ok, list()}
-  def fetch_types(module, type) when is_atom(module) do
+  @spec fetch_types(module() | binary() | list(), atom()) :: {:error, String.t()} | {:ok, list()}
+  def fetch_types(module, type) when is_atom(module) or is_binary(module) do
     case Code.Typespec.fetch_types(module) do
       {:ok, types} -> fetch_types(types, type)
       :error -> {:error, "cannot fetch types from the module"}
@@ -130,8 +132,6 @@ defmodule TypeCheck.Internals.Parser do
   # basic types
   defp convert_type(:any, [], _), do: B.any()
   defp convert_type(:atom, [], _), do: B.atom()
-  defp convert_type(:binary, [], _), do: B.binary()
-  defp convert_type(:bitstring, [], _), do: B.bitstring()
   defp convert_type(:boolean, [], _), do: B.boolean()
   defp convert_type(:pid, [], _), do: B.pid()
   defp convert_type(:no_return, [], _), do: B.none()
@@ -140,6 +140,19 @@ defmodule TypeCheck.Internals.Parser do
   # unsupported by type_check yet
   defp convert_type(:reference, [], ctx), do: ctx.default
   defp convert_type(:port, [], ctx), do: ctx.default
+
+  # bitstrings
+  defp convert_type(:binary, [], _), do: B.binary()
+
+  defp convert_type(:binary, [{:integer, _, prefix}, {:integer, _, unit}], _) do
+    if unit == 0 do
+      B.sized_bitstring(prefix)
+    else
+      B.sized_bitstring(prefix, unit)
+    end
+  end
+
+  defp convert_type(:bitstring, [], _), do: B.bitstring()
 
   # numbers
   defp convert_type(:float, [], _), do: B.float()
@@ -161,7 +174,7 @@ defmodule TypeCheck.Internals.Parser do
   defp convert_type(:byte, [], _), do: B.byte()
   defp convert_type(:char, [], _), do: B.char()
   defp convert_type(:node, [], _), do: B.atom()
-  defp convert_type(:charlist, [], _), do: B.charlist()
+  defp convert_type(:string, [], _), do: B.charlist()
 
   # shothands for generics
   defp convert_type(:fun, [], _), do: B.function()

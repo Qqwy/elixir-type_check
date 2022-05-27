@@ -1,9 +1,12 @@
 defmodule TypeCheck.Internals.ParserTest do
+  @moduledoc false
   use ExUnit.Case, async: true
   doctest TypeCheck.Internals.Parser
 
   alias TypeCheck.Internals.Parser
   alias TypeCheck.Builtin, as: B
+
+  alias TypeCheck.Internals.ParserTest.TypespecSample
 
   # test that fetch_spec doesn't explode and all specs are supported
   describe "fetch_spec smoke" do
@@ -77,6 +80,113 @@ defmodule TypeCheck.Internals.ParserTest do
         exp = B.function(@exp_args, @exp_result)
         assert ^exp = Parser.convert(spec)
       end
+    end
+  end
+
+  defmacrop test_module(raw_spec) do
+    quote do
+      {:module, _, bytecode, _} =
+        defmodule TypespecSample do
+          @moduledoc false
+          @spec unquote(raw_spec)
+          def f(a), do: a
+        end
+
+      :code.delete(TypespecSample)
+      :code.purge(TypespecSample)
+      bytecode
+    end
+  end
+
+  def convert_spec(bytecode) do
+    {:ok, spec} = bytecode |> Parser.fetch_spec(:f, 1)
+    # IO.inspect(spec)
+    spec |> Parser.convert()
+  end
+
+  describe "convert custom" do
+    test "any" do
+      bytecode = test_module(f(any) :: any)
+      expected = B.function([B.any()], B.any())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "atom" do
+      bytecode = test_module(f(any) :: atom)
+      expected = B.function([B.any()], B.atom())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "term" do
+      bytecode = test_module(f(any) :: term)
+      expected = B.function([B.any()], B.term())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "module" do
+      bytecode = test_module(f(any) :: module)
+      expected = B.function([B.any()], B.module())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "as_boolean" do
+      bytecode = test_module(f(t) :: as_boolean(t) when t: atom())
+      expected = B.function([B.atom()], B.as_boolean(B.atom()))
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "arity" do
+      bytecode = test_module(f(any) :: arity)
+      expected = B.function([B.any()], B.arity())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "binary" do
+      bytecode = test_module(f(any) :: binary)
+      expected = B.function([B.any()], B.binary())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "nonempty_binary" do
+      bytecode = test_module(f(any) :: <<_::8, _::_*8>>)
+      expected = B.function([B.any()], B.nonempty_binary())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "empty bitstring" do
+      bytecode = test_module(f(any) :: <<>>)
+      expected = B.function([B.any()], B.sized_bitstring(0))
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "sized_bitstring/1" do
+      bytecode = test_module(f(any) :: <<_::16>>)
+      expected = B.function([B.any()], B.sized_bitstring(16))
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "boolean" do
+      bytecode = test_module(f(any) :: boolean)
+      expected = B.function([B.any()], B.boolean())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "byte" do
+      bytecode = test_module(f(any) :: byte)
+      expected = B.function([B.any()], B.byte())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "char" do
+      bytecode = test_module(f(any) :: char)
+      expected = B.function([B.any()], B.char())
+      assert convert_spec(bytecode) == expected
+    end
+
+    test "charlist" do
+      bytecode = test_module(f(any) :: charlist)
+      expected = B.function([B.any()], B.charlist())
+      assert convert_spec(bytecode) == expected
     end
   end
 end
