@@ -93,10 +93,6 @@ defmodule TypeCheck.Internals.Parser do
   """
   # TODO(@orsinium):
   #  map(a, b)
-  #  mfa
-  #  keyword(t)
-  #  identifier
-  #  sized bitstring
   #  structs
   @spec convert(tuple()) :: TypeCheck.Type.t()
   def convert(type), do: convert(type, %Context{default: B.any(), vars: %{}})
@@ -128,7 +124,7 @@ defmodule TypeCheck.Internals.Parser do
 
   defp convert(_, ctx), do: ctx.default
 
-  @spec convert_type(atom(), list() | atom(), Context.t()) :: TypeCheck.Type.t()
+  @spec convert_type(atom() | nil, list() | atom(), Context.t()) :: TypeCheck.Type.t()
   # basic types
   defp convert_type(:any, [], _), do: B.any()
   defp convert_type(:atom, [], _), do: B.atom()
@@ -168,6 +164,7 @@ defmodule TypeCheck.Internals.Parser do
   # aliases
   defp convert_type(:term, [], _), do: B.term()
   defp convert_type(:arity, [], _), do: B.arity()
+  defp convert_type(:mfa, [], _), do: B.mfa()
   defp convert_type(:module, [], _), do: B.module()
   defp convert_type(:nonempty_binary, [], _), do: B.nonempty_binary()
   defp convert_type(:nonempty_bitstring, [], _), do: B.nonempty_bitstring()
@@ -178,11 +175,14 @@ defmodule TypeCheck.Internals.Parser do
 
   # shothands for generics
   defp convert_type(:fun, [], _), do: B.function()
+  defp convert_type(:function, [], _), do: B.function()
 
   defp convert_type(:fun, [{:type, _, :any}, ret_type], ctx),
     do: B.function(convert(ret_type, ctx))
 
   defp convert_type(:list, [], _), do: B.list()
+  # empty list
+  defp convert_type(nil, [], _), do: B.list()
   defp convert_type(:map, :any, _), do: B.map()
   defp convert_type(:nonempty_list, [], _), do: B.nonempty_list()
   # improper lists are cursed, restrict it to regular lists

@@ -66,7 +66,7 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :get_in, 2, [B.any(), B.nonempty_list(B.term())], B.term()},
       {Kernel, :max, 2, [B.term(), B.term()], B.one_of([B.term(), B.term()])},
       {Enum, :all?, 2, [B.any(), B.function([B.any()], B.as_boolean(B.term()))], B.boolean()},
-      {Macro, :var, 2, [B.atom(), B.atom()], B.fixed_tuple([B.atom(), B.any(), B.atom()])}
+      {Macro, :var, 2, [B.atom(), B.atom()], B.fixed_tuple([B.atom(), B.list(B.any()), B.atom()])}
     ]
 
     for {module, func, arity, exp_args, exp_result} <- cases do
@@ -174,6 +174,176 @@ defmodule TypeCheck.Internals.ParserTest do
     test "charlist" do
       bytecode = test_module(charlist)
       assert convert_spec(bytecode) == B.charlist()
+    end
+
+    test "fun" do
+      bytecode = test_module(fun)
+      assert convert_spec(bytecode) == B.fun()
+    end
+
+    test "function/0 (syntax)" do
+      bytecode = test_module((... -> any))
+      assert convert_spec(bytecode) == B.fun()
+    end
+
+    test "function/0" do
+      bytecode = test_module(function)
+      assert convert_spec(bytecode) == B.function()
+    end
+
+    test "function/1" do
+      bytecode = test_module((... -> atom()))
+      assert convert_spec(bytecode) == B.function(B.atom())
+    end
+
+    test "function/2" do
+      bytecode = test_module((boolean, integer -> atom))
+      assert convert_spec(bytecode) == B.function([B.boolean(), B.integer()], B.atom())
+    end
+
+    test "integer" do
+      bytecode = test_module(integer)
+      assert convert_spec(bytecode) == B.integer()
+    end
+
+    test "neg_integer" do
+      bytecode = test_module(neg_integer)
+      assert convert_spec(bytecode) == B.neg_integer()
+    end
+
+    test "non_neg_integer" do
+      bytecode = test_module(non_neg_integer)
+      assert convert_spec(bytecode) == B.non_neg_integer()
+    end
+
+    test "pos_integer" do
+      bytecode = test_module(pos_integer)
+      assert convert_spec(bytecode) == B.pos_integer()
+    end
+
+    test "float" do
+      bytecode = test_module(float)
+      assert convert_spec(bytecode) == B.float()
+    end
+
+    test "number" do
+      bytecode = test_module(number)
+      assert convert_spec(bytecode) == B.number()
+    end
+
+    test "list/0" do
+      bytecode = test_module(list)
+      assert convert_spec(bytecode) == B.list()
+    end
+
+    test "list/0 (syntax)" do
+      bytecode = test_module([])
+      assert convert_spec(bytecode) == B.list()
+    end
+
+    test "list/1" do
+      bytecode = test_module(list(integer))
+      assert convert_spec(bytecode) == B.list(B.integer())
+    end
+
+    test "list/1 (syntax)" do
+      bytecode = test_module([integer])
+      assert convert_spec(bytecode) == B.list(B.integer())
+    end
+
+    test "keyword/0" do
+      bytecode = test_module(keyword)
+      assert convert_spec(bytecode) == B.keyword()
+    end
+
+    test "keyword/1" do
+      bytecode = test_module(keyword(integer))
+      assert convert_spec(bytecode) == B.keyword(B.integer())
+    end
+
+    test "mfa" do
+      bytecode = test_module(mfa)
+      assert convert_spec(bytecode) == B.mfa()
+    end
+
+    test "tuple" do
+      bytecode = test_module({integer, atom})
+      assert convert_spec(bytecode) == B.fixed_tuple([B.integer(), B.atom()])
+    end
+
+    test "tuple/0" do
+      bytecode = test_module(tuple)
+      assert convert_spec(bytecode) == B.tuple()
+    end
+
+    test "empty tuple" do
+      bytecode = test_module({})
+      assert convert_spec(bytecode) == B.fixed_tuple([])
+    end
+
+    test "literal integer" do
+      bytecode = test_module(13)
+      assert convert_spec(bytecode) == B.literal(13)
+    end
+
+    test "literal atom" do
+      bytecode = test_module(:hi)
+      assert convert_spec(bytecode) == B.literal(:hi)
+    end
+
+    test "literal true" do
+      bytecode = test_module(true)
+      assert convert_spec(bytecode) == B.literal(true)
+    end
+
+    test "literal nil" do
+      bytecode = test_module(nil)
+      assert convert_spec(bytecode) == B.literal(nil)
+    end
+
+    test "range/2" do
+      bytecode = test_module(2..13)
+      assert convert_spec(bytecode) == B.range(2, 13)
+    end
+
+    test "one_of" do
+      bytecode = test_module(atom | integer | float)
+      assert convert_spec(bytecode) == B.one_of([B.atom(), B.integer(), B.float()])
+    end
+
+    test "map/0" do
+      bytecode = test_module(map)
+      assert convert_spec(bytecode) == B.map()
+    end
+
+    test "none" do
+      bytecode = test_module(none)
+      assert convert_spec(bytecode) == B.none()
+    end
+
+    test "pid" do
+      bytecode = test_module(pid)
+      assert convert_spec(bytecode) == B.pid()
+    end
+
+    test "nonempty_list/0" do
+      bytecode = test_module(nonempty_list)
+      assert convert_spec(bytecode) == B.nonempty_list()
+    end
+
+    test "nonempty_list/0 (syntax)" do
+      bytecode = test_module([...])
+      assert convert_spec(bytecode) == B.nonempty_list()
+    end
+
+    test "nonempty_list/1" do
+      bytecode = test_module(nonempty_list(integer))
+      assert convert_spec(bytecode) == B.nonempty_list(B.integer())
+    end
+
+    test "nonempty_list/1 (syntax)" do
+      bytecode = test_module([integer, ...])
+      assert convert_spec(bytecode) == B.nonempty_list(B.integer())
     end
   end
 end
