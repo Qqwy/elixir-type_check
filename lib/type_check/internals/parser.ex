@@ -91,9 +91,6 @@ defmodule TypeCheck.Internals.Parser do
       iex> expected = function([term()], boolean())
       iex> ^expected = convert(spec)
   """
-  # TODO(@orsinium):
-  #  map(a, b)
-  #  structs
   @spec convert(tuple()) :: TypeCheck.Type.t()
   def convert(type), do: convert(type, %Context{default: B.any(), vars: %{}})
 
@@ -184,6 +181,7 @@ defmodule TypeCheck.Internals.Parser do
   # empty list
   defp convert_type(nil, [], _), do: B.list()
   defp convert_type(:map, :any, _), do: B.map()
+  defp convert_type(:map, [], _), do: B.fixed_map([])
   defp convert_type(:nonempty_list, [], _), do: B.nonempty_list()
   # improper lists are cursed, restrict it to regular lists
   defp convert_type(:nonempty_maybe_improper_list, [], _), do: B.nonempty_list()
@@ -214,6 +212,21 @@ defmodule TypeCheck.Internals.Parser do
 
   defp convert_type(:tuple, types, ctx),
     do: B.fixed_tuple(Enum.map(types, &convert(&1, ctx)))
+
+  defp convert_type(:map, [{:type, _, :map_field_assoc, [_, _]}], _), do: B.map()
+
+  defp convert_type(:map, [{:type, _, :map_field_exact, [kt, vt]}], ctx),
+    do: B.map(convert(kt, ctx), convert(vt, ctx))
+
+  defp convert_type(:map, types, ctx) when is_list(types) do
+    types
+    |> Enum.map(fn
+      {:type, _, :map_field_exact, [{:atom, _, key}, vtype]} -> {key, convert(vtype, ctx)}
+      {:type, _, :map_field_assoc, _} -> nil
+    end)
+    |> Enum.filter(&Function.identity/1)
+    |> B.fixed_map()
+  end
 
   defp convert_type(:union, types, ctx), do: B.one_of(Enum.map(types, &convert(&1, ctx)))
   defp convert_type(_, _, ctx), do: ctx.default

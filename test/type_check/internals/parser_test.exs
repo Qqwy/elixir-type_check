@@ -345,5 +345,68 @@ defmodule TypeCheck.Internals.ParserTest do
       bytecode = test_module([integer, ...])
       assert convert_spec(bytecode) == B.nonempty_list(B.integer())
     end
+
+    test "empty map" do
+      bytecode = test_module(%{})
+      assert convert_spec(bytecode) == B.fixed_map([])
+    end
+
+    test "map/2" do
+      bytecode = test_module(%{integer => atom})
+      assert convert_spec(bytecode) == B.map(B.integer(), B.atom())
+    end
+
+    test "map/2 (with `required` word)" do
+      bytecode = test_module(%{required(integer) => atom})
+      assert convert_spec(bytecode) == B.map(B.integer(), B.atom())
+    end
+
+    test "map/2 (with `optional` word)" do
+      bytecode = test_module(%{optional(integer) => atom})
+      assert convert_spec(bytecode) == B.map()
+    end
+
+    test "fixed_map" do
+      bytecode = test_module(%{hello: integer, world: atom})
+      assert convert_spec(bytecode) == B.fixed_map(hello: B.integer(), world: B.atom())
+    end
+
+    test "struct Time.t" do
+      bytecode = test_module(Time.t())
+
+      exp =
+        B.fixed_map(%{
+          __struct__: B.literal(Time),
+          hour: B.non_neg_integer(),
+          minute: B.non_neg_integer(),
+          second: B.non_neg_integer(),
+          microsecond: B.fixed_tuple([B.non_neg_integer(), B.non_neg_integer()]),
+          calendar: B.atom()
+        })
+
+      assert convert_spec(bytecode) == exp
+    end
+
+    test "fixed map Calendar.datetime" do
+      bytecode = test_module(Calendar.datetime())
+
+      exp =
+        B.fixed_map(
+          calendar: B.any(),
+          year: B.any(),
+          month: B.any(),
+          day: B.any(),
+          hour: B.any(),
+          minute: B.any(),
+          second: B.any(),
+          microsecond: B.any(),
+          time_zone: B.any(),
+          zone_abbr: B.any(),
+          utc_offset: B.any(),
+          std_offset: B.any()
+        )
+
+      assert convert_spec(bytecode) == exp
+    end
   end
 end
