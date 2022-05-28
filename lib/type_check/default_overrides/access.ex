@@ -10,18 +10,12 @@ defmodule TypeCheck.DefaultOverrides.Access do
   @autogen_typespec false
   @type! container() :: keyword() | map()
 
-  # TODO
-  @type get_and_update_fun(data, current_value) ::
+  @type! get_and_update_fun(data, current_value) ::
   (:get_and_update, data, (term() -> term()) ->
     {current_value, new_data :: container()} | :pop)
-  @autogen_typespec false
-  @type! get_and_update_fun(data, current_value) :: function()
 
-  # TODO
-  @type get_fun(data) ::
+  @type! get_fun(data) ::
   (:get, data, (term() -> term()) -> new_data :: container())
-  @autogen_typespec false
-  @type! get_fun(data) :: function()
 
   @type! key() :: any()
 
