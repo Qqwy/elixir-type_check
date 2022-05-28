@@ -22,7 +22,7 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %TypeCheck.Builtin.CompoundFixedMap{}, param) do
-      # NOTE: We cannot use Keyword here since the keys are not atoms but arbitrary values
+      # NOTE: We cannot use Keyword.keys here since the keys are not atoms but arbitrary values
       fixed_keys = s.fixed.keypairs |> Enum.map(fn {key, _val} -> key end)
       fixed_part_var = Macro.var(:fixed_part, __MODULE__)
       flexible_part_var = Macro.var(:flexible_part, __MODULE__)
