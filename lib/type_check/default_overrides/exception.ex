@@ -6,17 +6,13 @@ defmodule TypeCheck.DefaultOverrides.Exception do
 
   @type! location() :: keyword()
 
-  # TODO
-  @type non_error_kind() :: :exit | :throw | {:EXIT, pid()}
-  @autogen_typespec false
-  @type! non_error_kind() :: :exit | :throw | {:EXIT, term()}
+  @type! non_error_kind() :: :exit | :throw | {:EXIT, pid()}
 
   @type! stacktrace() :: [stacktrace_entry()]
 
-  # TODO
   @type! stacktrace_entry() ::
   {module(), atom(), arity_or_args(), location()}
-  | {function(), arity_or_args(), location()}
+  | {(... -> any()), arity_or_args(), location()}
 
   # TODO
   @type! t() :: %{

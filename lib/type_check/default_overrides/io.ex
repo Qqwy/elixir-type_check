@@ -7,8 +7,7 @@ defmodule TypeCheck.DefaultOverrides.IO do
   # @type chardata() :: String.t() | maybe_improper_list(char() | chardata(), String.t() | [])
   # @type! chardata() :: String.t() | maybe_improper_list(char() | chardata(), String.t() | [])
 
-  # TODO
-  # @type! device() :: atom() | pid()
+  @type! device() :: atom() | pid()
 
   @type! nodata() :: {:error, term()} | :eof
 end
