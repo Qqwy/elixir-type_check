@@ -1220,6 +1220,9 @@ defmodule TypeCheck.Builtin do
   Also, the current property-generator will generate arbitrary PIDs, most of which
   will not point to alive processes.
   """
+  if_recompiling?() do
+    @spec! pid() :: TypeCheck.Builtin.PID.t()
+  end
   def pid() do
     build_struct(TypeCheck.Builtin.PID)
   end

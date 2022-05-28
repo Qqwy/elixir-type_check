@@ -206,7 +206,7 @@ Details:
 
 ### Changelog
 - 0.11.0 - 
-  Additions:
+  - Additions:
     - Support for fancier map syntaxes:
       - `%{required(key_type) => value_type}` Maps with a single kind of required key-value type.
       - `%{optional(key_type) => value_type}` Maps with a single kind of optional key-value type.
