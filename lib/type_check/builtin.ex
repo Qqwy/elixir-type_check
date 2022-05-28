@@ -871,7 +871,10 @@ defmodule TypeCheck.Builtin do
   Help with extending this support is very welcome.
   c.f. https://github.com/Qqwy/elixir-type_check/issues/7
   """
-  @spec fancy_map(fixed_kvs :: list({term(), TypeCheck.Type.t()}), required_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()}), optional_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()})) :: TypeCheck.Builtin.CompoundFixedMap.t() | TypeCheck.Builtin.FixedMap.t() | TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.NamedType.t()
+
+  if_recompiling? do
+    @spec fancy_map(fixed_kvs :: list({term(), TypeCheck.Type.t()}), required_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()}), optional_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()})) :: TypeCheck.Builtin.CompoundFixedMap.t() | TypeCheck.Builtin.FixedMap.t() | TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.NamedType.t()
+  end
   def fancy_map(fixed_kvs, required_kvs, optional_kvs)
   def fancy_map(fixed_keypairs, [], []) do
     fixed_map(fixed_keypairs)
