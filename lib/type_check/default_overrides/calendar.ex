@@ -9,18 +9,16 @@ defmodule TypeCheck.DefaultOverrides.Calendar do
   @autogen_typespec false
   @type! calendar() :: Elixir.Calendar.ISO
 
-  # TODO
   @type! date() :: %{
-    # optional(any()) => any(),
+    optional(any()) => any(),
     :calendar => calendar(),
     :year => year(),
     :month => month(),
     :day => day()
   }
 
-  # TODO
   @type! datetime() :: %{
-    # optional(any()) => any(),
+    optional(any()) => any(),
     :calendar => calendar(),
     :year => year(),
     :month => month(),
@@ -58,9 +56,8 @@ defmodule TypeCheck.DefaultOverrides.Calendar do
 
   @type! month() :: pos_integer()
 
-  # TODO
   @type! naive_datetime() :: %{
-    # optional(any()) => any(),
+    optional(any()) => any(),
     :calendar => calendar(),
     :year => year(),
     :month => month(),
@@ -75,9 +72,8 @@ defmodule TypeCheck.DefaultOverrides.Calendar do
 
   @type! std_offset() :: integer()
 
-  # TODO
   @type! time() :: %{
-    # optional(any()) => any(),
+    optional(any()) => any(),
     :hour => hour(),
     :minute => minute(),
     :second => second(),

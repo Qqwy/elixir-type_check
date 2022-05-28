@@ -14,10 +14,9 @@ defmodule TypeCheck.DefaultOverrides.Exception do
   {module(), atom(), arity_or_args(), location()}
   | {(... -> any()), arity_or_args(), location()}
 
-  # TODO
   @type! t() :: %{
     :__struct__ => module(),
     :__exception__ => true,
-    # optional(atom()) => any()
+    optional(atom()) => any()
   }
 end

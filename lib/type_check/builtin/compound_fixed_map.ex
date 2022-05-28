@@ -59,14 +59,14 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
-      import Inspect.Algebra, only: [color: 3, concat: 1, container_doc: 6]
-      fixed_keypairs_str = container_doc("%{", s.fixed.keypairs, "", opts, &to_map_kv(&1, &2), separator: color(",", :map, opts), break: :strict)
+      import Inspect.Algebra, only: [color: 3, concat: 1, container_doc: 6, group: 1, break: 1]
+      fixed_keypairs_str = container_doc("", s.fixed.keypairs, "", opts, &to_map_kv(&1, &2), separator: color(",", :map, opts), break: :strict)
 
       flexible_key_str = TypeCheck.Protocols.Inspect.inspect(s.flexible.key_type, opts)
       flexible_val_str = TypeCheck.Protocols.Inspect.inspect(s.flexible.value_type, opts)
       flexible_str = concat([color("optional(", :map, opts), flexible_key_str, color(") => ", :map, opts), flexible_val_str])
 
-      concat([fixed_keypairs_str, color(", ", :map, opts), flexible_str, color("}", :map, opts)])
+      concat([color("%{", :map, opts), break(""), group(concat([flexible_str, color(", ", :map, opts), fixed_keypairs_str])), color("}", :map, opts)])
       |> color(:map, opts)
     end
 
@@ -87,7 +87,6 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
       is_atom(val) and !match?('Elixir.' ++ _, Atom.to_charlist(val))
     end
   end
-
 
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do

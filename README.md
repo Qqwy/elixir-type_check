@@ -207,14 +207,16 @@ Details:
 ### Changelog
 - 0.11.0 - 
   Additions:
-    - Basic support `%{required(key_type) => value_type}` and `%{optional(key_type) => value_type}` syntaxes using the new `TypeCheck.Builtin.fancy_map` function.
-      Still has some limitations:
-        - Only a single required or optional can be used per map. 
-        - It is not yet possible to combine them with fixed keys.
-      Because of this, the inspection of the builtin type `map(key, value)` has been changed to look the same as an optional map. _This is a minor backwards-incompatible change._
+    - Support for fancier map syntaxes:
+      - `%{required(key_type) => value_type}` Maps with a single kind of required key-value type.
+      - `%{optional(key_type) => value_type}` Maps with a single kind of optional key-value type.
+      - `%{:some => a(), :fixed => b(), :keys => c(), optional(atom()) => any()}` Maps with any number of fixed keys and a single optional key-value type.
+      - TypeCheck now supports nearly all kinds of map types that see use. Archaic combinations of optional and required are not supported, but also not very useful types in practice.
+      - Because of this, the inspection of the builtin type `map(key, value)` has been changed to look the same as an optional map. _This is a minor backwards-incompatible change._
     - Desugaring `%{}` has changed from 'any map' to 'the empty map' in line with Elixir's Typespecs. _This is a minor backwards-incompatible change._
-    - Support for `port()`, `reference()` and `identifier()`.
-  
+    - Support for the builtin types `port()`, `reference()` and (based on these) `identifier()`.
+    - Support for the builtin type `struct()`.
+    - Improvements to the default type overrides for modules like `Calendar`, `Enum`, `Enumerable`, etc. now that optional keys in struct types and higher-order function types are supported.
 - 0.10.8 - 
   - Fixes:
     - Ensures that the `Inspect` protocol is properly implemented for sized bitstring types (c.f. #104). Thank you very much, @trarbr!

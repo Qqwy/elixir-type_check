@@ -905,6 +905,16 @@ defmodule TypeCheck.Builtin do
     """
   end
 
+  @doc typekind: :builtin
+  @doc """
+  Any kind of struct.
+
+  Syntactic sugar for %{:__struct__ => atom(), optional(atom()) => any()}
+  """
+  def struct() do
+    fancy_map([__struct__: atom()], [], [{atom(), any()}])
+  end
+
   @doc typekind: :extension
   @doc """
   A list of fixed size where `element_types` dictates the types
