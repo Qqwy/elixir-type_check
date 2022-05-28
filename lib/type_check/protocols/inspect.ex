@@ -14,6 +14,7 @@ structs = [
   TypeCheck.Builtin.Binary,
   TypeCheck.Builtin.Bitstring,
   TypeCheck.Builtin.Boolean,
+  TypeCheck.Builtin.CompoundFixedMap,
   TypeCheck.Builtin.Guarded,
   TypeCheck.Builtin.FixedMap,
   TypeCheck.Builtin.FixedList,
