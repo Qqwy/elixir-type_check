@@ -32,6 +32,8 @@ structs = [
   TypeCheck.Builtin.Number,
   TypeCheck.Builtin.OneOf,
   TypeCheck.Builtin.PID,
+  TypeCheck.Builtin.Port,
+  TypeCheck.Builtin.Reference,
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.SizedBitstring,
   TypeCheck.Builtin.Tuple,

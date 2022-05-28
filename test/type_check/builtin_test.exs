@@ -79,6 +79,12 @@ defmodule TypeCheck.BuiltinTest do
       quote do
         <<_ :: 4 >>
       end => TypeCheck.Builtin.SizedBitstring,
+      quote do
+        reference()
+      end => TypeCheck.Builtin.Reference,
+      quote do
+        port()
+      end => TypeCheck.Builtin.Port,
     }
 
     for {type, module} <- possibilities do

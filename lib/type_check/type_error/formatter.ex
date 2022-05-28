@@ -48,6 +48,8 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.OneOf.problem_tuple()
          | TypeCheck.Builtin.PosInteger.problem_tuple()
          | TypeCheck.Builtin.PID.problem_tuple()
+         | TypeCheck.Builtin.Port.problem_tuple()
+         | TypeCheck.Builtin.Reference.problem_tuple()
          | TypeCheck.Builtin.Range.problem_tuple()
          | TypeCheck.Builtin.Tuple.problem_tuple()
 
