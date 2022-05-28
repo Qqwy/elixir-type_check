@@ -34,6 +34,7 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.Boolean.problem_tuple()
          | TypeCheck.Builtin.FixedList.problem_tuple()
          | TypeCheck.Builtin.FixedMap.problem_tuple()
+         | TypeCheck.Builtin.CompoundFixedMap.problem_tuple()
          | TypeCheck.Builtin.FixedTuple.problem_tuple()
          | TypeCheck.Builtin.Float.problem_tuple()
          | TypeCheck.Builtin.Integer.problem_tuple()

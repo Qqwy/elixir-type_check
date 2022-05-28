@@ -855,8 +855,27 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
-  WIP
+  Allows constructing map types containing a combination of fixed, required and optional keys (and their associatied type-values)
+
+  Desugaring of most ways of map syntaxes.
+
+  Note that because of reasons of efficiency and implementation difficulty,
+  not all possibilities are supported by TypeCheck currently.
+
+  Supported are:
+  - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
+  - maps with a single required keypair (`%{required(key_type) => value_type}`)
+  - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+  - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
+
+  Help with extending this support is very welcome.
+  c.f. https://github.com/Qqwy/elixir-type_check/issues/7
   """
+
+  if_recompiling? do
+    @spec fancy_map(fixed_kvs :: list({term(), TypeCheck.Type.t()}), required_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()}), optional_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()})) :: TypeCheck.Builtin.CompoundFixedMap.t() | TypeCheck.Builtin.FixedMap.t() | TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.NamedType.t()
+  end
+  def fancy_map(fixed_kvs, required_kvs, optional_kvs)
   def fancy_map(fixed_keypairs, [], []) do
     fixed_map(fixed_keypairs)
   end
@@ -866,13 +885,26 @@ defmodule TypeCheck.Builtin do
   end
 
   def fancy_map([], [{required_key_type, value_type}], []) do
+    required_map(required_key_type, value_type)
+  end
+
+  defp required_map(required_key_type, value_type) do
     guard =
       quote do
-        map_size(unquote(Macro.var(:map, nil))) >= 1
-      end
+      map_size(unquote(Macro.var(:map, nil))) >= 1
+    end
 
     named_type(:map, map(required_key_type, value_type))
     |> guarded_by(guard)
+  end
+
+  def fancy_map(fixed_keypairs, [], [{optional_key_type, value_type}]) do
+    fixed = fixed_map(fixed_keypairs)
+    flexible = map(optional_key_type, value_type)
+
+    build_struct(TypeCheck.Builtin.CompoundFixedMap)
+    |> Map.put(:fixed, fixed)
+    |> Map.put(:flexible, flexible)
   end
 
   def fancy_map(_fixed_keypairs, _required_keypairs, _optional_keypairs) do
@@ -880,16 +912,27 @@ defmodule TypeCheck.Builtin do
     TODO!
     Maps with complex combinations of multiple
     fixed and/or required(...) and/or optional(...) keypairs
-    are not supported by TypeCheck yet.
+    are not currently supported by TypeCheck.
 
     Supported are:
     - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
     - maps with a single required keypair (`%{required(key_type) => value_type}`)
     - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+    - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
 
     Help with extending this support is very welcome.
     c.f. https://github.com/Qqwy/elixir-type_check/issues/7
     """
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Any kind of struct.
+
+  Syntactic sugar for %{:__struct__ => atom(), optional(atom()) => any()}
+  """
+  def struct() do
+    fancy_map([__struct__: atom()], [], [{atom(), any()}])
   end
 
   @doc typekind: :extension

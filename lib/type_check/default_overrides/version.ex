@@ -10,12 +10,10 @@ defmodule TypeCheck.DefaultOverrides.Version do
 
   @type! patch() :: non_neg_integer()
 
-  # TODO
   @type! pre() :: [String.t() | non_neg_integer()]
 
   @type! requirement() :: String.t() | Version.Requirement.t()
 
-  # TODO
   @type! t() :: %Elixir.Version{
     build: build(),
     major: major(),
