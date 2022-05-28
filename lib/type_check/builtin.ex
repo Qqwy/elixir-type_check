@@ -855,8 +855,24 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
-  WIP
+  Allows constructing map types containing a combination of fixed, required and optional keys (and their associatied type-values)
+
+  Desugaring of most ways of map syntaxes.
+
+  Note that because of reasons of efficiency and implementation difficulty,
+  not all possibilities are supported by TypeCheck currently.
+
+  Supported are:
+  - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
+  - maps with a single required keypair (`%{required(key_type) => value_type}`)
+  - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+  - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
+
+  Help with extending this support is very welcome.
+  c.f. https://github.com/Qqwy/elixir-type_check/issues/7
   """
+  @spec fancy_map(fixed_kvs :: list({term(), TypeCheck.Type.t()}), required_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()}), optional_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()})) :: TypeCheck.Builtin.CompoundFixedMap.t() | TypeCheck.Builtin.FixedMap.t() | TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.NamedType.t()
+  def fancy_map(fixed_kvs, required_kvs, optional_kvs)
   def fancy_map(fixed_keypairs, [], []) do
     fixed_map(fixed_keypairs)
   end
@@ -893,12 +909,13 @@ defmodule TypeCheck.Builtin do
     TODO!
     Maps with complex combinations of multiple
     fixed and/or required(...) and/or optional(...) keypairs
-    are not supported by TypeCheck yet.
+    are not currently supported by TypeCheck.
 
     Supported are:
     - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
     - maps with a single required keypair (`%{required(key_type) => value_type}`)
     - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+    - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
 
     Help with extending this support is very welcome.
     c.f. https://github.com/Qqwy/elixir-type_check/issues/7
