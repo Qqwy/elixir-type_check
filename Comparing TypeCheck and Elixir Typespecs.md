@@ -17,8 +17,8 @@ In the tables below:
 | atom()                                                       | ✅         |                                    |
 | map()                                                        | ✅         | any map                            |
 | pid()                                                        | ✅         | process identifier                 |
-| port()                                                       | ⌛         | port identifier                    |
-| reference()                                                  | ⌛         |                                    |
+| port()                                                       | ✅         | port identifier                    |
+| reference()                                                  | ✅         |                                    |
 | tuple()                                                      | ✅         | tuple of any size                  |
 | float()                                                      | ✅         |                                    |
 | integer()                                                    | ✅         |                                    |
@@ -83,7 +83,7 @@ This wrapper will only run once the the function actually is called.
 | nonempty_charlist()            | ⌛         | [char(), ...]                                                       |
 | fun()                          | ✅         | (... -> any)                                                        |
 | function()                     | ✅         | fun()                                                               |
-| identifier()                   | ⌛         | pid() \| port() \| reference()                                      |
+| identifier()                   | ✅         | pid() \| port() \| reference()                                      |
 | iodata()                       | ⌛         | iolist() \| binary()                                                |
 | iolist()                       | ⌛         | maybe_improper_list(byte() \| binary() \| iolist(), binary() \| []) |
 | keyword()                      | ✅         | [{atom(), any()}]                                                   |

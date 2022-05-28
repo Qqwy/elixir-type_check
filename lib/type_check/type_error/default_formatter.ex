@@ -224,6 +224,14 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val, inspect_value_opts())}` is not a pid."
   end
 
+  def do_format({%TypeCheck.Builtin.Port{}, :no_match, _, val}) do
+    "`#{inspect(val, inspect_value_opts())}` is not a port."
+  end
+
+  def do_format({%TypeCheck.Builtin.Reference{}, :no_match, _, val}) do
+    "`#{inspect(val, inspect_value_opts())}` is not a reference."
+  end
+
   def do_format({s = %TypeCheck.Builtin.Range{}, :not_an_integer, _, val}) do
     compound_check(val, s, "`#{inspect(val, inspect_value_opts())}` is not an integer.")
   end
