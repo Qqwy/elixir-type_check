@@ -6,7 +6,10 @@ defmodule TypeCheck.BuiltinTest do
   require TypeCheck
   import TypeCheck.Builtin
 
+  use TypeCheck.ExUnit
+
   doctest TypeCheck.Builtin
+  spectest TypeCheck.Builtin, except: [do_fixed_list: 1, do_fixed_tuple: 1]
 
   describe "builtin types adhere to their problem_tuple result types." do
     possibilities = %{

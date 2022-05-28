@@ -719,7 +719,8 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Range`
   """
   if_recompiling? do
-    @spec! range(range :: (%Range{} | TypeCheck.Builtin.Range.t())) :: TypeCheck.Builtin.Range.t()
+    # TODO!
+    @spec range(range :: Range.t()) :: TypeCheck.Builtin.Range.t()
   end
   def range(range = _lower.._higher) do
     # %TypeCheck.Builtin.Range{range: range}
