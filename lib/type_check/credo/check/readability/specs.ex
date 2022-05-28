@@ -1,8 +1,9 @@
 if Code.ensure_loaded?(Credo) do
-  defmodule TypeCheck.Credo.Checks.Readability.Specs do
+  defmodule TypeCheck.Credo.Check.Readability.Specs do
 
   use Credo.Check,
     tags: [:controversial],
+    category: :readability,
     param_defaults: [
       include_defp: false
     ],
