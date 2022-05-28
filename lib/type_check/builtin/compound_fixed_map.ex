@@ -87,4 +87,18 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
       is_atom(val) and !match?('Elixir.' ++ _, Atom.to_charlist(val))
     end
   end
+
+
+  if Code.ensure_loaded?(StreamData) do
+    defimpl TypeCheck.Protocols.ToStreamData do
+      def to_gen(s) do
+        fixed_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.fixed)
+        flexible_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.flexible)
+
+        StreamData.map({fixed_gen, flexible_gen}, fn {fixed_map, flexible_map} ->
+          Map.merge(fixed_map, flexible_map)
+        end)
+      end
+    end
+  end
 end
