@@ -24,7 +24,7 @@ defmodule TypeCheck.Internals.Parser do
       iex> {:ok, _} = fetch_spec(Kernel, :node, 1)
   """
   @spec fetch_spec(module() | binary() | list(), atom(), arity()) ::
-          {:error, String.t()} | {:ok, raw}
+          {:error, String.t()} | {:ok, [raw]}
   def fetch_spec(module, function, arity) when is_atom(module) or is_binary(module) do
     case Code.Typespec.fetch_specs(module) do
       {:ok, specs} -> fetch_spec(specs, function, arity)
@@ -34,9 +34,7 @@ defmodule TypeCheck.Internals.Parser do
 
   def fetch_spec(specs, function, arity) when is_list(specs) do
     case specs |> Enum.find(fn {func, _spec} -> func == {function, arity} end) do
-      {_, [spec]} -> {:ok, spec}
-      {_, [_ | _]} -> {:error, "multiple specs for function"}
-      {_, _spec} -> {:error, "unsupported spec"}
+      {_, specs} -> {:ok, specs}
       nil -> {:error, "cannot find spec for function"}
     end
   end
@@ -128,10 +126,13 @@ defmodule TypeCheck.Internals.Parser do
       iex> expected = function([term()], boolean())
       iex> ^expected = convert(spec)
   """
-  @spec convert(raw) :: TypeCheck.Type.t()
+  @spec convert(raw | [raw]) :: TypeCheck.Type.t()
   def convert(type), do: convert(type, %Context{default: B.any(), vars: %{}})
 
-  @spec convert(raw, Context.t()) :: TypeCheck.Type.t()
+  @spec convert(raw | [raw], Context.t()) :: TypeCheck.Type.t()
+
+  defp convert(types, ctx) when is_list(types),
+    do: types |> Enum.map(&convert(&1, ctx)) |> B.one_of()
 
   defp convert({:type, _, name, vars}, ctx), do: convert_type(name, vars, ctx)
   defp convert({:atom, _, val}, _), do: B.literal(val)
@@ -265,6 +266,6 @@ defmodule TypeCheck.Internals.Parser do
     |> B.fixed_map()
   end
 
-  defp convert_type(:union, types, ctx), do: B.one_of(Enum.map(types, &convert(&1, ctx)))
+  defp convert_type(:union, types, ctx), do: types |> Enum.map(&convert(&1, ctx)) |> B.one_of()
   defp convert_type(_, _, ctx), do: ctx.default
 end

@@ -33,8 +33,11 @@ defmodule TypeCheck.Internals.ParserTest do
         test "#{module}.#{func}/#{arity}" do
           case Parser.fetch_spec(@module, @func, @arity) do
             {:ok, spec} ->
-              t = Parser.convert(spec)
-              assert %TypeCheck.Builtin.Function{} = t
+              case Parser.convert(spec) do
+                %TypeCheck.Builtin.Function{} -> :ok
+                %TypeCheck.Builtin.OneOf{} -> :ok
+                t -> raise "unexpected type #{inspect(t)}"
+              end
 
             {:error, _} ->
               nil
@@ -107,9 +110,11 @@ defmodule TypeCheck.Internals.ParserTest do
 
   def convert_spec(bytecode) do
     {:ok, spec} = bytecode |> Parser.fetch_spec(:f, 1)
-    # IO.inspect(spec)
-    %TypeCheck.Builtin.Function{return_type: t} = Parser.convert(spec)
-    t
+
+    case Parser.convert(spec) do
+      %TypeCheck.Builtin.Function{return_type: type} -> type
+      %TypeCheck.Builtin.OneOf{choices: types} -> types
+    end
   end
 
   describe "convert custom" do
@@ -423,6 +428,21 @@ defmodule TypeCheck.Internals.ParserTest do
         end
 
       assert convert_spec(bytecode) == B.atom()
+    end
+
+    test "multiple @spec" do
+      bytecode =
+        test_module do
+          @spec f(atom) :: atom
+          @spec f(number) :: number
+        end
+
+      exp = [
+        B.function([B.atom()], B.atom()),
+        B.function([B.number()], B.number())
+      ]
+
+      assert convert_spec(bytecode) == exp
     end
   end
 end
