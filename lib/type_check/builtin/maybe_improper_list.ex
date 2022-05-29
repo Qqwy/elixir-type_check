@@ -173,16 +173,9 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-        list =
-          s.element_type
-          |> TypeCheck.Protocols.ToStreamData.to_gen()
-          |> StreamData.list_of()
-
-        terminator = TypeCheck.Protocols.ToStreamData.to_gen(s.terminator_type)
-
-        StreamData.map({list, terminator}, fn {list_val, terminator_val} ->
-          [list_val | terminator_val]
-        end)
+        element_gen =  TypeCheck.Protocols.ToStreamData.to_gen(s.element_type)
+        terminator_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.terminator_type)
+        StreamData.maybe_improper_list_of(element_gen, terminator_gen)
       end
     end
   end
