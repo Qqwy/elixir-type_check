@@ -23,6 +23,8 @@ defmodule TypeCheck.DefaultOverrides do
     Calendar
     Calendar.ISO
     Calendar.TimeZoneDatabase
+    Code
+    Code.Fragment
     Collectable
     Config.Provider
     Date
@@ -44,8 +46,10 @@ defmodule TypeCheck.DefaultOverrides do
     IO
     IO.ANSI
     IO.Stream
+    Kernel.ParallelCompiler
     Keyword
     List.Chars
+    Macro
     Map
     MapSet
     Module
