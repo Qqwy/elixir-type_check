@@ -37,8 +37,8 @@ defmodule TypeCheck.Defstruct do
         use TypeCheck.Defstruct
 
         defstruct!(
-          name: _ :: String.t(),
-          age: :secret :: non_neg_integer() | :secret
+          name: "Guest" :: String.t(),
+          age: _ :: non_neg_integer()
         )
       end
 
@@ -50,10 +50,10 @@ defmodule TypeCheck.Defstruct do
 
         @type! t() :: %User{
           name: String.t(),
-          age: non_neg_integer() | :secret
+          age: non_neg_integer()
         }
-        @enforce_keys [:name]
-        defstruct [:name, age: nil]
+        @enforce_keys [:age]
+        defstruct [:age, name: "Guest"]
       end
 
   ## Optional and required keys
