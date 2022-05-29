@@ -18,13 +18,17 @@ defmodule TypeCheck.DefaultOverrides do
 
   @elixir_modules ~w[
     Access
+    Agent
+    Application
     Calendar
     Calendar.ISO
     Calendar.TimeZoneDatabase
     Collectable
+    Config.Provider
     Date
     Date.Range
     DateTime
+    DynamicSupervisor
     Enum
     Enumerable
     Exception
@@ -33,6 +37,7 @@ defmodule TypeCheck.DefaultOverrides do
     File.Stream
     Float
     Function
+    GenServer
     Inspect
     IO
     IO.ANSI
@@ -42,14 +47,19 @@ defmodule TypeCheck.DefaultOverrides do
     MapSet
     Module
     NaiveDateTime
+    Node
     OptionParser
     Path
     Port
+    Process
     Range
     Regex
+    Registry
     Stream
     String
+    Supervisor
     System
+    Task
     Time
     URI
     Version

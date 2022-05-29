@@ -216,7 +216,9 @@ Details:
     - Desugaring `%{}` has changed from 'any map' to 'the empty map' in line with Elixir's Typespecs. _This is a minor backwards-incompatible change._
     - Support for the builtin types `port()`, `reference()` and (based on these) `identifier()`.
     - Support for the builtin type `struct()`.
+    - Support for the builtin type `timeout()`.
     - Improvements to the default type overrides for modules like `Calendar`, `Enum`, `Enumerable`, etc. now that optional keys in struct types and higher-order function types are supported.
+    - Addition of many more default type override modules, to ensure all of Elixir's standard library is covered.
     - `TypeCheck.Credo.Check.Readability.Specs` is an opt-in alternative Credo check which will check whether all functions have either a `@spec!` or 'normal' `@spec`. (Fixes #102).
 - 0.10.8 - 
   - Fixes:

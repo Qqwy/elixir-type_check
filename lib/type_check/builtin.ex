@@ -460,6 +460,14 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  Builtin type. Syntactic sugar for `:infinity | non_neg_integer()`
+  """
+  def timeout() do
+    one_of([literal(:infinity), non_neg_integer()])
+  end
+
+  @doc typekind: :builtin
+  @doc """
   A (proper) list with any type of elements;
 
   shorthand for `list(any())`
@@ -640,6 +648,8 @@ defmodule TypeCheck.Builtin do
   - for integers, atoms and booleans: the primitive value itself.
   - for binaries, a more general `binary()` is used
     as Elixir's builtin typespecs do not support literal UTF-8 binaries as literal values.
+  - For other kinds of values which Elixir's builtin typespecs do not support as literals,
+    we similarly represent it as a more general type.
 
   C.f. `TypeCheck.Builtin.Literal`
   """
