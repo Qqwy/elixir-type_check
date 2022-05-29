@@ -532,6 +532,28 @@ defmodule TypeCheck.Builtin do
     keyword(any())
   end
 
+
+  @doc typekind: :builtin
+  @doc """
+  Syntactic sugar for `maybe_improper_list(any(), any())`
+  """
+  def maybe_improper_list() do
+    maybe_improper_list(any(), any())
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  WIP
+  """
+  if_recompiling?
+    @spec! maybe_improper_list(element :: TypeCheck.Type.t(), sentinel :: TypeCheck.Type.t()) :: TypeCheck.Builtin.MaybeImproperList.t()
+  end
+  def maybe_improper_list(element_type, sentinel_type) do
+    build_struct(TypeCheck.Builtin.MaybeImproperList)
+    |> Map.put(:element_type, element_type)
+    |> Map.put(:sentinel_type, sentinel_type)
+  end
+
   @doc typekind: :builtin
   @doc """
   A list of pairs with atoms as 'keys' and t's as 'values'.
