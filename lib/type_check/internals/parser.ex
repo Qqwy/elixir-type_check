@@ -15,6 +15,8 @@ defmodule TypeCheck.Internals.Parser do
     @type t :: %Context{default: TypeCheck.Type.t(), vars: %{String.t() => TypeCheck.Type.t()}}
   end
 
+  @opaque raw :: {atom | nil, list, list | :any}
+
   @doc """
   Extract raw spec for the given MFA.
 
@@ -22,7 +24,7 @@ defmodule TypeCheck.Internals.Parser do
       iex> {:ok, _} = fetch_spec(Kernel, :node, 1)
   """
   @spec fetch_spec(module() | binary() | list(), atom(), arity()) ::
-          {:error, String.t()} | {:ok, tuple()}
+          {:error, String.t()} | {:ok, raw}
   def fetch_spec(module, function, arity) when is_atom(module) or is_binary(module) do
     case Code.Typespec.fetch_specs(module) do
       {:ok, specs} -> fetch_spec(specs, function, arity)
@@ -43,7 +45,7 @@ defmodule TypeCheck.Internals.Parser do
   Fetch raw type definition for the given type with the given number of generic variables.
   """
   @spec fetch_type(module() | binary(), atom(), arity()) ::
-          {:error, String.t()} | {:ok, any(), list()}
+          {:error, String.t()} | {:ok, raw, [raw]}
   def fetch_type(module, type, arity) do
     case fetch_types(module, type) do
       {:ok, []} -> {:error, "cannot find type with the given name"}
@@ -52,7 +54,7 @@ defmodule TypeCheck.Internals.Parser do
     end
   end
 
-  @spec fetch_type(list(), arity()) :: {:error, String.t()} | {:ok, any(), list()}
+  @spec fetch_type(list(), arity()) :: {:error, String.t()} | {:ok, raw, [raw]}
   defp fetch_type(types, arity) when is_list(types) do
     case types |> Enum.find(fn {_, {_, _, vars}} -> length(vars) == arity end) do
       {_, {_, spec, vars}} -> {:ok, spec, vars}
@@ -67,7 +69,7 @@ defmodule TypeCheck.Internals.Parser do
   It is possible for list to contain multiple types if there are multiple type
   definitions with the same name but different amount of generic arguments.
   """
-  @spec fetch_types(module() | binary() | list(), atom()) :: {:error, String.t()} | {:ok, list()}
+  @spec fetch_types(module() | binary() | list(), atom()) :: {:error, String.t()} | {:ok, [raw]}
   def fetch_types(module, type) when is_atom(module) or is_binary(module) do
     case Code.Typespec.fetch_types(module) do
       {:ok, types} -> fetch_types(types, type)
@@ -126,10 +128,10 @@ defmodule TypeCheck.Internals.Parser do
       iex> expected = function([term()], boolean())
       iex> ^expected = convert(spec)
   """
-  @spec convert(tuple()) :: TypeCheck.Type.t()
+  @spec convert(raw) :: TypeCheck.Type.t()
   def convert(type), do: convert(type, %Context{default: B.any(), vars: %{}})
 
-  @spec convert(tuple(), Context.t()) :: TypeCheck.Type.t()
+  @spec convert(raw, Context.t()) :: TypeCheck.Type.t()
 
   defp convert({:type, _, name, vars}, ctx), do: convert_type(name, vars, ctx)
   defp convert({:atom, _, val}, _), do: B.literal(val)
@@ -156,7 +158,7 @@ defmodule TypeCheck.Internals.Parser do
 
   defp convert(_, ctx), do: ctx.default
 
-  @spec convert_type(atom() | nil, list() | atom(), Context.t()) :: TypeCheck.Type.t()
+  @spec convert_type(atom() | nil, list() | :any, Context.t()) :: TypeCheck.Type.t()
   # basic types
   defp convert_type(:any, [], _), do: B.any()
   defp convert_type(:atom, [], _), do: B.atom()
