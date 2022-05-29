@@ -237,8 +237,8 @@ defmodule TypeCheck.Internals.PreExpander do
           TypeCheck.Builtin.range(unquote(orig_ast))
         end
 
-      nil ->
-        # Any other kind of map type.
+      _other ->
+        # Any other kind of map or possibly struct type, which might include optional or required keys.
         field_types =
           Enum.reduce(struct_fields, %{fixed: [], required: [], optional: []}, fn
             {{:required, _, [key_type]}, value_type}, acc ->
@@ -267,12 +267,12 @@ defmodule TypeCheck.Internals.PreExpander do
             TypeCheck.Builtin.fancy_map(unquote(field_types.fixed), unquote(field_types.required), unquote(field_types.optional))
           end
 
-      _other ->
-        # Unhandled already-expanded structs
-        # Treat them as literal values
-        quote generated: true, location: :keep do
-          TypeCheck.Builtin.literal(unquote(orig_ast))
-        end
+      # _other ->
+      #   # Unhandled already-expanded structs
+      #   # Treat them as literal values
+      #   quote generated: true, location: :keep do
+      #     TypeCheck.Builtin.literal(unquote(orig_ast))
+      #   end
     end
   end
 

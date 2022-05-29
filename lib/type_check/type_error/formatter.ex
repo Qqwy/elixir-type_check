@@ -34,6 +34,7 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.Boolean.problem_tuple()
          | TypeCheck.Builtin.FixedList.problem_tuple()
          | TypeCheck.Builtin.FixedMap.problem_tuple()
+         | TypeCheck.Builtin.CompoundFixedMap.problem_tuple()
          | TypeCheck.Builtin.FixedTuple.problem_tuple()
          | TypeCheck.Builtin.Float.problem_tuple()
          | TypeCheck.Builtin.Integer.problem_tuple()
@@ -48,6 +49,8 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.OneOf.problem_tuple()
          | TypeCheck.Builtin.PosInteger.problem_tuple()
          | TypeCheck.Builtin.PID.problem_tuple()
+         | TypeCheck.Builtin.Port.problem_tuple()
+         | TypeCheck.Builtin.Reference.problem_tuple()
          | TypeCheck.Builtin.Range.problem_tuple()
          | TypeCheck.Builtin.Tuple.problem_tuple()
 

@@ -718,7 +718,8 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Range`
   """
   if_recompiling? do
-    @spec! range(range :: (%Range{} | TypeCheck.Builtin.Range.t())) :: TypeCheck.Builtin.Range.t()
+    # TODO!
+    @spec range(range :: Range.t()) :: TypeCheck.Builtin.Range.t()
   end
   def range(range = _lower.._higher) do
     # %TypeCheck.Builtin.Range{range: range}
@@ -854,8 +855,27 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
-  WIP
+  Allows constructing map types containing a combination of fixed, required and optional keys (and their associatied type-values)
+
+  Desugaring of most ways of map syntaxes.
+
+  Note that because of reasons of efficiency and implementation difficulty,
+  not all possibilities are supported by TypeCheck currently.
+
+  Supported are:
+  - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
+  - maps with a single required keypair (`%{required(key_type) => value_type}`)
+  - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+  - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
+
+  Help with extending this support is very welcome.
+  c.f. https://github.com/Qqwy/elixir-type_check/issues/7
   """
+
+  if_recompiling? do
+    @spec fancy_map(fixed_kvs :: list({term(), TypeCheck.Type.t()}), required_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()}), optional_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()})) :: TypeCheck.Builtin.CompoundFixedMap.t() | TypeCheck.Builtin.FixedMap.t() | TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.NamedType.t()
+  end
+  def fancy_map(fixed_kvs, required_kvs, optional_kvs)
   def fancy_map(fixed_keypairs, [], []) do
     fixed_map(fixed_keypairs)
   end
@@ -865,13 +885,26 @@ defmodule TypeCheck.Builtin do
   end
 
   def fancy_map([], [{required_key_type, value_type}], []) do
+    required_map(required_key_type, value_type)
+  end
+
+  defp required_map(required_key_type, value_type) do
     guard =
       quote do
-        map_size(unquote(Macro.var(:map, nil))) >= 1
-      end
+      map_size(unquote(Macro.var(:map, nil))) >= 1
+    end
 
     named_type(:map, map(required_key_type, value_type))
     |> guarded_by(guard)
+  end
+
+  def fancy_map(fixed_keypairs, [], [{optional_key_type, value_type}]) do
+    fixed = fixed_map(fixed_keypairs)
+    flexible = map(optional_key_type, value_type)
+
+    build_struct(TypeCheck.Builtin.CompoundFixedMap)
+    |> Map.put(:fixed, fixed)
+    |> Map.put(:flexible, flexible)
   end
 
   def fancy_map(_fixed_keypairs, _required_keypairs, _optional_keypairs) do
@@ -879,16 +912,27 @@ defmodule TypeCheck.Builtin do
     TODO!
     Maps with complex combinations of multiple
     fixed and/or required(...) and/or optional(...) keypairs
-    are not supported by TypeCheck yet.
+    are not currently supported by TypeCheck.
 
     Supported are:
     - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
     - maps with a single required keypair (`%{required(key_type) => value_type}`)
     - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+    - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
 
     Help with extending this support is very welcome.
     c.f. https://github.com/Qqwy/elixir-type_check/issues/7
     """
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Any kind of struct.
+
+  Syntactic sugar for %{:__struct__ => atom(), optional(atom()) => any()}
+  """
+  def struct() do
+    fancy_map([__struct__: atom()], [], [{atom(), any()}])
   end
 
   @doc typekind: :extension
@@ -1175,8 +1219,63 @@ defmodule TypeCheck.Builtin do
   Also, the current property-generator will generate arbitrary PIDs, most of which
   will not point to alive processes.
   """
+  if_recompiling?() do
+    @spec! pid() :: TypeCheck.Builtin.PID.t()
+  end
   def pid() do
     build_struct(TypeCheck.Builtin.PID)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Matches any reference.
+
+  c.f. `TypeCheck.Builtin.Reference`
+
+      iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
+      true
+      iex> some_ref = IEx.Helpers.ref(0, 749884137, 111673345, 43386)
+      ...> TypeCheck.conforms!(some_ref, reference())
+      #Reference<0.749884137.111673345.43386>
+  """
+  if_recompiling? do
+    @spec! reference() :: TypeCheck.Builtin.Reference.t()
+  end
+  def reference() do
+    build_struct(TypeCheck.Builtin.Reference)
+  end
+
+
+  @doc typekind: :builtin
+  @doc """
+  Matches any port.
+
+  c.f. `TypeCheck.Builtin.Port`
+
+      iex> TypeCheck.conforms?(Kernel.make_ref(), reference())
+      true
+      iex> some_port = Port.open({:spawn, "cat"}, [:binary])
+      ...> TypeCheck.conforms?(some_port, port())
+      true
+  """
+  if_recompiling? do
+    @spec! port() :: TypeCheck.Builtin.Port.t()
+  end
+  def port() do
+    build_struct(TypeCheck.Builtin.Port)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Syntactic sugar for `pid() | port() | reference()`
+
+      iex> TypeCheck.conforms?(self(), identifier())
+      true
+  """
+  def identifier() do
+    named_type(:identifier,
+      one_of([pid(), port(), reference()])
+    )
   end
 
   @doc typekind: :builtin

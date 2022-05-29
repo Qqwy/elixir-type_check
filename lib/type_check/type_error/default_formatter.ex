@@ -80,12 +80,12 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "at index #{index}:\n", do_format(problem))
   end
 
-  def do_format({s = %TypeCheck.Builtin.FixedMap{}, :not_a_map, _, val}) do
+  def do_format({s = %maplike{}, :not_a_map, _, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
     problem = "`#{inspect(val, inspect_value_opts())}` is not a map."
     compound_check(val, s, problem)
   end
 
-  def do_format({s = %TypeCheck.Builtin.FixedMap{}, :missing_keys, %{keys: keys}, val}) do
+  def do_format({s = %maplike{}, :missing_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
     keys_str =
       keys
       |> Enum.map(&inspect/1)
@@ -96,7 +96,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
   
-  def do_format({s = %TypeCheck.Builtin.FixedMap{}, :superfluous_keys, %{keys: keys}, val}) do
+  def do_format({s = %maplike{}, :superfluous_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
     keys_str =
       keys
       |> Enum.map(&inspect/1)
@@ -109,8 +109,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format(
-        {s = %TypeCheck.Builtin.FixedMap{}, :value_error, %{problem: problem, key: key}, val}
-      ) do
+        {s = %maplike{}, :value_error, %{problem: problem, key: key}, val}
+  ) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
     compound_check(val, s, "under key `#{inspect(key, inspect_type_opts())}`:\n", do_format(problem))
   end
 
@@ -176,7 +176,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "`#{inspect(val, inspect_value_opts())}` is not a map.")
   end
 
-  def do_format({s = %TypeCheck.Builtin.Map{}, :key_error, %{problem: problem}, val}) do
+  def do_format({s = %maplike{}, :key_error, %{problem: problem}, val}) when maplike in [TypeCheck.Builtin.Map, TypeCheck.Builtin.CompoundFixedMap] do
     compound_check(val, s, "key error:\n", do_format(problem))
   end
 
@@ -222,6 +222,14 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   def do_format({%TypeCheck.Builtin.PID{}, :no_match, _, val}) do
     "`#{inspect(val, inspect_value_opts())}` is not a pid."
+  end
+
+  def do_format({%TypeCheck.Builtin.Port{}, :no_match, _, val}) do
+    "`#{inspect(val, inspect_value_opts())}` is not a port."
+  end
+
+  def do_format({%TypeCheck.Builtin.Reference{}, :no_match, _, val}) do
+    "`#{inspect(val, inspect_value_opts())}` is not a reference."
   end
 
   def do_format({s = %TypeCheck.Builtin.Range{}, :not_an_integer, _, val}) do

@@ -6,7 +6,10 @@ defmodule TypeCheck.BuiltinTest do
   require TypeCheck
   import TypeCheck.Builtin
 
+  use TypeCheck.ExUnit
+
   doctest TypeCheck.Builtin
+  spectest TypeCheck.Builtin, except: [do_fixed_list: 1, do_fixed_tuple: 1]
 
   describe "builtin types adhere to their problem_tuple result types." do
     possibilities = %{
@@ -34,6 +37,9 @@ defmodule TypeCheck.BuiltinTest do
       quote do
         %{a: 1, b: integer()}
       end => TypeCheck.Builtin.FixedMap,
+      quote do
+        %{optional(number()) => boolean(), a: 1, b: integer()}
+      end => TypeCheck.Builtin.CompoundFixedMap,
       quote do
         {1, float()}
       end => TypeCheck.Builtin.FixedTuple,
@@ -79,6 +85,12 @@ defmodule TypeCheck.BuiltinTest do
       quote do
         <<_ :: 4 >>
       end => TypeCheck.Builtin.SizedBitstring,
+      quote do
+        reference()
+      end => TypeCheck.Builtin.Reference,
+      quote do
+        port()
+      end => TypeCheck.Builtin.Port,
     }
 
     for {type, module} <- possibilities do

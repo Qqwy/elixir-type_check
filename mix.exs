@@ -36,7 +36,7 @@ defmodule TypeCheck.MixProject do
         ]
       _ ->
         [
-          extra_applications: [:logger, :iex, :stream_data]
+          extra_applications: [:logger, :iex, :stream_data, :credo]
         ]
     end
   end
@@ -70,7 +70,7 @@ defmodule TypeCheck.MixProject do
       {:ex_doc, "~> 0.22", only: :docs, runtime: false},
       {:benchee, "~> 1.0", only: :bench},
       {:excoveralls, "~> 0.10", only: :test},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.5", runtime: false, optional: true},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
     ]
   end
