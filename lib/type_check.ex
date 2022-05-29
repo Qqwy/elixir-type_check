@@ -352,7 +352,7 @@ defmodule TypeCheck do
         TypeCheck.apply!(unquote(type), unquote(module), unquote(function), unquote(args))
       end
     else
-      {:error, err} -> raise err
+      {:error, err} -> raise TypeCheck.CompileError, err
     end
   end
   
@@ -383,7 +383,7 @@ defmodule TypeCheck do
   end
   
   @doc """
-  Extract TypeCheck type from the `@spec` of the given function.
+  Extract TypeCheck type from the regular Elixir (or Erlang) `@spec` of the given function.
   
   ## Examples
   
@@ -405,7 +405,7 @@ defmodule TypeCheck do
   end
   
   @doc """
-  Extract TypeCheck type from the `@type` with the given name.
+  Extract TypeCheck type from the regular Elixir (or Erlang) `@type` with the given name.
   
   ## Examples
   
