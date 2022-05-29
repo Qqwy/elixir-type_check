@@ -298,7 +298,7 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Calendar                  | ✅         |            |
 | Calendar.ISO              | ✅         |            |
 | Calendar.TimeZoneDatabase | ✅         |            |
-| Code                      | ⌛         |            |
+| Code                      | ✅         |            |
 | Collectable               | ✅         |            |
 | Config.Provider           | ✅         |            |
 | Date                      | ✅         |            |
@@ -326,8 +326,8 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Inspect.Opts              | ✅         |            |
 | Keyword                   | ✅         |            |
 | List.Chars                | ✅         |            |
-| Macro                     | ⌛         |            |
-| Macro.Env                 | ⌛         |            |
+| Macro                     | ✅         |            |
+| Macro.Env                 | ✅         |            |
 | Map                       | ✅         |            |
 | MapSet                    | ✅         |            |
 | NaiveDateTime             | ✅         |            |
