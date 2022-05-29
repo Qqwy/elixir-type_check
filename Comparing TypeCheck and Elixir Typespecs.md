@@ -33,36 +33,35 @@ In the tables below:
 
 ## Literals
 
-| Type                                                         | Supported? | Notes                                                                                                  |
-|--------------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
-|--------------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
-| true                                                         | ✅         |                                                                                                        |
-| false                                                        | ✅         |                                                                                                        |
-| nil                                                          | ✅         |                                                                                                        |
-| <<>>                                                         | ✅         | empty bitstring                                                                                        |
-| <<_::size>                                                   | ✅         | size is 0 or a positive integer                                                                        |
-| <<_::_*unit>>                                                | ✅         | unit is an integer from 1 to 256                                                                       |
-| <<_::size, _::_*unit>>                                       | ✅         |                                                                                                        |
-| (-> type)                                                    | ✅¹        | 0-arity, returns type                                                                                  |
-| (type1, type2 -> type)                                       | ✅¹        | 2-arity, returns type                                                                                  |
-| (... -> type)                                                | ✅¹        | any arity, returns type                                                                                |
-| 1                                                            | ✅         | integer                                                                                                |
-| 1..10                                                        | ✅         | range                                                                                                  |
-| [type]                                                       | ✅         | list with any number of type elements                                                                  |
-| []                                                           | ✅         | empty list                                                                                             |
-| [...]                                                        | ✅         | shorthand for nonempty_list(any())                                                                     |
-| [type, ...]                                                  | ✅         | shorthand for nonempty_list(type)                                                                      |
-| [key: value_type]                                            | ✅         | keyword list with key :key of value_type                                                               |
-| %{}                                                          | ✅         | empty map                                                                                              |
-| %{key: value_type}                                           | ✅         | map with required (atom) key :key of value_type                                                        |
-| %{key_type => value_type}                                    | ✅         | map with required pairs of key_type and value_type                                                     |
-| %{required(key_type) => value_type}                          | ✅²       | map with required pairs of key_type and value_type                                                     |
-| %{optional(key_type) => value_type}                          | ✅²       | map with optional pairs of key_type and value_type                                                     |
-| %SomeStruct{}                                                | ✅         | struct with all fields of any type                                                                     |
-| %SomeStruct{key: value_type}                                 | ✅         | struct with required key :key of value_type                                                            |
-| %{key: value_type, optional(opt_key_type) => opt_value_type} | ✅³      | struct with required key :key of value_type, and zero or more pairs of opt_key_type and opt_value_type |
-| {}                                                           | ✅         | empty tuple                                                                                            |
-| \{:ok, type\}                                                | ✅         | two-element tuple with an atom and any type                                                            |
+| Type                                                           | Supported? | Notes                                                                                                  |
+|----------------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
+| `true`                                                         | ✅         |                                                                                                        |
+| `false`                                                        | ✅         |                                                                                                        |
+| `nil`                                                          | ✅         |                                                                                                        |
+| `<<>>`                                                         | ✅         | empty bitstring                                                                                        |
+| `<<_::size>`                                                   | ✅         | size is 0 or a positive integer                                                                        |
+| `<<_::_*unit>>`                                                | ✅         | unit is an integer from 1 to 256                                                                       |
+| `<<_::size, _::_*unit>>`                                       | ✅         |                                                                                                        |
+| `(-> type)`                                                    | ✅¹        | 0-arity, returns type                                                                                  |
+| `(type1, type2 -> type)`                                       | ✅¹        | 2-arity, returns type                                                                                  |
+| `(... -> type)`                                                | ✅¹        | any arity, returns type                                                                                |
+| `1`                                                            | ✅         | integer                                                                                                |
+| `1..10`                                                        | ✅         | range                                                                                                  |
+| `[type]`                                                       | ✅         | list with any number of type elements                                                                  |
+| `[]`                                                           | ✅         | empty list                                                                                             |
+| `[...]`                                                        | ✅         | shorthand for nonempty_list(any())                                                                     |
+| `[type, ...]`                                                  | ✅         | shorthand for nonempty_list(type)                                                                      |
+| `[key: value_type]`                                            | ✅         | keyword list with key :key of value_type                                                               |
+| `%{}`                                                          | ✅         | empty map                                                                                              |
+| `%{key: value_type}`                                           | ✅         | map with required (atom) key :key of value_type                                                        |
+| `%{key_type => value_type}`                                    | ✅         | map with required pairs of key_type and value_type                                                     |
+| `%{required(key_type) => value_type}`                          | ✅²        | map with required pairs of key_type and value_type                                                     |
+| `%{optional(key_type) => value_type}`                          | ✅²        | map with optional pairs of key_type and value_type                                                     |
+| `%SomeStruct{}`                                                | ✅         | struct with all fields of any type                                                                     |
+| `%SomeStruct{key: value_type}`                                 | ✅         | struct with required key :key of value_type                                                            |
+| `%{key: value_type, optional(opt_key_type) => opt_value_type}` | ✅³        | struct with required key :key of value_type, and zero or more pairs of opt_key_type and opt_value_type |
+| `{}`                                                           | ✅         | empty tuple                                                                                            |
+| `{:ok, type}`                                                  | ✅         | two-element tuple with an atom and any type                                                            |
 
 ¹: Functions passed as parameters can only be fully checked once they are called. 
 TypeCheck wraps them in a 'wrapper function' which performs the correct check on their input/output.
@@ -81,16 +80,16 @@ This wrapper will only run once the the function actually is called.
 | as_boolean(t)                  | ✅         | `t`                                                                   |
 | binary()                       | ✅         | `<<_::_*8>>`                                                          |
 | bitstring()                    | ✅         | `<<_::_*1>>`                                                          |
-| boolean()                      | ✅         | `true | false`                                                        |
+| boolean()                      | ✅         | `true \| false`                                                        |
 | byte()                         | ✅         | `0..255`                                                              |
 | char()                         | ✅         | `0..0x10FFFF`                                                         |
 | charlist()                     | ✅         | `[char()]`                                                            |
 | nonempty_charlist()            | ✅         | `[char(), ...]`                                                       |
 | fun()                          | ✅         | `(... -> any)`                                                        |
 | function()                     | ✅         | `fun()`                                                               |
-| identifier()                   | ✅         | `pid() | port() | reference()`                                      |
-| iodata()                       | ✅         | `iolist() | binary()`                                                |
-| iolist()                       | ✅         | `maybe_improper_list(byte() | binary() | iolist(), binary() | [])` |
+| identifier()                   | ✅         | `pid() \| port() \| reference()`                                      |
+| iodata()                       | ✅         | `iolist() \| binary()`                                                |
+| iolist()                       | ✅         | `maybe_improper_list(byte() \| binary() \| iolist(), binary() \| [])` |
 | keyword()                      | ✅         | `[{atom(), any()}]`                                                   |
 | keyword(t)                     | ✅         | `[{atom(), t}]`                                                       |
 | list()                         | ✅         | `[any()]`                                                             |
@@ -103,7 +102,7 @@ This wrapper will only run once the the function actually is called.
 | node()                         | ✅         | `atom()`                                                              |
 | number()                       | ✅         | `integer() \| float()`                                                |
 | struct()                       | ✅         | `%{:__struct__ => atom(), optional(atom()) => any()}`                 |
-| timeout()                      | ✅         | `:infinity | non_neg_integer()`                                      |
+| timeout()                      | ✅         | `:infinity \| non_neg_integer()`                                      |
 
 ## 🚀 TypeCheck Additions
 
