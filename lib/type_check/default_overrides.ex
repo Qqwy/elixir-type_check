@@ -20,6 +20,7 @@ defmodule TypeCheck.DefaultOverrides do
     Access
     Calendar
     Calendar.ISO
+    Calendar.TimeZoneDatabase
     Collectable
     Date
     Date.Range
@@ -34,11 +35,16 @@ defmodule TypeCheck.DefaultOverrides do
     Function
     Inspect
     IO
+    IO.ANSI
+    IO.Stream
     Keyword
     Map
     MapSet
     Module
     NaiveDateTime
+    OptionParser
+    Path
+    Port
     Range
     Regex
     Stream
@@ -53,16 +59,16 @@ defmodule TypeCheck.DefaultOverrides do
   @erlang_modules ~w[
     Erlang.Binary
     Erlang.Inet
+    Erlang.Calendar
   ]a
-
-  for module <- @elixir_modules do
-    Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
-  end
 
   for module <- @erlang_modules do
     Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
   end
 
+  for module <- @elixir_modules do
+    Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
+  end
 
   @doc """
   Lists all overridden types in {module, function, arity} format.
