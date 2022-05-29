@@ -26,6 +26,7 @@ structs = [
   TypeCheck.Builtin.NegInteger,
   TypeCheck.Builtin.NonNegInteger,
   TypeCheck.Builtin.List,
+  TypeCheck.Builtin.MaybeImproperList,
   TypeCheck.Builtin.Literal,
   TypeCheck.Builtin.Lazy,
   TypeCheck.Builtin.Map,

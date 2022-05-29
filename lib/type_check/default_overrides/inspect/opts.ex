@@ -1,11 +1,10 @@
 defmodule TypeCheck.DefaultOverrides.Inspect.Opts do
   use TypeCheck
   alias TypeCheck.DefaultOverrides.Inspect
-  # alias TypeCheck.DefaultOverrides.IO.ANSI
+  alias TypeCheck.DefaultOverrides.IO
 
   @type! color_key() :: atom()
 
-  # TODO
   @type! t() :: %Elixir.Inspect.Opts{
     base: :decimal | :binary | :hex | :octal,
     binaries: :infer | :as_binaries | :as_strings,
@@ -18,10 +17,8 @@ defmodule TypeCheck.DefaultOverrides.Inspect.Opts do
   printable_limit: non_neg_integer() | :infinity,
   safe: boolean(),
   structs: boolean(),
-  # syntax_colors: [{color_key(), IO.ANSI.ansidata()}],
+  syntax_colors: [{color_key(), IO.ANSI.ansidata()}],
   syntax_colors: [{color_key(), any()}],
   width: non_neg_integer() | :infinity
   }
-
-
 end

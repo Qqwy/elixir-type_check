@@ -1,13 +1,24 @@
 defmodule TypeCheck.DefaultOverrides.Calendar do
+  alias __MODULE__
   alias TypeCheck.DefaultOverrides.String
 
   use TypeCheck
 
+  import TypeCheck.Type.StreamData
+  @type! calendar() :: wrap_with_gen(module(), &Calendar.calendar_gen/0)
+
   # Since Elixir only ships with Calendar.ISO
-  # use only that one for data generation for now
-  @type calendar() :: module()
-  @autogen_typespec false
-  @type! calendar() :: Elixir.Calendar.ISO
+  # use only that one for data generation
+  if Code.ensure_loaded?(StreamData) do
+    def calendar_gen do
+      StreamData.constant(Elixir.Calendar.ISO)
+    end
+  else
+    def calendar_gen do
+      raise TypeCheck.CompileError, "This function requires the optional dependency StreamData."
+    end
+  end
+
 
   @type! date() :: %{
     optional(any()) => any(),

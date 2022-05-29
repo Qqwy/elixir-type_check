@@ -158,14 +158,20 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val, inspect_value_opts())}` is not a non-negative integer."
   end
 
-  def do_format({s = %TypeCheck.Builtin.List{}, :not_a_list, _, val}) do
+  def do_format({s = %listlike{}, :not_a_list, _, val}) when listlike in [TypeCheck.Builtin.List, TypeCheck.Builtin.MaybeImproperList] do
     compound_check(val, s, "`#{inspect(val, inspect_value_opts())}` is not a list.")
   end
 
   def do_format(
-        {s = %TypeCheck.Builtin.List{}, :element_error, %{problem: problem, index: index}, val}
-      ) do
+        {s = %listlike{}, :element_error, %{problem: problem, index: index}, val}
+  ) when listlike in [TypeCheck.Builtin.List, TypeCheck.Builtin.MaybeImproperList] do
     compound_check(val, s, "at index #{index}:\n", do_format(problem))
+  end
+
+  def do_format(
+    {s = %TypeCheck.Builtin.MaybeImproperList{}, :terminator_error, %{problem: problem}, val}
+  ) do
+    compound_check(val, s, "at the improper terminator of the list:\n", do_format(problem))
   end
 
   def do_format({%TypeCheck.Builtin.Literal{value: expected_value}, :not_same_value, %{}, val}) do
