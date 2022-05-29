@@ -315,17 +315,17 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Float                     | ✅         |            |
 | Function                  | ✅         |            |
 | GenEvent                  | ❌         | deprecated |
-| GenServer                 | ⌛         |            |
+| GenServer                 | ✅         |            |
 | HashDict                  | ❌         | deprecated |
 | HashSet                   | ❌         | deprecated |
 | IO                        | ✅         |            |
 | IO.ANSI                   | ✅         |            |
 | IO.Stream                 | ✅         |            |
 | Inspect                   | ✅         |            |
-| Inspect.Algebra           | ⌛         |            |
-| Inspect.Opts              | ⌛         |            |
+| Inspect.Algebra           | ✅         |            |
+| Inspect.Opts              | ✅         |            |
 | Keyword                   | ✅         |            |
-| List.Chars                | ⌛         |            |
+| List.Chars                | ✅         |            |
 | Macro                     | ⌛         |            |
 | Macro.Env                 | ⌛         |            |
 | Map                       | ✅         |            |
@@ -342,7 +342,7 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Set                       | ❌         | deprecated |
 | Stream                    | ✅         |            |
 | String                    | ✅         |            |
-| String.Chars              | ⌛         |            |
+| String.Chars              | ✅         |            |
 | Supervisor                | ✅         |            |
 | Supervisor.Spec           | ❌         | deprecated |
 | System                    | ✅         |            |

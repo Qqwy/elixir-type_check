@@ -39,10 +39,13 @@ defmodule TypeCheck.DefaultOverrides do
     Function
     GenServer
     Inspect
+    Inspect.Algebra
+    Inspect.Opts
     IO
     IO.ANSI
     IO.Stream
     Keyword
+    List.Chars
     Map
     MapSet
     Module
@@ -57,6 +60,7 @@ defmodule TypeCheck.DefaultOverrides do
     Registry
     Stream
     String
+    String.Chars
     Supervisor
     System
     Task
