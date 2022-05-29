@@ -342,13 +342,17 @@ defmodule TypeCheck do
       ** (TypeCheck.TypeError) At lib/type_check.ex:280:
           `"hi"` is not a number.
   """
-  @spec ensure_types!(Macro.t) :: Macro.t
+  @spec ensure_types!(Macro.t) :: Macro.t | no_return
   defmacro ensure_types!(expr) do
-    {module, function, args} = Parser.ast_to_mfa(expr)
-    {:ok, spec} = Parser.fetch_spec(module, function, length(args))
-    type = Parser.convert(spec) |> Macro.escape()
-    quote do
-      TypeCheck.apply!(unquote(type), unquote(module), unquote(function), unquote(args))
+    with {module, function, args} <- Parser.ast_to_mfa(expr),
+         {:ok, spec} <- Parser.fetch_spec(module, function, length(args))
+    do
+      type = spec |> Parser.convert() |> Macro.escape()
+      quote do
+        TypeCheck.apply!(unquote(type), unquote(module), unquote(function), unquote(args))
+      end
+    else
+      {:error, err} -> raise err
     end
   end
   

@@ -96,7 +96,7 @@ defmodule TypeCheck.Internals.Parser do
       iex> ast_to_mfa(quote do: D.diff(1, 2))
       {Date, :diff, [1, 2]}
   """
-  @spec ast_to_mfa(Macro.t()) :: {module(), atom(), [Macro.t()]}
+  @spec ast_to_mfa(Macro.t()) :: {module(), atom(), [Macro.t()]} | {:error, String.t()}
   def ast_to_mfa({func, [context: _, import: module], args}) do
     {module, func, args}
   end
@@ -107,11 +107,11 @@ defmodule TypeCheck.Internals.Parser do
       {:., _, [{:__aliases__, [alias: mod], _}, func]} -> {mod, func, args}
       {:., _, [{:__aliases__, _, [mod]}, func]} -> {elixir_module(mod), func, args}
       {:., _, [mod, func]} when is_atom(mod) -> {mod, func, args}
-      _ -> raise("cannot infer function")
+      _ -> {:error, "cannot infer function"}
     end
   end
 
-  def ast_to_mfa(_), do: raise("not a function call")
+  def ast_to_mfa(_), do: {:error, "not a function call"}
 
   defp elixir_module(module), do: String.to_atom("Elixir.#{module}")
 
