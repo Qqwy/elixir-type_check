@@ -195,7 +195,7 @@ defmodule TypeCheck.MacrosTest do
 
       defstruct name: "Foo", age: 42
 
-      @spec! from_map(%{}) :: %__MODULE__{}
+      @spec! from_map(%{optional(atom()) => any()}) :: %__MODULE__{}
       def from_map(map) do
         struct(__MODULE__, map)
       end

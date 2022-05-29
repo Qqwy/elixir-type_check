@@ -773,11 +773,14 @@ defmodule TypeCheck.Builtin do
     |> Map.put(:value_type, any())
   end
 
-  @doc typekind: :extension
+  @doc typekind: :builtin
   @doc """
   Any map containing zero or more keys of `key_type` and values of `value_type`.
 
-  Represented in Elixir's builtin Typespecs as `%{optional(key_type) => value_type}`.
+  Represented in Elixir's builtin Typespecs as `%{optional(key_type) => value_type}`,
+  and indeed a desugaring of this.
+
+  Note that multiple optional keypairs are not (yet) supported.
 
   C.f. `TypeCheck.Builtin.Map`
   """
@@ -847,6 +850,45 @@ defmodule TypeCheck.Builtin do
 
     build_struct(TypeCheck.Builtin.FixedMap)
     |> Map.put(:keypairs, Enum.into(keywords, []))
+  end
+
+  @doc typekind: :extension
+  @doc """
+  WIP
+  """
+  def fancy_map(fixed_keypairs, [], []) do
+    fixed_map(fixed_keypairs)
+  end
+
+  def fancy_map([], [], [{optional_key_type, value_type}]) do
+    map(optional_key_type, value_type)
+  end
+
+  def fancy_map([], [{required_key_type, value_type}], []) do
+    guard =
+      quote do
+        map_size(unquote(Macro.var(:map, nil))) >= 1
+      end
+
+    named_type(:map, map(required_key_type, value_type))
+    |> guarded_by(guard)
+  end
+
+  def fancy_map(_fixed_keypairs, _required_keypairs, _optional_keypairs) do
+    raise """
+    TODO!
+    Maps with complex combinations of multiple
+    fixed and/or required(...) and/or optional(...) keypairs
+    are not supported by TypeCheck yet.
+
+    Supported are:
+    - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
+    - maps with a single required keypair (`%{required(key_type) => value_type}`)
+    - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
+
+    Help with extending this support is very welcome.
+    c.f. https://github.com/Qqwy/elixir-type_check/issues/7
+    """
   end
 
   @doc typekind: :extension

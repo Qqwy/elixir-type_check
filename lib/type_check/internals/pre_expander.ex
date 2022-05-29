@@ -149,6 +149,12 @@ defmodule TypeCheck.Internals.PreExpander do
           TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env, options)), unquote(rewrite(rhs, env, options)))
         end
 
+      ast = {:%{}, _, []} ->
+        # Short-circuit for the empty map type.
+        quote generated: true, location: :keep do
+          TypeCheck.Builtin.literal(unquote(ast))
+        end
+
       ast = {:%{}, _, fields} ->
         rewrite_map_or_struct(fields, ast, env, options)
 
@@ -232,14 +238,34 @@ defmodule TypeCheck.Internals.PreExpander do
         end
 
       nil ->
-        # A map with fixed fields
-        # Keys are expected to be literal values
+        # Any other kind of map type.
         field_types =
-          Enum.map(struct_fields, fn {key, value_type} -> {key, rewrite(value_type, env, options)} end)
+          Enum.reduce(struct_fields, %{fixed: [], required: [], optional: []}, fn
+            {{:required, _, [key_type]}, value_type}, acc ->
+              req_key = rewrite(key_type, env, options)
+              req_value = rewrite(value_type, env, options)
+            case req_key do
+                # `required(literal(key))`
+              {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
+                update_in(acc.fixed, fn fixeds -> [{fixed_key, req_value} | fixeds] end)
+              _ ->
+                update_in(acc.required, fn requireds -> [{req_key, req_value} | requireds] end)
+            end
+            {{:optional, _, [key_type]}, value_type}, acc->
+              opt = {rewrite(key_type, env, options), rewrite(value_type, env, options)}
+              update_in(acc.optional, fn optionals -> [opt | optionals] end)
+            {key, value_type}, acc ->
+              fix = {key, rewrite(value_type, env, options)}
+              update_in(acc.fixed, fn fixeds -> [fix | fixeds] end)
+            other, _acc ->
+              raise """
+              Unknown syntax in map type literal: #{inspect(other)}.
+              """
+          end)
 
-        quote generated: true, location: :keep do
-          TypeCheck.Builtin.fixed_map(unquote(field_types))
-        end
+          quote generated: true, location: :keep do
+            TypeCheck.Builtin.fancy_map(unquote(field_types.fixed), unquote(field_types.required), unquote(field_types.optional))
+          end
 
       _other ->
         # Unhandled already-expanded structs

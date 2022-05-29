@@ -1,6 +1,7 @@
 defmodule TypeCheck.TypeError.DefaultFormatter do
   @behaviour TypeCheck.TypeError.Formatter
 
+  @spec format(TypeCheck.TypeError.problem_tuple(), TypeCheck.TypeError.location()) :: String.t()
   def format(problem_tuple, location \\ []) do
     res =
       do_format(problem_tuple)
