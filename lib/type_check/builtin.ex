@@ -1344,6 +1344,8 @@ defmodule TypeCheck.Builtin do
   @doc typekind: :builtin
   @doc """
   Any list with at least one element, which might be terminated by something else than `[]`.
+
+  To be precise, the list needs to be terminated with either `[]` or `terminator_type`
   """
   def nonempty_maybe_improper_list(element_type, terminator_type) do
     guard =
@@ -1357,6 +1359,8 @@ defmodule TypeCheck.Builtin do
   @doc typekind: :builtin
   @doc """
   Any list with at least one element, which has to be terminated by something else than `[]`.
+
+  To be precise, the list needs to be terminated with `terminator_type`.
   """
   def nonempty_improper_list(element_type, terminator_type) do
     guard =
