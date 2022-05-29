@@ -327,7 +327,7 @@ defmodule TypeCheck do
   @doc """
   Ensure at runtime that arguments at result of function call conform the function spec.
   
-  The function spec is extracted at compile time from the regular Elixir (oe Erlang) `@spec`.
+  The function spec is extracted at compile time from the regular Elixir (or Erlang) `@spec`.
 
   ## Experimental
   

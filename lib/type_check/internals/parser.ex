@@ -167,10 +167,8 @@ defmodule TypeCheck.Internals.Parser do
   defp convert_type(:pid, [], _), do: B.pid()
   defp convert_type(:no_return, [], _), do: B.none()
   defp convert_type(:none, [], _), do: B.none()
-
-  # unsupported by type_check yet
-  defp convert_type(:reference, [], ctx), do: ctx.default
-  defp convert_type(:port, [], ctx), do: ctx.default
+  defp convert_type(:reference, [], _), do: B.reference()
+  defp convert_type(:port, [], _), do: B.port()
 
   # bitstrings
   defp convert_type(:binary, [], _), do: B.binary()

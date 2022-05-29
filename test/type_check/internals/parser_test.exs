@@ -58,8 +58,7 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :elem, 2, [B.tuple(), B.non_neg_integer()], B.term()},
       {Kernel, :hd, 1, [B.nonempty_list(B.any())], B.any()},
       {Kernel, :is_atom, 1, [B.term()], B.boolean()},
-      # TODO(@orsinium): update when reference and port are supported
-      {Kernel, :node, 1, [B.one_of([B.pid(), B.any(), B.any()])], B.atom()},
+      {Kernel, :node, 1, [B.one_of([B.pid(), B.reference(), B.port()])], B.atom()},
       {Kernel, :tl, 1, [B.nonempty_list()], B.one_of(B.list(), B.any())},
       {Kernel, :tuple_size, 1, [B.tuple()], B.non_neg_integer()},
       {Kernel, :apply, 2, [B.fun(), B.list()], B.any()},
@@ -336,6 +335,16 @@ defmodule TypeCheck.Internals.ParserTest do
     test "pid" do
       bytecode = test_module(pid)
       assert convert_spec(bytecode) == B.pid()
+    end
+
+    test "port" do
+      bytecode = test_module(port)
+      assert convert_spec(bytecode) == B.port()
+    end
+
+    test "reference" do
+      bytecode = test_module(reference)
+      assert convert_spec(bytecode) == B.reference()
     end
 
     test "nonempty_list/0" do
