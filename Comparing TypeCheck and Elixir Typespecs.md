@@ -1,6 +1,6 @@
 # Comparing TypeCheck and Elixir Typespecs
 
-TypeCheck is intended to be a drop-in supplement to Elixir typespecs. Not all typespec syntax is supported in TypeCheck, but the majority of common syntax is and this gap continues to shrink. Below is a breakdown of supported typespec syntax in TypeCheck.
+TypeCheck is intended to be a drop-in supplement to Elixir typespecs. With very few exceptions, all of Elixir's typespecs are supported by TypeCheck. Below is a breakdown of supported typespec syntax in TypeCheck.
 
 In the tables below:
 - '✅' indicates that something is supported
@@ -27,9 +27,9 @@ In the tables below:
 | pos_integer()                                                | ✅         | 1, 2, 3, ...                       |
 | list(type)                                                   | ✅         | proper list                        |
 | nonempty_list(type)                                          | ✅         | non-empty proper list              |
-| maybe_improper_list(content_type, termination_type)          | ⌛         | proper or improper list            |
-| nonempty_improper_list(content_type, termination_type)       | ⌛         | improper list                      |
-| nonempty_maybe_improper_list(content_type, termination_type) | ⌛         | non-empty proper or improper list  |
+| maybe_improper_list(content_type, termination_type)          | ✅         | proper or improper list            |
+| nonempty_improper_list(content_type, termination_type)       | ✅         | improper list                      |
+| nonempty_maybe_improper_list(content_type, termination_type) | ✅         | non-empty proper or improper list  |
 
 ## Literals
 
@@ -56,11 +56,11 @@ In the tables below:
 | %{}                                                          | ✅         | empty map                                                                                              |
 | %{key: value_type}                                           | ✅         | map with required (atom) key :key of value_type                                                        |
 | %{key_type => value_type}                                    | ✅         | map with required pairs of key_type and value_type                                                     |
-| %{required(key_type) => value_type}                          | ✅''       | map with required pairs of key_type and value_type                                                     |
-| %{optional(key_type) => value_type}                          | ✅''       | map with optional pairs of key_type and value_type                                                     |
+| %{required(key_type) => value_type}                          | ✅²       | map with required pairs of key_type and value_type                                                     |
+| %{optional(key_type) => value_type}                          | ✅²       | map with optional pairs of key_type and value_type                                                     |
 | %SomeStruct{}                                                | ✅         | struct with all fields of any type                                                                     |
 | %SomeStruct{key: value_type}                                 | ✅         | struct with required key :key of value_type                                                            |
-| %{key: value_type, optional(opt_key_type) => opt_value_type} | ✅'''      | struct with required key :key of value_type, and zero or more pairs of opt_key_type and opt_value_type |
+| %{key: value_type, optional(opt_key_type) => opt_value_type} | ✅³      | struct with required key :key of value_type, and zero or more pairs of opt_key_type and opt_value_type |
 | {}                                                           | ✅         | empty tuple                                                                                            |
 | \{:ok, type\}                                                | ✅         | two-element tuple with an atom and any type                                                            |
 
@@ -68,42 +68,42 @@ In the tables below:
 TypeCheck wraps them in a 'wrapper function' which performs the correct check on their input/output.
 This wrapper will only run once the the function actually is called.
 
-'': Only a single 'required' or 'optional' field in a map is currently supported. (Types which need more are fortunately very rare.)
+²: Only a single 'required' or 'optional' field in a map is currently supported. (Types which need more are fortunately very rare.)
 
-''': Only optional is currently supported, and only a single one. (Types which need more are fortunately very rare.)
+³: Only optional is currently supported, and only a single one. (Types which need more are fortunately very rare.)
 
 ## Built-in types
 
 | Type                           | Supported? | Notes                                                               |
 |--------------------------------|------------|---------------------------------------------------------------------|
-| term()                         | ✅         | any()                                                               |
-| arity()                        | ✅         | 0..255                                                              |
-| as_boolean(t)                  | ✅         | t                                                                   |
-| binary()                       | ✅         | <<_::_*8>>                                                          |
-| bitstring()                    | ✅         | <<_::_*1>>                                                          |
-| boolean()                      | ✅         | true \| false                                                       |
-| byte()                         | ✅         | 0..255                                                              |
-| char()                         | ✅         | 0..0x10FFFF                                                         |
-| charlist()                     | ✅         | [char()]                                                            |
-| nonempty_charlist()            | ✅         | [char(), ...]                                                       |
-| fun()                          | ✅         | (... -> any)                                                        |
-| function()                     | ✅         | fun()                                                               |
-| identifier()                   | ✅         | pid() \| port() \| reference()                                      |
-| iodata()                       | ⌛         | iolist() \| binary()                                                |
-| iolist()                       | ⌛         | maybe_improper_list(byte() \| binary() \| iolist(), binary() \| []) |
-| keyword()                      | ✅         | [{atom(), any()}]                                                   |
-| keyword(t)                     | ✅         | [{atom(), t}]                                                       |
-| list()                         | ✅         | [any()]                                                             |
-| nonempty_list()                | ✅         | nonempty_list(any())                                                |
-| maybe_improper_list()          | ⌛         | maybe_improper_list(any(), any())                                   |
-| nonempty_maybe_improper_list() | ⌛         | nonempty_maybe_improper_list(any(), any())                          |
-| mfa()                          | ✅         | {module(), atom(), arity()}                                         |
-| module()                       | ✅         | atom()                                                              |
-| no_return()                    | ✅         | none()                                                              |
-| node()                         | ✅         | atom()                                                              |
-| number()                       | ✅         | integer() \| float()                                                |
-| struct()                       | ✅         | %{:__struct__ => atom(), optional(atom()) => any()}                 |
-| timeout()                      | ✅         | :infinity \| non_neg_integer()                                      |
+| term()                         | ✅         | `any()`                                                               |
+| arity()                        | ✅         | `0..255`                                                              |
+| as_boolean(t)                  | ✅         | `t`                                                                   |
+| binary()                       | ✅         | `<<_::_*8>>`                                                          |
+| bitstring()                    | ✅         | `<<_::_*1>>`                                                          |
+| boolean()                      | ✅         | `true | false`                                                        |
+| byte()                         | ✅         | `0..255`                                                              |
+| char()                         | ✅         | `0..0x10FFFF`                                                         |
+| charlist()                     | ✅         | `[char()]`                                                            |
+| nonempty_charlist()            | ✅         | `[char(), ...]`                                                       |
+| fun()                          | ✅         | `(... -> any)`                                                        |
+| function()                     | ✅         | `fun()`                                                               |
+| identifier()                   | ✅         | `pid() | port() | reference()`                                      |
+| iodata()                       | ✅         | `iolist() | binary()`                                                |
+| iolist()                       | ✅         | `maybe_improper_list(byte() | binary() | iolist(), binary() | [])` |
+| keyword()                      | ✅         | `[{atom(), any()}]`                                                   |
+| keyword(t)                     | ✅         | `[{atom(), t}]`                                                       |
+| list()                         | ✅         | `[any()]`                                                             |
+| nonempty_list()                | ✅         | `nonempty_list(any())`                                                |
+| maybe_improper_list()          | ✅         | `maybe_improper_list(any(), any())`                                   |
+| nonempty_maybe_improper_list() | ✅         | `nonempty_maybe_improper_list(any(), any())`                          |
+| mfa()                          | ✅         | `{module(), atom(), arity()}`                                         |
+| module()                       | ✅         | `atom()`                                                              |
+| no_return()                    | ✅         | `none()`                                                              |
+| node()                         | ✅         | `atom()`                                                              |
+| number()                       | ✅         | `integer() \| float()`                                                |
+| struct()                       | ✅         | `%{:__struct__ => atom(), optional(atom()) => any()}`                 |
+| timeout()                      | ✅         | `:infinity | non_neg_integer()`                                      |
 
 ## 🚀 TypeCheck Additions
 

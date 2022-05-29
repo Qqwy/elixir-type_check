@@ -1371,7 +1371,26 @@ defmodule TypeCheck.Builtin do
     guarded_by(named_type(:nonempty_improper_list, nonempty_maybe_improper_list(element_type, terminator_type)), guard)
   end
 
+  @doc """
+  A potentially-improper list containing binaries,
+  single characters, or nested iolists.
 
+  Syntactic sugar for `maybe_improper_list(byte() | binary() | iolist(), binary() | []) `
+  """
+  @doc typekind: :builtin
+  def iolist() do
+    element = one_of([byte(), binary(), lazy(iolist())])
+    terminator = one_of([binary(), []])
+    maybe_improper_list(element, terminator)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Syntactic sugar for `binary() | iolist()`
+  """
+  def iodata() do
+    one_of([binary(), iolist()])
+  end
 
   @doc typekind: :extension
   @doc """
