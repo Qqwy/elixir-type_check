@@ -44,17 +44,17 @@ defmodule TypeCheck.Defstruct do
 
   This is syntactic sugar for:
 
-  defmodule User do
-      use TypeCheck
-      use TypeCheck.Defstruct
+      defmodule User do
+        use TypeCheck
+        use TypeCheck.Defstruct
 
-      @type! t() :: %User{
-        name: String.t(),
-        age: non_neg_integer() | :secret
-      }
-      @enforce_keys [:name]
-      defstruct [:name, age: nil]
-  end
+        @type! t() :: %User{
+          name: String.t(),
+          age: non_neg_integer() | :secret
+        }
+        @enforce_keys [:name]
+        defstruct [:name, age: nil]
+      end
 
   ## Optional and required keys
 
