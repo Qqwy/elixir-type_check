@@ -1,13 +1,12 @@
 defmodule TypeCheck.DefaultOverrides.Inspect.Algebra do
   use TypeCheck
-  # alias TypeCheck.DefaultOverrides.IO.ANSI
+  alias TypeCheck.DefaultOverrides.IO
 
   @typep! doc_break() :: {:doc_break, binary(), :flex | :strict}
 
   @typep! doc_collapse() :: {:doc_collapse, pos_integer()}
 
-  # @typep! doc_color() :: {:doc_color, t(), IO.ANSI.ansidata()}
-  @typep! doc_color() :: {:doc_color, t(), any()}
+  @typep! doc_color() :: {:doc_color, t(), IO.ANSI.ansidata()}
 
   @typep! doc_cons() :: {:doc_cons, t(), t()}
 

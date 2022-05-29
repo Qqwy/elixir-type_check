@@ -1,10 +1,10 @@
 defmodule TypeCheck.DefaultOverrides.GenServer do
   use TypeCheck
+  alias TypeCheck.DefaultOverrides.Path
   alias TypeCheck.DefaultOverrides.Process
 
   # TODO
-  # @type! debug() :: [:trace | :log | :statistics | {:log_to_file, Path.t()}]
-  @type! debug() :: [:trace | :log | :statistics | {:log_to_file, any()}]
+  @type! debug() :: [:trace | :log | :statistics | {:log_to_file, Path.t()}]
 
   @type! from() :: {pid(), tag :: term()}
 
