@@ -1,8 +1,8 @@
 defmodule TypeCheck.Builtin.NamedType do
-  defstruct [:name, :type, :local]
+  defstruct [:name, :type, :local, :type_kind]
 
   use TypeCheck
-  @type! t :: %TypeCheck.Builtin.NamedType{name: atom(), type: TypeCheck.Type.t(), local: boolean()}
+  @type! t :: %TypeCheck.Builtin.NamedType{name: atom(), type: TypeCheck.Type.t(), local: boolean(), type_kind: :type | :typep | :opaque}
 
   @type! problem_tuple ::
          {t(), :named_type, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())},
@@ -16,17 +16,31 @@ defmodule TypeCheck.Builtin.NamedType do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
 
-      quote generated: true, location: :keep do
-        inner_res = unquote(inner_check)
-        case inner_res do
-          {:ok, bindings, altered_inner} ->
-            # Write it to a non-hygienic variable
-            # that we can read from more outer-level types
-            # unquote(Macro.var(s.name, TypeCheck.Builtin.NamedType)) = unquote(param)
-            {:ok, [{unquote(s.name), unquote(param)} | bindings], altered_inner}
+      if s.type_kind == :opaque do
+        # Do not expose binding on opaque types
+        quote generated: true, location: :keep do
+          inner_res = unquote(inner_check)
+          case inner_res do
+            {:ok, _bindings, altered_inner} ->
+              # Reset bindings
+              {:ok, [], altered_inner}
+            {:error, problem} ->
+              {:error, {unquote(Macro.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+          end
+        end
+      else
+        quote generated: true, location: :keep do
+          inner_res = unquote(inner_check)
+          case inner_res do
+            {:ok, bindings, altered_inner} ->
+              # Write it to a non-hygienic variable
+              # that we can read from more outer-level types
+              # unquote(Macro.var(s.name, TypeCheck.Builtin.NamedType)) = unquote(param)
+              {:ok, [{unquote(s.name), unquote(param)} | bindings], altered_inner}
 
-          {:error, problem} ->
-            {:error, {unquote(Macro.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+            {:error, problem} ->
+              {:error, {unquote(Macro.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+          end
         end
       end
     end
