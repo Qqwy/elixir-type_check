@@ -33,39 +33,44 @@ In the tables below:
 
 ## Literals
 
-| Type                                | Supported? | Notes                                              |
-|-------------------------------------|------------|----------------------------------------------------|
-| :atom                               | ✅         | atoms: :foo, :bar, ...                             |
-| true                                | ✅         |                                                    |
-| false                               | ✅         |                                                    |
-| nil                                 | ✅         |                                                    |
-| <<>>                                | ✅         | empty bitstring                                    |
-| <<_::size>                          | ✅         | size is 0 or a positive integer                    |
-| <<_::_*unit>>                       | ✅         | unit is an integer from 1 to 256                   |
-| <<_::size, _::_*unit>>              | ✅         |                                                    |
-| (-> type)                           | ✅¹        | 0-arity, returns type                              |
-| (type1, type2 -> type)              | ✅¹        | 2-arity, returns type                              |
-| (... -> type)                       | ✅¹        | any arity, returns type                            |
-| 1                                   | ✅         | integer                                            |
-| 1..10                               | ✅         | range                                              |
-| [type]                              | ✅         | list with any number of type elements              |
-| []                                  | ✅         | empty list                                         |
-| [...]                               | ✅         | shorthand for nonempty_list(any())                 |
-| [type, ...]                         | ✅         | shorthand for nonempty_list(type)                  |
-| [key: value_type]                   | ✅         | keyword list with key :key of value_type           |
-| %{}                                 | ✅         | empty map                                          |
-| %{key: value_type}                  | ✅         | map with required (atom) key :key of value_type    |
-| %{key_type => value_type}           | ⌛         | map with required pairs of key_type and value_type |
-| %{required(key_type) => value_type} | ⌛         | map with required pairs of key_type and value_type |
-| %{optional(key_type) => value_type} | ⌛         | map with optional pairs of key_type and value_type |
-| %SomeStruct{}                       | ✅         | struct with all fields of any type                 |
-| %SomeStruct{key: value_type}        | ✅         | struct with required key :key of value_type        |
-| {}                                  | ✅         | empty tuple                                        |
-| \{:ok, type\}                       | ✅         | two-element tuple with an atom and any type        |
+| Type                                                         | Supported? | Notes                                                                                                  |
+|--------------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
+|--------------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
+| true                                                         | ✅         |                                                                                                        |
+| false                                                        | ✅         |                                                                                                        |
+| nil                                                          | ✅         |                                                                                                        |
+| <<>>                                                         | ✅         | empty bitstring                                                                                        |
+| <<_::size>                                                   | ✅         | size is 0 or a positive integer                                                                        |
+| <<_::_*unit>>                                                | ✅         | unit is an integer from 1 to 256                                                                       |
+| <<_::size, _::_*unit>>                                       | ✅         |                                                                                                        |
+| (-> type)                                                    | ✅¹        | 0-arity, returns type                                                                                  |
+| (type1, type2 -> type)                                       | ✅¹        | 2-arity, returns type                                                                                  |
+| (... -> type)                                                | ✅¹        | any arity, returns type                                                                                |
+| 1                                                            | ✅         | integer                                                                                                |
+| 1..10                                                        | ✅         | range                                                                                                  |
+| [type]                                                       | ✅         | list with any number of type elements                                                                  |
+| []                                                           | ✅         | empty list                                                                                             |
+| [...]                                                        | ✅         | shorthand for nonempty_list(any())                                                                     |
+| [type, ...]                                                  | ✅         | shorthand for nonempty_list(type)                                                                      |
+| [key: value_type]                                            | ✅         | keyword list with key :key of value_type                                                               |
+| %{}                                                          | ✅         | empty map                                                                                              |
+| %{key: value_type}                                           | ✅         | map with required (atom) key :key of value_type                                                        |
+| %{key_type => value_type}                                    | ✅         | map with required pairs of key_type and value_type                                                     |
+| %{required(key_type) => value_type}                          | ✅''       | map with required pairs of key_type and value_type                                                     |
+| %{optional(key_type) => value_type}                          | ✅''       | map with optional pairs of key_type and value_type                                                     |
+| %SomeStruct{}                                                | ✅         | struct with all fields of any type                                                                     |
+| %SomeStruct{key: value_type}                                 | ✅         | struct with required key :key of value_type                                                            |
+| %{key: value_type, optional(opt_key_type) => opt_value_type} | ✅'''      | struct with required key :key of value_type, and zero or more pairs of opt_key_type and opt_value_type |
+| {}                                                           | ✅         | empty tuple                                                                                            |
+| \{:ok, type\}                                                | ✅         | two-element tuple with an atom and any type                                                            |
 
 ¹: Functions passed as parameters can only be fully checked once they are called. 
 TypeCheck wraps them in a 'wrapper function' which performs the correct check on their input/output.
 This wrapper will only run once the the function actually is called.
+
+'': Only a single 'required' or 'optional' field in a map is currently supported. (Types which need more are fortunately very rare.)
+
+''': Only optional is currently supported, and only a single one. (Types which need more are fortunately very rare.)
 
 ## Built-in types
 
@@ -95,10 +100,10 @@ This wrapper will only run once the the function actually is called.
 | mfa()                          | ✅         | {module(), atom(), arity()}                                         |
 | module()                       | ✅         | atom()                                                              |
 | no_return()                    | ✅         | none()                                                              |
-| node()                         | ⌛         | atom()                                                              |
+| node()                         | ✅         | atom()                                                              |
 | number()                       | ✅         | integer() \| float()                                                |
-| struct()                       | ⌛         | %{:__struct__ => atom(), optional(atom()) => any()}                 |
-| timeout()                      | ⌛         | :infinity \| non_neg_integer()                                      |
+| struct()                       | ✅         | %{:__struct__ => atom(), optional(atom()) => any()}                 |
+| timeout()                      | ✅         | :infinity \| non_neg_integer()                                      |
 
 ## 🚀 TypeCheck Additions
 
@@ -215,7 +220,7 @@ You can use "named types" to refer to (parts of) the value that matched the type
 @type! sorted_pair :: {lower :: number(), higher :: number()} when lower <= higher
 ```
 
-## ⌛ Remote Types
+## ✅ Remote Types
 
 It is often useful to refer to types defined in other modules. These are called 'Remote types'.
 Elixir's typespecs and TypeCheck both support remote types.
@@ -288,19 +293,19 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Type                      | Supported? | Notes      |
 |---------------------------|------------|------------|
 | Access                    | ✅         |            |
-| Agent                     | ⌛         |            |
-| Application               | ⌛         |            |
+| Agent                     | ✅         |            |
+| Application               | ✅         |            |
 | Calendar                  | ✅         |            |
 | Calendar.ISO              | ✅         |            |
-| Calendar.TimeZoneDatabase | ⌛         |            |
+| Calendar.TimeZoneDatabase | ✅         |            |
 | Code                      | ⌛         |            |
 | Collectable               | ✅         |            |
-| Config.Provider           | ⌛         |            |
+| Config.Provider           | ✅         |            |
 | Date                      | ✅         |            |
 | Date.Range                | ✅         |            |
 | DateTime                  | ✅         |            |
 | Dict                      | ❌         | deprecated |
-| DynamicSupervisor         | ⌛         |            |
+| DynamicSupervisor         | ✅         |            |
 | Enum                      | ✅         |            |
 | Enumerable                | ✅         |            |
 | Exception                 | ✅         |            |
@@ -314,8 +319,8 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | HashDict                  | ❌         | deprecated |
 | HashSet                   | ❌         | deprecated |
 | IO                        | ✅         |            |
-| IO.ANSI                   | ⌛         |            |
-| IO.Stream                 | ⌛         |            |
+| IO.ANSI                   | ✅         |            |
+| IO.Stream                 | ✅         |            |
 | Inspect                   | ✅         |            |
 | Inspect.Algebra           | ⌛         |            |
 | Inspect.Opts              | ⌛         |            |
@@ -326,23 +331,23 @@ TypeCheck helpfully ships with the majority of the types in Elixir's Standard Li
 | Map                       | ✅         |            |
 | MapSet                    | ✅         |            |
 | NaiveDateTime             | ✅         |            |
-| Node                      | ⌛         |            |
-| OptionParser              | ⌛         |            |
-| Path                      | ⌛         |            |
-| Port                      | ⌛         |            |
-| Process                   | ⌛         |            |
+| Node                      | ✅         |            |
+| OptionParser              | ✅         |            |
+| Path                      | ✅         |            |
+| Port                      | ✅         |            |
+| Process                   | ✅         |            |
 | Range                     | ✅         |            |
 | Regex                     | ✅         |            |
-| Registry                  | ⌛         |            |
+| Registry                  | ✅         |            |
 | Set                       | ❌         | deprecated |
 | Stream                    | ✅         |            |
 | String                    | ✅         |            |
 | String.Chars              | ⌛         |            |
-| Supervisor                | ⌛         |            |
+| Supervisor                | ✅         |            |
 | Supervisor.Spec           | ❌         | deprecated |
-| System                    | ⌛         |            |
-| Task                      | ⌛         |            |
-| Task.Supervisor           | ⌛         |            |
+| System                    | ✅         |            |
+| Task                      | ✅         |            |
+| Task.Supervisor           | ✅         |            |
 | Time                      | ✅         |            |
 | URI                       | ✅         |            |
 | Version                   | ✅         |            |
