@@ -1311,6 +1311,15 @@ defmodule TypeCheck.Builtin do
   end
 
 
+  @doc typekind: :builtin
+  @doc """
+  Shorthand for nonempty_list(char()).
+  """
+  def nonempty_charlist() do
+    nonempty_list(char())
+  end
+
+
   @doc typekind: :extension
   @doc """
   Checks whether the given value implements the particular protocol.

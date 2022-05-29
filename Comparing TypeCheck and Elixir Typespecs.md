@@ -85,7 +85,7 @@ This wrapper will only run once the the function actually is called.
 | byte()                         | ✅         | 0..255                                                              |
 | char()                         | ✅         | 0..0x10FFFF                                                         |
 | charlist()                     | ✅         | [char()]                                                            |
-| nonempty_charlist()            | ⌛         | [char(), ...]                                                       |
+| nonempty_charlist()            | ✅         | [char(), ...]                                                       |
 | fun()                          | ✅         | (... -> any)                                                        |
 | function()                     | ✅         | fun()                                                               |
 | identifier()                   | ✅         | pid() \| port() \| reference()                                      |
