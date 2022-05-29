@@ -219,7 +219,7 @@ Details:
     - Support for the builtin type `timeout()`.
     - Support for the builtin type `nonempty_charlist()`.
     - Improvements to the default type overrides for modules like `Calendar`, `Enum`, `Enumerable`, etc. now that optional keys in struct types and higher-order function types are supported.
-    - Addition of many more default type override modules, to ensure all of Elixir's standard library is covered.
+    - Addition of many more default type override modules, to ensure all of Elixir's standard library is covered. _(The only types still missing are those depending on `maybe_improper_list`.)_
     - `TypeCheck.Credo.Check.Readability.Specs` is an opt-in alternative Credo check which will check whether all functions have either a `@spec!` or 'normal' `@spec`. (Fixes #102).
 - 0.10.8 - 
   - Fixes:
