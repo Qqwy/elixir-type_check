@@ -83,18 +83,25 @@ defmodule TypeCheck.Internals.ParserTest do
     end
   end
 
-  defmacrop test_module(raw_spec) do
+  defmacrop test_module(do: block) do
     quote do
       {:module, _, bytecode, _} =
         defmodule TypespecSample do
           @moduledoc false
-          @spec f(any) :: unquote(raw_spec)
+          unquote(block)
           def f(a), do: a
         end
 
       :code.delete(TypespecSample)
       :code.purge(TypespecSample)
       bytecode
+    end
+  end
+
+  # if called without `do` keyword, assume that it is only the return value for @spec.
+  defmacrop test_module(raw_spec) do
+    quote do
+      test_module(do: @spec(f(any) :: unquote(raw_spec)))
     end
   end
 
@@ -407,6 +414,15 @@ defmodule TypeCheck.Internals.ParserTest do
         )
 
       assert convert_spec(bytecode) == exp
+    end
+
+    test "var and when" do
+      bytecode =
+        test_module do
+          @spec f(t) :: t when t: atom
+        end
+
+      assert convert_spec(bytecode) == B.atom()
     end
   end
 end
