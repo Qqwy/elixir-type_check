@@ -190,12 +190,12 @@ Details:
   - `(...-> result_type)`
   - `(param_type, param2_type -> result_type)`
 - [x] Basic support for maps with a single `required(type)` or `optional(type)`.
-- [ ] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
+- [x] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
+- [x] Overrides for more builtin remote types
+- [x] Support for maps with mixed `required(type)` and `optional(type)` syntaxes.
 
 ### Pre-stable
 
-- [ ] Overrides for more builtin remote types
-- [ ] Support for maps with mixed `required(type)` and `optional(type)` syntaxes.
 - [ ] Hide named types from opaque types.
 - [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
@@ -217,10 +217,9 @@ Details:
     - Support for the builtin types `port()`, `reference()` and (based on these) `identifier()`.
     - Support for the builtin type `struct()`.
     - Support for the builtin type `timeout()`.
-    - Support for the builtin type `nonempty_charlist()`.
-    - Improvements to the default type overrides for modules like `Calendar`, `Enum`, `Enumerable`, etc. now that optional keys in struct types and higher-order function types are supported.
-    - Addition of many more default type override modules, to ensure all of Elixir's standard library is covered. _(The only types still missing are those depending on `maybe_improper_list`.)_
-    - `TypeCheck.Credo.Check.Readability.Specs` is an opt-in alternative Credo check which will check whether all functions have either a `@spec!` or 'normal' `@spec`. (Fixes #102).
+    - Support for the builtin type `nonempty_charlist()` and `maybe_improper_list` and (based on these) `iolist()` and `iodata()`.
+    - Adding types depending on these builtins to the default type overrides. **We now support all modules of the full standard library!**
+    - `TypeCheck.Credo.Check.Readability.Specs`: an opt-in alternative Credo check which will check whether all functions have either a `@spec!` or 'normal' `@spec`. (Fixes #102).
 - 0.10.8 - 
   - Fixes:
     - Ensures that the `Inspect` protocol is properly implemented for sized bitstring types (c.f. #104). Thank you very much, @trarbr!
