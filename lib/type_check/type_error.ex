@@ -53,7 +53,7 @@ defmodule TypeCheck.TypeError do
           {type_checked_against(), check_name(), extra_information(), problematic_value()}
 
   @impl true
-  @dialyzer :nowarn_opaque
+  @dialyzer :no_opaque
   def exception({problem_tuple, location}) do
     message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple, location)
 
