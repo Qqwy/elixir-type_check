@@ -160,8 +160,6 @@ defmodule TypeCheck.Macros do
   """
   defmacro __using__(options) do
     otp_app = Application.get_application(__CALLER__.module)
-    IO.inspect(otp_app, label: :app)
-
     quote generated: true, location: :keep do
       import Kernel, except: [@: 1]
       import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
