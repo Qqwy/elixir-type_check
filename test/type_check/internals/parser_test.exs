@@ -71,7 +71,12 @@ defmodule TypeCheck.Internals.ParserTest do
       {Enum, :slice, 2,
        [
          B.any(),
-         B.fixed_map(%{__struct__: B.literal(Range), first: B.any(), last: B.any(), step: B.any()})
+         B.fixed_map(%{
+           __struct__: B.literal(Range),
+           first: B.integer(),
+           last: B.integer(),
+           step: B.one_of(B.pos_integer(), B.neg_integer())
+         })
        ], B.list()},
       {Macro, :var, 2, [B.atom(), B.atom()], B.fixed_tuple([B.atom(), B.list(B.any()), B.atom()])}
     ]

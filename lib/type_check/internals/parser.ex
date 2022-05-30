@@ -10,16 +10,25 @@ defmodule TypeCheck.Internals.Parser do
   defmodule Context do
     @moduledoc """
     Container for context information of convert/2.
+
+    Params:
+
+    * `default`: the default type to use when the actual type cannot be resolved.
+    * `vars`: concrette types for type variables, used for parsing generic types.
+    * `module`: the module of the currently parsed type, use to resolve user types.
+    * `max_depth`: how deeply remote types should be resolved,
+      used to prevent infinite recursion for recursive types.
     """
-    defstruct [:default, :vars, :module]
+    defstruct [:default, :vars, :module, :max_depth]
 
     @type t :: %Context{
             default: TypeCheck.Type.t(),
             vars: %{String.t() => TypeCheck.Type.t()},
-            module: module()
+            module: module(),
+            max_depth: non_neg_integer()
           }
 
-    def default(), do: %__MODULE__{default: B.any(), vars: %{}, module: nil}
+    def default(), do: %__MODULE__{default: B.any(), vars: %{}, module: nil, max_depth: 5}
   end
 
   @opaque raw :: {atom | nil, list, list | :any}
@@ -179,6 +188,8 @@ defmodule TypeCheck.Internals.Parser do
   def convert(_, ctx), do: ctx.default
 
   @spec convert_remote_type(module(), atom(), [raw], Context.t()) :: TypeCheck.Type.t()
+  defp convert_remote_type(_, _, _, ctx = %{max_depth: 0}), do: ctx.default
+
   defp convert_remote_type(module, type, vars, ctx) do
     case fetch_type(module, type, length(vars)) do
       {:ok, spec, var_names} ->
@@ -187,7 +198,8 @@ defmodule TypeCheck.Internals.Parser do
         # add new key-value pairs into existing vars
         vars = Enum.zip(var_names, vars) |> Map.new()
         vars = Map.merge(ctx.vars, vars)
-        convert(spec, %{ctx | vars: vars, module: module})
+        ctx = %{ctx | vars: vars, module: module, max_depth: ctx.max_depth - 1}
+        convert(spec, ctx)
 
       {:error, _} ->
         ctx.default
