@@ -342,7 +342,8 @@ defmodule TypeCheck do
 
   """
   @spec apply!(TypeCheck.Type.t(), module(), atom(), list()) :: any()
-  def apply!(%{param_types: ptypes, return_type: rtype}, module, function, args) do
+  def apply!(type, module, function, args) do
+    {ptypes, rtype} = split_func_type(type)
     with :ok <- check_params(args, ptypes),
          result <- Kernel.apply(module, function, args),
          _ <- dynamic_conforms!(result, rtype) do
@@ -368,7 +369,8 @@ defmodule TypeCheck do
   """
   @spec apply(TypeCheck.Type.t(), module(), atom(), list()) ::
           {:ok, any()} | {:error, TypeCheck.TypeError.t()}
-  def apply(%{param_types: ptypes, return_type: rtype}, module, function, args) do
+  def apply(type, module, function, args) do
+    {ptypes, rtype} = split_func_type(type)
     with :ok <- check_params(args, ptypes),
          result <- Kernel.apply(module, function, args),
          :ok <- dynamic_conforms(result, rtype) do
@@ -385,4 +387,14 @@ defmodule TypeCheck do
   end
 
   defp check_params(_, _), do: :ok
+  
+  @spec split_func_type(TypeCheck.Type.t()) :: {[TypeCheck.Type.t()], TypeCheck.Type.t()}
+  defp split_func_type(%{param_types: ptypes, return_type: rtype}), do: {ptypes, rtype}
+
+  defp split_func_type(%{__struct__: TypeCheck.Builtin.OneOf, choices: types}) do
+    ptypes = types |> Enum.map(fn %{param_types: params} -> params end) |> List.zip
+      |> Enum.map(fn types -> types |> Tuple.to_list |> TypeCheck.Builtin.one_of end)
+    rtypes = Enum.map(types, fn %{return_type: rtype} -> rtype end)
+    {TypeCheck.Builtin.one_of(ptypes), TypeCheck.Builtin.one_of(rtypes)}
+  end
 end
