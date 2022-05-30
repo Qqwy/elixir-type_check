@@ -193,11 +193,11 @@ Details:
 - [x] Overrides for builtin remote types (`String.t`,`Enum.t`, `Range.t`, `MapSet.t` etc.) **(75% done)** [Details](https://hexdocs.pm/type_check/comparing-typecheck-and-elixir-typespecs.html#elixir-standard-library-types)
 - [x] Overrides for more builtin remote types
 - [x] Support for maps with mixed `required(type)` and `optional(type)` syntaxes.
+- [x] Configurable setting to turn checks on/off at compile-time, on a per-OTP-app basis (so you have control over your dependencies) as well as your individual modules.
 
 ### Pre-stable
 
 - [ ] Hide named types from opaque types.
-- [ ] Configurable setting to turn on/off at compile-time, and maybe dynamically at run-time (with slight performance penalty).
 - [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
 
 ### Longer-term future ideas
@@ -205,6 +205,12 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.12.0 - 
+  - Additions:
+    - The default options used are now fetched from the application configuration. This means that you can configure a default for your app as well as for each of your dependencies(!) by adding `config :app_name, :type_check [...]` to your configuration file(s). (c.f. #61)
+  - Fixes:
+    - Creation of the new `maybe_nonempty_list` type will no longer get stuck in an infinite loop on creation. (c.f. #120)
+- 0.11.1 -
 - 0.11.0 - 
   - Additions:
     - Support for fancier map syntaxes:
