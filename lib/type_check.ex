@@ -328,6 +328,8 @@ defmodule TypeCheck do
 
   The first argument must be a function type of the function to be called.
 
+  In case of type error, raises an exception.
+  
   ## Examples
 
       iex> alias TypeCheck.Builtin, as: B
@@ -341,14 +343,46 @@ defmodule TypeCheck do
   """
   @spec apply!(TypeCheck.Type.t(), module(), atom(), list()) :: any()
   def apply!(%{param_types: ptypes, return_type: rtype}, module, function, args) do
-    Enum.zip(args, ptypes)
-    |> Enum.each(fn
-      {avalue, atype} -> dynamic_conforms!(avalue, atype)
-    end)
-
-    result = Kernel.apply(module, function, args)
-    dynamic_conforms!(result, rtype)
-    result
+    with :ok <- check_params(args, ptypes),
+         result <- Kernel.apply(module, function, args),
+         _ <- dynamic_conforms!(result, rtype) do
+      result
+    else
+      {:error, reason} -> raise reason
+    end
   end
 
+  @doc """
+  The same as `TypeCheck.apply/3` but ensures that values conform the given type.
+
+  Returns `{:error, reason}` on failure, `{:ok, function_call_result}` otherwise.
+  
+      iex> alias TypeCheck.Builtin, as: B
+      iex> type = B.function([B.number], B.number)
+      iex> TypeCheck.apply(type, Kernel, :abs, [-13])
+      {:ok, 13}
+      iex> {:error, err} = TypeCheck.apply(type, Kernel, :abs, [false])
+      iex> err.message
+      "At lib/type_check.ex:279:\\n    `false` is not a number."      
+
+  """
+  @spec apply(TypeCheck.Type.t(), module(), atom(), list()) ::
+          {:ok, any()} | {:error, TypeCheck.TypeError.t()}
+  def apply(%{param_types: ptypes, return_type: rtype}, module, function, args) do
+    with :ok <- check_params(args, ptypes),
+         result <- Kernel.apply(module, function, args),
+         :ok <- dynamic_conforms(result, rtype) do
+      result
+    end
+  end
+
+  @spec check_params(list(), [TypeCheck.Type.t()]) :: :ok | {:error, TypeCheck.TypeError.t()}
+  defp check_params([value | values], [type | types]) do
+    case dynamic_conforms(value, type) do
+      {:ok, _} -> check_params(values, types)
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp check_params(_, _), do: :ok
 end
