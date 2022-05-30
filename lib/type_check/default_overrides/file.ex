@@ -15,8 +15,15 @@ defmodule TypeCheck.DefaultOverrides.File do
   {{year :: non_neg_integer(), month :: 1..12, day :: 1..31},
    {hour :: 0..23, minute :: 0..59, second :: 0..59}}
 
-  # TODO
-  # @type! io_device() :: :file.io_device()
+
+  # TODO: c.f. https://github.com/Qqwy/elixir-type_check/issues/116
+  # https://github.com/erlang/otp/blob/master/bootstrap/lib/kernel/include/file.hrl#L62
+  # -record(file_descriptor,
+	#   {module :: module(),     % Module that handles this kind of file
+	#    data   :: term()}).     % Module dependent data
+
+  @type! fd :: {:file_descriptor, module :: module(), data :: term()}
+  @type! io_device() :: pid() | fd()
 
   @type! mode() ::
   :append
@@ -34,8 +41,25 @@ defmodule TypeCheck.DefaultOverrides.File do
   | {:delayed_write, non_neg_integer(), non_neg_integer()}
   | encoding_mode()
 
-  # TODO
-  # @type! posix() :: :file.posix()
+  @type! posix ::
+  :eacces | :eagain |
+  :ebadf | :ebadmsg | :ebusy |
+  :edeadlk | :edeadlock | :edquot |
+  :eexist |
+  :efault | :efbig | :eftype |
+  :eintr | :einval | :eio | :eisdir |
+  :eloop |
+  :emfile | :emlink | :emultihop |
+  :enametoolong | :enfile |
+  :enobufs | :enodev | :enolck | :enolink | :enoent |
+  :enomem | :enospc | :enosr | :enostr | :enosys |
+  :enotblk | :enotdir | :enotsup | :enxio |
+  :eopnotsupp | :eoverflow |
+  :eperm | :epipe |
+  :erange | :erofs |
+  :espipe  | :esrch  | :estale |
+  :etxtbsy |
+  :exdev
 
   @type! posix_time() :: integer()
 

@@ -460,6 +460,14 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :builtin
   @doc """
+  Builtin type. Syntactic sugar for `:infinity | non_neg_integer()`
+  """
+  def timeout() do
+    one_of([literal(:infinity), non_neg_integer()])
+  end
+
+  @doc typekind: :builtin
+  @doc """
   A (proper) list with any type of elements;
 
   shorthand for `list(any())`
@@ -522,6 +530,28 @@ defmodule TypeCheck.Builtin do
   end
   def keyword() do
     keyword(any())
+  end
+
+
+  @doc typekind: :builtin
+  @doc """
+  Syntactic sugar for `maybe_improper_list(any(), any())`
+  """
+  def maybe_improper_list() do
+    maybe_improper_list(any(), any())
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  WIP
+  """
+  if_recompiling? do
+    @spec! maybe_improper_list(element :: TypeCheck.Type.t(), terminator :: TypeCheck.Type.t()) :: TypeCheck.Builtin.MaybeImproperList.t()
+  end
+  def maybe_improper_list(element_type, terminator_type) do
+    build_struct(TypeCheck.Builtin.MaybeImproperList)
+    |> Map.put(:element_type, element_type)
+    |> Map.put(:terminator_type, terminator_type)
   end
 
   @doc typekind: :builtin
@@ -640,6 +670,8 @@ defmodule TypeCheck.Builtin do
   - for integers, atoms and booleans: the primitive value itself.
   - for binaries, a more general `binary()` is used
     as Elixir's builtin typespecs do not support literal UTF-8 binaries as literal values.
+  - For other kinds of values which Elixir's builtin typespecs do not support as literals,
+    we similarly represent it as a more general type.
 
   C.f. `TypeCheck.Builtin.Literal`
   """
@@ -1285,7 +1317,7 @@ defmodule TypeCheck.Builtin do
   def nonempty_list(type) do
     guard =
       quote do
-        length(unquote(Macro.var(:non_empty_list, nil))) > 0
+        (unquote(Macro.var(:non_empty_list, nil)) != [])
       end
 
     guarded_by(named_type(:non_empty_list, list(type)), guard)
@@ -1299,6 +1331,65 @@ defmodule TypeCheck.Builtin do
     nonempty_list(any())
   end
 
+
+  @doc typekind: :builtin
+  @doc """
+  Shorthand for nonempty_list(char()).
+  """
+  def nonempty_charlist() do
+    nonempty_list(char())
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Any list with at least one element, which might be terminated by something else than `[]`.
+
+  To be precise, the list needs to be terminated with either `[]` or `terminator_type`
+  """
+  def nonempty_maybe_improper_list(element_type, terminator_type) do
+    guard =
+      quote do
+        (unquote(Macro.var(:nonempty_maybe_improper_list, nil)) != [])
+      end
+
+    guarded_by(named_type(:nonempty_maybe_improper_list, nonempty_maybe_improper_list(element_type, terminator_type)), guard)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Any list with at least one element, which has to be terminated by something else than `[]`.
+
+  To be precise, the list needs to be terminated with `terminator_type`.
+  """
+  def nonempty_improper_list(element_type, terminator_type) do
+    guard =
+      quote do
+        (unquote(Macro.var(:nonempty_improper_list, nil)) != [])
+      end
+
+    guarded_by(named_type(:nonempty_improper_list, nonempty_maybe_improper_list(element_type, terminator_type)), guard)
+  end
+
+  @doc """
+  A potentially-improper list containing binaries,
+  single characters, or nested iolists.
+
+  Syntactic sugar for `maybe_improper_list(byte() | binary() | iolist(), binary() | []) `
+  """
+  @doc typekind: :builtin
+  def iolist() do
+    element = one_of([byte(), binary(), lazy(iolist())])
+    terminator = one_of([binary(), []])
+    maybe_improper_list(element, terminator)
+  end
+
+  @doc typekind: :builtin
+  @doc """
+  Syntactic sugar for `binary() | iolist()`
+  """
+  def iodata() do
+    one_of([binary(), iolist()])
+  end
 
   @doc typekind: :extension
   @doc """

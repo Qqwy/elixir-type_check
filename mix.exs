@@ -36,7 +36,7 @@ defmodule TypeCheck.MixProject do
         ]
       _ ->
         [
-          extra_applications: [:logger, :iex, :stream_data, :credo]
+          extra_applications: [:logger, :iex, :stream_data, :credo, :mint]
         ]
     end
   end
@@ -65,13 +65,14 @@ defmodule TypeCheck.MixProject do
     [
       # Used for spectesting and property-tests in general:
       {:stream_data, "~> 0.5.0", optional: true},
+      {:credo, "~> 1.5", runtime: false, optional: true},
 
       # For documentation purposes:
-      {:ex_doc, "~> 0.22", only: :docs, runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:benchee, "~> 1.0", only: :bench},
       {:excoveralls, "~> 0.10", only: :test},
-      {:credo, "~> 1.5", runtime: false, optional: true},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:blocked, "~> 0.10.0", runtime: false}
     ]
   end
 

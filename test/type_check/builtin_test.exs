@@ -59,8 +59,11 @@ defmodule TypeCheck.BuiltinTest do
         map(atom(), any())
       end => TypeCheck.Builtin.Map,
       quote do
-        [integer()]
+        list(integer())
       end => TypeCheck.Builtin.List,
+      quote do
+        maybe_improper_list(integer(), boolean())
+      end => TypeCheck.Builtin.MaybeImproperList,
       quote do
         literal(42)
       end => TypeCheck.Builtin.Literal,

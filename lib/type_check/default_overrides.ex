@@ -18,12 +18,19 @@ defmodule TypeCheck.DefaultOverrides do
 
   @elixir_modules ~w[
     Access
+    Agent
+    Application
     Calendar
     Calendar.ISO
+    Calendar.TimeZoneDatabase
+    Code
+    Code.Fragment
     Collectable
+    Config.Provider
     Date
     Date.Range
     DateTime
+    DynamicSupervisor
     Enum
     Enumerable
     Exception
@@ -32,18 +39,35 @@ defmodule TypeCheck.DefaultOverrides do
     File.Stream
     Float
     Function
+    GenServer
     Inspect
+    Inspect.Algebra
+    Inspect.Opts
     IO
+    IO.ANSI
+    IO.Stream
+    Kernel.ParallelCompiler
     Keyword
+    List.Chars
+    Macro
     Map
     MapSet
     Module
     NaiveDateTime
+    Node
+    OptionParser
+    Path
+    Port
+    Process
     Range
     Regex
+    Registry
     Stream
     String
+    String.Chars
+    Supervisor
     System
+    Task
     Time
     URI
     Version
@@ -53,16 +77,16 @@ defmodule TypeCheck.DefaultOverrides do
   @erlang_modules ~w[
     Erlang.Binary
     Erlang.Inet
+    Erlang.Calendar
   ]a
-
-  for module <- @elixir_modules do
-    Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
-  end
 
   for module <- @erlang_modules do
     Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
   end
 
+  for module <- @elixir_modules do
+    Code.ensure_compiled(Elixir.Module.concat(__MODULE__, module))
+  end
 
   @doc """
   Lists all overridden types in {module, function, arity} format.

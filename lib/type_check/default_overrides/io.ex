@@ -1,11 +1,8 @@
 defmodule TypeCheck.DefaultOverrides.IO do
-  alias TypeCheck.DefaultOverrides.String, warn: false
+  alias TypeCheck.DefaultOverrides.String
   use TypeCheck
 
-  # TODO
-  # @autogen_typespec false
-  # @type chardata() :: String.t() | maybe_improper_list(char() | chardata(), String.t() | [])
-  # @type! chardata() :: String.t() | maybe_improper_list(char() | chardata(), String.t() | [])
+  @type! chardata() :: String.t() | maybe_improper_list(char() | chardata(), String.t() | [])
 
   @type! device() :: atom() | pid()
 

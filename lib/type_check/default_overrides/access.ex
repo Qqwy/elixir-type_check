@@ -5,10 +5,7 @@ defmodule TypeCheck.DefaultOverrides.Access do
 
   @type! any_container() :: any()
 
-  # TODO
-  @type container() :: keyword() | struct() | map()
-  @autogen_typespec false
-  @type! container() :: keyword() | map()
+  @type! container() :: keyword() | struct() | map()
 
   @type! get_and_update_fun(data, current_value) ::
   (:get_and_update, data, (term() -> term()) ->
