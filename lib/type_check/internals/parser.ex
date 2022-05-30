@@ -266,8 +266,11 @@ defmodule TypeCheck.Internals.Parser do
   defp convert_type(:map, :any, _), do: B.map()
   defp convert_type(:map, [], _), do: B.fixed_map([])
   defp convert_type(:nonempty_list, [], _), do: B.nonempty_list()
-  # improper lists are cursed, restrict it to regular lists
-  defp convert_type(:nonempty_maybe_improper_list, [], _), do: B.nonempty_list()
+
+  defp convert_type(:nonempty_maybe_improper_list, [], _),
+    do: B.maybe_improper_list(B.any(), B.any())
+
+  defp convert_type(:maybe_improper_list, [], _), do: B.maybe_improper_list(B.any(), B.any())
   defp convert_type(:tuple, :any, _), do: B.tuple()
 
   # generics
@@ -287,11 +290,14 @@ defmodule TypeCheck.Internals.Parser do
   end
 
   defp convert_type(:list, [t], ctx), do: B.list(convert(t, ctx))
-  defp convert_type(:maybe_improper_list, [t, _tail], ctx), do: B.list(convert(t, ctx))
+
+  defp convert_type(:maybe_improper_list, [elem, tail], ctx),
+    do: B.maybe_improper_list(convert(elem, ctx), convert(tail, ctx))
+
   defp convert_type(:nonempty_list, [t], ctx), do: B.nonempty_list(convert(t, ctx))
 
-  defp convert_type(:nonempty_maybe_improper_list, [t, _tail], ctx),
-    do: B.nonempty_list(convert(t, ctx))
+  defp convert_type(:nonempty_maybe_improper_list, [elem, tail], ctx),
+    do: B.maybe_improper_list(convert(elem, ctx), convert(tail, ctx))
 
   defp convert_type(:tuple, types, ctx),
     do: B.fixed_tuple(Enum.map(types, &convert(&1, ctx)))
