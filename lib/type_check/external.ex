@@ -87,7 +87,7 @@ defmodule TypeCheck.External do
       #TypeCheck.Type< list({atom(), number()}) >
       iex> {:ok, type} = fetch_type(Range, :t, [integer(), integer()])
       iex> type
-      #TypeCheck.Type< %Range{first: integer(), last: integer(), step: positive_integer() | neg_integer()} >
+      #TypeCheck.Type< %Range{first: integer(), last: integer(), step: pos_integer() | neg_integer()} >
 
   Fetching non-existent type causes an error:
 
