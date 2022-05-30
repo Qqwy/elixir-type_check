@@ -136,8 +136,7 @@ defmodule TypeCheck do
         end
       _other ->
         quote generated: true, location: :keep do
-          default_options = Application.compile_env(Application.get_application(__MODULE__), :type_check, [])
-          use TypeCheck.Macros, (unquote(options) ++ default_options)
+          use TypeCheck.Macros, unquote(options)
           require TypeCheck
           require TypeCheck.Type
           import TypeCheck.Builtin

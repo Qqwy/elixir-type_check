@@ -168,7 +168,8 @@ defmodule TypeCheck.Macros do
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
       @before_compile TypeCheck.Macros
 
-      Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options)))
+      default_options = Application.compile_env(Application.get_application(__MODULE__), :type_check, [])
+      Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options) ++ default_options))
 
       Module.put_attribute(__MODULE__, :autogen_typespec, true)
     end
