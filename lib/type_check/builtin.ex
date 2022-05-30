@@ -712,34 +712,30 @@ defmodule TypeCheck.Builtin do
   end
   def one_of(list_of_possibilities)
 
-  # unwrap nested unions
-  def one_of([left = %{__struct__: TypeCheck.Builtin.OneOf}, right = %{__struct__: TypeCheck.Builtin.OneOf}]) do
-    one_of(left.choices ++ right.choices)
-  end
-
-  def one_of([left = %{__struct__: TypeCheck.Builtin.OneOf}, right]) do
-    one_of(left.choices ++ [right])
-  end
-
-  def one_of([left, right = %{__struct__: TypeCheck.Builtin.OneOf}]) do
-    one_of([left] ++ right.choices)
-  end
-
   # Fix double expansion
   def one_of(list = %{__struct__: TypeCheck.Builtin.FixedList}) do
     one_of(list.element_types)
   end
 
   def one_of(types) when is_list(types) do
+    # unwrap nested unions
+    types =
+      types
+      |> Enum.flat_map(fn
+        %{__struct__: TypeCheck.Builtin.OneOf, choices: types} -> types
+        type -> [type]
+      end)
+      |> Enum.uniq()
+
     cond do
-      types |> Enum.uniq |> length == 1 ->
+      length(types) == 1 ->
         List.first(types)
-      types |> Enum.any?(&match?(%{__struct__: TypeCheck.Builtin.Any}, &1)) ->
+
+      Enum.any?(types, &match?(%{__struct__: TypeCheck.Builtin.Any}, &1)) ->
         any()
+
       true ->
-        # %TypeCheck.Builtin.OneOf{choices: types}
-        build_struct(TypeCheck.Builtin.OneOf)
-        |> Map.put(:choices, types)
+        build_struct(TypeCheck.Builtin.OneOf) |> Map.put(:choices, types)
     end
   end
 
