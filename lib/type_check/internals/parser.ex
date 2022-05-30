@@ -11,10 +11,15 @@ defmodule TypeCheck.Internals.Parser do
     @moduledoc """
     Container for context information of convert/2.
     """
-    defstruct [:default, :vars]
-    @type t :: %Context{default: TypeCheck.Type.t(), vars: %{String.t() => TypeCheck.Type.t()}}
+    defstruct [:default, :vars, :module]
 
-    def default(), do: %__MODULE__{default: B.any(), vars: %{}}
+    @type t :: %Context{
+            default: TypeCheck.Type.t(),
+            vars: %{String.t() => TypeCheck.Type.t()},
+            module: module()
+          }
+
+    def default(), do: %__MODULE__{default: B.any(), vars: %{}, module: nil}
   end
 
   @opaque raw :: {atom | nil, list, list | :any}
@@ -163,8 +168,18 @@ defmodule TypeCheck.Internals.Parser do
   def convert({:integer, _, val}, _), do: B.literal(val)
   def convert({:ann_type, _, [_var, t]}, ctx), do: convert(t, ctx)
   def convert({:var, _, name}, ctx), do: Map.get(ctx.vars, name, ctx.default)
+  def convert({:user_type, _, _}, ctx = %{module: nil}), do: ctx.default
 
-  def convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}, ctx) do
+  def convert({:user_type, _, type, vars}, ctx),
+    do: convert_remote_type(ctx.module, type, vars, ctx)
+
+  def convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}, ctx),
+    do: convert_remote_type(module, type, vars, ctx)
+
+  def convert(_, ctx), do: ctx.default
+
+  @spec convert_remote_type(module(), atom(), [raw], Context.t()) :: TypeCheck.Type.t()
+  defp convert_remote_type(module, type, vars, ctx) do
     case fetch_type(module, type, length(vars)) do
       {:ok, spec, var_names} ->
         # convert values from raw spec to type_check types
@@ -178,8 +193,6 @@ defmodule TypeCheck.Internals.Parser do
         ctx.default
     end
   end
-
-  def convert(_, ctx), do: ctx.default
 
   @spec convert_type(atom() | nil, list() | :any, Context.t()) :: TypeCheck.Type.t()
   # basic types

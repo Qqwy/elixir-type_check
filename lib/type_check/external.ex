@@ -87,7 +87,7 @@ defmodule TypeCheck.External do
       #TypeCheck.Type< list({atom(), number()}) >
       iex> {:ok, type} = fetch_type(Range, :t, [integer(), integer()])
       iex> type
-      #TypeCheck.Type< %Range{first: integer(), last: integer(), step: any()} >
+      #TypeCheck.Type< %Range{first: integer(), last: integer(), step: positive_integer() | neg_integer()} >
 
   Fetching non-existent type causes an error:
 
@@ -102,7 +102,7 @@ defmodule TypeCheck.External do
     case Parser.fetch_type(module, type, arity) do
       {:ok, type, var_names} ->
         vars = Enum.zip(var_names, var_types) |> Map.new()
-        ctx = %{Parser.Context.default() | vars: vars}
+        ctx = %{Parser.Context.default() | vars: vars, module: module}
         {:ok, Parser.convert(type, ctx)}
 
       {:error, err} ->
