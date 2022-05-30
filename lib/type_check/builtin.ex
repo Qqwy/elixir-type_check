@@ -730,13 +730,16 @@ defmodule TypeCheck.Builtin do
     one_of(list.element_types)
   end
 
-  def one_of(list_of_possibilities) when is_list(list_of_possibilities) do
-    if list_of_possibilities |> Enum.uniq |> length == 1 do
-      List.first(list_of_possibilities)
-    else
-      # %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
-      build_struct(TypeCheck.Builtin.OneOf)
-      |> Map.put(:choices, list_of_possibilities)
+  def one_of(types) when is_list(types) do
+    cond do
+      types |> Enum.uniq |> length == 1 ->
+        List.first(types)
+      types |> Enum.any?(&match?(%{__struct__: TypeCheck.Builtin.Any}, &1)) ->
+        any()
+      true ->
+        # %TypeCheck.Builtin.OneOf{choices: types}
+        build_struct(TypeCheck.Builtin.OneOf)
+        |> Map.put(:choices, types)
     end
   end
 
