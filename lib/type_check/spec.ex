@@ -1,4 +1,6 @@
 defmodule TypeCheck.Spec do
+  @dialyzer :no_opaque
+
   defstruct [
     :name,
     :param_types,
