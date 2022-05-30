@@ -19,7 +19,7 @@ defmodule TypeCheck.Builtin.NamedTypeTest do
     import ExUnit.CaptureIO
     capture_io(:stderr, fn ->
     assert_raise(CompileError,
-      "lib/type_check/spec.ex:28: undefined function hidden/0 (expected TypeCheck.Builtin.NamedTypeTest.BadExample to define such a function or for it to be imported, but none are available)",
+      ~r"lib/type_check/spec.ex:28: undefined function hidden/0",
       fn ->
       defmodule BadExample do
         use TypeCheck
