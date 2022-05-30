@@ -26,9 +26,15 @@ defmodule TypeCheck.Internals.Parser do
   @spec fetch_spec(module() | binary() | list(), atom(), arity()) ::
           {:error, String.t()} | {:ok, [raw]}
   def fetch_spec(module, function, arity) when is_atom(module) or is_binary(module) do
-    case Code.Typespec.fetch_specs(module) do
-      {:ok, specs} -> fetch_spec(specs, function, arity)
-      :error -> {:error, "cannot fetch specs from the module"}
+    with {:module, _} <- ensure_loaded(module),
+         {:ok, specs} <- Code.Typespec.fetch_specs(module) do
+      fetch_spec(specs, function, arity)
+    else
+      {:error, reason} when is_atom(reason) ->
+        {:error, "could not load module #{inspect(module)} due to reason #{inspect(reason)}"}
+
+      :error ->
+        {:error, "cannot fetch specs from the module"}
     end
   end
 
@@ -69,9 +75,15 @@ defmodule TypeCheck.Internals.Parser do
   """
   @spec fetch_types(module() | binary() | list(), atom()) :: {:error, String.t()} | {:ok, [raw]}
   def fetch_types(module, type) when is_atom(module) or is_binary(module) do
-    case Code.Typespec.fetch_types(module) do
-      {:ok, types} -> fetch_types(types, type)
-      :error -> {:error, "cannot fetch types from the module"}
+    with {:module, _} <- ensure_loaded(module),
+         {:ok, types} <- Code.Typespec.fetch_types(module) do
+      fetch_types(types, type)
+    else
+      {:error, reason} when is_atom(reason) ->
+        {:error, "could not load module #{inspect(module)} due to reason #{inspect(reason)}"}
+
+      :error ->
+        {:error, "cannot fetch types from the module"}
     end
   end
 
@@ -79,6 +91,11 @@ defmodule TypeCheck.Internals.Parser do
     filtered = types |> Enum.filter(fn {_, {name, _, _}} -> name == type end)
     {:ok, filtered}
   end
+
+  # A safe version of `Code.ensure_loaded/1` that ignores raw bytecode.
+  @spec ensure_loaded(module() | binary()) :: {:module, module()} | {:error, atom()}
+  defp ensure_loaded(module) when is_atom(module), do: Code.ensure_loaded(module)
+  defp ensure_loaded(_), do: {:module, :bytecode}
 
   @doc """
   Extract module name, function name, and arguments from quoted expression of a function call.
@@ -113,6 +130,7 @@ defmodule TypeCheck.Internals.Parser do
 
   def ast_to_mfa(_), do: {:error, "not a function call"}
 
+  @spec elixir_module(module()) :: module()
   defp elixir_module(module), do: String.to_atom("Elixir.#{module}")
 
   @doc """
