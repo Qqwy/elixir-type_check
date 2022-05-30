@@ -187,7 +187,7 @@ defmodule TypeCheck.Internals.Parser do
         # add new key-value pairs into existing vars
         vars = Enum.zip(var_names, vars) |> Map.new()
         vars = Map.merge(ctx.vars, vars)
-        convert(spec, %{ctx | vars: vars})
+        convert(spec, %{ctx | vars: vars, module: module})
 
       {:error, _} ->
         ctx.default

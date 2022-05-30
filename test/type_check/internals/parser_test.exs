@@ -68,6 +68,11 @@ defmodule TypeCheck.Internals.ParserTest do
       {Kernel, :get_in, 2, [B.any(), B.nonempty_list(B.term())], B.term()},
       {Kernel, :max, 2, [B.term(), B.term()], B.one_of([B.term(), B.term()])},
       {Enum, :all?, 2, [B.any(), B.function([B.any()], B.as_boolean(B.term()))], B.boolean()},
+      {Enum, :slice, 2,
+       [
+         B.any(),
+         B.fixed_map(%{__struct__: B.literal(Range), first: B.any(), last: B.any(), step: B.any()})
+       ], B.list()},
       {Macro, :var, 2, [B.atom(), B.atom()], B.fixed_tuple([B.atom(), B.list(B.any()), B.atom()])}
     ]
 
@@ -413,18 +418,18 @@ defmodule TypeCheck.Internals.ParserTest do
 
       exp =
         B.fixed_map(
-          calendar: B.any(),
-          year: B.any(),
-          month: B.any(),
-          day: B.any(),
-          hour: B.any(),
-          minute: B.any(),
-          second: B.any(),
-          microsecond: B.any(),
-          time_zone: B.any(),
-          zone_abbr: B.any(),
-          utc_offset: B.any(),
-          std_offset: B.any()
+          calendar: B.atom(),
+          year: B.integer(),
+          month: B.pos_integer(),
+          day: B.pos_integer(),
+          hour: B.non_neg_integer(),
+          minute: B.non_neg_integer(),
+          second: B.non_neg_integer(),
+          microsecond: B.fixed_tuple([B.non_neg_integer(), B.non_neg_integer()]),
+          time_zone: B.binary(),
+          zone_abbr: B.binary(),
+          utc_offset: B.integer(),
+          std_offset: B.integer()
         )
 
       assert convert_spec(bytecode) == exp
