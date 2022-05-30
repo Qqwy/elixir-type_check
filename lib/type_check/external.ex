@@ -18,14 +18,14 @@ defmodule TypeCheck.External do
   ## Examples
 
       iex> import TypeCheck.External
-      iex> ensure_types!(Kernel.abs(-13))
+      iex> enforce_spec!(Kernel.abs(-13))
       13
-      iex> ensure_types!(Kernel.abs("hi"))
+      iex> enforce_spec!(Kernel.abs("hi"))
       ** (TypeCheck.TypeError) At lib/type_check.ex:279:
           `"hi"` is not a number.
   """
-  @spec ensure_types!(Macro.t()) :: Macro.t() | no_return
-  defmacro ensure_types!(expr) do
+  @spec enforce_spec!(Macro.t()) :: Macro.t() | no_return
+  defmacro enforce_spec!(expr) do
     with {module, function, args} <- Parser.ast_to_mfa(expr),
          {:ok, spec} <- Parser.fetch_spec(module, function, length(args)) do
       type = spec |> Parser.convert() |> Macro.escape()
@@ -50,7 +50,7 @@ defmodule TypeCheck.External do
       iex> {:ok, type} = fetch_spec(Atom, :to_string, 1)
       iex> type
       #TypeCheck.Type< (atom() -> binary()) >
-      iex> TypeCheck.fetch_spec(Kernel, :non_existent, 1)
+      iex> fetch_spec(Kernel, :non_existent, 1)
       {:error, "cannot find spec for function"}
   """
   @spec fetch_spec(module(), atom(), arity()) :: TypeCheck.Type.t()
@@ -64,20 +64,49 @@ defmodule TypeCheck.External do
   @doc """
   Extract TypeCheck type from the regular Elixir (or Erlang) `@type` with the given name.
 
+  To fetch a generic type, you must pass a list of types to be placed instead of
+  generic variables. If you don't know these types, just punch in `any()`
+  as many times as you need. For example, to fetch the type of `Range.t(left, right)`,
+  you need to pass `[number(), number()]` or `[any(), any()]`.
+
   ## Examples
 
+  Fetching a regular type:
+
       iex> import TypeCheck.External
-      iex> {:ok, type} = fetch_type(String, :t, 0)
+      iex> {:ok, type} = fetch_type(String, :t)
       iex> type
       #TypeCheck.Type< binary() >
-      iex> fetch_type(String, :non_existent, 0)
+
+  Fetching a generic type:
+
+      iex> import TypeCheck.External
+      iex> import TypeCheck.Builtin
+      iex> {:ok, type} = fetch_type(:elixir, :keyword, [number()])
+      iex> type
+      #TypeCheck.Type< list({atom(), number()}) >
+      iex> {:ok, type} = fetch_type(Range, :t, [integer(), integer()])
+      iex> type
+      #TypeCheck.Type< %Range{first: integer(), last: integer(), step: any()} >
+
+  Fetching non-existent type causes an error:
+
+      iex> import TypeCheck.External
+      iex> fetch_type(String, :non_existent)
       {:error, "cannot find type with the given name"}
   """
-  @spec fetch_type(module(), atom(), arity()) :: TypeCheck.Type.t()
-  def fetch_type(module, type, arity) do
+  @spec fetch_type(module(), atom(), [TypeCheck.Type.t()]) :: TypeCheck.Type.t()
+  def fetch_type(module, type, var_types \\ []) do
+    arity = length(var_types)
+
     case Parser.fetch_type(module, type, arity) do
-      {:ok, type, _} -> {:ok, Parser.convert(type)}
-      {:error, err} -> {:error, err}
+      {:ok, type, var_names} ->
+        vars = Enum.zip(var_names, var_types) |> Map.new()
+        ctx = %{Parser.Context.default() | vars: vars}
+        {:ok, Parser.convert(type, ctx)}
+
+      {:error, err} ->
+        {:error, err}
     end
   end
 end

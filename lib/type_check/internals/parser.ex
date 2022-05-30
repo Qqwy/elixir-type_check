@@ -13,6 +13,8 @@ defmodule TypeCheck.Internals.Parser do
     """
     defstruct [:default, :vars]
     @type t :: %Context{default: TypeCheck.Type.t(), vars: %{String.t() => TypeCheck.Type.t()}}
+
+    def default(), do: %__MODULE__{default: B.any(), vars: %{}}
   end
 
   @opaque raw :: {atom | nil, list, list | :any}
@@ -49,7 +51,7 @@ defmodule TypeCheck.Internals.Parser do
   Fetch raw type definition for the given type with the given number of generic variables.
   """
   @spec fetch_type(module() | binary(), atom(), arity()) ::
-          {:error, String.t()} | {:ok, raw, [raw]}
+          {:error, String.t()} | {:ok, raw, [atom()]}
   def fetch_type(module, type, arity) do
     case fetch_types(module, type) do
       {:ok, []} -> {:error, "cannot find type with the given name"}
@@ -58,11 +60,15 @@ defmodule TypeCheck.Internals.Parser do
     end
   end
 
-  @spec fetch_type(list(), arity()) :: {:error, String.t()} | {:ok, raw, [raw]}
+  @spec fetch_type(list(), arity()) :: {:error, String.t()} | {:ok, raw, [atom()]}
   defp fetch_type(types, arity) when is_list(types) do
     case types |> Enum.find(fn {_, {_, _, vars}} -> length(vars) == arity end) do
-      {_, {_, spec, vars}} -> {:ok, spec, vars}
-      nil -> {:error, "cannot find type with the given arity"}
+      {_, {_, spec, vars}} ->
+        var_names = Enum.map(vars, fn {:var, _, name} -> name end)
+        {:ok, spec, var_names}
+
+      nil ->
+        {:error, "cannot find type with the given arity"}
     end
   end
 
@@ -73,7 +79,7 @@ defmodule TypeCheck.Internals.Parser do
   It is possible for list to contain multiple types if there are multiple type
   definitions with the same name but different amount of generic arguments.
   """
-  @spec fetch_types(module() | binary() | list(), atom()) :: {:error, String.t()} | {:ok, [raw]}
+  @spec fetch_types(module() | binary() | [raw], atom()) :: {:error, String.t()} | {:ok, [raw]}
   def fetch_types(module, type) when is_atom(module) or is_binary(module) do
     with {:module, _} <- ensure_loaded(module),
          {:ok, types} <- Code.Typespec.fetch_types(module) do
@@ -145,26 +151,24 @@ defmodule TypeCheck.Internals.Parser do
       iex> ^expected = convert(spec)
   """
   @spec convert(raw | [raw]) :: TypeCheck.Type.t()
-  def convert(type), do: convert(type, %Context{default: B.any(), vars: %{}})
+  def convert(type), do: convert(type, Context.default())
 
   @spec convert(raw | [raw], Context.t()) :: TypeCheck.Type.t()
 
-  defp convert(types, ctx) when is_list(types),
+  def convert(types, ctx) when is_list(types),
     do: types |> Enum.map(&convert(&1, ctx)) |> B.one_of()
 
-  defp convert({:type, _, name, vars}, ctx), do: convert_type(name, vars, ctx)
-  defp convert({:atom, _, val}, _), do: B.literal(val)
-  defp convert({:integer, _, val}, _), do: B.literal(val)
-  defp convert({:ann_type, _, [_var, t]}, ctx), do: convert(t, ctx)
-  defp convert({:var, _, name}, ctx), do: Map.get(ctx.vars, name, ctx.default)
+  def convert({:type, _, name, vars}, ctx), do: convert_type(name, vars, ctx)
+  def convert({:atom, _, val}, _), do: B.literal(val)
+  def convert({:integer, _, val}, _), do: B.literal(val)
+  def convert({:ann_type, _, [_var, t]}, ctx), do: convert(t, ctx)
+  def convert({:var, _, name}, ctx), do: Map.get(ctx.vars, name, ctx.default)
 
-  defp convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}, ctx) do
+  def convert({:remote_type, _, [{:atom, _, module}, {:atom, _, type}, vars]}, ctx) do
     case fetch_type(module, type, length(vars)) do
       {:ok, spec, var_names} ->
-        # extract names of vars from raw spec
-        var_names = var_names |> Enum.map(fn {:var, _, name} -> name end)
         # convert values from raw spec to type_check types
-        vars = vars |> Enum.map(&convert(&1, ctx))
+        vars = Enum.map(vars, &convert(&1, ctx))
         # add new key-value pairs into existing vars
         vars = Enum.zip(var_names, vars) |> Map.new()
         vars = Map.merge(ctx.vars, vars)
@@ -175,7 +179,7 @@ defmodule TypeCheck.Internals.Parser do
     end
   end
 
-  defp convert(_, ctx), do: ctx.default
+  def convert(_, ctx), do: ctx.default
 
   @spec convert_type(atom() | nil, list() | :any, Context.t()) :: TypeCheck.Type.t()
   # basic types
