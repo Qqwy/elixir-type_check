@@ -597,7 +597,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Tuple`
   """
   if_recompiling? do
-    @spec fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
+    @spec! fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
   end
   def fixed_tuple(list_of_element_types)
   # prevents double-expanding
@@ -691,7 +691,7 @@ defmodule TypeCheck.Builtin do
   (and represented that way in Elixir's builtin Typespecs).
   """
   if_recompiling? do
-    @spec! one_of(left :: TypeCheck.Type.t(), right :: TypeCheck.Type.t()) :: TypeCheck.Builtin.OneOf.t()
+    @spec! one_of(left :: TypeCheck.Type.t(), right :: TypeCheck.Type.t()) :: TypeCheck.Type.t()
   end
   def one_of(left, right), do: one_of([left, right])
 
@@ -708,7 +708,7 @@ defmodule TypeCheck.Builtin do
   c.f. `one_of/2`.
   """
   if_recompiling? do
-    @spec one_of(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.OneOf.t()
+    @spec! one_of(types :: list(TypeCheck.Type.t())) :: TypeCheck.Type.t()
   end
   def one_of(list_of_possibilities)
 
@@ -978,7 +978,7 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `[any()]` instead.
   """
   if_recompiling? do
-    @spec fixed_list(element_types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedList.t()
+    @spec! fixed_list(element_types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedList.t()
   end
 
   def fixed_list(element_types)
