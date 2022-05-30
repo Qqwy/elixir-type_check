@@ -16,8 +16,8 @@ defmodule TypeCheck.Builtin.NamedType do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
 
-      if s.type_kind == :opaque do
-        # Do not expose binding on opaque types
+      if !s.local do
+        # Do not expose bindings across non-local types
         quote generated: true, location: :keep do
           inner_res = unquote(inner_check)
           case inner_res do
