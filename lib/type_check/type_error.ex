@@ -53,7 +53,7 @@ defmodule TypeCheck.TypeError do
           {type_checked_against(), check_name(), extra_information(), problematic_value()}
 
   @impl true
-  # @spec exception({problem_tuple(), any()} | problem_tuple()) :: t()
+  @dialyzer {:nowarn_function, [exception: 1]}
   def exception({problem_tuple, location}) do
     message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple, location)
 
@@ -61,11 +61,6 @@ defmodule TypeCheck.TypeError do
   end
 
   def exception(problem_tuple) do
-    case problem_tuple do
-      {_, _, _, _} ->
-        exception({problem_tuple, []})
-      other ->
-        raise "Cannot make a TypeCheck.TypeError exception from #{inspect(other)}"
-    end
+    exception({problem_tuple, []})
   end
 end
