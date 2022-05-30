@@ -159,6 +159,9 @@ defmodule TypeCheck.Macros do
   ```
   """
   defmacro __using__(options) do
+    otp_app = Application.get_application(__CALLER__.module)
+    IO.inspect(otp_app, label: :app)
+
     quote generated: true, location: :keep do
       import Kernel, except: [@: 1]
       import TypeCheck.Macros, only: [type!: 1, typep!: 1, opaque!: 1, spec!: 1, @: 1]
@@ -168,7 +171,7 @@ defmodule TypeCheck.Macros do
       Module.register_attribute(__MODULE__, TypeCheck.Specs, accumulate: true)
       @before_compile TypeCheck.Macros
 
-      default_options = Application.compile_env(Application.get_application(__MODULE__), :type_check, [])
+      default_options = Application.compile_env(unquote(otp_app), :type_check, []) # first parameter _needs_ to be an atom for the macro to work on Elixir < v.1.13
       Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options) ++ default_options))
 
       Module.put_attribute(__MODULE__, :autogen_typespec, true)
