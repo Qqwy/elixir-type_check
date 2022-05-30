@@ -1074,13 +1074,14 @@ defmodule TypeCheck.Builtin do
   if_recompiling? do
     # @spec! named_type(name :: atom() | String.t(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
   end
-  def named_type(name, type) do
+  def named_type(name, type, type_kind \\ :type) do
     TypeCheck.Type.ensure_type!(type)
 
     build_struct(TypeCheck.Builtin.NamedType)
     |> Map.put(:name, name)
     |> Map.put(:type, type)
     |> Map.put(:local, true)
+    |> Map.put(:type_kind, type_kind)
   end
 
   @doc typekind: :extension
