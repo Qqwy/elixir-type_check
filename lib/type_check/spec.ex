@@ -1,5 +1,4 @@
 defmodule TypeCheck.Spec do
-  @dialyzer :no_opaque
 
   defstruct [
     :name,
@@ -7,6 +6,12 @@ defmodule TypeCheck.Spec do
     :return_type,
     :location
   ]
+
+  import TypeCheck.Internals.Bootstrap.Macros
+  if_recompiling? do
+    @type! t() :: %__MODULE__{name: String.t(), param_types: list(TypeCheck.Type.t()), return_type: TypeCheck.Type.t(), location: [] | list({:file, binary()} | {:line, non_neg_integer()})}
+    @type! problem_tuple :: {t(), :no_match, %{}, any()}
+  end
 
   defp spec_fun_name(function, arity) do
     :"__TypeCheck spec for '#{function}/#{arity}'__"
