@@ -10,9 +10,10 @@ defmodule TypeCheck.Spec do
   import TypeCheck.Internals.Bootstrap.Macros
   if_recompiling? do
     use TypeCheck
-    @type! t() :: %__MODULE__{name: binary(), param_types: list(TypeCheck.Type.t()), return_type: TypeCheck.Type.t(), location: [] | list({:file, binary()} | {:line, non_neg_integer()})}
-    @type! problem_tuple :: {t(), :param_error, %{index: non_neg_integer(), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, any()}
-    | {t(), :return_error, %{arguments: list(term()), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, any()}
+    alias TypeCheck.DefaultOverrides.String
+    @type! t() :: %__MODULE__{name: String.t(), param_types: list(TypeCheck.Type.t()), return_type: TypeCheck.Type.t(), location: [] | list({:file, String.t()} | {:line, non_neg_integer()})}
+    @type! problem_tuple :: {t(), :param_error, %{index: non_neg_integer(), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
+    | {t(), :return_error, %{arguments: list(term()), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
   end
 
   defp spec_fun_name(function, arity) do
