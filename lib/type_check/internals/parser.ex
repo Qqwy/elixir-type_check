@@ -5,7 +5,9 @@ defmodule TypeCheck.Internals.Parser do
   alias TypeCheck.Builtin, as: B
 
   defmodule Context do
-    @moduledoc """
+    @moduledoc false
+
+    @doc """
     Container for context information of convert/2.
 
     Params:

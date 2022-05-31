@@ -4,8 +4,11 @@ defmodule TypeCheck.External do
 
   ## Experimental
 
-  This module is experimental. Use it at your own risk only in a test-covered code.
-  If it explodes, please, [open an issue](https://github.com/Qqwy/elixir-type_check/issues).
+  This module is experimental.
+  The API of the various functions in this module are not yet stable;
+  they might change slightly in future minor versions of the library.
+
+  If you encounter a problem, please, [open an issue](https://github.com/Qqwy/elixir-type_check/issues).
 
   """
   alias TypeCheck.Internals.Parser
