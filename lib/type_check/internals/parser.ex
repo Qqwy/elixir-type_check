@@ -1,9 +1,6 @@
 defmodule TypeCheck.Internals.Parser do
-  @moduledoc """
-  The parser for the default Elixir/Erlang `@spec`.
-
-  Experimental!
-  """
+  @moduledoc false
+  # The parser for the default Elixir/Erlang `@spec`. Experimental!
 
   alias TypeCheck.Builtin, as: B
 

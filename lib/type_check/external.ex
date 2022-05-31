@@ -135,14 +135,9 @@ defmodule TypeCheck.External do
   """
   @spec apply!(TypeCheck.Type.t(), module(), atom(), list()) :: any()
   def apply!(type, module, function, args) do
-    {ptypes, rtype} = split_func_type(type)
-
-    with :ok <- check_params(args, ptypes),
-         result <- Kernel.apply(module, function, args),
-         _ <- TypeCheck.dynamic_conforms!(result, rtype) do
-      result
-    else
-      {:error, reason} -> raise reason
+    case apply(type, module, function, args) do
+      {:ok, result} -> result
+      {:error, exception} -> raise exception
     end
   end
 
