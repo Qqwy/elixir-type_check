@@ -262,7 +262,7 @@ defmodule TypeCheck do
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At lib/type_check.ex:281:
+      "At (for doctest at) lib/type_check.ex:260:
           `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
@@ -278,7 +278,7 @@ defmodule TypeCheck do
     case Code.eval_quoted(check_code, value: value) do
       {{:ok, _, altered_value}, _} -> {:ok, altered_value}
       {{:error, problem}, _} ->
-        {:current_stacktrace, [_ , caller | _]} = Process.info(self(), :current_stacktrace)
+        {:current_stacktrace, [_ , _, caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)
         location = update_in(location[:file], &to_string/1)
         exception = TypeCheck.TypeError.exception({problem, location})
@@ -315,7 +315,7 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:281:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:323:
           `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
