@@ -194,11 +194,12 @@ Details:
 - [x] Overrides for more builtin remote types
 - [x] Support for maps with mixed `required(type)` and `optional(type)` syntaxes.
 - [x] Configurable setting to turn checks on/off at compile-time, on a per-OTP-app basis (so you have control over your dependencies) as well as your individual modules.
+- [x] Hide named types from opaque types.
+- [x] A way to define structs and their field types at the same time.
+- [x] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
 
 ### Pre-stable
 
-- [ ] Hide named types from opaque types.
-- [ ] Finalize formatter specification and make a generator for this so that people can easily test their own formatters.
 
 ### Longer-term future ideas
 
@@ -208,7 +209,14 @@ Details:
 - 0.12.0 - 
   - Additions:
     - The default options used are now fetched from the application configuration. This means that you can configure a default for your app as well as for each of your dependencies(!) by adding `config :app_name, :type_check [...]` to your configuration file(s). (c.f. #61)
+    - `TypeCheck.External` module, with functions to work with typespecs in modules outside of your control. Thank you very much, @orsinium! (c.f. #113)
+      - `fetch_spec` to build a TypeCheck type from any function that has a `@spec`.
+      - `fetch_type` to build a TypeCheck type from any `@type`.
+      - `enforce_spec!` to wrap a call to any function that has a `@spec` with a runtime type-check on the input parameters and return value.
+      - `apply` and `apply!` to wrap a call to any function with the function spec type that you give it.
+    - `TypeCheck.Defstruct.defstruct!`, a way to combine `defstruct`, `@enforce_keys` and the creation of the struct's type, reducing boilerplate and the possibility of mistakes.
   - Fixes:
+    - Long-standing issue where Dialyzer would sometimes complain in apps using TypeCheck is resolved. (c.f. #95)
     - Creation of the new `maybe_nonempty_list` type will no longer get stuck in an infinite loop on creation. (c.f. #120)
 - 0.11.1 -
 - 0.11.0 - 
