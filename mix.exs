@@ -36,7 +36,7 @@ defmodule TypeCheck.MixProject do
         ]
       _ ->
         [
-          extra_applications: [:logger, :iex, :stream_data, :credo, :mint]
+          extra_applications: [:logger, :iex, :stream_data, :credo]
         ]
     end
   end
