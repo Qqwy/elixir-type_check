@@ -156,7 +156,7 @@ defmodule TypeCheck.Spec do
 
       Kernel.unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
 
-      # The result is checed in a separate function
+      # The result is checked in a separate function
       # This ensures we can convince Dialyzer to skip it. c.f. #85
       @compile {:inline, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
       @dialyzer {:nowarn_function, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}

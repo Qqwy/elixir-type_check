@@ -54,8 +54,6 @@ defmodule TypeCheck.TypeError do
 
   @impl true
 
-  @dialyzer {:nowarn_function, [exception: 1]}
-  @dialyzer :no_opaque
   def exception({problem_tuple, location}) do
     message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple, location)
 
