@@ -21,7 +21,7 @@ defmodule TypeCheck.Builtin.PosInteger do
 
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(_, opts) do
-      "positive_integer()"
+      "pos_integer()"
       |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end

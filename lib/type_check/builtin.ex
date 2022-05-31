@@ -597,7 +597,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Tuple`
   """
   if_recompiling? do
-    @spec fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
+    @spec! fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
   end
   def fixed_tuple(list_of_element_types)
   # prevents double-expanding
@@ -691,27 +691,9 @@ defmodule TypeCheck.Builtin do
   (and represented that way in Elixir's builtin Typespecs).
   """
   if_recompiling? do
-    @spec! one_of(left :: TypeCheck.Type.t(), right :: TypeCheck.Type.t()) :: TypeCheck.Builtin.OneOf.t()
+    @spec! one_of(left :: TypeCheck.Type.t(), right :: TypeCheck.Type.t()) :: TypeCheck.Type.t()
   end
-  def one_of(left, right)
-
-  # Prevents nesting
-  # for nicer error messages on failure.
-  def one_of(left = %{__struct__: TypeCheck.Builtin.OneOf}, right = %{__struct__: TypeCheck.Builtin.OneOf}) do
-    one_of(left.choices ++ right.choices)
-  end
-
-  def one_of(left = %{__struct__: TypeCheck.Builtin.OneOf}, right) do
-    one_of(left.choices ++ [right])
-  end
-
-  def one_of(left, right = %{__struct__: TypeCheck.Builtin.OneOf}) do
-    one_of([left] ++ right.choices)
-  end
-
-  def one_of(left, right) do
-    one_of([left, right])
-  end
+  def one_of(left, right), do: one_of([left, right])
 
   @doc typekind: :builtin
   @doc """
@@ -726,7 +708,7 @@ defmodule TypeCheck.Builtin do
   c.f. `one_of/2`.
   """
   if_recompiling? do
-    @spec one_of(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.OneOf.t()
+    @spec! one_of(types :: list(TypeCheck.Type.t())) :: TypeCheck.Type.t()
   end
   def one_of(list_of_possibilities)
 
@@ -735,10 +717,26 @@ defmodule TypeCheck.Builtin do
     one_of(list.element_types)
   end
 
-  def one_of(list_of_possibilities) when is_list(list_of_possibilities) do
-    # %TypeCheck.Builtin.OneOf{choices: list_of_possibilities}
-    build_struct(TypeCheck.Builtin.OneOf)
-    |> Map.put(:choices, list_of_possibilities)
+  def one_of(types) when is_list(types) do
+    # unwrap nested unions
+    types =
+      types
+      |> Enum.flat_map(fn
+        %{__struct__: TypeCheck.Builtin.OneOf, choices: types} -> types
+        type -> [type]
+      end)
+      |> Enum.uniq()
+
+    cond do
+      length(types) == 1 ->
+        List.first(types)
+
+      Enum.any?(types, &match?(%{__struct__: TypeCheck.Builtin.Any}, &1)) ->
+        any()
+
+      true ->
+        build_struct(TypeCheck.Builtin.OneOf) |> Map.put(:choices, types)
+    end
   end
 
   @doc typekind: :builtin
@@ -979,7 +977,7 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `[any()]` instead.
   """
   if_recompiling? do
-    @spec fixed_list(element_types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedList.t()
+    @spec! fixed_list(element_types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedList.t()
   end
 
   def fixed_list(element_types)

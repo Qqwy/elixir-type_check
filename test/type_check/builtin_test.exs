@@ -153,4 +153,23 @@ defmodule TypeCheck.BuiltinTest do
     assert {:ok, _} = TypeCheck.conforms(none(), any())
     assert {:error, _} = TypeCheck.conforms(any(), none())
   end
+
+  describe "one_of is simplified" do
+    test "single type" do
+      assert one_of([integer()]) == integer()
+    end
+
+    test "nested one_of" do
+      assert one_of([one_of([integer()]), one_of([atom()])]) == one_of(integer(), atom())
+    end
+
+    test "repeated type" do
+      assert one_of([integer(), integer(), integer()]) == integer()
+    end
+
+    test "nested one_of with another type" do
+      assert one_of([one_of([integer()]), atom()]) == one_of(integer(), atom())
+    end
+  end
+
 end
