@@ -72,7 +72,6 @@ defmodule TypeCheck.MixProject do
       {:benchee, "~> 1.0", only: :bench},
       {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:blocked, "~> 0.10.0", runtime: false}
     ]
   end
 
