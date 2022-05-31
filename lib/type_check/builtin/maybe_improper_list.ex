@@ -173,7 +173,7 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
-        require Blocked
+        # require Blocked
         # Blocked.by("https://github.com/whatyouhide/stream_data/issues/169", "StreamData.maybe_improper_list_of is incorrect") do
           element_gen =  TypeCheck.Protocols.ToStreamData.to_gen(s.element_type)
           terminator_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.terminator_type)
