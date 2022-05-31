@@ -1072,13 +1072,14 @@ defmodule TypeCheck.Builtin do
   if_recompiling? do
     # @spec! named_type(name :: atom() | String.t(), type :: TypeCheck.Type.t()) :: TypeCheck.Builtin.NamedType.t()
   end
-  def named_type(name, type) do
+  def named_type(name, type, type_kind \\ :type) do
     TypeCheck.Type.ensure_type!(type)
 
     build_struct(TypeCheck.Builtin.NamedType)
     |> Map.put(:name, name)
     |> Map.put(:type, type)
     |> Map.put(:local, true)
+    |> Map.put(:type_kind, type_kind)
   end
 
   @doc typekind: :extension
@@ -1351,7 +1352,7 @@ defmodule TypeCheck.Builtin do
         (unquote(Macro.var(:nonempty_maybe_improper_list, nil)) != [])
       end
 
-    guarded_by(named_type(:nonempty_maybe_improper_list, nonempty_maybe_improper_list(element_type, terminator_type)), guard)
+    guarded_by(named_type(:nonempty_maybe_improper_list, maybe_improper_list(element_type, terminator_type)), guard)
   end
 
   @doc typekind: :builtin
@@ -1363,11 +1364,16 @@ defmodule TypeCheck.Builtin do
   def nonempty_improper_list(element_type, terminator_type) do
     guard =
       quote do
-        (unquote(Macro.var(:nonempty_improper_list, nil)) != [])
+        Builtin.improper_list?(unquote(Macro.var(:nonempty_improper_list, nil)))
       end
 
-    guarded_by(named_type(:nonempty_improper_list, nonempty_maybe_improper_list(element_type, terminator_type)), guard)
+    guarded_by(named_type(:nonempty_improper_list, maybe_improper_list(element_type, terminator_type)), guard)
   end
+
+  @doc false
+  def improper_list?([]), do: false
+  def improper_list?([_head | tail]), do: improper_list?(tail)
+  def improper_list?(_terminator), do: true
 
   @doc """
   A potentially-improper list containing binaries,

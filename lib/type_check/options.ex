@@ -15,6 +15,22 @@ defmodule TypeCheck.Options do
 
   These options are module-specific and are read/used at compile-time.
 
+  ## Setting different options for different dependencies
+
+  Different default options can be set for each of the different dependencies,
+  by supplying the desired options in the configuration of that dependency under the `:type_check` key:
+
+  ```
+  config :your_dependency_name, :type_check, [
+    enable_runtime_checks: false
+    # etc.
+  ]
+  ```
+
+  Note that these values might (by design) be overridden by module-specific options
+  that might be specified at the location where the dependency calls `use TypeCheck`.
+
+
   ## The supported options in detail
 
   ### Overrides:

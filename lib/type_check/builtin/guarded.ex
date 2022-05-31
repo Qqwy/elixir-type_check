@@ -13,7 +13,11 @@ defmodule TypeCheck.Builtin.Guarded do
   @doc false
   def extract_names(type) do
     case type do
-      %TypeCheck.Builtin.NamedType{} ->
+      # Do not extract names across non-local types
+      %TypeCheck.Builtin.NamedType{local: false} ->
+        []
+
+      %TypeCheck.Builtin.NamedType{local: true} ->
         [type.name | extract_names(type.type)]
 
       %TypeCheck.Builtin.FixedList{} ->
