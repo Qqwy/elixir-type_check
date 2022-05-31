@@ -1,10 +1,20 @@
 defmodule TypeCheck.Spec do
+
   defstruct [
     :name,
     :param_types,
     :return_type,
     :location
   ]
+
+  import TypeCheck.Internals.Bootstrap.Macros
+  if_recompiling? do
+    use TypeCheck
+    alias TypeCheck.DefaultOverrides.String
+    @type! t() :: %__MODULE__{name: String.t(), param_types: list(TypeCheck.Type.t()), return_type: TypeCheck.Type.t(), location: [] | list({:file, String.t()} | {:line, non_neg_integer()})}
+    @type! problem_tuple :: {t(), :param_error, %{index: non_neg_integer(), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
+    | {t(), :return_error, %{arguments: list(term()), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
+  end
 
   defp spec_fun_name(function, arity) do
     :"__TypeCheck spec for '#{function}/#{arity}'__"
@@ -149,7 +159,7 @@ defmodule TypeCheck.Spec do
 
       Kernel.unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
 
-      # The result is checed in a separate function
+      # The result is checked in a separate function
       # This ensures we can convince Dialyzer to skip it. c.f. #85
       @compile {:inline, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
       @dialyzer {:nowarn_function, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}

@@ -142,7 +142,7 @@ defmodule TypeCheck.BuiltinTest do
         property "#{module}'s ToStreamData implementation conforms with its own type" do
           require TypeCheck.Type
           check all value <- TypeCheck.Protocols.ToStreamData.to_gen(TypeCheck.Type.build(unquote(type))) do
-            assert {:ok, _} = TypeCheck.conforms(value, unquote(type))
+            TypeCheck.conforms!(value, unquote(type))
           end
         end
       end

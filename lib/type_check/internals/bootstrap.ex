@@ -8,6 +8,7 @@ case Code.ensure_compiled(TypeCheck.Builtin.Any) do
   {:module, _} ->
 
     TypeCheck.Internals.Bootstrap.Macros.recompile(TypeCheck.Type, "lib/type_check/type.ex")
+    TypeCheck.Internals.Bootstrap.Macros.recompile(TypeCheck.Spec, "lib/type_check/spec.ex")
     TypeCheck.Internals.Bootstrap.Macros.recompile(TypeCheck.Options, "lib/type_check/options.ex")
     TypeCheck.Internals.Bootstrap.Macros.recompile(TypeCheck.Builtin, "lib/type_check/builtin.ex")
 end

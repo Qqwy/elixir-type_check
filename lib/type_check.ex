@@ -176,7 +176,9 @@ defmodule TypeCheck do
     res = quote generated: true, location: :keep do
       case unquote(check) do
         {:ok, bindings, altered_value} -> {:ok, altered_value}
-        {:error, problem} -> {:error, TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})}
+        {:error, problem} ->
+          exception = TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})
+          {:error, exception}
       end
     end
 
@@ -260,7 +262,7 @@ defmodule TypeCheck do
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At lib/type_check.ex:279:
+      "At lib/type_check.ex:281:
           `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
@@ -279,7 +281,8 @@ defmodule TypeCheck do
         {:current_stacktrace, [_ , caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)
         location = update_in(location[:file], &to_string/1)
-        {:error, TypeCheck.TypeError.exception({problem, location})}
+        exception = TypeCheck.TypeError.exception({problem, location})
+        {:error, exception}
     end
   end
 
@@ -312,7 +315,7 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:279:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:281:
           `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()

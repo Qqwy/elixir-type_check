@@ -54,6 +54,7 @@ defmodule TypeCheck.TypeError.Formatter do
          | TypeCheck.Builtin.Reference.problem_tuple()
          | TypeCheck.Builtin.Range.problem_tuple()
          | TypeCheck.Builtin.Tuple.problem_tuple()
+         | TypeCheck.Spec.problem_tuple()
 
   @doc """
   A formatter is expected to turn a `problem_tuple` into a string
