@@ -268,7 +268,7 @@ defmodule TypeCheck.Internals.Parser do
   defp convert_type(:nonempty_list, [], _), do: B.nonempty_list()
 
   defp convert_type(:nonempty_maybe_improper_list, [], _),
-    do: B.maybe_improper_list(B.any(), B.any())
+    do: B.nonempty_maybe_improper_list(B.any(), B.any())
 
   defp convert_type(:maybe_improper_list, [], _), do: B.maybe_improper_list(B.any(), B.any())
   defp convert_type(:tuple, :any, _), do: B.tuple()
@@ -297,7 +297,7 @@ defmodule TypeCheck.Internals.Parser do
   defp convert_type(:nonempty_list, [t], ctx), do: B.nonempty_list(convert(t, ctx))
 
   defp convert_type(:nonempty_maybe_improper_list, [elem, tail], ctx),
-    do: B.maybe_improper_list(convert(elem, ctx), convert(tail, ctx))
+    do: B.nonempty_maybe_improper_list(convert(elem, ctx), convert(tail, ctx))
 
   defp convert_type(:tuple, types, ctx),
     do: B.fixed_tuple(Enum.map(types, &convert(&1, ctx)))
