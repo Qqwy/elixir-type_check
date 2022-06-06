@@ -87,7 +87,7 @@ defmodule TypeCheck.MixProject do
       ],
       # main: "TypeCheck",
       groups_for_modules: [
-        Main: [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec, TypeCheck.Options, TypeCheck.ExUnit],
+        Main: [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec, TypeCheck.Options, TypeCheck.ExUnit, TypeCheck.External],
         "Errors and Formatting them": ~r"^TypeCheck.TypeError",
         "Property Testing": ~r"^TypeCheck.Type.StreamData",
         "Builtin Types": ~r"^TypeCheck.Builtin",
