@@ -214,11 +214,10 @@ Details:
       - `fetch_type` to build a TypeCheck type from any `@type`.
       - `enforce_spec!` to wrap a call to any function that has a `@spec` with a runtime type-check on the input parameters and return value.
       - `apply` and `apply!` to wrap a call to any function with the function spec type that you give it.
-    - `TypeCheck.Defstruct.defstruct!`, a way to combine `defstruct`, `@enforce_keys` and the creation of the struct's type, reducing boilerplate and the possibility of mistakes.
+    - `TypeCheck.Defstruct.defstruct!`, a way to combine `defstruct`, `@enforce_keys` and the creation of the struct's type, reducing boilerplate and the possibility of mistakes. (c.f. #118)
   - Fixes:
     - Long-standing issue where Dialyzer would sometimes complain in apps using TypeCheck is resolved. (c.f. #95)
     - Creation of the new `maybe_nonempty_list` type will no longer get stuck in an infinite loop on creation. (c.f. #120)
-- 0.11.1 -
 - 0.11.0 - 
   - Additions:
     - Support for fancier map syntaxes:
