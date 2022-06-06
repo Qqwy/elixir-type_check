@@ -24,7 +24,7 @@ defmodule TypeCheck.External do
       iex> enforce_spec!(Kernel.abs(-13))
       13
       iex> enforce_spec!(Kernel.abs("hi"))
-      ** (TypeCheck.TypeError) At lib/type_check/external.ex:175:
+      ** (TypeCheck.TypeError) At lib/type_check/external.ex:176:
           `"hi"` is not a number.
   """
   @spec enforce_spec!(Macro.t()) :: Macro.t() | no_return
@@ -132,7 +132,7 @@ defmodule TypeCheck.External do
       iex> TypeCheck.External.apply!(type, Kernel, :abs, [-13])
       13
       iex> TypeCheck.External.apply!(type, Kernel, :abs, ["hello"])
-      ** (TypeCheck.TypeError) At lib/type_check/external.ex:175:
+      ** (TypeCheck.TypeError) At lib/type_check/external.ex:176:
           `"hello"` is not a number.
 
   """
@@ -156,7 +156,7 @@ defmodule TypeCheck.External do
       {:ok, 13}
       iex> {:error, err} = TypeCheck.External.apply(type, Kernel, :abs, [false])
       iex> err.message
-      "At lib/type_check/external.ex:175:\\n    `false` is not a number."
+      "At lib/type_check/external.ex:176:\\n    `false` is not a number."
 
   """
   @spec apply(TypeCheck.Type.t(), module(), atom(), list()) ::
