@@ -145,7 +145,8 @@ defmodule TypeCheck.External do
   end
 
   @doc """
-  The same as `TypeCheck.External.apply/3` but ensures that values conform the given type.
+  Non-raising version of `TypeCheck.External.apply!/4`.
+  Ensures values conform to the given type.
 
   Returns `{:error, reason}` on failure, `{:ok, function_call_result}` otherwise.
 
