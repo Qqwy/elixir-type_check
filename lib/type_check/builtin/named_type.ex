@@ -1,8 +1,8 @@
 defmodule TypeCheck.Builtin.NamedType do
-  defstruct [:name, :type, :local, :type_kind]
+  defstruct [:name, :type, :local, :type_kind, :called_as]
 
   use TypeCheck
-  @type! t :: %TypeCheck.Builtin.NamedType{name: atom(), type: TypeCheck.Type.t(), local: boolean(), type_kind: :type | :typep | :opaque}
+  @type! t :: %TypeCheck.Builtin.NamedType{name: atom(), type: TypeCheck.Type.t(), local: boolean(), type_kind: :type | :typep | :opaque, called_as: nil | {atom(), list(any())}}
 
   @type! problem_tuple ::
          {t(), :named_type, %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())},

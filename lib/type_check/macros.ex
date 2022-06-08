@@ -574,7 +574,9 @@ defmodule TypeCheck.Macros do
   end
 
   defp type_fun_definition(name_with_params, type, module_name, overrides, kind) do
-    {_name, params} = Macro.decompose_call(name_with_params)
+    {name, params} = Macro.decompose_call(name_with_params)
+    IO.inspect(name, label: :name)
+    IO.inspect(params, label: :params)
 
     params_check_code =
       params
@@ -603,7 +605,8 @@ defmodule TypeCheck.Macros do
         unquote_splicing(params_check_code)
         # import TypeCheck.Builtin
         unquote(type_expansion_loop_prevention_code(name_with_params))
-        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type), unquote(kind)) |> Map.put(:local, false)
+        mfa = {unquote(module_name), unquote(name), unquote(params)}
+        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type), unquote(kind), mfa) |> Map.put(:local, false)
       end
     end
   end
