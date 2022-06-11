@@ -82,6 +82,12 @@ defmodule TypeCheck.Builtin.FixedList do
     end
   end
 
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      update_in(s.element_types, &Enum.map(&1, fn val -> TypeCheck.Protocols.Escape.escape(val) end))
+    end
+  end
+
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       s.element_types

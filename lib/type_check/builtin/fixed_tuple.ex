@@ -11,6 +11,12 @@ defmodule TypeCheck.Builtin.FixedTuple do
             %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()},
             tuple()}
 
+    defimpl TypeCheck.Protocols.Escape do
+      def escape(s) do
+             update_in(s.element_types, &Enum.map(&1, fn val -> TypeCheck.Protocols.Escape.escape(val) end))
+      end
+    end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_types: types_list}, param) do
       element_checks_ast = build_element_checks_ast(types_list, param, s)

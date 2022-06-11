@@ -13,6 +13,12 @@ defmodule TypeCheck.Builtin.List do
               index: non_neg_integer()
             }, any()}
 
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+             update_in(s.element_type, &TypeCheck.Protocols.Escape.escape(&1))
+    end
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_type: element_type}, param) do
       quote generated: true, location: :keep do

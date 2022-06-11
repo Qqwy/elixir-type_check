@@ -88,6 +88,12 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
     end
   end
 
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      %{s | fixed: TypeCheck.Protocols.Escape.escape(s.fixed), flexible: TypeCheck.Protocols.Escape.escape(s.flexible)}
+    end
+  end
+
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do

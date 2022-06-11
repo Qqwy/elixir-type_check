@@ -5,6 +5,13 @@ defmodule TypeCheck.Builtin.OneOf do
   @type! t() :: %TypeCheck.Builtin.OneOf{choices: list(TypeCheck.Type.t())}
   @type! problem_tuple :: {t(), :all_failed, %{problems: list(lazy(TypeCheck.TypeError.Formatter.problem_tuple))}, term()}
 
+
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      update_in(s.choices, &Enum.map(&1, fn type -> TypeCheck.Protocols.Escape.escape(type) end))
+    end
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(x = %{choices: choices}, param) do
       snippets =

@@ -12,6 +12,26 @@ defmodule TypeCheck.Builtin.NamedType do
   def stringify_name(str, _opts) when is_binary(str), do: to_string(str)
   def stringify_name(other, opts), do: TypeCheck.Protocols.Inspect.inspect(other, opts)
 
+
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      case s do
+        %{called_as: {module, function, args}, type_kind: kind} when kind in [:type, :opaque] ->
+          escaped_args = args
+          |> Enum.map(&TypeCheck.Protocols.Escape.escape/1)
+          |> Macro.escape(unquote: true)
+
+          res = quote do
+            unquote(module).unquote(function)(unquote_splicing(escaped_args))
+          end
+          {:unquote, [], [res]}
+        _other ->
+          %{s| type: TypeCheck.Protocols.Escape.escape(s.type)}
+          # other
+      end
+    end
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       inner_check = TypeCheck.Protocols.ToCheck.to_check(s.type, param)
@@ -25,7 +45,7 @@ defmodule TypeCheck.Builtin.NamedType do
               # Reset bindings
               {:ok, [], altered_inner}
             {:error, problem} ->
-              {:error, {unquote(Macro.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+              {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
           end
         end
       else
@@ -39,7 +59,7 @@ defmodule TypeCheck.Builtin.NamedType do
               {:ok, [{unquote(s.name), unquote(param)} | bindings], altered_inner}
 
             {:error, problem} ->
-              {:error, {unquote(Macro.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+              {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
           end
         end
       end

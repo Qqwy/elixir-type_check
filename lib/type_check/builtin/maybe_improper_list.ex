@@ -8,6 +8,7 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
            terminator_type: terminator_type
          }
 
+
   @type! problem_tuple ::
            {t(), :not_a_list, %{}, any()}
            | {t(), :element_error,
@@ -17,6 +18,12 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
               }, any()}
            | {t(), :terminator_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, any()}
+
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+               %{s | element_type: TypeCheck.Protocols.Escape.escape(s.element_type), terminator_type: TypeCheck.Protocols.Escape.escape(s.terminator_type)}
+    end
+  end
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do

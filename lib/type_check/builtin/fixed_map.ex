@@ -20,6 +20,13 @@ defmodule TypeCheck.Builtin.FixedMap do
            | {t(), :value_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
+
+    defimpl TypeCheck.Protocols.Escape do
+      def escape(s) do
+               update_in(s.keypairs, &Enum.map(&1, fn {key, val} -> {key, TypeCheck.Protocols.Escape.escape(val)} end))
+      end
+    end
+
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
     def to_check(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param)

@@ -8,6 +8,16 @@ defmodule TypeCheck.Builtin.Function do
   }
   @type! problem_tuple :: {t(), :no_match, %{}, any()}
 
+
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      # update_in(s.element_types, &Enum.map(&1, fn val -> escape(val) end))
+      require Logger
+      Logger.warn("Todo: escaping functions")
+      s # TODO!
+    end
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote generated: true, location: :keep do

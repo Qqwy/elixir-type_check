@@ -11,6 +11,12 @@ defmodule TypeCheck.Builtin.Map do
            | {t(), :value_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
 
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+               %{s | key_type: TypeCheck.Protocols.Escape.escape(s.key_type), value_type: TypeCheck.Protocols.Escape.escape(s.value_type)}
+    end
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
       quote generated: true, location: :keep do
