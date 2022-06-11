@@ -213,7 +213,7 @@ defmodule TypeCheck.Spec do
     # {file, line} = location
     quote generated: true, location: :keep do
       [
-        {{:ok, _bindings, altered_param}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))},
+        {{:ok, _bindings, altered_param}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(TypeCheck.Internals.Escaper.escape(param_type))},
         clean_param = altered_param
        ]
     end

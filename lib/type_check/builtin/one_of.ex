@@ -32,7 +32,7 @@ defmodule TypeCheck.Builtin.OneOf do
 
         with unquote_splicing(snippets) do
           {:error,
-           {unquote(Macro.escape(x)), :all_failed, %{problems: Enum.reverse(problems)},
+           {unquote(TypeCheck.Internals.Escaper.escape(x)), :all_failed, %{problems: Enum.reverse(problems)},
             unquote(param)}}
         else
           {:ok, bindings, altered_param} ->

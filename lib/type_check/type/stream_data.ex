@@ -50,6 +50,12 @@ defmodule TypeCheck.Type.StreamData do
     end
   end
 
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      update_in(s.type, &TypeCheck.Protocols.Escape.escape/1)
+    end
+  end
+
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       TypeCheck.Protocols.Inspect.inspect(s.type, opts)
