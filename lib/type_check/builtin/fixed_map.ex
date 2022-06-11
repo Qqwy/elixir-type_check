@@ -76,7 +76,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           missing_keys ->
             {:error,
-             {unquote(Macro.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
         end
       end
     end

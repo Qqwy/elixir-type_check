@@ -37,7 +37,7 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
             {:ok, bindings1 ++ bindings2, Map.merge(fixed_part, flexible_part)}
             else
               {:error, {_, reason, info, _val}} ->
-                {:error, {unquote(Macro.escape(s)), reason, info, unquote(param)}}
+                {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), reason, info, unquote(param)}}
           end
         end
 
@@ -50,7 +50,7 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
           val when is_map(val) ->
             {:ok, [], val}
           other ->
-            {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, other}}
+            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, other}}
         end
       end
     end

@@ -29,7 +29,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
 
           x when tuple_size(x) != unquote(expected_size) ->
             {:error,
-             {unquote(Macro.escape(s)), :different_size, %{expected_size: unquote(expected_size)},
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :different_size, %{expected_size: unquote(expected_size)},
               x}}
 
           _ ->

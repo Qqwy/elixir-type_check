@@ -113,8 +113,8 @@ defmodule TypeCheck.Spec do
         # import TypeCheck.Builtin
         %TypeCheck.Spec{
           name: unquote(name),
-          param_types: unquote(Macro.escape(param_types)),
-          return_type: unquote(Macro.escape(return_type)),
+          param_types: unquote(TypeCheck.Internals.Escaper.escape(param_types)),
+          return_type: unquote(TypeCheck.Internals.Escaper.escape(return_type)),
           location: {unquote(file), unquote(line)}
         }
       end
