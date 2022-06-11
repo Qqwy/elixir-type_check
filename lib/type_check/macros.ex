@@ -575,8 +575,8 @@ defmodule TypeCheck.Macros do
 
   defp type_fun_definition(name_with_params, type, module_name, overrides, kind) do
     {name, params} = Macro.decompose_call(name_with_params)
-    IO.inspect(name, label: :name)
-    IO.inspect(params, label: :params)
+    # IO.inspect(name, label: :name)
+    # IO.inspect(params, label: :params)
 
     params_check_code =
       params
