@@ -280,7 +280,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     name = Map.get(s, :name, "#Function<...>")
     function_with_arity = IO.ANSI.format_fragment([:white, "#{name}/#{Enum.count(val)}", :red])
     param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
-    arguments = val |> Enum.map(&inspect/1) |> Enum.join(", ")
+    arguments = val |> Enum.map(fn val -> inspect(val, inspect_value_opts()) end) |> Enum.join(", ")
     raw_call = if mod == TypeCheck.Builtin.Function do
       "#{name}.(#{arguments})"
     else
@@ -352,11 +352,13 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   defp inspect_value_opts() do
     # [reset_color: :red, syntax_colors: ([reset: :white] ++ TypeCheck.Inspect.default_colors())]
-    if IO.ANSI.enabled? do
-      [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
-    else
-      []
-    end
+    color_opts =
+      if IO.ANSI.enabled? do
+        [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+      else
+        []
+      end
+    [limit: 5] ++ color_opts
   end
 
   defp inspect_type_opts() do
