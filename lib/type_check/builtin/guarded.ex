@@ -95,13 +95,13 @@ defmodule TypeCheck.Builtin.Guarded do
               {:ok, bindings, altered_param}
             else
               {:error,
-               {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map},
+               {:guard_failed, %{bindings: bindings_map},
                 unquote(param)}}
             end
 
           {:error, problem} ->
             {:error,
-             {unquote(Macro.escape(s)), :type_failed, %{problem: problem}, unquote(param)}}
+             {:type_failed, %{problem: problem}, unquote(param)}}
         end
       end
     end

@@ -3,7 +3,7 @@ defmodule TypeCheck.Builtin.Number do
 
   use TypeCheck
   @type! t :: %__MODULE__{}
-  @type! problem_tuple :: {t(), :no_match, %{}, val :: any()}
+  @type! problem_tuple :: {:no_match, %{}, val :: any()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
@@ -13,7 +13,7 @@ defmodule TypeCheck.Builtin.Number do
             {:ok, [], x}
 
           _ ->
-            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
+            {:error, {:no_match, %{}, unquote(param)}}
         end
       end
     end

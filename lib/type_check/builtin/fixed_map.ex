@@ -14,10 +14,10 @@ defmodule TypeCheck.Builtin.FixedMap do
   @type! t :: %__MODULE__{keypairs: list({term(), TypeCheck.Type.t()})}
 
   @type! problem_tuple ::
-           {t(), :not_a_map, %{}, any()}
-           | {t(), :missing_keys, %{keys: list(atom())}, map()}
-           | {t(), :superfluous_keys, %{keys: list(atom())}, map()}
-           | {t(), :value_error,
+           {:not_a_map, %{}, any()}
+           | {:missing_keys, %{keys: list(atom())}, map()}
+           | {:superfluous_keys, %{keys: list(atom())}, map()}
+           | {:value_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
 
@@ -55,7 +55,7 @@ defmodule TypeCheck.Builtin.FixedMap do
           val when is_map(val) ->
             {:ok, [], val}
             other ->
-            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, other}}
+            {:error, {:not_a_map, %{}, other}}
         end
       end
     end
@@ -76,7 +76,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           missing_keys ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
+             {:missing_keys, %{keys: missing_keys}, unquote(param)}}
         end
       end
     end
@@ -96,7 +96,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           superfluous_keys ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :superfluous_keys, %{keys: superfluous_keys},
+             {:superfluous_keys, %{keys: superfluous_keys},
               unquote(param)}}
         end
       end
@@ -133,7 +133,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         else
           {{:error, error}, key} ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+             {:value_error, %{problem: error, key: key}, unquote(param)}}
         end
       end
     end

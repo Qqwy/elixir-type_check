@@ -14,9 +14,9 @@ defmodule TypeCheck.Builtin.FixedList do
   @type! t :: %__MODULE__{element_types: list(TypeCheck.Type.t())}
 
   @type! problem_tuple ::
-         {t(), :not_a_list, %{}, any()}
-         | {t(), :different_length, %{expected_length: non_neg_integer()}, list()}
-         | {t(), :element_error,
+         {:not_a_list, %{}, any()}
+         | {:different_length, %{expected_length: non_neg_integer()}, list()}
+         | {:element_error,
             %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: non_neg_integer()},
             list()}
 
@@ -28,11 +28,11 @@ defmodule TypeCheck.Builtin.FixedList do
       quote generated: :true, location: :keep do
         case unquote(param) do
           x when not is_list(x) ->
-            {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, x}}
+            {:error, {:not_a_list, %{}, x}}
 
           x when length(x) != unquote(expected_length) ->
             {:error,
-             {unquote(Macro.escape(s)), :different_length,
+             {:different_length,
               %{expected_length: unquote(expected_length)}, x}}
 
           _ ->
@@ -41,7 +41,7 @@ defmodule TypeCheck.Builtin.FixedList do
       end
     end
 
-    def build_element_checks_ast(element_types, param, s) do
+    def build_element_checks_ast(element_types, param, _s) do
       element_checks =
         element_types
         |> Enum.with_index()
@@ -75,7 +75,7 @@ defmodule TypeCheck.Builtin.FixedList do
         else
           {{:error, error}, index, _rest} ->
             {:error,
-             {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+             {:element_error, %{problem: error, index: index},
               unquote(param)}}
         end
       end

@@ -12,12 +12,12 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
   @type! t :: %__MODULE__{fixed: TypeCheck.Builtin.FixedMap.t(), flexible: TypeCheck.Builtin.Map.t()}
 
   @type! problem_tuple ::
-  {t(), :not_a_map, %{}, any()}
-  | {t(), :missing_keys, %{keys: list(atom())}, map()}
-  | {t(), :superfluous_keys, %{keys: list(atom())}, map()}
-  | {t(), :value_error,
+  {:not_a_map, %{}, any()}
+  | {:missing_keys, %{keys: list(atom())}, map()}
+  | {:superfluous_keys, %{keys: list(atom())}, map()}
+  | {:value_error,
      %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
-  | {t(), :key_error,
+  | {:key_error,
      %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
   defimpl TypeCheck.Protocols.ToCheck do
@@ -36,21 +36,21 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
             do
             {:ok, bindings1 ++ bindings2, Map.merge(fixed_part, flexible_part)}
             else
-              {:error, {_, reason, info, _val}} ->
-                {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), reason, info, unquote(param)}}
+              {:error, {reason, info, _val}} ->
+                {:error, {reason, info, unquote(param)}}
           end
         end
 
       res
     end
 
-    defp map_check(param, s) do
+    defp map_check(param, _s) do
       quote generated: true, location: :keep do
         case unquote(param) do
           val when is_map(val) ->
             {:ok, [], val}
           other ->
-            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, other}}
+            {:error, {:not_a_map, %{}, other}}
         end
       end
     end

@@ -7,7 +7,7 @@ defmodule TypeCheck.Builtin.Function do
              param_types: list(TypeCheck.Type.t()) | nil,
              return_type: TypeCheck.Type.t()
            }
-  @type! problem_tuple :: {t(), :no_match, %{}, any()}
+  @type! problem_tuple :: {:no_match, %{}, any()}
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
@@ -31,7 +31,7 @@ defmodule TypeCheck.Builtin.Function do
             {:ok, [], wrapped_fun}
 
           _ ->
-            {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
+            {:error, {:no_match, %{}, unquote(param)}}
         end
       end
     end
@@ -84,7 +84,7 @@ defmodule TypeCheck.Builtin.Function do
 
                   {:error, problem} ->
                     raise TypeCheck.TypeError,
-                          {unquote(Macro.escape(s)), :return_error,
+                          {:return_error,
                            %{problem: problem, arguments: unquote(clean_params)},
                            var!(result, nil)}
                 end

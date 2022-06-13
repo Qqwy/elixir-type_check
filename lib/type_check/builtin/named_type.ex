@@ -45,7 +45,7 @@ defmodule TypeCheck.Builtin.NamedType do
               # Reset bindings
               {:ok, [], altered_inner}
             {:error, problem} ->
-              {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+              {:error, {:named_type, %{problem: problem}, unquote(param)}}
           end
         end
       else
@@ -59,7 +59,7 @@ defmodule TypeCheck.Builtin.NamedType do
               {:ok, [{unquote(s.name), unquote(param)} | bindings], altered_inner}
 
             {:error, problem} ->
-              {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :named_type, %{problem: problem}, unquote(param)}}
+              {:error, {:named_type, %{problem: problem}, unquote(param)}}
           end
         end
       end
