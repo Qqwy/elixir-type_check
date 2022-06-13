@@ -1,16 +1,20 @@
 defmodule TypeCheck.TypeError.DefaultFormatter do
   @behaviour TypeCheck.TypeError.Formatter
 
-  @spec format(TypeCheck.TypeError.problem_tuple(), TypeCheck.TypeError.location()) :: String.t()
   def format(problem_tuple, location \\ []) do
-    res =
-      do_format(problem_tuple)
-      |> indent() # Ensure we start with four spaces, which multi-line exception pretty-printing expects
-      |> indent()
-
-    location_string(location) <> res
-    |> String.trim()
+    inspect(problem_tuple)
   end
+
+  # @spec format(TypeCheck.TypeError.problem_tuple(), TypeCheck.TypeError.location()) :: String.t()
+  # def format(problem_tuple, location \\ []) do
+  #   res =
+  #     do_format(problem_tuple)
+  #     |> indent() # Ensure we start with four spaces, which multi-line exception pretty-printing expects
+  #     |> indent()
+
+  #   location_string(location) <> res
+  #   |> String.trim()
+  # end
 
   defp location_string([]), do: ""
   defp location_string(location) do

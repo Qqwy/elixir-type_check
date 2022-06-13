@@ -12,8 +12,8 @@ defmodule TypeCheck.Spec do
     use TypeCheck
     alias TypeCheck.DefaultOverrides.String
     @type! t() :: %__MODULE__{name: String.t(), param_types: list(TypeCheck.Type.t()), return_type: TypeCheck.Type.t(), location: [] | list({:file, String.t()} | {:line, non_neg_integer()})}
-    @type! problem_tuple :: {t(), :param_error, %{index: non_neg_integer(), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
-    | {t(), :return_error, %{arguments: list(term()), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
+    @type! problem_tuple :: {:param_error, %{index: non_neg_integer(), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
+    | {:return_error, %{arguments: list(term()), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
   end
 
   defp spec_fun_name(function, arity) do

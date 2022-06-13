@@ -63,4 +63,7 @@ defmodule TypeCheck.TypeError do
   def exception(problem_tuple) do
     exception({problem_tuple, []})
   end
+
+  def hydrate_problem_tuple(s, problem_tuple) do
+  end
 end
