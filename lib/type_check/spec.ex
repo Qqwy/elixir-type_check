@@ -200,10 +200,10 @@ defmodule TypeCheck.Spec do
         # Run actual code
       else
         {{:error, problem}, index} ->
-          raise TypeCheck.TypeError,
-          {
-            {__MODULE__.unquote(spec_fun_name(name, arity))(), {:param_error,
-             %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}}
+          type = __MODULE__.unquote(spec_fun_name(name, arity))()
+          problem_tuple = {:param_error, %{index: index, problem: problem}, unquote(clean_params)}
+          location = unquote(Macro.Env.location(caller))
+          raise TypeCheck.TypeError, {type, {problem_tuple, location}}
       end
     end
   end
@@ -220,7 +220,7 @@ defmodule TypeCheck.Spec do
     end
   end
 
-  defp return_check_code(name, arity, clean_params, return_type, _caller, _location) do
+  defp return_check_code(name, arity, clean_params, return_type, caller, _location) do
     return_code_check =
       TypeCheck.Protocols.ToCheck.to_check(return_type, Macro.var(:super_result, nil))
 
@@ -233,9 +233,10 @@ defmodule TypeCheck.Spec do
           altered_return_value
 
         {:error, problem} ->
-          raise TypeCheck.TypeError,
-                {__MODULE__.unquote(spec_fun_name(name, arity))(), {:return_error,
-                 %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}}
+          type = __MODULE__.unquote(spec_fun_name(name, arity))()
+          problem_tuple = {:return_error, %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
+          location = unquote(Macro.Env.location(caller))
+          raise TypeCheck.TypeError, {type, {problem_tuple, location}}
       end
     end
   end
