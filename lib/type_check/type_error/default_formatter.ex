@@ -280,7 +280,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     name = Map.get(s, :name, "#Function<...>")
     function_with_arity = IO.ANSI.format_fragment([:white, "#{name}/#{Enum.count(val)}", :red])
     param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
-    arguments = val |> Enum.map(fn val -> inspect(val, inspect_value_opts()) end) |> Enum.join(", ")
+    arguments = val |> Enum.map(&inspect(&1, inspect_value_opts())) |> Enum.join(", ")
     raw_call = if mod == TypeCheck.Builtin.Function do
       "#{name}.(#{arguments})"
     else
