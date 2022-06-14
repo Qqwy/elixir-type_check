@@ -106,6 +106,7 @@ defmodule TypeCheck.Spec do
   @doc false
   def create_spec_def(name, arity, param_types, return_type, {file, line}) do
     spec_fun_name = spec_fun_name(name, arity)
+    escaped_param_types = Enum.map(param_types, &TypeCheck.Internals.Escaper.escape/1)
 
     quote generated: true, location: :keep do
       @doc false
@@ -113,8 +114,8 @@ defmodule TypeCheck.Spec do
         # import TypeCheck.Builtin
         %TypeCheck.Spec{
           name: unquote(name),
-          param_types: unquote(Macro.escape(param_types)),
-          return_type: unquote(Macro.escape(return_type)),
+          param_types: unquote(escaped_param_types),
+          return_type: unquote(TypeCheck.Internals.Escaper.escape(return_type)),
           location: {unquote(file), unquote(line)}
         }
       end
@@ -198,7 +199,7 @@ defmodule TypeCheck.Spec do
       with unquote_splicing(paired_params) do
         # Run actual code
       else
-        {{:error, problem}, index, param_type} ->
+        {{:error, problem}, index} ->
           raise TypeCheck.TypeError,
           {
             {__MODULE__.unquote(spec_fun_name(name, arity))(), :param_error,
@@ -213,7 +214,7 @@ defmodule TypeCheck.Spec do
     # {file, line} = location
     quote generated: true, location: :keep do
       [
-        {{:ok, _bindings, altered_param}, _index, _param_type} <- {unquote(impl), unquote(index), unquote(Macro.escape(param_type))},
+        {{:ok, _bindings, altered_param}, _index} <- {unquote(impl), unquote(index)},
         clean_param = altered_param
        ]
     end

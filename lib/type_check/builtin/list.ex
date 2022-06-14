@@ -13,12 +13,18 @@ defmodule TypeCheck.Builtin.List do
               index: non_neg_integer()
             }, any()}
 
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+             update_in(s.element_type, &TypeCheck.Protocols.Escape.escape(&1))
+    end
+  end
+
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_type: element_type}, param) do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_list(x) ->
-            {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, unquote(param)}}
+            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_list, %{}, unquote(param)}}
 
           _ ->
             unquote(build_element_check(element_type, param, s))
@@ -52,7 +58,7 @@ defmodule TypeCheck.Builtin.List do
               {:error, problem} ->
                 problem =
                   {:error,
-                  {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                  {unquote(TypeCheck.Internals.Escaper.escape(s)), :element_error, %{problem: problem, index: index},
                     orig_param}}
 
                 {:halt, problem}

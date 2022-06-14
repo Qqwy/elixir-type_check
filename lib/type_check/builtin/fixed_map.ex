@@ -20,6 +20,13 @@ defmodule TypeCheck.Builtin.FixedMap do
            | {t(), :value_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
+
+    defimpl TypeCheck.Protocols.Escape do
+      def escape(s) do
+               update_in(s.keypairs, &Enum.map(&1, fn {key, val} -> {key, TypeCheck.Protocols.Escape.escape(val)} end))
+      end
+    end
+
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
     def to_check(s = %TypeCheck.Builtin.FixedMap{keypairs: keypairs}, param)
@@ -48,7 +55,7 @@ defmodule TypeCheck.Builtin.FixedMap do
           val when is_map(val) ->
             {:ok, [], val}
             other ->
-            {:error, {unquote(Macro.escape(s)), :not_a_map, %{}, other}}
+            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, other}}
         end
       end
     end
@@ -69,7 +76,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           missing_keys ->
             {:error,
-             {unquote(Macro.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
         end
       end
     end
@@ -89,7 +96,7 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           superfluous_keys ->
             {:error,
-             {unquote(Macro.escape(s)), :superfluous_keys, %{keys: superfluous_keys},
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :superfluous_keys, %{keys: superfluous_keys},
               unquote(param)}}
         end
       end
@@ -126,7 +133,7 @@ defmodule TypeCheck.Builtin.FixedMap do
         else
           {{:error, error}, key} ->
             {:error,
-             {unquote(Macro.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
         end
       end
     end

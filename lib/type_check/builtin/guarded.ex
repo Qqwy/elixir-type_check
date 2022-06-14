@@ -10,6 +10,13 @@ defmodule TypeCheck.Builtin.Guarded do
 
   @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast()}
 
+
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      update_in(s.type, &TypeCheck.Protocols.Escape.escape(&1))
+    end
+  end
+
   @doc false
   def extract_names(type) do
     case type do
