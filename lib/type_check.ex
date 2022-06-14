@@ -177,7 +177,7 @@ defmodule TypeCheck do
       case unquote(check) do
         {:ok, bindings, altered_value} -> {:ok, altered_value}
         {:error, problem} ->
-          exception = TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})
+          exception = TypeCheck.TypeError.exception({unquote(TypeCheck.Internals.Escaper.escape(type)), {problem, unquote(Macro.Env.location(__CALLER__))}})
           {:error, exception}
       end
     end
@@ -230,7 +230,11 @@ defmodule TypeCheck do
     res = quote generated: true, location: :keep do
       case unquote(check) do
         {:ok, _bindings, altered_value} -> altered_value
-        {:error, other} -> raise TypeCheck.TypeError, other
+        {:error, other} ->
+          type = unquote(TypeCheck.Internals.Escaper.escape(type))
+          IO.inspect(type, label: :conforms_type)
+          exception = TypeCheck.TypeError.exception({type, {other, []}})
+          raise exception
       end
     end
 
@@ -281,7 +285,7 @@ defmodule TypeCheck do
         {:current_stacktrace, [_ , _, caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)
         location = update_in(location[:file], &to_string/1)
-        exception = TypeCheck.TypeError.exception({problem, location})
+        exception = TypeCheck.TypeError.exception({type, {problem, location}})
         {:error, exception}
     end
   end

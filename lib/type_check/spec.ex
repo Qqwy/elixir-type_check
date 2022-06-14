@@ -234,7 +234,7 @@ defmodule TypeCheck.Spec do
 
         {:error, problem} ->
           raise TypeCheck.TypeError,
-                {{__MODULE__.unquote(spec_fun_name(name, arity))(), {:return_error,
+                {__MODULE__.unquote(spec_fun_name(name, arity))(), {:return_error,
                  %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}}
       end
     end

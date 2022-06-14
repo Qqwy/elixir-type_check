@@ -54,6 +54,14 @@ defmodule TypeCheck.TypeError do
 
   @impl true
 
+
+  def exception({s, {problem_tuple, location}}) do
+    hydrated_problem_tuple = hydrate_problem_tuple(s, problem_tuple)
+    message = TypeCheck.TypeError.DefaultFormatter.format(hydrated_problem_tuple, location)
+
+    %__MODULE__{message: message, raw: hydrated_problem_tuple, location: location}
+  end
+
   def exception({problem_tuple, location}) do
     message = TypeCheck.TypeError.DefaultFormatter.format(problem_tuple, location)
 
@@ -64,7 +72,7 @@ defmodule TypeCheck.TypeError do
     exception({problem_tuple, []})
   end
 
-  @simple_problems ~w[no_match not_same_value not_a_map not_a_list missing_keys superfluous_keys different_length different_size not_an_integer not_in_range wrong_size]a
+  @simple_problems ~w[no_match not_same_value not_a_map not_a_list missing_keys superfluous_keys different_length different_size not_an_integer not_in_range wrong_size guard_failed]a
 
   def hydrate_problem_tuple(s = %TypeCheck.Type.StreamData{}, problem_tuple) do
     hydrate_problem_tuple(s.type, problem_tuple)
@@ -74,15 +82,25 @@ defmodule TypeCheck.TypeError do
     case problem_tuple do
       {simple, meta, param} when simple in @simple_problems -> {s, simple, meta, param}
       {:value_error, meta, param} ->
-        # TODO CompoundFixedMap
-        s2 = s.keypairs[meta.key]
-        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
-        {s, :value_error, meta2, param}
+        case s do
+          %TypeCheck.Builtin.CompoundFixedMap{} ->
+            s2 = s.fixed.keypairs[meta.key] || s.flexible.value_type
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :value_error, meta2, param}
+          %TypeCheck.Builtin.FixedMap{} ->
+            s2 = s.keypairs[meta.key]
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :value_error, meta2, param}
+          %TypeCheck.Builtin.Map{} ->
+            s2 = s.value_type
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :value_error, meta2, param}
+        end
       {:key_error, meta, param} ->
         s2 = meta.key
         meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
         {s, :key_error, meta2, param}
-      {:element_error, meta, param} -> # Handles both fixed_list and fixed_tuple
+      {:element_error, meta, param} ->
         case s do
           %TypeCheck.Builtin.List{} ->
             s2 = s.element_type
@@ -104,11 +122,15 @@ defmodule TypeCheck.TypeError do
       {:terminator_error, meta, param} ->
         s2 = s.terminator_type
         meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
-        {:terminator_error, meta2, param}
+        {s, :terminator_error, meta2, param}
       {:named_type, meta, param} ->
         s2 = s.type
         meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
-        {:named_type, meta2, param}
+        {s, :named_type, meta2, param}
+      {:type_failed, meta, param} ->
+        s2 = s.type
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {s, :type_failed, meta2, param}
       {:all_failed, meta, param} ->
         hydrated_problems =
           Enum.zip(s.choices, meta.problems)
@@ -116,7 +138,7 @@ defmodule TypeCheck.TypeError do
             hydrate_problem_tuple(s2, problem)
           end)
         meta2 = put_in(meta.problems, hydrated_problems)
-        {:all_failed, meta2, param}
+        {s, :all_failed, meta2, param}
       {:return_error, meta, param} ->
         s2 = s.return_type
         meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
