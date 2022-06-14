@@ -202,8 +202,8 @@ defmodule TypeCheck.Spec do
         {{:error, problem}, index} ->
           raise TypeCheck.TypeError,
           {
-            {__MODULE__.unquote(spec_fun_name(name, arity))(), :param_error,
-             %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}
+            {__MODULE__.unquote(spec_fun_name(name, arity))(), {:param_error,
+             %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}}
       end
     end
   end
@@ -234,8 +234,8 @@ defmodule TypeCheck.Spec do
 
         {:error, problem} ->
           raise TypeCheck.TypeError,
-                {__MODULE__.unquote(spec_fun_name(name, arity))(), :return_error,
-                 %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}
+                {{__MODULE__.unquote(spec_fun_name(name, arity))(), {:return_error,
+                 %{problem: problem, arguments: unquote(clean_params)}, var!(super_result, nil)}}
       end
     end
   end

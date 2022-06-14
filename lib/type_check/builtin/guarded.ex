@@ -10,6 +10,8 @@ defmodule TypeCheck.Builtin.Guarded do
 
   @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast()}
 
+  # TODO problem_tuple type
+
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do

@@ -64,6 +64,70 @@ defmodule TypeCheck.TypeError do
     exception({problem_tuple, []})
   end
 
+  @simple_problems ~w[no_match not_same_value not_a_map not_a_list missing_keys superfluous_keys different_length different_size not_an_integer not_in_range wrong_size]a
+
+  def hydrate_problem_tuple(s = %TypeCheck.Type.StreamData{}, problem_tuple) do
+    hydrate_problem_tuple(s.type, problem_tuple)
+  end
+
   def hydrate_problem_tuple(s, problem_tuple) do
+    case problem_tuple do
+      {simple, meta, param} when simple in @simple_problems -> {s, simple, meta, param}
+      {:value_error, meta, param} ->
+        # TODO CompoundFixedMap
+        s2 = s.keypairs[meta.key]
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {s, :value_error, meta2, param}
+      {:key_error, meta, param} ->
+        s2 = meta.key
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {s, :key_error, meta2, param}
+      {:element_error, meta, param} -> # Handles both fixed_list and fixed_tuple
+        case s do
+          %TypeCheck.Builtin.List{} ->
+            s2 = s.element_type
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :element_error, meta2, param}
+          %TypeCheck.Builtin.MaybeImproperList{} ->
+            s2 = s.element_type
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :element_error, meta2, param}
+          %TypeCheck.Builtin.FixedList{} ->
+            s2 = Enum.at(s.element_types, meta.index)
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :element_error, meta2, param}
+          %TypeCheck.Builtin.FixedTuple{} ->
+            s2 = Enum.at(s.element_types, meta.index)
+            meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+            {s, :element_error, meta2, param}
+        end
+      {:terminator_error, meta, param} ->
+        s2 = s.terminator_type
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {:terminator_error, meta2, param}
+      {:named_type, meta, param} ->
+        s2 = s.type
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {:named_type, meta2, param}
+      {:all_failed, meta, param} ->
+        hydrated_problems =
+          Enum.zip(s.choices, meta.problems)
+          |> Enum.map(fn s2, problem ->
+            hydrate_problem_tuple(s2, problem)
+          end)
+        meta2 = put_in(meta.problems, hydrated_problems)
+        {:all_failed, meta2, param}
+      {:return_error, meta, param} ->
+        s2 = s.return_type
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {s, :return_error, meta2, param}
+      {:param_error, meta, param} ->
+        s2 = Enum.at(s.param_types, meta.index)
+        meta2 = update_in(meta.problem, &hydrate_problem_tuple(s2, &1))
+        {s, :param_error, meta2, param}
+      other ->
+        IO.warn("TODO: #{inspect({s, problem_tuple})}")
+        other
+    end
   end
 end
