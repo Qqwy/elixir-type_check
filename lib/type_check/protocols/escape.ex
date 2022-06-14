@@ -1,9 +1,7 @@
 defprotocol TypeCheck.Protocols.Escape do
   @moduledoc false
   # Escaping of structs.
-  # Instead of always using `Macro.escape`,
-  # Try to be slightly more clever to make sure compile-time AST
-  # does not become super large
+  # c.f. TypeCheck.Internals.Escaper for more info
 
   @fallback_to_any true
 
