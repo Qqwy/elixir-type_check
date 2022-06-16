@@ -206,6 +206,10 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.12.1 - 
+  - Fixes:
+    - No longer use white ANSI color in exception formatting, ensuring messages of the DefaultFormatter are also visible on white backgrounds (Livebook, anyone? :D)
+    - Skip OTP app lookup (used to fetch per OTP app compile-time configuration) if we're not compiled inside an OTP app (such as inside a Livebook).
 - 0.12.0 - 
   - Additions:
     - The default options used are now fetched from the application configuration. This means that you can configure a default for your app as well as for each of your dependencies(!) by adding `config :app_name, :type_check [...]` to your configuration file(s). (c.f. #61)
