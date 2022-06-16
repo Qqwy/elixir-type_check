@@ -128,17 +128,17 @@ defmodule TypeCheck.Inspect do
     [
       atom: :cyan,
       string: :yellow,
-      list: :white,
+      list: :default_color,
       boolean: :magenta,
       nil: :light_magenta,
-      tuple: :white,
+      tuple: :default_color,
       binary: :green,
-      map: :white,
+      map: :default_color,
       number: :yellow,
       range: :yellow,
-      default: :white,
-      named_type: :white,
-      builtin_type: :white
+      default: :default_color,
+      named_type: :default_color,
+      builtin_type: :default_color
     ]
   end
 end

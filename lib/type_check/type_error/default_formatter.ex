@@ -278,7 +278,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   def do_format({s = %mod{}, :param_error, %{index: index, problem: problem}, val}) when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", do_format(problem))
     name = Map.get(s, :name, "#Function<...>")
-    function_with_arity = IO.ANSI.format_fragment([:white, "#{name}/#{Enum.count(val)}", :red])
+    function_with_arity = IO.ANSI.format_fragment([:default_color, "#{name}/#{Enum.count(val)}", :red])
     param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
     arguments = val |> Enum.map(&inspect(&1, inspect_value_opts())) |> Enum.join(", ")
     raw_call = if mod == TypeCheck.Builtin.Function do
@@ -286,7 +286,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     else
       "#{name}(#{arguments})"
     end
-    call = IO.ANSI.format_fragment([:white, raw_call, :red])
+    call = IO.ANSI.format_fragment([:default_color, raw_call, :red])
 
     value = Enum.at(val, index)
     value_str = inspect(value, inspect_value_opts())
@@ -307,16 +307,16 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
         {s = %mod{}, :return_error, %{problem: problem, arguments: arguments}, val}
       ) when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
     name = Map.get(s, :name, "#Function<...>")
-    function_with_arity = IO.ANSI.format_fragment([:white, "#{name}/#{Enum.count(arguments)}", :red])
+    function_with_arity = IO.ANSI.format_fragment([:default_color, "#{name}/#{Enum.count(arguments)}", :red])
     result_spec = s.return_type |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
     arguments_str = arguments |> Enum.map(fn val -> inspect(val, inspect_value_opts()) end) |> Enum.join(", ")
-    arguments_str = IO.ANSI.format_fragment([:white, arguments_str, :white])
+    arguments_str = IO.ANSI.format_fragment([:default_color, arguments_str, :default_color])
     raw_call = if mod == TypeCheck.Builtin.Function do
       "#{name}.(#{arguments_str})"
     else
       "#{name}(#{arguments_str})"
     end
-    call = IO.ANSI.format_fragment([:white, raw_call, :red])
+    call = IO.ANSI.format_fragment([:default_color, raw_call, :red])
 
     val_str = inspect(val, inspect_value_opts())
 
@@ -351,7 +351,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   defp inspect_value_opts() do
-    # [reset_color: :red, syntax_colors: ([reset: :white] ++ TypeCheck.Inspect.default_colors())]
+    # [reset_color: :red, syntax_colors: ([reset: :default_color] ++ TypeCheck.Inspect.default_colors())]
     color_opts =
       if IO.ANSI.enabled? do
         [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
