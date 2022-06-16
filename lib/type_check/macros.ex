@@ -160,7 +160,7 @@ defmodule TypeCheck.Macros do
   """
   defmacro __using__(options) do
     # Application.get_application(module) does not work while compiling `module`:
-    otp_app = Mix.Project.config() |> Keyword.fetch!(:app)
+    otp_app = Mix.Project.config() |> Keyword.get(:app)
 
     quote generated: true, location: :keep do
       import Kernel, except: [@: 1]
@@ -172,7 +172,12 @@ defmodule TypeCheck.Macros do
       @before_compile TypeCheck.Macros
 
       # first parameter _needs_ to be an atom for the macro to work on Elixir < v.1.13
-      default_options = Application.compile_env(unquote(otp_app), :type_check, [])
+      default_options =
+        if unquote(otp_app) != nil do
+          Application.compile_env(unquote(otp_app), :type_check, [])
+        else
+          []
+        end
 
       Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options) ++ default_options))
 
