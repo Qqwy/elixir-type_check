@@ -207,6 +207,8 @@ Details:
 
 ### Changelog
 - 0.12.1 - 
+  - Performance:
+    - Significant reduction on generated code size of runtime type checks. This will speed up compilation roughly ~10-50%.
   - Fixes:
     - No longer use white ANSI color in exception formatting, ensuring messages of the DefaultFormatter are also visible on white backgrounds (Livebook, anyone? :D)
     - Skip OTP app lookup (used to fetch per OTP app compile-time configuration) if we're not compiled inside an OTP app (such as inside a Livebook).
