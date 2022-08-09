@@ -340,7 +340,7 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.10.0"},
+    {:type_check, "~> 0.12"},
     # To allow spectesting and property-testing data generators (optional):
     {:stream_data, "~> 0.5.0", only: :test}, 
   ]
