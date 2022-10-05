@@ -382,3 +382,4 @@ On a superficial level, Norm and TypeCheck seem similar. However, there are [imp
 ## Is it any good?
 
 [yes](https://news.ycombinator.com/item?id=3067434)
+
