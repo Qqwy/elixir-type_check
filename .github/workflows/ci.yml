@@ -4,7 +4,7 @@ on: push
 
 jobs:
   test:
-    runs-on: buildjet-4vcpu-ubuntu-2204 # ubuntu-latest
+    runs-on: buildjet-16vcpu-ubuntu-2204 # ubuntu-latest
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
       matrix:
