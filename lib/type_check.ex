@@ -343,8 +343,6 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
       ** (TypeCheck.TypeError) At lib/type_check.ex:323:
           `20` is not the same value as `42`.
-
-
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
   def dynamic_conforms!(value, type, options \\ TypeCheck.Options.new()) do
