@@ -134,7 +134,6 @@ defmodule TypeCheck do
           import TypeCheck.Builtin
           :ok
         end
-
       _other ->
         quote generated: true, location: :keep do
           use TypeCheck.Macros, unquote(options)
@@ -174,29 +173,19 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    res =
-      quote generated: true, location: :keep do
-        case unquote(check) do
-          {:ok, bindings, altered_value} ->
-            {:ok, altered_value}
-
-          {:error, problem} ->
-            exception =
-              TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})
-
-            {:error, exception}
-        end
+    res = quote generated: true, location: :keep do
+      case unquote(check) do
+        {:ok, bindings, altered_value} -> {:ok, altered_value}
+        {:error, problem} ->
+          exception = TypeCheck.TypeError.exception({problem, unquote(Macro.Env.location(__CALLER__))})
+          {:error, exception}
       end
-
-    if(evaluated_options.debug) do
-      value_str = value |> Macro.to_string() |> Code.format_string!()
-
-      TypeCheck.Internals.Helper.prettyprint_spec(
-        "TypeCheck.conforms(#{value_str}, #{inspect(type)}, #{inspect(options)})",
-        res
-      )
     end
 
+    if(evaluated_options.debug) do
+      value_str = value |> Macro.to_string |> Code.format_string!
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms(#{value_str}, #{inspect(type)}, #{inspect(options)})", res)
+    end
     res
   end
 
@@ -213,18 +202,13 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    res =
-      quote generated: true, location: :keep do
-        match?({:ok, _, _}, unquote(check))
-      end
+    res = quote generated: true, location: :keep do
+      match?({:ok, _, _}, unquote(check))
+    end
 
     if(evaluated_options.debug) do
-      value_str = value |> Macro.to_string() |> Code.format_string!()
-
-      TypeCheck.Internals.Helper.prettyprint_spec(
-        "TypeCheck.conforms?(#{value_str}, #{inspect(type)}, #{inspect(options)})",
-        res
-      )
+      value_str = value |> Macro.to_string |> Code.format_string!
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms?(#{value_str}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
     res
@@ -243,21 +227,16 @@ defmodule TypeCheck do
     type = TypeCheck.Type.build_unescaped(type, __CALLER__, evaluated_options)
     check = TypeCheck.Protocols.ToCheck.to_check(type, value)
 
-    res =
-      quote generated: true, location: :keep do
-        case unquote(check) do
-          {:ok, _bindings, altered_value} -> altered_value
-          {:error, other} -> raise TypeCheck.TypeError, other
-        end
+    res = quote generated: true, location: :keep do
+      case unquote(check) do
+        {:ok, _bindings, altered_value} -> altered_value
+        {:error, other} -> raise TypeCheck.TypeError, other
       end
+    end
 
     if(evaluated_options.debug) do
-      value_str = value |> Macro.to_string() |> Code.format_string!()
-
-      TypeCheck.Internals.Helper.prettyprint_spec(
-        "TypeCheck.conforms!(#{value_str}, #{inspect(type)}, #{inspect(options)})",
-        res
-      )
+      value_str = value |> Macro.to_string |> Code.format_string!
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.conforms!(#{value_str}, #{inspect(type)}, #{inspect(options)})", res)
     end
 
     res
@@ -293,18 +272,13 @@ defmodule TypeCheck do
     check_code = TypeCheck.Protocols.ToCheck.to_check(type, Macro.var(:value, nil))
 
     if(evaluated_options.debug) do
-      TypeCheck.Internals.Helper.prettyprint_spec(
-        "TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})",
-        check_code
-      )
+      TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.dynamic_conforms(#{inspect(value)}, #{inspect(type)}, #{inspect(options)})", check_code)
     end
 
     case Code.eval_quoted(check_code, value: value) do
-      {{:ok, _, altered_value}, _} ->
-        {:ok, altered_value}
-
+      {{:ok, _, altered_value}, _} -> {:ok, altered_value}
       {{:error, problem}, _} ->
-        {:current_stacktrace, [_, _, caller | _]} = Process.info(self(), :current_stacktrace)
+        {:current_stacktrace, [_ , _, caller | _]} = Process.info(self(), :current_stacktrace)
         location = elem(caller, 3)
         location = update_in(location[:file], &to_string/1)
         exception = TypeCheck.TypeError.exception({problem, location})
