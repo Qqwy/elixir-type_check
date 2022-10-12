@@ -133,10 +133,17 @@ defmodule TypeCheck.Internals.Parser do
       {Date, :diff, [1, 2]}
   """
   @spec ast_to_mfa(Macro.t()) :: {module(), atom(), [Macro.t()]} | {:error, String.t()}
+  # Elixir 1.13- AST for imported function:
   def ast_to_mfa({func, [context: _, import: module], args}) do
     {module, func, args}
   end
 
+  # Elixir 1.14 AST for imported function:
+  def ast_to_mfa({func, [context: _, imports: [{1, module}]], args}) do
+    {module, func, args}
+  end
+
+  # AST for exported function:
   def ast_to_mfa({target, _, args}) do
     case target do
       {:., _, [{:__aliases__, [alias: false], [mod]}, func]} -> {elixir_module(mod), func, args}
