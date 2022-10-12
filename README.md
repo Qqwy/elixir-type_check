@@ -206,6 +206,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.12.3 -
+  - Fixes:
+    - Compatibility problems with Elixir v1.14. (`Code.Identifier.inspect_as_key`, working with the AST of imported functions)  Thank you very much, @marcandre! (c.f. #150)
 - 0.12.2 -
   - Fixes:
     - Compilation error in a new Phoenix 1.16 project. Thank you very much, @assimelha! (c.f. #114)
