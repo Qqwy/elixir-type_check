@@ -206,6 +206,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.12.2 -
+  - Fixes:
+    - Compilation error in a new Phoenix 1.16 project. Thank you very much, @assimelha! (c.f. #114)
 - 0.12.1 - 
   - Performance:
     - Significant reduction on generated code size of runtime type checks. This will speed up compilation roughly ~10-50%.
