@@ -70,12 +70,22 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
       |> color(:map, opts)
     end
 
+    if function_exported?(Macro, :inspect_atom, 2) do
+      # Elixir 1.14+
+      defp inspect_as_key(key) do
+        Macro.inspect_atom(:key, key)
+      end
+    else
+      # Legacy Elixir
+      defdelegate inspect_as_key(key), to: Code.Identifier
+    end
+
     defp to_map_kv({key, value_type}, opts) do
       import Inspect.Algebra, only: [color: 3, concat: 2, to_doc: 2]
       value_doc = TypeCheck.Protocols.Inspect.inspect(value_type, opts)
 
       if non_module_atom?(key) do
-        key = color(Code.Identifier.inspect_as_key(key), :atom, opts)
+        key = color(inspect_as_key(key), :atom, opts)
         concat(key, concat(" ", value_doc))
       else
         sep = color(" =>", :map, opts)
