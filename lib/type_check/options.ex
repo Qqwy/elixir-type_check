@@ -77,6 +77,8 @@ defmodule TypeCheck.Options do
   for all added `@spec`s, as well as `TypeCheck.conforms/3`/`TypeCheck.conforms?/3`/`TypeCheck.conforms!/3` calls.
   """
 
+  defstruct [overrides: [], default_overrides: true, enable_runtime_checks: true, debug: false]
+
   if_recompiling? do
     use TypeCheck
 
@@ -106,8 +108,6 @@ defmodule TypeCheck.Options do
       debug: boolean(),
     }
   end
-
-  defstruct [overrides: [], default_overrides: true, enable_runtime_checks: true, debug: false]
 
   def new() do
     %__MODULE__{overrides: default_overrides()}
