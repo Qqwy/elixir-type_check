@@ -10,6 +10,13 @@ defmodule TypeCheck.Internals.PreExpander do
     |> Macro.expand(env)
     |> TypeCheck.Internals.Overrides.rewrite_if_override(Map.get(options, :overrides, []), env)
     |> case do
+        ast = {{:., _, [{:__aliases__, _, module_alias}, unqualified_type]}, meta, args} ->
+          if Module.concat(module_alias) == env.module do
+            {unqualified_type, meta, args}
+          else
+            ast
+          end
+
       ast = {:lazy_explicit, meta, args}  ->
         if {:lazy_explicit, 3} in builtin_imports do
           ast
