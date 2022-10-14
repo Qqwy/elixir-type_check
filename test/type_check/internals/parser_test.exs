@@ -1,6 +1,6 @@
 defmodule TypeCheck.Internals.ParserTest do
   @moduledoc false
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest TypeCheck.Internals.Parser
 
   alias TypeCheck.Internals.Parser
@@ -101,6 +101,7 @@ defmodule TypeCheck.Internals.ParserTest do
       {:module, _, bytecode, _} =
         defmodule TypespecSample do
           @moduledoc false
+          @compile :debug_info
           unquote(block)
           def f(a), do: a
         end
