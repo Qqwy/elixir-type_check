@@ -1,4 +1,4 @@
-defmodule TypespecGenExample do
+defmodule TypespecGenerationExample do
   @moduledoc """
   Module used for the regression test of issue #139
   about generation of proper typespecs from recursive type definitions

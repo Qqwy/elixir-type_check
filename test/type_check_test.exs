@@ -112,12 +112,13 @@ defmodule TypeCheckTest do
 
   describe "Typespec generation" do
     test "Typespec generation of recursive type (using lazy) with one_of works (regression test for #139)" do
-      defmodule TypespecGenExample do
-        use TypeCheck
+      # Depends on the example in `support/typespec_generation_example.ex`
+      {:ok, [type: t1, type: t2]} = Code.Typespec.fetch_types(TypespecGenerationExample)
+      t1_str = t1 |> Code.Typespec.type_to_quoted() |> Macro.to_string()
+      t2_str = t2 |> Code.Typespec.type_to_quoted() |> Macro.to_string()
 
-        @type! t() :: lazy(t(true | false))
-        @type! t(value) :: {:value, value} | {:t, t()}
-      end
+      assert t1_str == "t(value) :: {:value, value} | {:t, t()}"
+      assert t2_str == "t() :: t(true | false)"
     end
   end
 end
