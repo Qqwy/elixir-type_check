@@ -83,6 +83,10 @@ defmodule TypeCheck.Builtin.Guarded do
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)
 
+      # We import the original module, if possible.
+      # This way, Elixir is able to find unqualified functions that are used in the type guard,
+      # even if the type containing the guard ends up being used in another module.
+      # C.f. issue #147.
       guard_ast =
         if s.original_module && !Module.open?(s.original_module) do
           quote do
