@@ -208,16 +208,20 @@ defmodule TypeCheck.Internals.PreExpander do
         # Ensures that if the type-with-a-guard is used in a different module
         # it will still be able to use functions from the module with the definition
         # unqualified. c.f. issue #147
-        guard =
-          quote generated: true, location: :keep do
-            import unquote(env.module)
-            unquote(guard)
-          end
+        # guard =
+        #   quote generated: true, location: :keep do
+        #     import unquote(env.module)
+        #     unquote(guard)
+        #   end
 
         escaped_guard = Macro.escape(guard)
 
         quote generated: true, location: :keep do
-          TypeCheck.Builtin.guarded_by(unquote(rewritten_type), unquote(escaped_guard))
+          TypeCheck.Builtin.guarded_by(
+            unquote(rewritten_type),
+            unquote(escaped_guard),
+            unquote(env.module)
+          )
         end
 
       {:{}, _, elements} ->
