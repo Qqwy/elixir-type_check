@@ -5,7 +5,7 @@ end
 
 defmodule TypeCheckTest.SpecWithGuardExample do
   use TypeCheck
-  @spec! in_magic_range((x :: non_neg_integer() when x != 42)) :: boolean()
+  @spec! in_magic_range(x :: non_neg_integer() when x != 42) :: boolean()
   def in_magic_range(_val) do
     true
   end
@@ -15,7 +15,6 @@ defmodule TypeCheckTest.TypeWithGuardExample do
   use TypeCheck
   @type! magic_num :: non_neg_integer() when magic_num != 69
 end
-
 
 defmodule TypeCheckTest do
   use ExUnit.Case, async: true
@@ -68,39 +67,58 @@ defmodule TypeCheckTest do
     end
 
     test "it will raise when the input does not match the spec type" do
-      exception = assert_raise(TypeCheck.TypeError, fn ->
-        TypeCheckTest.SpecWithGuardExample.in_magic_range(-10)
-      end)
+      exception =
+        assert_raise(TypeCheck.TypeError, fn ->
+          TypeCheckTest.SpecWithGuardExample.in_magic_range(-10)
+        end)
 
       assert {%TypeCheck.Spec{}, :param_error, %{}, [-10]} = exception.raw
 
-      assert {%TypeCheck.Builtin.Guarded{}, :type_failed, %{}, -10} = elem(exception.raw, 2).problem
+      assert {%TypeCheck.Builtin.Guarded{}, :type_failed, %{}, -10} =
+               elem(exception.raw, 2).problem
     end
+
     test "it will raise when the input does not match the spec guard" do
-      exception = assert_raise(TypeCheck.TypeError, fn ->
-        TypeCheckTest.SpecWithGuardExample.in_magic_range(42)
-      end)
+      exception =
+        assert_raise(TypeCheck.TypeError, fn ->
+          TypeCheckTest.SpecWithGuardExample.in_magic_range(42)
+        end)
 
       assert {%TypeCheck.Spec{}, :param_error, %{}, [42]} = exception.raw
-      assert {%TypeCheck.Builtin.Guarded{}, :guard_failed, %{}, 42} = elem(exception.raw, 2).problem
+
+      assert {%TypeCheck.Builtin.Guarded{}, :guard_failed, %{}, 42} =
+               elem(exception.raw, 2).problem
     end
   end
 
   describe "type with guard" do
     test "it can be conformed against" do
       require TypeCheck
-      assert TypeCheck.conforms?(10, TypeCheckTest.TypeWithGuardExample.magic_num)
-      refute TypeCheck.conforms?(69, TypeCheckTest.TypeWithGuardExample.magic_num)
+      assert TypeCheck.conforms?(10, TypeCheckTest.TypeWithGuardExample.magic_num())
+      refute TypeCheck.conforms?(69, TypeCheckTest.TypeWithGuardExample.magic_num())
     end
   end
 
   test "StreamData is optional" do
-    {stdout, 0} = System.cmd("mix", ["deps.compile", "--force"],
-      cd: "./test/support/depending_project",
-      stderr_to_stdout: true
-    )
+    {stdout, 0} =
+      System.cmd("mix", ["deps.compile", "--force"],
+        cd: "./test/support/depending_project",
+        stderr_to_stdout: true
+      )
 
     refute stdout =~ "warning: StreamData"
     refute stdout =~ "warning: "
+  end
+
+  describe "Typespec generation" do
+    test "Typespec generation of recursive type (using lazy) with one_of works (regression test for #139)" do
+      # Depends on the example in `support/typespec_generation_example.ex`
+      {:ok, [type: t1, type: t2]} = Code.Typespec.fetch_types(TypespecGenerationExample)
+      t1_str = t1 |> Code.Typespec.type_to_quoted() |> Macro.to_string()
+      t2_str = t2 |> Code.Typespec.type_to_quoted() |> Macro.to_string()
+
+      assert t1_str == "t(value) :: {:value, value} | {:t, t()}"
+      assert t2_str == "t() :: t(true | false)"
+    end
   end
 end

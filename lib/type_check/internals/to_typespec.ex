@@ -7,11 +7,16 @@ defmodule TypeCheck.Internals.ToTypespec do
   def rewrite(ast, env) do
     builtin_imports = env.functions[TypeCheck.Builtin] || []
     case Macro.expand(ast, env) do
-      ast = {:lazy_explicit, _, [module, name, arguments]} ->
+      ast = {:lazy_explicit, meta, [module, name, arguments]} ->
         if {:lazy_explicit, 3} in builtin_imports do
           # Removes 'lazy' from typespec.
-          quote generated: true, location: :keep do
-            unquote(module).unquote(name)(unquote_splicing(arguments))
+          # Restores original type information we had available in `@type!`.
+          case Keyword.fetch(meta, :original_type_ast) do
+            {:ok, type_ast} -> type_ast
+            :error ->
+              quote generated: true, location: :keep do
+                unquote(module).unquote(name)(unquote_splicing(arguments))
+              end
           end
         else
           ast

@@ -1191,7 +1191,6 @@ defmodule TypeCheck.Builtin do
     @spec lazy(ast :: TypeCheck.Type.t()) :: TypeCheck.Builtin.Lazy.t()
   end
   defmacro lazy(type_call_ast) do
-
     typecheck_options = Module.get_attribute(__CALLER__.module, TypeCheck.Options, TypeCheck.Options.new())
     expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__, typecheck_options)
 
@@ -1205,9 +1204,14 @@ defmodule TypeCheck.Builtin do
           other
       end
 
-    quote generated: true, location: :keep do
-      lazy_explicit(unquote(module), unquote(name), unquote(arguments))
-    end
+    # Used in the 'ToTypespec' conversion
+    # to use original type information when removing `lazy`.
+    {:lazy_explicit, meta, args} =
+      quote generated: true, location: :keep do
+        lazy_explicit(unquote(module), unquote(name), unquote(arguments))
+      end
+    meta = meta |> Keyword.put(:original_type_ast, type_call_ast)
+    {:lazy_explicit, meta, args}
   end
 
   defp find_matching_module(caller, name, arity) do
