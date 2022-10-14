@@ -6,12 +6,11 @@ defmodule TypeCheck.Internals.PreExpander do
   # that e.g. are function calls to functions in `TypeCheck.Builtin`.
   def rewrite(ast, env, options) do
     builtin_imports = env.functions[TypeCheck.Builtin] || []
-
     ast
     |> Macro.expand(env)
     |> TypeCheck.Internals.Overrides.rewrite_if_override(Map.get(options, :overrides, []), env)
     |> case do
-      ast = {:lazy_explicit, meta, args} ->
+      ast = {:lazy_explicit, meta, args}  ->
         if {:lazy_explicit, 3} in builtin_imports do
           ast
         else
@@ -27,7 +26,6 @@ defmodule TypeCheck.Internals.PreExpander do
         else
           {:literal, meta, [rewrite(value, env, options)]}
         end
-
       ast = {:tuple, meta, [value]} ->
         if {:tuple, 1} in builtin_imports do
           ast
@@ -35,27 +33,27 @@ defmodule TypeCheck.Internals.PreExpander do
           {:tuple, meta, [rewrite(value, env, options)]}
         end
 
-      {list_taking_fun, meta, [arg]}
-      when is_list(arg) and list_taking_fun in [:fixed_list, :fixed_tuple, :one_of] ->
+      {list_taking_fun, meta, [arg]} when is_list(arg) and list_taking_fun in [:fixed_list, :fixed_tuple, :one_of] ->
         if {list_taking_fun, 1} in builtin_imports do
-          rewritten_arg =
-            arg
+            rewritten_arg = arg
             |> Enum.map(&rewrite(&1, env, options))
 
           quote generated: true, location: :keep do
             TypeCheck.Builtin.unquote(list_taking_fun)(unquote(rewritten_arg))
           end
+
         else
           {list_taking_fun, meta, [rewrite(arg, env, options)]}
         end
 
       ast = {:impl, meta, [module]} ->
-        # Do not expand arguments to `impl/1` further
-        if {:impl, 1} in builtin_imports do
-          ast
-        else
-          {:impl, meta, [rewrite(module, env, options)]}
-        end
+         # Do not expand arguments to `impl/1` further
+         if {:impl, 1} in builtin_imports do
+           ast
+         else
+           {:impl, meta, [rewrite(module, env, options)]}
+         end
+
 
       ast = {:&, _, _args} ->
         # Do not expand inside captures
@@ -68,105 +66,87 @@ defmodule TypeCheck.Internals.PreExpander do
 
       [{:->, _, args}] ->
         case args do
-          [[{:..., _, module}], return_type] when is_atom(module) ->
+          [[{:"...", _, module}], return_type] when is_atom(module) ->
             quote generated: true, location: :keep do
               TypeCheck.Builtin.function(unquote(rewrite(return_type, env, options)))
             end
-
           [param_types, return_type] ->
             rewritten_params =
               param_types
               |> Enum.map(&rewrite(&1, env, options))
-
             quote generated: true, location: :keep do
-              TypeCheck.Builtin.function(
-                unquote(rewritten_params),
-                unquote(rewrite(return_type, env, options))
-              )
+              TypeCheck.Builtin.function(unquote(rewritten_params), unquote(rewrite(return_type, env, options)))
             end
         end
 
       list when is_list(list) ->
-        case list do
-          [] ->
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.literal(unquote([]))
-            end
+           case list do
+             [] ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.literal(unquote([]))
+               end
+             [{:..., _, _}] ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.nonempty_list()
+               end
 
-          [{:..., _, _}] ->
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.nonempty_list()
-            end
-
-          [element_type] ->
-            rewritten_element_type = rewrite(element_type, env, options)
-
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.list(unquote(rewritten_element_type))
-            end
-
-          [element_type, {:..., _, _}] ->
-            rewritten_element_type = rewrite(element_type, env, options)
-
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))
-            end
-
-          other ->
-            raise TypeCheck.CompileError, """
-            TypeCheck does not support the list literal `#{Macro.to_string(other)}`
-            Currently supported are:
-            - [] -> empty list
-            - [type] -> list(type)
-            - [...] -> nonempty_list()
-            - [type, ...] -> nonempty_list(type)
-            """
-        end
-
+             [element_type] ->
+               rewritten_element_type = rewrite(element_type, env, options)
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.list(unquote(rewritten_element_type))
+               end
+             [element_type, {:..., _, _}] ->
+               rewritten_element_type = rewrite(element_type, env, options)
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.nonempty_list(unquote(rewritten_element_type))
+               end
+             other ->
+               raise TypeCheck.CompileError, """
+               TypeCheck does not support the list literal `#{Macro.to_string(other)}`
+               Currently supported are:
+               - [] -> empty list
+               - [type] -> list(type)
+               - [...] -> nonempty_list()
+               - [type, ...] -> nonempty_list(type)
+               """
+           end
       bitstring = {:<<>>, _, args} ->
-        case args do
-          [] ->
-            # Empty bitstring
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.literal(unquote(<<>>))
-            end
-
-          [{:"::", _, [{:_, _, _}, size]}] when is_integer(size) ->
-            # <<_ :: size >>
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.sized_bitstring(unquote(size), nil)
-            end
-
-          [{:"::", _, [{:_, _, _}, {:*, _, [{:_, _, _}, unit]}]}] when is_integer(unit) ->
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.sized_bitstring(0, unquote(unit))
-            end
-
-          [
-            {:"::", _, [{:_, _, _}, size]},
-            {:"::", _, [{:_, _, _}, {:*, _, [{:_, _, _}, unit]}]}
-          ] ->
-            quote generated: true, location: :keep do
-              TypeCheck.Builtin.sized_bitstring(unquote(size), unquote(unit))
-            end
-
-          _other ->
-            raise TypeCheck.CompileError, """
-            TypeCheck does not support the bitstring literal `#{Macro.to_string(bitstring)}`
-            Currently supported are:
-            - <<>> -> empty bitstring
-            - <<_ :: size >> -> a bitstring of exactly `size` bits long
-            - <<_ :: _ * unit >> -> a bitstring whose length is divisible by `unit`.
-            - <<_ :: size, _ * unit >> -> a bitstring whose (length - `size`) is divisible by `unit`.
-            """
-        end
+           case args do
+             [] ->
+               # Empty bitstring
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.literal(unquote(<<>>))
+               end
+             [{:"::", _, [{:_, _, _}, size]}] when is_integer(size) ->
+               # <<_ :: size >>
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.sized_bitstring(unquote(size), nil)
+               end
+             [{:"::", _, [{:_, _, _}, {:*, _, [{:_, _, _}, unit]}]}] when is_integer(unit) ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.sized_bitstring(0, unquote(unit))
+               end
+            [
+              {:"::", _, [{:_, _, _}, size]},
+              {:"::", _, [{:_, _, _}, {:*, _, [{:_, _, _}, unit]}]}
+            ] ->
+               quote generated: true, location: :keep do
+                 TypeCheck.Builtin.sized_bitstring(unquote(size), unquote(unit))
+               end
+             _other ->
+               raise TypeCheck.CompileError, """
+               TypeCheck does not support the bitstring literal `#{Macro.to_string(bitstring)}`
+               Currently supported are:
+               - <<>> -> empty bitstring
+               - <<_ :: size >> -> a bitstring of exactly `size` bits long
+               - <<_ :: _ * unit >> -> a bitstring whose length is divisible by `unit`.
+               - <<_ :: size, _ * unit >> -> a bitstring whose (length - `size`) is divisible by `unit`.
+               """
+           end
 
       {:|, _, [lhs, rhs]} ->
         quote generated: true, location: :keep do
-          TypeCheck.Builtin.one_of(
-            unquote(rewrite(lhs, env, options)),
-            unquote(rewrite(rhs, env, options))
-          )
+          TypeCheck.Builtin.one_of(unquote(rewrite(lhs, env, options)), unquote(rewrite(rhs, env, options)))
         end
 
       ast = {:%{}, _, []} ->
@@ -203,25 +183,8 @@ defmodule TypeCheck.Internals.PreExpander do
         """
 
       {:when, _, [type, guard]} ->
-        rewritten_type = rewrite(type, env, options)
-
-        # Ensures that if the type-with-a-guard is used in a different module
-        # it will still be able to use functions from the module with the definition
-        # unqualified. c.f. issue #147
-        # guard =
-        #   quote generated: true, location: :keep do
-        #     import unquote(env.module)
-        #     unquote(guard)
-        #   end
-
-        escaped_guard = Macro.escape(guard)
-
         quote generated: true, location: :keep do
-          TypeCheck.Builtin.guarded_by(
-            unquote(rewritten_type),
-            unquote(escaped_guard),
-            unquote(env.module)
-          )
+          TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env, options)), unquote(Macro.escape(guard)), unquote(env.module))
         end
 
       {:{}, _, elements} ->
@@ -281,44 +244,35 @@ defmodule TypeCheck.Internals.PreExpander do
             {{:required, _, [key_type]}, value_type}, acc ->
               req_key = rewrite(key_type, env, options)
               req_value = rewrite(value_type, env, options)
-
-              case req_key do
+            case req_key do
                 # `required(literal(key))`
-                {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
-                  update_in(acc.fixed, fn fixeds -> [{fixed_key, req_value} | fixeds] end)
-
-                _ ->
-                  update_in(acc.required, fn requireds -> [{req_key, req_value} | requireds] end)
-              end
-
-            {{:optional, _, [key_type]}, value_type}, acc ->
+              {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
+                update_in(acc.fixed, fn fixeds -> [{fixed_key, req_value} | fixeds] end)
+              _ ->
+                update_in(acc.required, fn requireds -> [{req_key, req_value} | requireds] end)
+            end
+            {{:optional, _, [key_type]}, value_type}, acc->
               opt = {rewrite(key_type, env, options), rewrite(value_type, env, options)}
               update_in(acc.optional, fn optionals -> [opt | optionals] end)
-
             {key, value_type}, acc ->
               fix = {key, rewrite(value_type, env, options)}
               update_in(acc.fixed, fn fixeds -> [fix | fixeds] end)
-
             other, _acc ->
               raise """
               Unknown syntax in map type literal: #{inspect(other)}.
               """
           end)
 
-        quote generated: true, location: :keep do
-          TypeCheck.Builtin.fancy_map(
-            unquote(field_types.fixed),
-            unquote(field_types.required),
-            unquote(field_types.optional)
-          )
-        end
+          quote generated: true, location: :keep do
+            TypeCheck.Builtin.fancy_map(unquote(field_types.fixed), unquote(field_types.required), unquote(field_types.optional))
+          end
 
-        # _other ->
-        #   # Unhandled already-expanded structs
-        #   # Treat them as literal values
-        #   quote generated: true, location: :keep do
-        #     TypeCheck.Builtin.literal(unquote(orig_ast))
-        #   end
+      # _other ->
+      #   # Unhandled already-expanded structs
+      #   # Treat them as literal values
+      #   quote generated: true, location: :keep do
+      #     TypeCheck.Builtin.literal(unquote(orig_ast))
+      #   end
     end
   end
 
@@ -339,11 +293,7 @@ defmodule TypeCheck.Internals.PreExpander do
         Macro.struct!(expanded_struct_name, env)
       rescue
         err in [CompileError] ->
-          pretty_type =
-            quote do
-              %unquote(struct_name){unquote_splicing(fields)}
-            end
-
+          pretty_type = quote do %unquote(struct_name){unquote_splicing(fields)} end
           description = """
 
           Could not look up default fields for struct type #{Macro.to_string(pretty_type)}.
@@ -365,26 +315,18 @@ defmodule TypeCheck.Internals.PreExpander do
           See https://github.com/Qqwy/elixir-type_check/issues/83
           for more information.
           """
-
           fields =
             err
             |> Map.from_struct()
             |> Map.to_list()
             |> Keyword.replace(:description, description)
-
           raise CompileError, fields
       end
-
     default_field_types =
       default_fields
       |> Map.from_struct()
       |> Map.keys()
-      |> Enum.map(fn key ->
-        {key,
-         quote do
-           TypeCheck.Builtin.any()
-         end}
-      end)
+      |> Enum.map(fn key -> {key, quote do TypeCheck.Builtin.any() end} end)
       |> Enum.into(%{})
 
     field_types = Map.merge(default_field_types, explicit_field_types) |> Enum.to_list()
