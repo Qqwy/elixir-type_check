@@ -11,7 +11,6 @@ defmodule TypeCheck.Internals.ToTypespec do
         if {:lazy_explicit, 3} in builtin_imports do
           # Removes 'lazy' from typespec.
           # Restores original type information we had available in `@type!`.
-          IO.inspect(meta, label: :meta)
           case Keyword.fetch(meta, :original_type_ast) do
             {:ok, type_ast} -> type_ast
             :error ->
