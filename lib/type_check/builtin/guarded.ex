@@ -1,5 +1,5 @@
 defmodule TypeCheck.Builtin.Guarded do
-  defstruct [:type, :guard]
+  defstruct [:type, :guard, :original_module]
 
   use TypeCheck
   import TypeCheck.Type.StreamData
@@ -8,7 +8,7 @@ defmodule TypeCheck.Builtin.Guarded do
     Macro.escape(term)
   end
 
-  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast()}
+  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast(), original_module: module() | nil}
 
 
   defimpl TypeCheck.Protocols.Escape do
@@ -83,6 +83,20 @@ defmodule TypeCheck.Builtin.Guarded do
         |> Enum.into(%{})
         |> Macro.escape(unquote: true)
 
+      # We import the original module, if possible.
+      # This way, Elixir is able to find unqualified functions that are used in the type guard,
+      # even if the type containing the guard ends up being used in another module.
+      # C.f. issue #147.
+      guard_ast =
+        if s.original_module && !Module.open?(s.original_module) do
+          quote do
+            import unquote(s.original_module)
+            unquote(s.guard)
+          end
+        else
+          s.guard
+        end
+
       quote generated: true, location: :keep do
         case unquote(type_check) do
           {:ok, bindings, altered_param} ->
@@ -91,7 +105,7 @@ defmodule TypeCheck.Builtin.Guarded do
 
             unquote(names_map) = bindings_map
 
-            if unquote(s.guard) do
+            if unquote(guard_ast) do
               {:ok, bindings, altered_param}
             else
               {:error,

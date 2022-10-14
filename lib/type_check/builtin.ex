@@ -1105,15 +1105,16 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `type` (without the guard) instead.
   """
   if_recompiling? do
-    @spec! guarded_by(type :: TypeCheck.Type.t(), ast :: term()) :: TypeCheck.Builtin.Guarded.t()
+    @spec! guarded_by(type :: TypeCheck.Type.t(), ast :: term(), original_module:: module() | nil) :: TypeCheck.Builtin.Guarded.t()
   end
-  def guarded_by(type, guard_ast) do
+  def guarded_by(type, guard_ast, module \\ nil) do
     # Make sure the type contains coherent names.
     TypeCheck.Builtin.Guarded.extract_names(type)
 
     build_struct(TypeCheck.Builtin.Guarded)
     |> Map.put(:type, type)
     |> Map.put(:guard, guard_ast)
+    |> Map.put(:original_module, module)
   end
 
   @doc typekind: :extension
@@ -1190,7 +1191,6 @@ defmodule TypeCheck.Builtin do
     @spec lazy(ast :: TypeCheck.Type.t()) :: TypeCheck.Builtin.Lazy.t()
   end
   defmacro lazy(type_call_ast) do
-
     typecheck_options = Module.get_attribute(__CALLER__.module, TypeCheck.Options, TypeCheck.Options.new())
     expanded_call = TypeCheck.Internals.PreExpander.rewrite(type_call_ast, __CALLER__, typecheck_options)
 
@@ -1204,9 +1204,14 @@ defmodule TypeCheck.Builtin do
           other
       end
 
-    quote generated: true, location: :keep do
-      lazy_explicit(unquote(module), unquote(name), unquote(arguments))
-    end
+    # Used in the 'ToTypespec' conversion
+    # to use original type information when removing `lazy`.
+    {:lazy_explicit, meta, args} =
+      quote generated: true, location: :keep do
+        lazy_explicit(unquote(module), unquote(name), unquote(arguments))
+      end
+    meta = meta |> Keyword.put(:original_type_ast, type_call_ast)
+    {:lazy_explicit, meta, args}
   end
 
   defp find_matching_module(caller, name, arity) do
