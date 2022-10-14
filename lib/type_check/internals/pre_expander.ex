@@ -184,7 +184,7 @@ defmodule TypeCheck.Internals.PreExpander do
 
       {:when, _, [type, guard]} ->
         quote generated: true, location: :keep do
-          TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env, options)), unquote(Macro.escape(guard)))
+          TypeCheck.Builtin.guarded_by(unquote(rewrite(type, env, options)), unquote(Macro.escape(guard)), unquote(env.module))
         end
 
       {:{}, _, elements} ->

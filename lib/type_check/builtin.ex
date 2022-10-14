@@ -1105,15 +1105,16 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `type` (without the guard) instead.
   """
   if_recompiling? do
-    @spec! guarded_by(type :: TypeCheck.Type.t(), ast :: term()) :: TypeCheck.Builtin.Guarded.t()
+    @spec! guarded_by(type :: TypeCheck.Type.t(), ast :: term(), original_module:: module() | nil) :: TypeCheck.Builtin.Guarded.t()
   end
-  def guarded_by(type, guard_ast) do
+  def guarded_by(type, guard_ast, module \\ nil) do
     # Make sure the type contains coherent names.
     TypeCheck.Builtin.Guarded.extract_names(type)
 
     build_struct(TypeCheck.Builtin.Guarded)
     |> Map.put(:type, type)
     |> Map.put(:guard, guard_ast)
+    |> Map.put(:original_module, module)
   end
 
   @doc typekind: :extension
