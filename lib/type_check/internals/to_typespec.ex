@@ -6,6 +6,7 @@ defmodule TypeCheck.Internals.ToTypespec do
 
   def rewrite(ast, env) do
     builtin_imports = env.functions[TypeCheck.Builtin] || []
+
     case Macro.expand(ast, env) do
       ast = {:lazy_explicit, _, [module, name, arguments]} ->
         if {:lazy_explicit, 3} in builtin_imports do
@@ -51,11 +52,11 @@ defmodule TypeCheck.Internals.ToTypespec do
 
       ast = {:one_of, _, [types]} ->
         if {:one_of, 1} in builtin_imports do
-        Enum.reduce(types, fn type, snippet ->
-          quote generated: true, location: :keep do
-            unquote(snippet) | unquote(type)
-          end
-        end)
+          Enum.reduce(types, fn type, snippet ->
+            quote generated: true, location: :keep do
+              unquote(snippet) | unquote(type)
+            end
+          end)
         else
           ast
         end
@@ -69,15 +70,15 @@ defmodule TypeCheck.Internals.ToTypespec do
 
       ast = {:tuple, meta, [size]} ->
         if {:tuple, 1} in builtin_imports do
-        elems =
-          0..size
-          |> Enum.map(fn _ ->
-            quote generated: true, location: :keep do
-              any()
-            end
-          end)
+          elems =
+            0..size
+            |> Enum.map(fn _ ->
+              quote generated: true, location: :keep do
+                any()
+              end
+            end)
 
-        {:{}, meta, elems}
+          {:{}, meta, elems}
         else
           ast
         end
