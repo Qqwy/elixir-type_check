@@ -103,4 +103,9 @@ defmodule TypeCheckTest do
     refute stdout =~ "warning: StreamData"
     refute stdout =~ "warning: "
   end
+
+  test "Using the qualified name of a type inside a module defining it is possible (regression test for #154)" do
+    assert TypeCheck.conforms?(%QualifiedNamesExample{name: "Battler"}, QualifiedNamesExample.t())
+  end
+
 end
