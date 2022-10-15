@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.12.3",
+      version: "0.12.4",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -34,6 +34,7 @@ defmodule TypeCheck.MixProject do
         [
           extra_applications: [:logger, :iex]
         ]
+
       _ ->
         [
           extra_applications: [:logger, :iex, :stream_data, :credo]
@@ -71,7 +72,7 @@ defmodule TypeCheck.MixProject do
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:benchee, "~> 1.0", only: :bench},
       {:excoveralls, "~> 0.10", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 
@@ -83,11 +84,20 @@ defmodule TypeCheck.MixProject do
         "README.md": [title: "Guide/Readme"],
         "Type-checking and spec-testing with TypeCheck.md": [title: "Introducing TypeCheck"],
         "Comparing TypeCheck and Elixir Typespecs.md": [title: "Comparison to Plain Typespecs"],
-        "Comparing TypeCheck and Norm.md": [],
+        "Comparing TypeCheck and Norm.md": []
       ],
       # main: "TypeCheck",
       groups_for_modules: [
-        Main: [TypeCheck, TypeCheck.Macros, TypeCheck.Type, TypeCheck.Spec, TypeCheck.Options, TypeCheck.ExUnit, TypeCheck.External, TypeCheck.Defstruct],
+        Main: [
+          TypeCheck,
+          TypeCheck.Macros,
+          TypeCheck.Type,
+          TypeCheck.Spec,
+          TypeCheck.Options,
+          TypeCheck.ExUnit,
+          TypeCheck.External,
+          TypeCheck.Defstruct
+        ],
         "Errors and Formatting them": ~r"^TypeCheck.TypeError",
         "Property Testing": ~r"^TypeCheck.Type.StreamData",
         "Builtin Types": ~r"^TypeCheck.Builtin",

@@ -206,6 +206,11 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.12.4 - 
+  - Fixes:
+    - Allow syntax `%{String.t() => any()}` as shorthand for `%{required(String.t()) => any()}`. (c.f. #152)
+    - Situations in which the fully qualified name of a type defined in the current module were not picked up (`Example.t()` not being found inside specs in `Example`. even though `Example` defined a type called `t()`). (c.f. #154)
+    - A problem with using types with type guards in other modules. (c.f. #147)
 - 0.12.3 -
   - Fixes:
     - Compatibility problems with Elixir v1.14. (`Code.Identifier.inspect_as_key`, working with the AST of imported functions)  Thank you very much, @marcandre! (c.f. #150)
