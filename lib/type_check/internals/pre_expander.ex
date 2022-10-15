@@ -251,19 +251,34 @@ defmodule TypeCheck.Internals.PreExpander do
             {{:required, _, [key_type]}, value_type}, acc ->
               req_key = rewrite(key_type, env, options)
               req_value = rewrite(value_type, env, options)
-            case req_key do
-                # `required(literal(key))`
-              {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
-                update_in(acc.fixed, fn fixeds -> [{fixed_key, req_value} | fixeds] end)
-              _ ->
-                update_in(acc.required, fn requireds -> [{req_key, req_value} | requireds] end)
-            end
+              case req_key do
+                  # `required(literal(key))`
+                {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
+                  update_in(acc.fixed, fn fixeds -> [{fixed_key, req_value} | fixeds] end)
+                _ ->
+                  update_in(acc.required, fn requireds -> [{req_key, req_value} | requireds] end)
+              end
             {{:optional, _, [key_type]}, value_type}, acc->
               opt = {rewrite(key_type, env, options), rewrite(value_type, env, options)}
               update_in(acc.optional, fn optionals -> [opt | optionals] end)
-            {key, value_type}, acc ->
+            {key, value_type}, acc when is_atom(key) or is_integer(key) or is_binary(key) ->
+              # A basic fixed key for a static 'struct like' map
               fix = {key, rewrite(value_type, env, options)}
               update_in(acc.fixed, fn fixeds -> [fix | fixeds] end)
+            {key_type, value_type}, acc ->
+              # Otherwise, it is shorthand for `required(key) => value`
+              req_key = rewrite(key_type, env, options)
+              req_value = rewrite(value_type, env, options)
+              # IO.inspect({req_key, req_value}, label: :asdf)
+
+              case req_key do
+                  # `required(literal(key))`
+                {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
+                  update_in(acc.fixed, fn fixeds -> [{fixed_key, req_value} | fixeds] end)
+                _ ->
+                  update_in(acc.required, fn requireds -> [{req_key, req_value} | requireds] end)
+              end
+
             other, _acc ->
               raise """
               Unknown syntax in map type literal: #{inspect(other)}.
