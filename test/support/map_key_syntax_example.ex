@@ -12,4 +12,5 @@ defmodule MapKeySyntaxExample do
   # and be considered the same as `required(binary())`
   @spec! example(%{String.t() => any} | t()) :: t()
   def example(%__MODULE__{} = struct), do: struct
+  def example(map), do: %__MODULE__{name: inspect(map)}
 end
