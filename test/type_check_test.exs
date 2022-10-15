@@ -122,6 +122,10 @@ defmodule TypeCheckTest do
     end
   end
 
+  test "Using the qualified name of a type inside a module defining it is possible (regression test for #154)" do
+    assert TypeCheck.conforms?(%QualifiedNamesExample{name: "Battler"}, QualifiedNamesExample.t())
+  end
+  
   test "Usage of shorthand map key syntax (`String.t()` == `required(String.t())`) is possible (regression test for #152)" do
     # Depends on the example in `support/map_key_syntax_example.ex`
     assert MapKeySyntaxExample.example(%{"foo" => 10}) ==
