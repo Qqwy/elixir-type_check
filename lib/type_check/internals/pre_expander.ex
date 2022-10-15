@@ -262,6 +262,8 @@ defmodule TypeCheck.Internals.PreExpander do
               # Otherwise, it is shorthand for `required(key) => value`
               req_key = rewrite(key_type, env, options)
               req_value = rewrite(value_type, env, options)
+              # IO.inspect({req_key, req_value}, label: :asdf)
+
               case req_key do
                   # `required(literal(key))`
                 {{:., _, [{:__aliases__, _, [:TypeCheck, :Builtin]}, :literal]}, _, [fixed_key]} ->
