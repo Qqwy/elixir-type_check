@@ -209,6 +209,8 @@ Details:
 - 0.13.0 - 
   - Additions:
     - Support for maps with multiple optional atom keys. Thank you very much, @dvic! (c.f. #165)
+  - Fixes:
+    - Fixes 'Enumerable not implemented' crash when passing a struct to a type expecting a fixed map. (c.f. #161)
 - 0.12.4 - 
   - Fixes:
     - Allow syntax `%{String.t() => any()}` as shorthand for `%{required(String.t()) => any()}`. (c.f. #152)
