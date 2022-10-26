@@ -44,7 +44,7 @@ defmodule TypeCheck.Builtin.FixedMapTest do
              TypeCheck.conforms(%{foo: "bar", key: "hello"}, %{key: String.t()})
   end
 
-  test "Checkings structs does not get a 'protocol Enumerable not implemented' (Regression #161)" do
+  test "Checkings structs inside a union that also allows maps does not get a 'protocol Enumerable not implemented' (Regression #161)" do
     assert EnumerableNotImplementedExample.hello(%{"a" => :b}) == :ok
 
     assert EnumerableNotImplementedExample.hello(%EnumerableNotImplementedExample{name: "X"}) ==

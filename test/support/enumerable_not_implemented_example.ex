@@ -5,7 +5,7 @@ defmodule EnumerableNotImplementedExample do
   require TypeCheck.DefaultOverrides
 
   defstruct [:name]
-  use TypeCheck, enable_runtime_checks: Mix.env() != :prod
+  use TypeCheck
   @type! t :: %__MODULE__{name: String.t()}
 
   @spec! hello(%{String.t() => any} | t()) :: atom
