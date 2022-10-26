@@ -6,8 +6,8 @@ defmodule TypeCheck.Builtin.List do
   @type! t(element_type) :: %__MODULE__{element_type: element_type}
 
   @type! problem_tuple ::
-         {t(), :not_a_list, %{}, any()}
-         | {t(), :element_error,
+         {:not_a_list, %{}, any()}
+         | {:element_error,
             %{
               problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()),
               index: non_neg_integer()
@@ -24,7 +24,7 @@ defmodule TypeCheck.Builtin.List do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_list(x) ->
-            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_list, %{}, unquote(param)}}
+            {:error, {:not_a_list, %{}, unquote(param)}}
 
           _ ->
             unquote(build_element_check(element_type, param, s))
@@ -58,7 +58,7 @@ defmodule TypeCheck.Builtin.List do
               {:error, problem} ->
                 problem =
                   {:error,
-                  {unquote(TypeCheck.Internals.Escaper.escape(s)), :element_error, %{problem: problem, index: index},
+                  {:element_error, %{problem: problem, index: index},
                     orig_param}}
 
                 {:halt, problem}

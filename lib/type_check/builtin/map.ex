@@ -5,10 +5,10 @@ defmodule TypeCheck.Builtin.Map do
   @opaque! t :: %__MODULE__{key_type: TypeCheck.Type.t(), value_type: TypeCheck.Type.t()}
 
   @type! problem_tuple ::
-           {t(), :not_a_map, %{}, any()}
-           | {t(), :key_error,
+           {:not_a_map, %{}, any()}
+           | {:key_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
-           | {t(), :value_error,
+           | {:value_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, any()}
 
   defimpl TypeCheck.Protocols.Escape do
@@ -22,7 +22,7 @@ defmodule TypeCheck.Builtin.Map do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_map(x) ->
-            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, unquote(param)}}
+            {:error, {:not_a_map, %{}, unquote(param)}}
 
           _ ->
             unquote(build_keypairs_check(s.key_type, s.value_type, param, s))
@@ -64,7 +64,7 @@ defmodule TypeCheck.Builtin.Map do
               {{:error, problem}, _} ->
                 res =
                   {:error,
-                   {unquote(TypeCheck.Internals.Escaper.escape(s)), :key_error, %{problem: problem, key: key},
+                   {:key_error, %{problem: problem, key: key},
                     orig_param}}
 
                 {:halt, res}
@@ -72,7 +72,7 @@ defmodule TypeCheck.Builtin.Map do
               {_, {:error, problem}} ->
                 res =
                   {:error,
-                   {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error, %{problem: problem, key: key},
+                   {:value_error, %{problem: problem, key: key},
                     orig_param}}
 
                 {:halt, res}

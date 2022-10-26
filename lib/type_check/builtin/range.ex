@@ -10,18 +10,18 @@ defmodule TypeCheck.Builtin.Range do
   end
 
   @type! problem_tuple ::
-         {t(), :not_an_integer, %{}, any()}
-         | {t(), :not_in_range, %{}, integer()}
+         {:not_an_integer, %{}, any()}
+         | {:not_in_range, %{}, integer()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{range: range}, param) do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_integer(x) ->
-            {:error, {unquote(Macro.escape(s)), :not_an_integer, %{}, unquote(param)}}
+            {:error, {:not_an_integer, %{}, unquote(param)}}
 
           x when x not in unquote(Macro.escape(range)) ->
-            {:error, {unquote(Macro.escape(s)), :not_in_range, %{}, unquote(param)}}
+            {:error, {:not_in_range, %{}, unquote(param)}}
 
           correct_value ->
             {:ok, [], correct_value}

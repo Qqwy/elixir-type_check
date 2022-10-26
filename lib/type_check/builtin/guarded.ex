@@ -10,6 +10,8 @@ defmodule TypeCheck.Builtin.Guarded do
 
   @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast(), original_module: module() | nil}
 
+  # TODO problem_tuple type
+
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
@@ -109,13 +111,13 @@ defmodule TypeCheck.Builtin.Guarded do
               {:ok, bindings, altered_param}
             else
               {:error,
-               {unquote(Macro.escape(s)), :guard_failed, %{bindings: bindings_map},
+               {:guard_failed, %{bindings: bindings_map},
                 unquote(param)}}
             end
 
           {:error, problem} ->
             {:error,
-             {unquote(Macro.escape(s)), :type_failed, %{problem: problem}, unquote(param)}}
+             {:type_failed, %{problem: problem}, unquote(param)}}
         end
       end
     end

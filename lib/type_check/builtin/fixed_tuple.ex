@@ -5,9 +5,9 @@ defmodule TypeCheck.Builtin.FixedTuple do
   @type! t :: %__MODULE__{element_types: list(TypeCheck.Type.t())}
 
   @type! problem_tuple ::
-         {t(), :not_a_tuple, %{}, any()}
-         | {t(), :different_size, %{expected_size: integer()}, tuple()}
-         | {t(), :element_error,
+         {:not_a_tuple, %{}, any()}
+         | {:different_size, %{expected_size: integer()}, tuple()}
+         | {:element_error,
             %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()},
             tuple()}
 
@@ -25,11 +25,11 @@ defmodule TypeCheck.Builtin.FixedTuple do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_tuple(x) ->
-            {:error, {unquote(Macro.escape(s)), :not_a_tuple, %{}, x}}
+            {:error, {:not_a_tuple, %{}, x}}
 
           x when tuple_size(x) != unquote(expected_size) ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :different_size, %{expected_size: unquote(expected_size)},
+             {:different_size, %{expected_size: unquote(expected_size)},
               x}}
 
           _ ->
@@ -69,7 +69,7 @@ defmodule TypeCheck.Builtin.FixedTuple do
         else
           {{:error, error}, index} ->
             {:error,
-             {unquote(Macro.escape(s)), :element_error, %{problem: error, index: index},
+             {:element_error, %{problem: error, index: index},
               unquote(param)}}
         end
       end

@@ -10,13 +10,13 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
 
 
   @type! problem_tuple ::
-           {t(), :not_a_list, %{}, any()}
-           | {t(), :element_error,
+           {:not_a_list, %{}, any()}
+           | {:element_error,
               %{
                 problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()),
                 index: non_neg_integer()
               }, any()}
-           | {t(), :terminator_error,
+           | {:terminator_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, any()}
 
   defimpl TypeCheck.Protocols.Escape do
@@ -30,7 +30,7 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_list(x) ->
-            {:error, {unquote(Macro.escape(s)), :not_a_list, %{}, unquote(param)}}
+            {:error, {:not_a_list, %{}, unquote(param)}}
 
           _ ->
             unquote(build_element_check(s, param))
@@ -70,7 +70,7 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
 
                 {:error, problem} ->
                   {:error,
-                   {unquote(Macro.escape(s)), :terminator_error, %{problem: problem, index: index},
+                   {:terminator_error, %{problem: problem, index: index},
                     orig_param}}
               end
             else
@@ -81,7 +81,7 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
                 {:error, problem} ->
                   problem =
                     {:error,
-                     {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
+                     {:element_error, %{problem: problem, index: index},
                       orig_param}}
 
                   {:halt, problem}
