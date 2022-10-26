@@ -206,6 +206,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.13.0 - 
+  - Additions:
+    - Support for maps with multiple optional atom keys. Thank you very much, @dvic! (c.f. #165)
 - 0.12.4 - 
   - Fixes:
     - Allow syntax `%{String.t() => any()}` as shorthand for `%{required(String.t()) => any()}`. (c.f. #152)
