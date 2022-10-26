@@ -929,16 +929,41 @@ defmodule TypeCheck.Builtin do
     |> guarded_by(guard)
   end
 
-  def fancy_map(fixed_keypairs, [], [{optional_key_type, value_type}]) do
+  def fancy_map(fixed_keypairs, [], optionals) do
     fixed = fixed_map(fixed_keypairs)
-    flexible = map(optional_key_type, value_type)
+
+    flexible =
+      case optionals do
+        [{optional_key_type, value_type}] ->
+          map(optional_key_type, value_type)
+
+        optionals when is_list(optionals) and length(optionals) > 0 ->
+          # check whether all optionals have literal keys
+          check_result =
+            Enum.reduce_while(optionals, [], fn
+              {%{__struct__: TypeCheck.Builtin.Literal, value: key}, type}, acc ->
+                {:cont, [{key, type} | acc]}
+
+              _, _acc ->
+                {:halt, :unsupported}
+            end)
+
+          case check_result do
+            :unsupported ->
+              raise_unsupported_map_error()
+
+            keypairs when is_list(keypairs) ->
+              build_struct(TypeCheck.Builtin.OptionalFixedMap)
+              |> Map.put(:keypairs, keypairs)
+          end
+      end
 
     build_struct(TypeCheck.Builtin.CompoundFixedMap)
     |> Map.put(:fixed, fixed)
     |> Map.put(:flexible, flexible)
   end
 
-  def fancy_map(_fixed_keypairs, _required_keypairs, _optional_keypairs) do
+  defp raise_unsupported_map_error do
     raise """
     TODO!
     Maps with complex combinations of multiple
@@ -949,7 +974,8 @@ defmodule TypeCheck.Builtin do
     - maps with only fixed keys (`%{a: 1, b: 2, "foo" => number()}`)
     - maps with a single required keypair (`%{required(key_type) => value_type}`)
     - maps with a single optional keypair (`%{optional(key_type) => value_type}`)
-    - maps with only fixed keys and one optional keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
+    - maps with only fixed keys and zero or more optional literal keypairs (`%{:a => 1, :b => 2, optional(:foo) => boolean(), optional(:bar) => boolean()}`)
+    - maps with only fixed keys and one optional non-literal keypair (`%{:a => 1, :b => 2, "foo" => number(), optional(integer()) => boolean()}`)
 
     Help with extending this support is very welcome.
     c.f. https://github.com/Qqwy/elixir-type_check/issues/7

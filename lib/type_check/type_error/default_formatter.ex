@@ -80,12 +80,12 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "at index #{index}:\n", do_format(problem))
   end
 
-  def do_format({s = %maplike{}, :not_a_map, _, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
+  def do_format({s = %maplike{}, :not_a_map, _, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
     problem = "`#{inspect(val, inspect_value_opts())}` is not a map."
     compound_check(val, s, problem)
   end
 
-  def do_format({s = %maplike{}, :missing_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
+  def do_format({s = %maplike{}, :missing_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
     keys_str =
       keys
       |> Enum.map(&inspect/1)
@@ -95,8 +95,8 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
     compound_check(val, s, problem)
   end
-  
-  def do_format({s = %maplike{}, :superfluous_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
+
+  def do_format({s = %maplike{}, :superfluous_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
     keys_str =
       keys
       |> Enum.map(&inspect/1)
@@ -110,7 +110,7 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
 
   def do_format(
         {s = %maplike{}, :value_error, %{problem: problem, key: key}, val}
-  ) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap] do
+  ) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
     compound_check(val, s, "under key `#{inspect(key, inspect_type_opts())}`:\n", do_format(problem))
   end
 

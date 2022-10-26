@@ -12,6 +12,7 @@ defmodule TypeCheck.TypeError.FormatterTest do
         TypeCheck.Builtin.Bitstring,
         TypeCheck.Builtin.Boolean,
         TypeCheck.Builtin.CompoundFixedMap,
+        TypeCheck.Builtin.OptionalFixedMap,
         TypeCheck.Builtin.FixedList,
         TypeCheck.Builtin.FixedMap,
         TypeCheck.Builtin.FixedTuple,
