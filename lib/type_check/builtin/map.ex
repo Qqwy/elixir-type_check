@@ -56,6 +56,8 @@ defmodule TypeCheck.Builtin.Map do
 
         res =
           orig_param
+          # :maps.to_list is needed so a struct without an Enumerable impl does not crash this code:
+          |> :maps.to_list()
           |> Enum.reduce_while({:ok, [], []}, fn {key, value}, {:ok, bindings, altered_param} ->
             var!(single_field_key, unquote(__MODULE__)) = key
             var!(single_field_value, unquote(__MODULE__)) = value
