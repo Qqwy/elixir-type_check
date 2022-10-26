@@ -15,11 +15,13 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
     def to_check(s, param) do
       quote generated: true, location: :keep do
         x = unquote(param)
+
         case unquote(s.protocol).impl_for(x) do
           nil ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, x}}
+
           _ ->
-          {:ok, [], x}
+            {:ok, [], x}
         end
       end
     end
@@ -31,12 +33,15 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
       |> Inspect.Algebra.color(:builtin_type, opts)
     end
   end
+
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
         case s.protocol.__protocol__(:impls) do
           :not_consolidated ->
-            raise TypeCheck.CompileError, "values of the type #{inspect(s)} can only be generated when the protocol is consolidated."
+            raise TypeCheck.CompileError,
+                  "values of the type #{inspect(s)} can only be generated when the protocol is consolidated."
+
           {:consolidated, implementations} ->
             # Extract all implementations that have their own ToStreamData implementation.
             # raise "TODO #{inspect(implementations)}"
@@ -63,6 +68,7 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
         charlist_gen =
           StreamData.string(:ascii)
           |> StreamData.map(&to_charlist/1)
+
         {:ok, charlist_gen}
       end
 
@@ -84,16 +90,33 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
       def stream_data_impl(_protocol, module) do
         import TypeCheck.Builtin
         alias TypeCheck.Type.StreamData, as: SD
+
         case module do
           # Generators for builtin (non-struct) protocol types
-          Atom -> {:ok, SD.to_gen(atom())}
-          Integer -> {:ok, SD.to_gen(integer())}
-          Float -> {:ok, SD.to_gen(float())}
-          BitString -> {:ok, SD.to_gen(bitstring())}
-          List -> {:ok, SD.to_gen(list())}
-          Map -> {:ok, SD.to_gen(map())}
-          Tuple -> {:ok, SD.to_gen(tuple())}
-          Boolean -> {:ok, SD.to_gen(boolean())}
+          Atom ->
+            {:ok, SD.to_gen(atom())}
+
+          Integer ->
+            {:ok, SD.to_gen(integer())}
+
+          Float ->
+            {:ok, SD.to_gen(float())}
+
+          BitString ->
+            {:ok, SD.to_gen(bitstring())}
+
+          List ->
+            {:ok, SD.to_gen(list())}
+
+          Map ->
+            {:ok, SD.to_gen(map())}
+
+          Tuple ->
+            {:ok, SD.to_gen(tuple())}
+
+          Boolean ->
+            {:ok, SD.to_gen(boolean())}
+
           Range ->
             # Note: These are _literal_ range-structs;
             res =
@@ -101,27 +124,36 @@ defmodule TypeCheck.Builtin.ImplementsProtocol do
               |> StreamData.bind(fn {a, b} ->
                 StreamData.constant(Kernel.".."(min(a, b), max(a, b)))
               end)
+
             {:ok, res}
+
           Function ->
             {:error, :not_implemented_yet}
+
           _ ->
             try do
-              {:consolidated, _to_streamdata_impls} = TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
+              {:consolidated, _to_streamdata_impls} =
+                TypeCheck.Protocols.ToStreamData.__protocol__(:impls)
+
               cond do
-                  # If module contains a `@type! t :: ...`
+                # If module contains a `@type! t :: ...`
                 function_exported?(module, :t, 0) ->
                   res =
                     module.t()
                     |> SD.to_gen()
+
                   {:ok, res}
-                  # If module contains `new/0`
+
+                # If module contains `new/0`
                 function_exported?(module, :new, 0) ->
                   res = StreamData.constant(module.new())
                   {:ok, res}
+
                 true ->
                   {:error, :no_impl}
               end
-            rescue _ ->
+            rescue
+              _ ->
                 # Skip all implementations that raise an error when invoked like this.
                 {:error, :no_impl}
             end

@@ -35,7 +35,6 @@ defmodule TypeCheck.Builtin.PID do
 
         {partgen, partgen, partgen}
         |> StreamData.map(fn {a, b, c} -> IEx.Helpers.pid(a, b, c) end)
-
       end
     end
   end

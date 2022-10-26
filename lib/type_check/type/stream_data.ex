@@ -40,7 +40,8 @@ defmodule TypeCheck.Type.StreamData do
       ...> IntString.t() |> TypeCheck.Type.StreamData.to_gen() |> StreamData.seeded(42) |> Enum.take(10)
       ["0", "2", "1", "-3", "-5", "-4", "-3", "-4", "3", "-6"]
   """
-  def wrap_with_gen(type, generator_function) when is_function(generator_function, 0) or is_function(generator_function, 1) do
+  def wrap_with_gen(type, generator_function)
+      when is_function(generator_function, 0) or is_function(generator_function, 1) do
     %__MODULE__{type: type, generator_function: generator_function}
   end
 
@@ -57,7 +58,6 @@ defmodule TypeCheck.Type.StreamData do
   end
 
   if Code.ensure_loaded?(StreamData) do
-
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
         if is_function(s.generator_function, 0) do
@@ -161,9 +161,7 @@ defmodule TypeCheck.Type.StreamData do
         |> StreamData.scale(fn size -> div(size, 2) end)
       end)
     end
-
   else
-
     def arbitrary_type_gen() do
       raise ArgumentError, """
       `arbitrary_type_gen/0` depends on the optional library `:stream_data`.

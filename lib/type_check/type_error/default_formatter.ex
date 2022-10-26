@@ -5,19 +5,21 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   def format(problem_tuple, location \\ []) do
     res =
       do_format(problem_tuple)
-      |> indent() # Ensure we start with four spaces, which multi-line exception pretty-printing expects
+      # Ensure we start with four spaces, which multi-line exception pretty-printing expects
+      |> indent()
       |> indent()
 
-    location_string(location) <> res
+    (location_string(location) <> res)
     |> String.trim()
   end
 
   defp location_string([]), do: ""
+
   defp location_string(location) do
     raw_file = location[:file]
     line = location[:line]
 
-    file = String.replace_prefix(raw_file, File.cwd! <> "/", "")
+    file = String.replace_prefix(raw_file, File.cwd!() <> "/", "")
     "At #{file}:#{line}:\n"
   end
 
@@ -49,9 +51,11 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     cond do
       s.unit_size == nil ->
         "`#{inspect(val, inspect_value_opts())}` has a different bit_size (#{bit_size(val)}) than expected (#{s.prefix_size})."
+
       s.prefix_size == 0 ->
         "`#{inspect(val, inspect_value_opts())}` has a different bit_size (#{bit_size(val)}) than expected (_ * #{s.unit_size})."
-        true ->
+
+      true ->
         "`#{inspect(val, inspect_value_opts())}` has a different bit_size (#{bit_size(val)}) than expected (#{s.prefix_size} + _ * #{s.unit_size})."
     end
   end
@@ -69,7 +73,9 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
         {s = %TypeCheck.Builtin.FixedList{}, :different_length,
          %{expected_length: expected_length}, val}
       ) do
-    problem = "`#{inspect(val, inspect_value_opts())}` has #{length(val)} elements rather than #{expected_length}."
+    problem =
+      "`#{inspect(val, inspect_value_opts())}` has #{length(val)} elements rather than #{expected_length}."
+
     compound_check(val, s, problem)
   end
 
@@ -80,23 +86,39 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "at index #{index}:\n", do_format(problem))
   end
 
-  def do_format({s = %maplike{}, :not_a_map, _, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
+  def do_format({s = %maplike{}, :not_a_map, _, val})
+      when maplike in [
+             TypeCheck.Builtin.FixedMap,
+             TypeCheck.Builtin.CompoundFixedMap,
+             TypeCheck.Builtin.OptionalFixedMap
+           ] do
     problem = "`#{inspect(val, inspect_value_opts())}` is not a map."
     compound_check(val, s, problem)
   end
 
-  def do_format({s = %maplike{}, :missing_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
+  def do_format({s = %maplike{}, :missing_keys, %{keys: keys}, val})
+      when maplike in [
+             TypeCheck.Builtin.FixedMap,
+             TypeCheck.Builtin.CompoundFixedMap,
+             TypeCheck.Builtin.OptionalFixedMap
+           ] do
     keys_str =
       keys
       |> Enum.map(&inspect/1)
       |> Enum.join(", ")
 
-    problem = "`#{inspect(val, inspect_value_opts())}` is missing the following required key(s): `#{keys_str}`."
+    problem =
+      "`#{inspect(val, inspect_value_opts())}` is missing the following required key(s): `#{keys_str}`."
 
     compound_check(val, s, problem)
   end
 
-  def do_format({s = %maplike{}, :superfluous_keys, %{keys: keys}, val}) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
+  def do_format({s = %maplike{}, :superfluous_keys, %{keys: keys}, val})
+      when maplike in [
+             TypeCheck.Builtin.FixedMap,
+             TypeCheck.Builtin.CompoundFixedMap,
+             TypeCheck.Builtin.OptionalFixedMap
+           ] do
     keys_str =
       keys
       |> Enum.map(&inspect/1)
@@ -108,18 +130,28 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
 
-  def do_format(
-        {s = %maplike{}, :value_error, %{problem: problem, key: key}, val}
-  ) when maplike in [TypeCheck.Builtin.FixedMap, TypeCheck.Builtin.CompoundFixedMap, TypeCheck.Builtin.OptionalFixedMap] do
-    compound_check(val, s, "under key `#{inspect(key, inspect_type_opts())}`:\n", do_format(problem))
+  def do_format({s = %maplike{}, :value_error, %{problem: problem, key: key}, val})
+      when maplike in [
+             TypeCheck.Builtin.FixedMap,
+             TypeCheck.Builtin.CompoundFixedMap,
+             TypeCheck.Builtin.OptionalFixedMap
+           ] do
+    compound_check(
+      val,
+      s,
+      "under key `#{inspect(key, inspect_type_opts())}`:\n",
+      do_format(problem)
+    )
   end
 
   def do_format({%TypeCheck.Builtin.Float{}, :no_match, _, val}) do
     "`#{inspect(val, inspect_value_opts())}` is not a float."
   end
 
-  def do_format({%TypeCheck.Builtin.Function{param_types: list}, :no_match, _, val}) when is_list(list) and is_function(val) do
+  def do_format({%TypeCheck.Builtin.Function{param_types: list}, :no_match, _, val})
+      when is_list(list) and is_function(val) do
     {:arity, arity} = Function.info(val, :arity)
+
     "`#{inspect(val, inspect_value_opts())}` (arity #{arity}) is not a function of arity `#{length(list)}`."
   end
 
@@ -132,7 +164,15 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format({s = %TypeCheck.Builtin.Guarded{}, :guard_failed, %{bindings: bindings}, val}) do
-    guard_str = Inspect.Algebra.format(Inspect.Algebra.color(Macro.to_string(s.guard), :builtin_type, struct(Inspect.Opts, inspect_type_opts())), 80)
+    guard_str =
+      Inspect.Algebra.format(
+        Inspect.Algebra.color(
+          Macro.to_string(s.guard),
+          :builtin_type,
+          struct(Inspect.Opts, inspect_type_opts())
+        ),
+        80
+      )
 
     problem = """
     `#{guard_str}` evaluated to false or nil.
@@ -158,19 +198,19 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     "`#{inspect(val, inspect_value_opts())}` is not a non-negative integer."
   end
 
-  def do_format({s = %listlike{}, :not_a_list, _, val}) when listlike in [TypeCheck.Builtin.List, TypeCheck.Builtin.MaybeImproperList] do
+  def do_format({s = %listlike{}, :not_a_list, _, val})
+      when listlike in [TypeCheck.Builtin.List, TypeCheck.Builtin.MaybeImproperList] do
     compound_check(val, s, "`#{inspect(val, inspect_value_opts())}` is not a list.")
   end
 
-  def do_format(
-        {s = %listlike{}, :element_error, %{problem: problem, index: index}, val}
-  ) when listlike in [TypeCheck.Builtin.List, TypeCheck.Builtin.MaybeImproperList] do
+  def do_format({s = %listlike{}, :element_error, %{problem: problem, index: index}, val})
+      when listlike in [TypeCheck.Builtin.List, TypeCheck.Builtin.MaybeImproperList] do
     compound_check(val, s, "at index #{index}:\n", do_format(problem))
   end
 
   def do_format(
-    {s = %TypeCheck.Builtin.MaybeImproperList{}, :terminator_error, %{problem: problem}, val}
-  ) do
+        {s = %TypeCheck.Builtin.MaybeImproperList{}, :terminator_error, %{problem: problem}, val}
+      ) do
     compound_check(val, s, "at the improper terminator of the list:\n", do_format(problem))
   end
 
@@ -182,17 +222,22 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, "`#{inspect(val, inspect_value_opts())}` is not a map.")
   end
 
-  def do_format({s = %maplike{}, :key_error, %{problem: problem}, val}) when maplike in [TypeCheck.Builtin.Map, TypeCheck.Builtin.CompoundFixedMap] do
+  def do_format({s = %maplike{}, :key_error, %{problem: problem}, val})
+      when maplike in [TypeCheck.Builtin.Map, TypeCheck.Builtin.CompoundFixedMap] do
     compound_check(val, s, "key error:\n", do_format(problem))
   end
 
   def do_format({s = %TypeCheck.Builtin.Map{}, :value_error, %{problem: problem, key: key}, val}) do
-    compound_check(val, s, "under key `#{inspect(key, inspect_type_opts())}`:\n", do_format(problem))
+    compound_check(
+      val,
+      s,
+      "under key `#{inspect(key, inspect_type_opts())}`:\n",
+      do_format(problem)
+    )
   end
 
   def do_format({s = %TypeCheck.Builtin.NamedType{}, :named_type, %{problem: problem}, val}) do
-    child_str =
-      indent(do_format(problem))
+    child_str = indent(do_format(problem))
 
     """
     `#{inspect(val, inspect_value_opts())}` does not match the definition of the named type `#{Inspect.Algebra.format(Inspect.Algebra.color(to_string(s.name), :named_type, struct(Inspect.Opts, inspect_type_opts())), 80)}`
@@ -243,7 +288,11 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   def do_format({s = %TypeCheck.Builtin.Range{range: range}, :not_in_range, _, val}) do
-    compound_check(val, s, "`#{inspect(val, inspect_value_opts())}` falls outside the range #{inspect(range, inspect_type_opts())}.")
+    compound_check(
+      val,
+      s,
+      "`#{inspect(val, inspect_value_opts())}` falls outside the range #{inspect(range, inspect_type_opts())}."
+    )
   end
 
   def do_format({s = %TypeCheck.Builtin.FixedTuple{}, :not_a_tuple, _, val}) do
@@ -255,7 +304,9 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
         {s = %TypeCheck.Builtin.FixedTuple{}, :different_size, %{expected_size: expected_size},
          val}
       ) do
-    problem = "`#{inspect(val, inspect_value_opts())}` has #{tuple_size(val)} elements rather than #{expected_size}."
+    problem =
+      "`#{inspect(val, inspect_value_opts())}` has #{tuple_size(val)} elements rather than #{expected_size}."
+
     compound_check(val, s, problem)
   end
 
@@ -271,21 +322,32 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     compound_check(val, s, problem)
   end
 
-  def do_format({%TypeCheck.Builtin.ImplementsProtocol{protocol: protocol_name}, :no_match, _, val}) do
+  def do_format(
+        {%TypeCheck.Builtin.ImplementsProtocol{protocol: protocol_name}, :no_match, _, val}
+      ) do
     "`#{inspect(val, inspect_value_opts())}` does not implement the protocol `#{protocol_name}`"
   end
 
-  def do_format({s = %mod{}, :param_error, %{index: index, problem: problem}, val}) when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
+  def do_format({s = %mod{}, :param_error, %{index: index, problem: problem}, val})
+      when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
     # compound_check(val, s, "at parameter no. #{index + 1}:\n", do_format(problem))
     name = Map.get(s, :name, "#Function<...>")
-    function_with_arity = IO.ANSI.format_fragment([:default_color, "#{name}/#{Enum.count(val)}", :red])
-    param_spec = s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
+
+    function_with_arity =
+      IO.ANSI.format_fragment([:default_color, "#{name}/#{Enum.count(val)}", :red])
+
+    param_spec =
+      s.param_types |> Enum.at(index) |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
+
     arguments = val |> Enum.map(&inspect(&1, inspect_value_opts())) |> Enum.join(", ")
-    raw_call = if mod == TypeCheck.Builtin.Function do
-      "#{name}.(#{arguments})"
-    else
-      "#{name}(#{arguments})"
-    end
+
+    raw_call =
+      if mod == TypeCheck.Builtin.Function do
+        "#{name}.(#{arguments})"
+      else
+        "#{name}(#{arguments})"
+      end
+
     call = IO.ANSI.format_fragment([:default_color, raw_call, :red])
 
     value = Enum.at(val, index)
@@ -303,19 +365,27 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
     """
   end
 
-  def do_format(
-        {s = %mod{}, :return_error, %{problem: problem, arguments: arguments}, val}
-      ) when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
+  def do_format({s = %mod{}, :return_error, %{problem: problem, arguments: arguments}, val})
+      when mod in [TypeCheck.Spec, TypeCheck.Builtin.Function] do
     name = Map.get(s, :name, "#Function<...>")
-    function_with_arity = IO.ANSI.format_fragment([:default_color, "#{name}/#{Enum.count(arguments)}", :red])
+
+    function_with_arity =
+      IO.ANSI.format_fragment([:default_color, "#{name}/#{Enum.count(arguments)}", :red])
+
     result_spec = s.return_type |> TypeCheck.Inspect.inspect_binary(inspect_type_opts())
-    arguments_str = arguments |> Enum.map(fn val -> inspect(val, inspect_value_opts()) end) |> Enum.join(", ")
+
+    arguments_str =
+      arguments |> Enum.map(fn val -> inspect(val, inspect_value_opts()) end) |> Enum.join(", ")
+
     arguments_str = IO.ANSI.format_fragment([:default_color, arguments_str, :default_color])
-    raw_call = if mod == TypeCheck.Builtin.Function do
-      "#{name}.(#{arguments_str})"
-    else
-      "#{name}(#{arguments_str})"
-    end
+
+    raw_call =
+      if mod == TypeCheck.Builtin.Function do
+        "#{name}.(#{arguments_str})"
+      else
+        "#{name}(#{arguments_str})"
+      end
+
     call = IO.ANSI.format_fragment([:default_color, raw_call, :red])
 
     val_str = inspect(val, inspect_value_opts())
@@ -353,17 +423,18 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   defp inspect_value_opts() do
     # [reset_color: :red, syntax_colors: ([reset: :default_color] ++ TypeCheck.Inspect.default_colors())]
     color_opts =
-      if IO.ANSI.enabled? do
-        [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+      if IO.ANSI.enabled?() do
+        [reset_color: :red, syntax_colors: [reset: :red] ++ TypeCheck.Inspect.default_colors()]
       else
         []
       end
+
     [limit: 5] ++ color_opts
   end
 
   defp inspect_type_opts() do
-    if IO.ANSI.enabled? do
-      [reset_color: :red, syntax_colors: ([reset: :red] ++ TypeCheck.Inspect.default_colors())]
+    if IO.ANSI.enabled?() do
+      [reset_color: :red, syntax_colors: [reset: :red] ++ TypeCheck.Inspect.default_colors()]
     else
       []
     end

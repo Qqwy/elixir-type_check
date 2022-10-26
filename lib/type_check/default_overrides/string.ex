@@ -8,7 +8,6 @@ defmodule TypeCheck.DefaultOverrides.String do
 
   @type! pattern() :: t() | [t()] | Erlang.Binary.cp()
 
-
   import TypeCheck.Type.StreamData
   @type! t() :: wrap_with_gen(binary(), &String.printable_string_gen/0)
 

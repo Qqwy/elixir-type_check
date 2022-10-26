@@ -9,7 +9,7 @@ defmodule TypeCheck.BuiltinTest do
   use TypeCheck.ExUnit
 
   doctest TypeCheck.Builtin
-  spectest TypeCheck.Builtin, except: [do_fixed_list: 1, do_fixed_tuple: 1]
+  spectest(TypeCheck.Builtin, except: [do_fixed_list: 1, do_fixed_tuple: 1])
 
   describe "builtin types adhere to their problem_tuple result types." do
     possibilities = %{
@@ -86,14 +86,14 @@ defmodule TypeCheck.BuiltinTest do
         impl(Enumerable)
       end => TypeCheck.Builtin.ImplementsProtocol,
       quote do
-        <<_ :: 4 >>
+        <<_::4>>
       end => TypeCheck.Builtin.SizedBitstring,
       quote do
         reference()
       end => TypeCheck.Builtin.Reference,
       quote do
         port()
-      end => TypeCheck.Builtin.Port,
+      end => TypeCheck.Builtin.Port
     }
 
     for {type, module} <- possibilities do
@@ -105,9 +105,11 @@ defmodule TypeCheck.BuiltinTest do
             TypeCheck.Builtin.Any ->
               # Should _always_ match
               assert {:ok, _} = TypeCheck.conforms(input, unquote(type))
+
             TypeCheck.Builtin.None ->
               # Should _never_ match
               assert {:error, _} = TypeCheck.conforms(input, unquote(type))
+
             _other ->
               # Matches sometimes.
 
@@ -141,7 +143,9 @@ defmodule TypeCheck.BuiltinTest do
       unless module in [TypeCheck.Builtin.None] do
         property "#{module}'s ToStreamData implementation conforms with its own type" do
           require TypeCheck.Type
-          check all value <- TypeCheck.Protocols.ToStreamData.to_gen(TypeCheck.Type.build(unquote(type))) do
+
+          check all value <-
+                      TypeCheck.Protocols.ToStreamData.to_gen(TypeCheck.Type.build(unquote(type))) do
             TypeCheck.conforms!(value, unquote(type))
           end
         end
@@ -171,5 +175,4 @@ defmodule TypeCheck.BuiltinTest do
       assert one_of([one_of([integer()]), atom()]) == one_of(integer(), atom())
     end
   end
-
 end

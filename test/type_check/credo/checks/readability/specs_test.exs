@@ -231,75 +231,74 @@ defmodule TypeCheck.Credo.Checks.Readability.SpecsTest do
     end
   end
 
-
-    test "it should NOT report functions with `@impl true`" do
-      """
-      defmodule CredoTypespecTest do
-        @impl true
-        def foo(a), do: a
-      end
-      """
-      |> to_source_file()
-      |> run_check(@described_check)
-      |> refute_issues()
+  test "it should NOT report functions with `@impl true`" do
+    """
+    defmodule CredoTypespecTest do
+      @impl true
+      def foo(a), do: a
     end
+    """
+    |> to_source_file()
+    |> run_check(@described_check)
+    |> refute_issues()
+  end
 
-    test "it should NOT report functions with guards and `@impl true`" do
-      """
-      defmodule CredoTypespecTest do
-        @impl true
-        def foo(a) when is_integer(a), do: a
-      end
-      """
-      |> to_source_file()
-      |> run_check(@described_check)
-      |> refute_issues()
+  test "it should NOT report functions with guards and `@impl true`" do
+    """
+    defmodule CredoTypespecTest do
+      @impl true
+      def foo(a) when is_integer(a), do: a
     end
+    """
+    |> to_source_file()
+    |> run_check(@described_check)
+    |> refute_issues()
+  end
 
-    test "it should NOT report functions without arguments and `@impl true`" do
-      """
-      defmodule CredoTypespecTest do
-        @impl true
-        def foo, do: :ok
-      end
-      """
-      |> to_source_file()
-      |> run_check(@described_check)
-      |> refute_issues()
+  test "it should NOT report functions without arguments and `@impl true`" do
+    """
+    defmodule CredoTypespecTest do
+      @impl true
+      def foo, do: :ok
     end
+    """
+    |> to_source_file()
+    |> run_check(@described_check)
+    |> refute_issues()
+  end
 
-    test "it should NOT report functions with `@impl SomeMod`" do
-      """
-      defmodule CredoTypespecTest do
-        @impl SomeMod
-        def foo(a), do: a
-      end
-      """
-      |> to_source_file()
-      |> run_check(@described_check)
-      |> refute_issues()
+  test "it should NOT report functions with `@impl SomeMod`" do
+    """
+    defmodule CredoTypespecTest do
+      @impl SomeMod
+      def foo(a), do: a
     end
+    """
+    |> to_source_file()
+    |> run_check(@described_check)
+    |> refute_issues()
+  end
 
-    test "it should report functions with `@impl false`" do
-      """
-      defmodule CredoTypespecTest do
-        @impl false
-        def foo(a), do: a
-      end
-      """
-      |> to_source_file()
-      |> run_check(@described_check)
-      |> assert_issue()
+  test "it should report functions with `@impl false`" do
+    """
+    defmodule CredoTypespecTest do
+      @impl false
+      def foo(a), do: a
     end
+    """
+    |> to_source_file()
+    |> run_check(@described_check)
+    |> assert_issue()
+  end
 
-    test "it should report function with arity zero and no parentheses" do
-      """
-      defmodule CredoTypespecTest do
-        def foo, do: :ok
-      end
-      """
-      |> to_source_file()
-      |> run_check(@described_check)
-      |> assert_issue()
+  test "it should report function with arity zero and no parentheses" do
+    """
+    defmodule CredoTypespecTest do
+      def foo, do: :ok
     end
+    """
+    |> to_source_file()
+    |> run_check(@described_check)
+    |> assert_issue()
+  end
 end

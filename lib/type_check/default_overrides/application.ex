@@ -3,18 +3,18 @@ defmodule TypeCheck.DefaultOverrides.Application do
   @type! app() :: atom()
 
   @type! application_key() ::
-  :start_phases
-  | :mod
-  | :applications
-  | :optional_applications
-  | :included_applications
-  | :registered
-  | :maxT
-  | :maxP
-  | :modules
-  | :vsn
-  | :id
-  | :description
+           :start_phases
+           | :mod
+           | :applications
+           | :optional_applications
+           | :included_applications
+           | :registered
+           | :maxT
+           | :maxP
+           | :modules
+           | :vsn
+           | :id
+           | :description
 
   @type! key() :: atom()
 

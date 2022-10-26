@@ -13,7 +13,11 @@ defmodule TypeCheck.Builtin.Map do
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
-               %{s | key_type: TypeCheck.Protocols.Escape.escape(s.key_type), value_type: TypeCheck.Protocols.Escape.escape(s.value_type)}
+      %{
+        s
+        | key_type: TypeCheck.Protocols.Escape.escape(s.key_type),
+          value_type: TypeCheck.Protocols.Escape.escape(s.value_type)
+      }
     end
   end
 
@@ -22,7 +26,8 @@ defmodule TypeCheck.Builtin.Map do
       quote generated: true, location: :keep do
         case unquote(param) do
           x when not is_map(x) ->
-            {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, unquote(param)}}
+            {:error,
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, unquote(param)}}
 
           _ ->
             unquote(build_keypairs_check(s.key_type, s.value_type, param, s))
@@ -64,16 +69,16 @@ defmodule TypeCheck.Builtin.Map do
               {{:error, problem}, _} ->
                 res =
                   {:error,
-                   {unquote(TypeCheck.Internals.Escaper.escape(s)), :key_error, %{problem: problem, key: key},
-                    orig_param}}
+                   {unquote(TypeCheck.Internals.Escaper.escape(s)), :key_error,
+                    %{problem: problem, key: key}, orig_param}}
 
                 {:halt, res}
 
               {_, {:error, problem}} ->
                 res =
                   {:error,
-                   {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error, %{problem: problem, key: key},
-                    orig_param}}
+                   {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error,
+                    %{problem: problem, key: key}, orig_param}}
 
                 {:halt, res}
             end
@@ -94,6 +99,7 @@ defmodule TypeCheck.Builtin.Map do
     def inspect(list, opts) do
       key_str = TypeCheck.Protocols.Inspect.inspect(list.key_type, opts)
       val_str = TypeCheck.Protocols.Inspect.inspect(list.value_type, opts)
+
       ["%{optional(", key_str, ") => ", val_str, "}"]
       |> Inspect.Algebra.concat()
       |> Inspect.Algebra.color(:builtin_type, opts)

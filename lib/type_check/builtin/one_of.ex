@@ -3,8 +3,9 @@ defmodule TypeCheck.Builtin.OneOf do
 
   use TypeCheck
   @type! t() :: %TypeCheck.Builtin.OneOf{choices: list(TypeCheck.Type.t())}
-  @type! problem_tuple :: {t(), :all_failed, %{problems: list(lazy(TypeCheck.TypeError.Formatter.problem_tuple))}, term()}
-
+  @type! problem_tuple ::
+           {t(), :all_failed,
+            %{problems: list(lazy(TypeCheck.TypeError.Formatter.problem_tuple()))}, term()}
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
@@ -32,8 +33,8 @@ defmodule TypeCheck.Builtin.OneOf do
 
         with unquote_splicing(snippets) do
           {:error,
-           {unquote(TypeCheck.Internals.Escaper.escape(x)), :all_failed, %{problems: Enum.reverse(problems)},
-            unquote(param)}}
+           {unquote(TypeCheck.Internals.Escaper.escape(x)), :all_failed,
+            %{problems: Enum.reverse(problems)}, unquote(param)}}
         else
           {:ok, bindings, altered_param} ->
             {:ok, bindings, altered_param}
@@ -63,14 +64,15 @@ defmodule TypeCheck.Builtin.OneOf do
         choice_gens =
           s.choices
           |> Enum.reject(fn choice ->
-          match?(%TypeCheck.Builtin.None{}, choice)
-          || match?(%TypeCheck.Builtin.NamedType{type: %TypeCheck.Builtin.None{}}, choice)
-        end)
+            match?(%TypeCheck.Builtin.None{}, choice) ||
+              match?(%TypeCheck.Builtin.NamedType{type: %TypeCheck.Builtin.None{}}, choice)
+          end)
           |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
 
         case choice_gens do
           [] ->
-            raise TypeCheck.CompileError, "Cannot create a generator for `#{inspect(s)}` since it has no inhabiting values."
+            raise TypeCheck.CompileError,
+                  "Cannot create a generator for `#{inspect(s)}` since it has no inhabiting values."
 
           _ ->
             StreamData.one_of(choice_gens)

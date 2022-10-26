@@ -5,8 +5,8 @@ defmodule TypeCheck.DefaultOverrides.IO.ANSI do
   @type! ansidata() :: ansilist() | ansicode() | binary()
 
   @type! ansilist() ::
-  maybe_improper_list(
-    char() | ansicode() | binary() | ansilist(),
-    binary() | ansicode() | []
-  )
+           maybe_improper_list(
+             char() | ansicode() | binary() | ansilist(),
+             binary() | ansicode() | []
+           )
 end

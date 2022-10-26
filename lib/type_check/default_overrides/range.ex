@@ -13,5 +13,4 @@ defmodule TypeCheck.DefaultOverrides.Range do
 
     @type! t(first, last) :: %Elixir.Range{first: first, last: last, step: step()}
   end
-
 end

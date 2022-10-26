@@ -7,9 +7,9 @@ defmodule TypeCheck.DefaultOverrides.Enumerable do
   @type! reducer() :: (element :: term(), current_acc :: acc() -> updated_acc :: acc())
 
   @type! result() ::
-  {:done, term()}
-  | {:halted, term()}
-  | {:suspended, term(), continuation()}
+           {:done, term()}
+           | {:halted, term()}
+           | {:suspended, term(), continuation()}
 
   @type! slicing_fun() :: (start :: non_neg_integer(), length :: pos_integer() -> [term()])
 

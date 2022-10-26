@@ -12,4 +12,5 @@ defmodule AutogenTypespecsExample do
   @autogen_typespec false
   @type! bar() :: integer()
 end
+
 # coveralls-ignore-end

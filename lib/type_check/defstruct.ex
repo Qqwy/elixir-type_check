@@ -87,7 +87,7 @@ defmodule TypeCheck.Defstruct do
     res
     |> Macro.to_string()
     |> Code.format_string!()
-    |> IO.puts
+    |> IO.puts()
 
     res
   end

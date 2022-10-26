@@ -1,5 +1,4 @@
 defmodule TypeCheck.Spec do
-
   defstruct [
     :name,
     :param_types,
@@ -8,12 +7,28 @@ defmodule TypeCheck.Spec do
   ]
 
   import TypeCheck.Internals.Bootstrap.Macros
+
   if_recompiling? do
     use TypeCheck
     alias TypeCheck.DefaultOverrides.String
-    @type! t() :: %__MODULE__{name: String.t(), param_types: list(TypeCheck.Type.t()), return_type: TypeCheck.Type.t(), location: [] | list({:file, String.t()} | {:line, non_neg_integer()})}
-    @type! problem_tuple :: {t(), :param_error, %{index: non_neg_integer(), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
-    | {t(), :return_error, %{arguments: list(term()), problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())}, list(any())}
+
+    @type! t() :: %__MODULE__{
+             name: String.t(),
+             param_types: list(TypeCheck.Type.t()),
+             return_type: TypeCheck.Type.t(),
+             location: [] | list({:file, String.t()} | {:line, non_neg_integer()})
+           }
+    @type! problem_tuple ::
+             {t(), :param_error,
+              %{
+                index: non_neg_integer(),
+                problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())
+              }, list(any())}
+             | {t(), :return_error,
+                %{
+                  arguments: list(term()),
+                  problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple())
+                }, list(any())}
   end
 
   defp spec_fun_name(function, arity) do
@@ -77,8 +92,12 @@ defmodule TypeCheck.Spec do
   """
   def lookup!(module, function, arity) do
     case lookup(module, function, arity) do
-      {:ok, spec} -> spec
-      _ -> raise ArgumentError, "No spec found for `#{inspect(module)}.#{to_string(function)}/#{arity}`"
+      {:ok, spec} ->
+        spec
+
+      _ ->
+        raise ArgumentError,
+              "No spec found for `#{inspect(module)}.#{to_string(function)}/#{arity}`"
     end
   end
 
@@ -127,26 +146,41 @@ defmodule TypeCheck.Spec do
     cond do
       Module.defines?(module, {function, arity}, :def) ->
         :def
+
       Module.defines?(module, {function, arity}, :defp) ->
         :defp
+
       Module.defines?(module, {function, arity}, :defmacro) ->
         :defmacro
+
       Module.defines?(module, {function, arity}, :defmacrop) ->
         :defmacrop
+
       true ->
-        raise TypeCheck.CompileError, "cannot add spec to #{to_string(module)}.#{inspect(function)}/#{inspect(arity)} because it was not defined"
+        raise TypeCheck.CompileError,
+              "cannot add spec to #{to_string(module)}.#{inspect(function)}/#{inspect(arity)} because it was not defined"
     end
   end
 
   @doc false
-  def wrap_function_with_spec(name, _location, arity, clean_params, params_spec_code, return_spec_code, typespec, caller) do
+  def wrap_function_with_spec(
+        name,
+        _location,
+        arity,
+        clean_params,
+        params_spec_code,
+        return_spec_code,
+        typespec,
+        caller
+      ) do
     return_spec_fun_name = :"__#{name}__type_check_return_spec__"
 
-    body = quote do
-      unquote(params_spec_code)
-      super_result = super(unquote_splicing(clean_params))
-      unquote(return_spec_fun_name)(super_result, unquote_splicing(clean_params))
-    end
+    body =
+      quote do
+        unquote(params_spec_code)
+        super_result = super(unquote_splicing(clean_params))
+        unquote(return_spec_fun_name)(super_result, unquote_splicing(clean_params))
+      end
 
     # Check if original function is public or private
     function_kind = TypeCheck.Spec.check_function_kind(caller.module, name, arity)
@@ -158,14 +192,19 @@ defmodule TypeCheck.Spec do
 
       defoverridable([{unquote(name), unquote(arity)}])
 
-      Kernel.unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)), do: unquote(body))
+      Kernel.unquote(function_kind)(unquote(name)(unquote_splicing(clean_params)),
+        do: unquote(body)
+      )
 
       # The result is checked in a separate function
       # This ensures we can convince Dialyzer to skip it. c.f. #85
       @compile {:inline, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
       @dialyzer {:nowarn_function, [{unquote(return_spec_fun_name), unquote(arity + 1)}]}
 
-      Kernel.defp unquote(return_spec_fun_name)(var!(super_result, nil), unquote_splicing(clean_params)) do
+      Kernel.defp unquote(return_spec_fun_name)(
+                    var!(super_result, nil),
+                    unquote_splicing(clean_params)
+                  ) do
         unquote(return_spec_code)
       end
     end
@@ -183,7 +222,8 @@ defmodule TypeCheck.Spec do
   defp params_check_code(_name, _arity = 0, _param_types, _clean_params, _caller, _location) do
     # No check needed for arity-0 functions.
     # Also gets rid of a compiler warning 'else will never match'
-    quote generated: true, location: :keep do end
+    quote generated: true, location: :keep do
+    end
   end
 
   defp params_check_code(name, arity, param_types, clean_params, caller, location) do
@@ -201,9 +241,11 @@ defmodule TypeCheck.Spec do
       else
         {{:error, problem}, index} ->
           raise TypeCheck.TypeError,
-          {
-            {__MODULE__.unquote(spec_fun_name(name, arity))(), :param_error,
-             %{index: index, problem: problem}, unquote(clean_params)}, unquote(Macro.Env.location(caller))}
+                {
+                  {__MODULE__.unquote(spec_fun_name(name, arity))(), :param_error,
+                   %{index: index, problem: problem}, unquote(clean_params)},
+                  unquote(Macro.Env.location(caller))
+                }
       end
     end
   end
@@ -216,7 +258,7 @@ defmodule TypeCheck.Spec do
       [
         {{:ok, _bindings, altered_param}, _index} <- {unquote(impl), unquote(index)},
         clean_param = altered_param
-       ]
+      ]
     end
   end
 
@@ -242,8 +284,11 @@ defmodule TypeCheck.Spec do
 
   @doc false
   def to_typespec(name, params_ast, return_type_ast, caller) do
-    clean_param_types = Enum.map(params_ast, &TypeCheck.Internals.ToTypespec.full_rewrite(&1, caller))
+    clean_param_types =
+      Enum.map(params_ast, &TypeCheck.Internals.ToTypespec.full_rewrite(&1, caller))
+
     clean_return_type = TypeCheck.Internals.ToTypespec.full_rewrite(return_type_ast, caller)
+
     quote generated: true, location: :keep do
       unquote(name)(unquote_splicing(clean_param_types)) :: unquote(clean_return_type)
     end
@@ -285,13 +330,13 @@ defmodule TypeCheck.Spec do
     end
   end
 
-
   if Code.ensure_loaded?(StreamData) do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(s) do
         s.param_types
         |> Enum.map(&TypeCheck.Protocols.ToStreamData.to_gen/1)
         |> StreamData.fixed_list()
+
         # |> List.to_tuple
         # |> StreamData.tuple
       end

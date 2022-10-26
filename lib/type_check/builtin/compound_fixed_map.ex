@@ -11,18 +11,18 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
   use TypeCheck
 
   @type! t :: %__MODULE__{
-    fixed: TypeCheck.Builtin.FixedMap.t(),
-    flexible: TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.OptionalFixedMap.t()
-  }
+           fixed: TypeCheck.Builtin.FixedMap.t(),
+           flexible: TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.OptionalFixedMap.t()
+         }
 
   @type! problem_tuple ::
-  {t(), :not_a_map, %{}, any()}
-  | {t(), :missing_keys, %{keys: list(atom())}, map()}
-  | {t(), :superfluous_keys, %{keys: list(atom())}, map()}
-  | {t(), :value_error,
-     %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
-  | {t(), :key_error,
-     %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
+           {t(), :not_a_map, %{}, any()}
+           | {t(), :missing_keys, %{keys: list(atom())}, map()}
+           | {t(), :superfluous_keys, %{keys: list(atom())}, map()}
+           | {t(), :value_error,
+              %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
+           | {t(), :key_error,
+              %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %TypeCheck.Builtin.CompoundFixedMap{}, param) do
@@ -32,16 +32,19 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
       flexible_part_var = Macro.var(:flexible_part, __MODULE__)
 
       res =
-        quote generated: :true, location: :keep do
+        quote generated: true, location: :keep do
           with {:ok, _, _} <- unquote(map_check(param, s)),
-            {unquote(fixed_part_var), unquote(flexible_part_var)} = Map.split(unquote(param), unquote(fixed_keys)),
-               {:ok, bindings1, fixed_part} <- unquote(TypeCheck.Protocols.ToCheck.to_check(s.fixed, fixed_part_var)),
-               {:ok, bindings2, flexible_part} <- unquote(TypeCheck.Protocols.ToCheck.to_check(s.flexible, flexible_part_var))
-            do
+               {unquote(fixed_part_var), unquote(flexible_part_var)} =
+                 Map.split(unquote(param), unquote(fixed_keys)),
+               {:ok, bindings1, fixed_part} <-
+                 unquote(TypeCheck.Protocols.ToCheck.to_check(s.fixed, fixed_part_var)),
+               {:ok, bindings2, flexible_part} <-
+                 unquote(TypeCheck.Protocols.ToCheck.to_check(s.flexible, flexible_part_var)) do
             {:ok, bindings1 ++ bindings2, Map.merge(fixed_part, flexible_part)}
-            else
-              {:error, {_, reason, info, _val}} ->
-                {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), reason, info, unquote(param)}}
+          else
+            {:error, {_, reason, info, _val}} ->
+              {:error,
+               {unquote(TypeCheck.Internals.Escaper.escape(s)), reason, info, unquote(param)}}
           end
         end
 
@@ -53,6 +56,7 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
         case unquote(param) do
           val when is_map(val) ->
             {:ok, [], val}
+
           other ->
             {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, other}}
         end
@@ -60,29 +64,50 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
     end
   end
 
-
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       import Inspect.Algebra, only: [color: 3, concat: 1, container_doc: 6, group: 1, break: 1]
-      fixed_keypairs_str = container_doc("", s.fixed.keypairs, "", opts, &to_map_kv(&1, &2), separator: color(",", :map, opts), break: :strict)
+
+      fixed_keypairs_str =
+        container_doc("", s.fixed.keypairs, "", opts, &to_map_kv(&1, &2),
+          separator: color(",", :map, opts),
+          break: :strict
+        )
 
       flexible_str =
         case s.flexible do
           %TypeCheck.Builtin.Map{} = flexible ->
             flexible_key_str = TypeCheck.Protocols.Inspect.inspect(flexible.key_type, opts)
             flexible_val_str = TypeCheck.Protocols.Inspect.inspect(flexible.value_type, opts)
-            concat([color("optional(", :map, opts), flexible_key_str, color(") => ", :map, opts), flexible_val_str])
+
+            concat([
+              color("optional(", :map, opts),
+              flexible_key_str,
+              color(") => ", :map, opts),
+              flexible_val_str
+            ])
+
           %TypeCheck.Builtin.OptionalFixedMap{} = flexible ->
             for {key, value_type} <- flexible.keypairs do
               flexible_key_str = TypeCheck.Protocols.Inspect.inspect(key, opts)
               flexible_val_str = TypeCheck.Protocols.Inspect.inspect(value_type, opts)
-              concat([color("optional(", :map, opts), flexible_key_str, color(") => ", :map, opts), flexible_val_str])
+
+              concat([
+                color("optional(", :map, opts),
+                flexible_key_str,
+                color(") => ", :map, opts),
+                flexible_val_str
+              ])
             end
             |> Enum.intersperse(color(", ", :map, opts))
             |> concat()
         end
 
-      concat([color("%{", :map, opts), group(concat([fixed_keypairs_str, color(", ", :map, opts), flexible_str])), color("}", :map, opts)])
+      concat([
+        color("%{", :map, opts),
+        group(concat([fixed_keypairs_str, color(", ", :map, opts), flexible_str])),
+        color("}", :map, opts)
+      ])
       |> color(:map, opts)
     end
 
@@ -116,7 +141,11 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
-      %{s | fixed: TypeCheck.Protocols.Escape.escape(s.fixed), flexible: TypeCheck.Protocols.Escape.escape(s.flexible)}
+      %{
+        s
+        | fixed: TypeCheck.Protocols.Escape.escape(s.fixed),
+          flexible: TypeCheck.Protocols.Escape.escape(s.flexible)
+      }
     end
   end
 

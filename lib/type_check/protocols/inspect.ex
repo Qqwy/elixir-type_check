@@ -39,13 +39,13 @@ structs = [
   TypeCheck.Builtin.Range,
   TypeCheck.Builtin.SizedBitstring,
   TypeCheck.Builtin.Tuple,
-  TypeCheck.Builtin.ImplementsProtocol,
+  TypeCheck.Builtin.ImplementsProtocol
 ]
 
 for struct <- structs do
   defimpl Inspect, for: struct do
     def inspect(val, opts) do
-        opts = Map.put(opts, :show_long_named_type, true)
+      opts = Map.put(opts, :show_long_named_type, true)
 
       "#TypeCheck.Type<"
       |> Inspect.Algebra.glue(TypeCheck.Protocols.Inspect.inspect(val, opts))
@@ -63,14 +63,15 @@ defimpl TypeCheck.Protocols.Inspect, for: Any do
         # because custom struct implementation cannot, in general,
         # handle types as their field values.
         Elixir.Inspect.Any.inspect(somestruct, opts)
+
       nonmap ->
         Elixir.Inspect.inspect(nonmap, opts)
     end
+
     # Elixir.Inspect.inspect(val, [opts])
     # Elixir.Inspect.Any.inspect(val, opts)
   end
 end
-
 
 # Override because Stream's normal Elixir implementation messes with TypeCheck's type-inspecting.
 # This is probably a bit of a hack, but should be 'good enough' since using %Stream{}-structs themselves
@@ -89,14 +90,16 @@ defmodule TypeCheck.Inspect do
   import Kernel, except: [inspect: 2]
 
   def inspect(type, opts \\ %Inspect.Opts{})
+
   def inspect(type, opts) when is_list(opts) do
     opts =
-      if IO.ANSI.enabled? do
+      if IO.ANSI.enabled?() do
         opts ++ [syntax_colors: default_colors()]
       else
         opts
       end
       |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+
     inspect(type, opts)
   end
 
@@ -107,14 +110,16 @@ defmodule TypeCheck.Inspect do
   end
 
   def inspect_binary(type, opts \\ %Inspect.Opts{})
+
   def inspect_binary(type, opts) when is_list(opts) do
     opts =
-      if IO.ANSI.enabled? do
+      if IO.ANSI.enabled?() do
         opts ++ [syntax_colors: default_colors() ++ [reset: opts[:reset_color] || :default_color]]
       else
         opts
       end
       |> Enum.reduce(struct(Inspect.Opts), fn {k, v}, res -> Map.put(res, k, v) end)
+
     inspect_binary(type, opts)
   end
 

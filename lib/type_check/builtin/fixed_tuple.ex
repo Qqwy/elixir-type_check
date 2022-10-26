@@ -5,17 +5,20 @@ defmodule TypeCheck.Builtin.FixedTuple do
   @type! t :: %__MODULE__{element_types: list(TypeCheck.Type.t())}
 
   @type! problem_tuple ::
-         {t(), :not_a_tuple, %{}, any()}
-         | {t(), :different_size, %{expected_size: integer()}, tuple()}
-         | {t(), :element_error,
-            %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()},
-            tuple()}
+           {t(), :not_a_tuple, %{}, any()}
+           | {t(), :different_size, %{expected_size: integer()}, tuple()}
+           | {t(), :element_error,
+              %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), index: integer()},
+              tuple()}
 
-    defimpl TypeCheck.Protocols.Escape do
-      def escape(s) do
-             update_in(s.element_types, &Enum.map(&1, fn val -> TypeCheck.Protocols.Escape.escape(val) end))
-      end
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      update_in(
+        s.element_types,
+        &Enum.map(&1, fn val -> TypeCheck.Protocols.Escape.escape(val) end)
+      )
     end
+  end
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{element_types: types_list}, param) do
@@ -29,8 +32,8 @@ defmodule TypeCheck.Builtin.FixedTuple do
 
           x when tuple_size(x) != unquote(expected_size) ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :different_size, %{expected_size: unquote(expected_size)},
-              x}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :different_size,
+              %{expected_size: unquote(expected_size)}, x}}
 
           _ ->
             unquote(element_checks_ast)
@@ -53,7 +56,8 @@ defmodule TypeCheck.Builtin.FixedTuple do
 
           quote generated: true, location: :keep do
             [
-              {{:ok, element_bindings, altered_element}, _index} <- {unquote(impl), unquote(index)},
+              {{:ok, element_bindings, altered_element}, _index} <-
+                {unquote(impl), unquote(index)},
               bindings = element_bindings ++ bindings,
               altered_param = Tuple.append(altered_param, altered_element)
             ]

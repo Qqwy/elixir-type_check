@@ -21,6 +21,7 @@ defmodule TypeCheck.Builtin.Port do
         case unquote(param) do
           x when is_port(x) ->
             {:ok, [], x}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end

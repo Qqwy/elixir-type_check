@@ -20,12 +20,14 @@ defmodule TypeCheck.Builtin.FixedMap do
            | {t(), :value_error,
               %{problem: lazy(TypeCheck.TypeError.Formatter.problem_tuple()), key: any()}, map()}
 
-
-    defimpl TypeCheck.Protocols.Escape do
-      def escape(s) do
-               update_in(s.keypairs, &Enum.map(&1, fn {key, val} -> {key, TypeCheck.Protocols.Escape.escape(val)} end))
-      end
+  defimpl TypeCheck.Protocols.Escape do
+    def escape(s) do
+      update_in(
+        s.keypairs,
+        &Enum.map(&1, fn {key, val} -> {key, TypeCheck.Protocols.Escape.escape(val)} end)
+      )
     end
+  end
 
   defimpl TypeCheck.Protocols.ToCheck do
     # Optimization: If we have no expectations on keys -> value types, remove those useless checks.
@@ -54,7 +56,8 @@ defmodule TypeCheck.Builtin.FixedMap do
         case unquote(param) do
           val when is_map(val) ->
             {:ok, [], val}
-            other ->
+
+          other ->
             {:error, {unquote(TypeCheck.Internals.Escaper.escape(s)), :not_a_map, %{}, other}}
         end
       end
@@ -76,7 +79,8 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           missing_keys ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :missing_keys, %{keys: missing_keys}, unquote(param)}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :missing_keys,
+              %{keys: missing_keys}, unquote(param)}}
         end
       end
     end
@@ -96,8 +100,8 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           superfluous_keys ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :superfluous_keys, %{keys: superfluous_keys},
-              unquote(param)}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :superfluous_keys,
+              %{keys: superfluous_keys}, unquote(param)}}
         end
       end
     end
@@ -116,7 +120,8 @@ defmodule TypeCheck.Builtin.FixedMap do
 
           quote generated: true, location: :keep do
             [
-              {{:ok, value_bindings, altered_element}, _key} <- {unquote(value_check), unquote(key)},
+              {{:ok, value_bindings, altered_element}, _key} <-
+                {unquote(value_check), unquote(key)},
               bindings = value_bindings ++ bindings,
               altered_keypairs = [{unquote(key), altered_element} | altered_keypairs]
             ]
@@ -128,12 +133,13 @@ defmodule TypeCheck.Builtin.FixedMap do
         altered_keypairs = []
 
         with unquote_splicing(keypair_checks),
-        altered_param = :maps.from_list(altered_keypairs) do
+             altered_param = :maps.from_list(altered_keypairs) do
           {:ok, bindings, altered_param}
         else
           {{:error, error}, key} ->
             {:error,
-             {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error, %{problem: error, key: key}, unquote(param)}}
+             {unquote(TypeCheck.Internals.Escaper.escape(s)), :value_error,
+              %{problem: error, key: key}, unquote(param)}}
         end
       end
     end
@@ -142,12 +148,13 @@ defmodule TypeCheck.Builtin.FixedMap do
   defimpl TypeCheck.Protocols.Inspect do
     def inspect(s, opts) do
       # map = case s.keypairs do
-        # list when is_list(list) ->
-          map = Enum.into(s.keypairs, %{})
-        # %TypeCheck.Builtin.List{element_type: %TypeCheck.Builtin.FixedTuple{element_types: [key_type, value_type]}} ->
-        #         # Special case for when calling on the 'meta' FixedMap
-        #         # i.e. `TypeCheck.Builtin.FixedMap.t()`
-        #   %{key_type => value_type}
+      # list when is_list(list) ->
+      map = Enum.into(s.keypairs, %{})
+
+      # %TypeCheck.Builtin.List{element_type: %TypeCheck.Builtin.FixedTuple{element_types: [key_type, value_type]}} ->
+      #         # Special case for when calling on the 'meta' FixedMap
+      #         # i.e. `TypeCheck.Builtin.FixedMap.t()`
+      #   %{key_type => value_type}
 
       # end
       # IO.inspect(s, structs: false, label: :inspect_my_fixed_map)

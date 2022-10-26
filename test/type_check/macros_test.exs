@@ -4,22 +4,22 @@ defmodule TypeCheck.MacrosTest do
   import StreamData, only: []
   import TypeCheck.Type.StreamData
 
-
   describe "doctests" do
     # Required for the unquote fragments example in the moduledoc:
     defmodule MetaExample do
       use TypeCheck
       people = ~w[joe robert mike]a
+
       for name <- people do
         @type! unquote(name)() :: %{name: unquote(name), coolness_level: :high}
       end
     end
 
-
     # Required for the macro example in the moduledoc:
     defmodule GreeterMacro do
       defmacro generate_greeter(greeting) do
         import Kernel, except: [@: 1]
+
         quote bind_quoted: [greeting: greeting] do
           @spec! unquote(greeting)(binary) :: binary
           def unquote(greeting)(name) do
@@ -45,16 +45,13 @@ defmodule TypeCheck.MacrosTest do
       {:ok, [type: type]} = Code.Typespec.fetch_types(module)
 
       "@type " <>
-      (
-        type
-        |> Code.Typespec.type_to_quoted()
-        |> Macro.to_string
-      )
+        (type
+         |> Code.Typespec.type_to_quoted()
+         |> Macro.to_string())
     end
 
     doctest TypeCheck.Macros
   end
-
 
   describe "basic type definition" do
     defmodule BasicTypeDefinition do
@@ -81,6 +78,7 @@ defmodule TypeCheck.MacrosTest do
       defmodule UnquoteFragmentSpec do
         defmacro my_macro(name) do
           import Kernel, except: [@: 1]
+
           quote bind_quoted: [name: name], location: :keep do
             @spec! unquote(:"my_function_#{name}")(binary) :: binary
             def unquote(:"my_function_#{name}")(greeting) do
@@ -99,6 +97,7 @@ defmodule TypeCheck.MacrosTest do
 
       assert TypeCheck.Spec.defined?(UnquoteFragmentSpecExample, :my_function_greeter, 1)
       assert UnquoteFragmentSpecExample.my_function_greeter("hi") == "hi"
+
       assert_raise(TypeCheck.TypeError, fn ->
         UnquoteFragmentSpecExample.my_function_greeter(1)
       end)
@@ -121,9 +120,11 @@ defmodule TypeCheck.MacrosTest do
     assert [secret: 1] == PrivateFunctionSpecExample.__type_check__(:specs)
 
     # importantly, {secret: 1} is not in there:
-    assert ["__TypeCheck spec for 'secret/1'__": 0, __type_check__: 1, public: 1] = PrivateFunctionSpecExample.__info__(:functions)
+    assert ["__TypeCheck spec for 'secret/1'__": 0, __type_check__: 1, public: 1] =
+             PrivateFunctionSpecExample.__info__(:functions)
 
     assert PrivateFunctionSpecExample.public(10) == 42
+
     assert_raise(TypeCheck.TypeError, fn ->
       PrivateFunctionSpecExample.public("not an integer")
     end)
@@ -141,6 +142,7 @@ defmodule TypeCheck.MacrosTest do
 
     defmodule Example do
       require MacroSpecExample
+
       def example do
         MacroSpecExample.compile_time_atom_to_string(:baz)
       end
@@ -149,6 +151,7 @@ defmodule TypeCheck.MacrosTest do
     assert_raise(TypeCheck.TypeError, fn ->
       defmodule Example2 do
         require MacroSpecExample
+
         def example do
           MacroSpecExample.compile_time_atom_to_string(42)
         end
@@ -170,6 +173,7 @@ defmodule TypeCheck.MacrosTest do
     end
 
     assert ModuleExpansion.build("hello") == %{__struct__: ModuleExpansion, name: "hello"}
+
     assert_raise TypeCheck.TypeError, fn ->
       ModuleExpansion.build(:not_a_string)
     end
@@ -186,7 +190,8 @@ defmodule TypeCheck.MacrosTest do
           @type! t :: %__MODULE__{name: String.t()}
           defstruct [:name]
         end
-      end)
+      end
+    )
   end
 
   test "Specs for struct types don't truncate fields (regression-test for https://github.com/Qqwy/elixir-type_check/issues/78)" do

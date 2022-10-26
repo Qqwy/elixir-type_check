@@ -1,5 +1,6 @@
 defmodule TypeCheck.Options do
   import TypeCheck.Internals.Bootstrap.Macros
+
   @moduledoc """
   Defines the options that TypeCheck supports on calls to `use TypeCheck`.
 
@@ -77,7 +78,7 @@ defmodule TypeCheck.Options do
   for all added `@spec`s, as well as `TypeCheck.conforms/3`/`TypeCheck.conforms?/3`/`TypeCheck.conforms!/3` calls.
   """
 
-  defstruct [overrides: [], default_overrides: true, enable_runtime_checks: true, debug: false]
+  defstruct overrides: [], default_overrides: true, enable_runtime_checks: true, debug: false
 
   if_recompiling? do
     use TypeCheck
@@ -92,21 +93,21 @@ defmodule TypeCheck.Options do
     @type! type_overrides :: list(type_override())
 
     @type! t :: %TypeCheck.Options{
-      overrides: type_overrides(),
-      default_overrides: boolean(),
-      enable_runtime_checks: boolean(),
-      debug: boolean(),
-    }
+             overrides: type_overrides(),
+             default_overrides: boolean(),
+             enable_runtime_checks: boolean(),
+             debug: boolean()
+           }
   else
     @type remote_type() :: mfa | function
     @type type_override :: {remote_type(), remote_type()}
 
     @type t :: %TypeCheck.Options{
-      overrides: list(type_override()),
-      default_overrides: boolean(),
-      enable_runtime_checks: boolean(),
-      debug: boolean(),
-    }
+            overrides: list(type_override()),
+            default_overrides: boolean(),
+            enable_runtime_checks: boolean(),
+            debug: boolean()
+          }
   end
 
   def new() do
@@ -121,6 +122,7 @@ defmodule TypeCheck.Options do
   if_recompiling? do
     @spec! new(enum :: any()) :: t()
   end
+
   def new(enum) do
     # IO.inspect(enum, label: "Inside second new clause")
     raw_overrides = Keyword.get(enum, :overrides, [])
@@ -128,6 +130,7 @@ defmodule TypeCheck.Options do
     enable_runtime_checks = Keyword.get(enum, :enable_runtime_checks, true)
 
     overrides = check_overrides!(raw_overrides)
+
     overrides =
       if Access.get(enum, :default_overrides, true) do
         overrides ++ default_overrides()
@@ -145,22 +148,25 @@ defmodule TypeCheck.Options do
   if_recompiling? do
     @spec! check_overrides!(overrides :: type_overrides()) :: type_overrides()
   end
+
   def check_overrides!(overrides) do
     Enum.map(overrides, &check_override!/1)
   end
 
   defp default_overrides() do
-      case Code.ensure_loaded(TypeCheck.DefaultOverrides) do
-        {:error, _problem} -> []
-        {:module, _} -> apply(TypeCheck.DefaultOverrides, :default_overrides, [])
-      end
+    case Code.ensure_loaded(TypeCheck.DefaultOverrides) do
+      {:error, _problem} -> []
+      {:module, _} -> apply(TypeCheck.DefaultOverrides, :default_overrides, [])
+    end
   end
 
   defp check_override!({original, override}) do
     {module_k, function_k, arity_k} = ensure_external_function!(original)
     {module_v, function_v, arity_v} = ensure_external_function!(override)
+
     if arity_k != arity_v do
-      raise TypeCheck.CompileError, "Error while parsing TypeCheck overides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
+      raise TypeCheck.CompileError,
+            "Error while parsing TypeCheck overides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
     else
       {
         {module_k, function_k, arity_k},
@@ -168,8 +174,10 @@ defmodule TypeCheck.Options do
       }
     end
   end
+
   defp check_override!(other) do
-    raise TypeCheck.CompileError, "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `#{inspect(other)}`."
+    raise TypeCheck.CompileError,
+          "`check_overrides!` expects a list of two-element tuples `{mfa, mfa}` where `mfa` is either `{Module, function, arity}` or `&Module.function/arity`. However, an element not adhering to the `{mfa, mfa}` format was found: `#{inspect(other)}`."
   end
 
   defp ensure_external_function!(fun) when is_function(fun) do
@@ -177,14 +185,20 @@ defmodule TypeCheck.Options do
       {:type, :external} ->
         info = Function.info(fun)
         {info[:module], info[:name], info[:arity]}
+
       _other ->
-        raise TypeCheck.CompileError, "Error while parsing TypeCheck overides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
+        raise TypeCheck.CompileError,
+              "Error while parsing TypeCheck overides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
     end
   end
-  defp ensure_external_function!({module, function, arity}) when is_atom(module) and is_atom(function) and arity >= 0 do
+
+  defp ensure_external_function!({module, function, arity})
+       when is_atom(module) and is_atom(function) and arity >= 0 do
     {module, function, arity}
   end
+
   defp ensure_external_function!(fun) do
-    raise TypeCheck.CompileError, "Error while parsing TypeCheck overides: #{inspect(fun)} is not a function!"
+    raise TypeCheck.CompileError,
+          "Error while parsing TypeCheck overides: #{inspect(fun)} is not a function!"
   end
 end

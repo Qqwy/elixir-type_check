@@ -17,29 +17,32 @@ defmodule TypeCheck.Builtin.NamedTypeTest do
 
   test "Attempting to use a nested named type in a guard raises a CompileError" do
     import ExUnit.CaptureIO
+
     capture_io(:stderr, fn ->
-    assert_raise(CompileError,
-      ~r"lib/type_check/spec.ex:28: undefined function hidden/0",
-      fn ->
-      defmodule BadExample do
-        use TypeCheck
+      assert_raise(
+        CompileError,
+        ~r"lib/type_check/spec.ex:30: undefined function hidden/0",
+        fn ->
+          defmodule BadExample do
+            use TypeCheck
 
-        @opaque! nested() :: (hidden :: binary())
-        @type! known :: (%{a: number(), b: nested()} when is_binary(hidden))
+            @opaque! nested() :: hidden :: binary()
+            @type! known :: (%{a: number(), b: nested()} when is_binary(hidden))
 
-        @spec! example(known()) :: known()
-        def example(val) do
-          val
+            @spec! example(known()) :: known()
+            def example(val) do
+              val
+            end
+          end
         end
-      end
-    end)
+      )
     end)
   end
 
   test "Using a local named type works" do
     defmodule GoodExample do
       use TypeCheck
-      @opaque! known :: (%{a: number(), b: (nothidden :: binary())} when is_binary(nothidden))
+      @opaque! known :: (%{a: number(), b: nothidden :: binary()} when is_binary(nothidden))
 
       @spec! example(known()) :: known()
       def example(val) do

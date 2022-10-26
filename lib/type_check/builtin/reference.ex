@@ -18,10 +18,11 @@ defmodule TypeCheck.Builtin.Reference do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote generated: :true, location: :keep do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when is_reference(x) ->
             {:ok, [], x}
+
           _ ->
             {:error, {unquote(Macro.escape(s)), :no_match, %{}, unquote(param)}}
         end

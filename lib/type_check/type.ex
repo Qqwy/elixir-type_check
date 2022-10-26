@@ -3,6 +3,7 @@ defmodule TypeCheck.Type do
   TODO
   """
   import TypeCheck.Internals.Bootstrap.Macros
+
   if_recompiling? do
     use TypeCheck
   end
@@ -16,7 +17,10 @@ defmodule TypeCheck.Type do
   """
   if_recompiling? do
     import TypeCheck.Type.StreamData
-    @type! t() :: ((x :: any() when TypeCheck.Type.type?(x)) |> wrap_with_gen(&TypeCheck.Type.StreamData.arbitrary_type_gen/0))
+
+    @type! t() ::
+             (x :: any() when TypeCheck.Type.type?(x))
+             |> wrap_with_gen(&TypeCheck.Type.StreamData.arbitrary_type_gen/0)
   else
     @type t() :: any()
   end

@@ -179,7 +179,11 @@ defmodule TypeCheck.Macros do
           []
         end
 
-      Module.put_attribute(__MODULE__, TypeCheck.Options, TypeCheck.Options.new(unquote(options) ++ default_options))
+      Module.put_attribute(
+        __MODULE__,
+        TypeCheck.Options,
+        TypeCheck.Options.new(unquote(options) ++ default_options)
+      )
 
       Module.put_attribute(__MODULE__, :autogen_typespec, true)
     end
@@ -214,7 +218,8 @@ defmodule TypeCheck.Macros do
       if Map.get(options, :enable_runtime_checks) do
         wrap_functions_with_specs(specs, definitions, env)
       else
-        quote do end
+        quote do
+        end
       end
 
     spec_names = specs |> Enum.map(fn {name, _, arity, _, _, _} -> {name, arity} end)
@@ -229,6 +234,7 @@ defmodule TypeCheck.Macros do
 
       @doc false
       def __type_check__(arg)
+
       def __type_check__(:specs) do
         unquote(spec_names)
       end
@@ -243,9 +249,14 @@ defmodule TypeCheck.Macros do
     for {name, location, arity, _clean_params, params_ast, return_type_ast} <- specs do
       require TypeCheck.Type
 
-      typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
-      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
-      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
+      typecheck_options =
+        Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+
+      param_types =
+        Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
+
+      return_type =
+        TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
       TypeCheck.Spec.create_spec_def(name, arity, param_types, return_type, location)
     end
@@ -259,9 +270,14 @@ defmodule TypeCheck.Macros do
 
       require TypeCheck.Type
 
-      typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
-      param_types = Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
-      return_type = TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
+      typecheck_options =
+        Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+
+      param_types =
+        Enum.map(params_ast, &TypeCheck.Type.build_unescaped(&1, caller, typecheck_options, true))
+
+      return_type =
+        TypeCheck.Type.build_unescaped(return_type_ast, caller, typecheck_options, true)
 
       clean_specdef = TypeCheck.Spec.to_typespec(name, params_ast, return_type_ast, caller)
 
@@ -275,16 +291,17 @@ defmodule TypeCheck.Macros do
           location
         )
 
-      res = TypeCheck.Spec.wrap_function_with_spec(
-        name,
-        location,
-        arity,
-        clean_params,
-        params_spec_code,
-        return_spec_code,
-        clean_specdef,
-        caller
-      )
+      res =
+        TypeCheck.Spec.wrap_function_with_spec(
+          name,
+          location,
+          arity,
+          clean_params,
+          params_spec_code,
+          return_spec_code,
+          clean_specdef,
+          caller
+        )
 
       if typecheck_options.debug do
         TypeCheck.Internals.Helper.prettyprint_spec("TypeCheck.Macros @spec", res)
@@ -470,10 +487,10 @@ defmodule TypeCheck.Macros do
 
   @doc false
   def define_type(
-         {:when, _, [named_type = {:"::", _, [name_with_maybe_params, _type]}, guard_ast]},
-         kind,
-         caller
-       ) do
+        {:when, _, [named_type = {:"::", _, [name_with_maybe_params, _type]}, guard_ast]},
+        kind,
+        caller
+      ) do
     define_type(
       {:"::", [], [name_with_maybe_params, {:when, [], [named_type, guard_ast]}]},
       kind,
@@ -504,15 +521,25 @@ defmodule TypeCheck.Macros do
           """)
       end
 
-    typecheck_options = Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+    typecheck_options =
+      Module.get_attribute(caller.module, TypeCheck.Options, TypeCheck.Options.new())
+
     type = TypeCheck.Internals.PreExpander.rewrite(type, caller, typecheck_options)
+
     name_with_arity =
       case name_with_maybe_params do
         {name, _, context} when is_atom(context) -> {name, 0}
         {name, _, params} when is_list(params) -> {name, length(params)}
       end
 
-    res = type_fun_definition(name_with_maybe_params, type, caller.module, typecheck_options.overrides, kind)
+    res =
+      type_fun_definition(
+        name_with_maybe_params,
+        type,
+        caller.module,
+        typecheck_options.overrides,
+        kind
+      )
 
     quote generated: true, location: :keep do
       if Module.get_attribute(__MODULE__, :autogen_typespec) do
@@ -529,6 +556,7 @@ defmodule TypeCheck.Macros do
             @typep unquote(name_with_maybe_params) :: unquote(clean_typedef)
         end
       end
+
       Module.put_attribute(__MODULE__, :autogen_typespec, true)
 
       unquote(res)
@@ -580,26 +608,30 @@ defmodule TypeCheck.Macros do
 
   defp type_fun_definition(name_with_params, type, module_name, overrides, kind) do
     {name, params} = Macro.decompose_call(name_with_params)
+
     params_check_code =
       params
       |> Enum.map(fn param ->
-      quote generated: true, location: :keep do
+        quote generated: true, location: :keep do
           TypeCheck.Type.ensure_type!(unquote(param))
         end
       end)
 
-      overridden_modules = overrides |> Enum.map(fn {{m1, _f1, _a1}, {m2, _f2, _a2}} -> {m2, m1} end)
+    overridden_modules =
+      overrides |> Enum.map(fn {{m1, _f1, _a1}, {m2, _f2, _a2}} -> {m2, m1} end)
 
-      pretty_module_name = Keyword.get(overridden_modules, module_name, module_name)
-      pretty_module_name =
-        case Module.split(pretty_module_name) do
-          ["TypeCheck", "DefaultOverrides" | rest] ->
-            Module.concat(rest)
-          _ ->
-            pretty_module_name
-        end
+    pretty_module_name = Keyword.get(overridden_modules, module_name, module_name)
 
-      pretty_type_name = "#{inspect(pretty_module_name)}.#{Macro.to_string(name_with_params)}"
+    pretty_module_name =
+      case Module.split(pretty_module_name) do
+        ["TypeCheck", "DefaultOverrides" | rest] ->
+          Module.concat(rest)
+
+        _ ->
+          pretty_module_name
+      end
+
+    pretty_type_name = "#{inspect(pretty_module_name)}.#{Macro.to_string(name_with_params)}"
 
     quote generated: true, location: :keep do
       @doc false
@@ -608,7 +640,9 @@ defmodule TypeCheck.Macros do
         # import TypeCheck.Builtin
         unquote(type_expansion_loop_prevention_code(name_with_params))
         mfa = {unquote(module_name), unquote(name), unquote(params)}
-        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type), unquote(kind), mfa) |> Map.put(:local, false)
+
+        TypeCheck.Builtin.named_type(unquote(pretty_type_name), unquote(type), unquote(kind), mfa)
+        |> Map.put(:local, false)
       end
     end
   end
@@ -623,9 +657,7 @@ defmodule TypeCheck.Macros do
 
       if expansion_tracker > 1_000_000 do
         IO.warn("""
-        Potentially infinite type expansion loop detected while expanding `#{
-          unquote(Macro.to_string(name_with_params))
-        }`.
+        Potentially infinite type expansion loop detected while expanding `#{unquote(Macro.to_string(name_with_params))}`.
         You probably want to use `TypeCheck.Builtin.lazy` to defer type expansion to runtime.
         """)
       else
@@ -650,23 +682,26 @@ defmodule TypeCheck.Macros do
       Module.put_attribute(
         __MODULE__,
         TypeCheck.Specs,
-        {unquote(name), {unquote(caller.file), unquote(caller.line)}, unquote(arity), unquote(Macro.escape(clean_params)),
-         unquote(Macro.escape(params_ast)), unquote(Macro.escape(return_type_ast))}
+        {unquote(name), {unquote(caller.file), unquote(caller.line)}, unquote(arity),
+         unquote(Macro.escape(clean_params)), unquote(Macro.escape(params_ast)),
+         unquote(Macro.escape(return_type_ast))}
       )
     end
   end
 
   import Kernel, except: [@: 1]
+
   defmacro @ast do
     case ast do
       {name, _, expr} when name in ~w[type! typep! opaque! spec!]a ->
         quote generated: true, location: :keep do
           TypeCheck.Macros.unquote(name)(unquote_splicing(expr))
         end
+
       _ ->
         quote generated: true, location: :keep do
           Kernel.@(unquote(ast))
         end
-      end
+    end
   end
 end

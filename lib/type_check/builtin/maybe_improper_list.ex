@@ -8,7 +8,6 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
            terminator_type: terminator_type
          }
 
-
   @type! problem_tuple ::
            {t(), :not_a_list, %{}, any()}
            | {t(), :element_error,
@@ -21,7 +20,11 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
-               %{s | element_type: TypeCheck.Protocols.Escape.escape(s.element_type), terminator_type: TypeCheck.Protocols.Escape.escape(s.terminator_type)}
+      %{
+        s
+        | element_type: TypeCheck.Protocols.Escape.escape(s.element_type),
+          terminator_type: TypeCheck.Protocols.Escape.escape(s.terminator_type)
+      }
     end
   end
 
@@ -55,39 +58,38 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
           orig_param
           |> TypeCheck.Builtin.MaybeImproperList.with_index_improper()
           |> TypeCheck.Builtin.MaybeImproperList.reduce_while_improper(
-          {:ok, [], []}, fn {input,
-                             index},
-        {:ok,
-         bindings,
-         altered_param},
-          terminator? ->
-            var!(single_param, unquote(__MODULE__)) = input
+            {:ok, [], []},
+            fn {input, index}, {:ok, bindings, altered_param}, terminator? ->
+              var!(single_param, unquote(__MODULE__)) = input
 
-            if terminator? do
-              case unquote(terminator_check) do
-                {:ok, terminator_bindings, altered_terminator} ->
-                  {:ok_terminator, terminator_bindings ++ bindings, altered_param, altered_terminator}
+              if terminator? do
+                case unquote(terminator_check) do
+                  {:ok, terminator_bindings, altered_terminator} ->
+                    {:ok_terminator, terminator_bindings ++ bindings, altered_param,
+                     altered_terminator}
 
-                {:error, problem} ->
-                  {:error,
-                   {unquote(Macro.escape(s)), :terminator_error, %{problem: problem, index: index},
-                    orig_param}}
-              end
-            else
-              case unquote(element_check) do
-                {:ok, element_bindings, altered_element} ->
-                  {:cont, {:ok, element_bindings ++ bindings, [altered_element | altered_param]}}
-
-                {:error, problem} ->
-                  problem =
+                  {:error, problem} ->
                     {:error,
-                     {unquote(Macro.escape(s)), :element_error, %{problem: problem, index: index},
-                      orig_param}}
+                     {unquote(Macro.escape(s)), :terminator_error,
+                      %{problem: problem, index: index}, orig_param}}
+                end
+              else
+                case unquote(element_check) do
+                  {:ok, element_bindings, altered_element} ->
+                    {:cont,
+                     {:ok, element_bindings ++ bindings, [altered_element | altered_param]}}
 
-                  {:halt, problem}
+                  {:error, problem} ->
+                    problem =
+                      {:error,
+                       {unquote(Macro.escape(s)), :element_error,
+                        %{problem: problem, index: index}, orig_param}}
+
+                    {:halt, problem}
+                end
               end
             end
-          end)
+          )
 
         case res do
           {:ok_terminator, bindings, altered_param, altered_terminator} ->
@@ -109,16 +111,20 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
   # Similar to Enum.with_index, but works on improper lists
   @typep elem() :: term()
   @typep terminator() :: term()
-  @spec with_index_improper(maybe_improper_list(elem(), terminator())) :: maybe_improper_list({elem(), non_neg_integer()}, {terminator(), non_neg_integer()})
+  @spec with_index_improper(maybe_improper_list(elem(), terminator())) ::
+          maybe_improper_list({elem(), non_neg_integer()}, {terminator(), non_neg_integer()})
   def with_index_improper(maybe_improper_list) do
     do_with_index_improper(maybe_improper_list, [], 0)
   end
 
   defp do_with_index_improper(maybe_improper_list, result, count) do
     case maybe_improper_list do
-      [] -> :lists.reverse(result)
+      [] ->
+        :lists.reverse(result)
+
       [head | tail] ->
         do_with_index_improper(tail, [{head, count} | result], count + 1)
+
       terminator ->
         rest_list = :lists.reverse(result)
         terminator_with_index = {terminator, count}
@@ -182,15 +188,16 @@ defmodule TypeCheck.Builtin.MaybeImproperList do
       def to_gen(s) do
         # require Blocked
         # Blocked.by("https://github.com/whatyouhide/stream_data/issues/169", "StreamData.maybe_improper_list_of is incorrect") do
-          element_gen =  TypeCheck.Protocols.ToStreamData.to_gen(s.element_type)
-          terminator_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.terminator_type)
-          gen = StreamData.maybe_improper_list_of(element_gen, terminator_gen)
-          StreamData.filter(gen, fn list ->
-            case list do
-              [_elem] -> false
-              _other -> true
-            end
-          end)
+        element_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.element_type)
+        terminator_gen = TypeCheck.Protocols.ToStreamData.to_gen(s.terminator_type)
+        gen = StreamData.maybe_improper_list_of(element_gen, terminator_gen)
+
+        StreamData.filter(gen, fn list ->
+          case list do
+            [_elem] -> false
+            _other -> true
+          end
+        end)
 
         # else
         #   element_gen =  TypeCheck.Protocols.ToStreamData.to_gen(s.element_type)

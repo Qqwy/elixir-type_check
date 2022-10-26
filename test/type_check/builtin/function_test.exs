@@ -5,12 +5,12 @@ defmodule TypeCheck.Builtin.FunctionTest do
   use TypeCheck
 
   test "Recognizes arity-0 function syntax" do
-    function_type = TypeCheck.Type.build((-> integer()))
+    function_type = TypeCheck.Type.build((() -> integer()))
     assert inspect(function_type) == "#TypeCheck.Type< ( -> integer()) >"
   end
 
   test "Recognizes any-arity function syntax" do
-    function_type = TypeCheck.Type.build((...-> integer()))
+    function_type = TypeCheck.Type.build((... -> integer()))
     assert inspect(function_type) == "#TypeCheck.Type< (... -> integer()) >"
   end
 
@@ -29,7 +29,7 @@ defmodule TypeCheck.Builtin.FunctionTest do
 
   property "Functions of correct arity are OK, but will raise when called with incorrect input later" do
     check all input <- StreamData.term(),
-      not is_integer(input) do
+              not is_integer(input) do
       myfun = fn condition, thing ->
         if condition do
           thing
@@ -37,26 +37,32 @@ defmodule TypeCheck.Builtin.FunctionTest do
           42
         end
       end
+
       assert {:ok, fun} = TypeCheck.conforms(myfun, (boolean(), binary() -> integer()))
 
-      assert fun.(false,  "asdf") == 42
+      assert fun.(false, "asdf") == 42
 
-      exception = assert_raise(TypeCheck.TypeError, fn ->
-        fun.(:not_a_boolean, "asdf")
-      end)
+      exception =
+        assert_raise(TypeCheck.TypeError, fn ->
+          fun.(:not_a_boolean, "asdf")
+        end)
+
       assert {_, :param_error, %{index: 0}, _} = exception.raw
 
-      exception = assert_raise(TypeCheck.TypeError, fn ->
-        fun.(true, 12345)
-      end)
+      exception =
+        assert_raise(TypeCheck.TypeError, fn ->
+          fun.(true, 12345)
+        end)
+
       assert {_, :param_error, %{index: 1}, _} = exception.raw
 
       # Return type
-      exception = assert_raise(TypeCheck.TypeError, fn ->
-        fun.(true, "asdf")
-      end)
-      assert {_, :return_error, _, _} = exception.raw
+      exception =
+        assert_raise(TypeCheck.TypeError, fn ->
+          fun.(true, "asdf")
+        end)
 
+      assert {_, :return_error, _, _} = exception.raw
     end
   end
 
@@ -64,10 +70,11 @@ defmodule TypeCheck.Builtin.FunctionTest do
     test "function generators' generated funs generate different results" do
       function_type = TypeCheck.Type.build((integer() -> String.t()))
       funs = TypeCheck.Type.StreamData.to_gen(function_type) |> Enum.take(100)
+
       results =
         funs
         |> Enum.map(fn fun -> fun.(42) end)
-        |> MapSet.new
+        |> MapSet.new()
 
       assert MapSet.size(results) > 1
     end

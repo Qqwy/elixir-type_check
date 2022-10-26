@@ -7,7 +7,6 @@ defprotocol TypeCheck.Protocols.Escape do
 
   @spec escape(TypeCheck.Type.t()) :: Macro.t()
   def escape(val)
-
 end
 
 defimpl TypeCheck.Protocols.Escape, for: Any do

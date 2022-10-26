@@ -15,12 +15,12 @@ defmodule TypeCheck.DefaultOverrides.Version do
   @type! requirement() :: String.t() | Version.Requirement.t()
 
   @type! t() :: %Elixir.Version{
-    build: build(),
-    major: major(),
-    minor: minor(),
-    patch: patch(),
-    pre: pre()
-  }
+           build: build(),
+           major: major(),
+           minor: minor(),
+           patch: patch(),
+           pre: pre()
+         }
 
   @type! version() :: String.t() | t()
 end

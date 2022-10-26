@@ -1,18 +1,19 @@
 defmodule TypeCheck.DefaultOverrides.Access do
   use TypeCheck
+
   @type! access_fun(data, current_value) ::
-  get_fun(data) | get_and_update_fun(data, current_value)
+           get_fun(data) | get_and_update_fun(data, current_value)
 
   @type! any_container() :: any()
 
   @type! container() :: keyword() | struct() | map()
 
   @type! get_and_update_fun(data, current_value) ::
-  (:get_and_update, data, (term() -> term()) ->
-    {current_value, new_data :: container()} | :pop)
+           (:get_and_update, data, (term() -> term()) ->
+              {current_value, new_data :: container()} | :pop)
 
   @type! get_fun(data) ::
-  (:get, data, (term() -> term()) -> new_data :: container())
+           (:get, data, (term() -> term()) -> new_data :: container())
 
   @type! key() :: any()
 

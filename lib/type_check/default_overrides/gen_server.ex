@@ -11,14 +11,14 @@ defmodule TypeCheck.DefaultOverrides.GenServer do
   @type! name() :: atom() | {:global, term()} | {:via, module(), term()}
 
   @type! on_start() ::
-  {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}
+           {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}
 
   @type! option() ::
-  {:debug, debug()}
-  | {:name, name()}
-  | {:timeout, timeout()}
-  | {:spawn_opt, [Process.spawn_opt()]}
-  | {:hibernate_after, timeout()}
+           {:debug, debug()}
+           | {:name, name()}
+           | {:timeout, timeout()}
+           | {:spawn_opt, [Process.spawn_opt()]}
+           | {:hibernate_after, timeout()}
 
   @type! options() :: [option()]
 

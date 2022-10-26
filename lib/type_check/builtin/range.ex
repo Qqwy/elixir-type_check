@@ -10,8 +10,8 @@ defmodule TypeCheck.Builtin.Range do
   end
 
   @type! problem_tuple ::
-         {t(), :not_an_integer, %{}, any()}
-         | {t(), :not_in_range, %{}, integer()}
+           {t(), :not_an_integer, %{}, any()}
+           | {t(), :not_in_range, %{}, integer()}
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s = %{range: range}, param) do

@@ -8,6 +8,6 @@ defmodule TypeCheck.Internals.Escaper do
   def escape(val) do
     val
     |> TypeCheck.Protocols.Escape.escape()
-    |> Macro.escape(unquote: :true)
+    |> Macro.escape(unquote: true)
   end
 end

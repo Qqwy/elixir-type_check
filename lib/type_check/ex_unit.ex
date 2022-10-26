@@ -129,45 +129,52 @@ defmodule TypeCheck.ExUnit do
 
   defp do_spectest(module, options, caller) do
     req =
-    if is_atom(Macro.expand(module, caller)) do
-      quote generated: true, location: :keep do
-        require unquote(module)
+      if is_atom(Macro.expand(module, caller)) do
+        quote generated: true, location: :keep do
+          require unquote(module)
+        end
       end
-    end
-
 
     tests =
       quote generated: true, location: :keep, bind_quoted: [module: module, options: options] do
-      initial_seed =
-        case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
-          seed when is_integer(seed) ->
-            seed
+        initial_seed =
+          case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
+            seed when is_integer(seed) ->
+              seed
 
-          other ->
-            raise ArgumentError, "expected :initial_seed to be an integer, got: #{inspect(other)}"
-        end
+            other ->
+              raise ArgumentError,
+                    "expected :initial_seed to be an integer, got: #{inspect(other)}"
+          end
 
-      generator_options =
-        case options[:generator] do
-          nil -> []
-          StreamData -> []
-          {StreamData, opts} when is_list(opts) -> opts
-        end
-      generator_options  = generator_options ++ [initial_seed: Macro.escape({0, 0, initial_seed})]
+        generator_options =
+          case options[:generator] do
+            nil -> []
+            StreamData -> []
+            {StreamData, opts} when is_list(opts) -> opts
+          end
 
-      env = __ENV__
-      exposed_specs = module.__type_check__(:specs)
-      specs = (options[:only] || exposed_specs) -- (options[:except] || [])
-      for {name, arity} <- specs  do
-        spec = TypeCheck.Spec.lookup!(module, name, arity)
-        body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, generator_options)
+        generator_options =
+          generator_options ++ [initial_seed: Macro.escape({0, 0, initial_seed})]
 
-        test_name = ExUnit.Case.register_test(env, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [:spectest])
-        def unquote(test_name)(_) do
-          unquote(body)
+        env = __ENV__
+        exposed_specs = module.__type_check__(:specs)
+        specs = (options[:only] || exposed_specs) -- (options[:except] || [])
+
+        for {name, arity} <- specs do
+          spec = TypeCheck.Spec.lookup!(module, name, arity)
+          body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, generator_options)
+
+          test_name =
+            ExUnit.Case.register_test(env, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [
+              :spectest
+            ])
+
+          def unquote(test_name)(_) do
+            unquote(body)
+          end
         end
       end
-    end
 
     quote generated: true, location: :keep do
       unquote(req)
@@ -177,44 +184,55 @@ defmodule TypeCheck.ExUnit do
 
   @doc false
   def __build_spectest__(module, function_name, arity, spec, generator_options) do
-
-    quote [generated: true] do
+    quote generated: true do
       generator_options = unquote(generator_options)
 
       generator = TypeCheck.Type.StreamData.to_gen(unquote(Macro.escape(spec)))
-      result = StreamData.check_all(generator, generator_options, fn unquote(Macro.generate_arguments(arity, module)) ->
-        try do
-          unquote(module).unquote(function_name)(unquote_splicing(Macro.generate_arguments(arity, module)))
-          {:ok, unquote(Macro.generate_arguments(arity, module))}
-        rescue
-          exception ->
-            result = %{
-          exception: exception,
-          stacktrace: __STACKTRACE__,
-          generated_values: unquote(Macro.generate_arguments(arity, module))
-        }
-          {:error, result}
-        end
-      end)
+
+      result =
+        StreamData.check_all(generator, generator_options, fn unquote(
+                                                                Macro.generate_arguments(
+                                                                  arity,
+                                                                  module
+                                                                )
+                                                              ) ->
+          try do
+            unquote(module).unquote(function_name)(
+              unquote_splicing(Macro.generate_arguments(arity, module))
+            )
+
+            {:ok, unquote(Macro.generate_arguments(arity, module))}
+          rescue
+            exception ->
+              result = %{
+                exception: exception,
+                stacktrace: __STACKTRACE__,
+                generated_values: unquote(Macro.generate_arguments(arity, module))
+              }
+
+              {:error, result}
+          end
+        end)
 
       case result do
         {:error, metadata} ->
-          shrunk_params = metadata.shrunk_failure.generated_values |> Enum.map(&inspect/1) |> Enum.join(", ")
-          message =
-            """
-            Spectest failed (after #{metadata.successful_runs} successful runs)
+          shrunk_params =
+            metadata.shrunk_failure.generated_values |> Enum.map(&inspect/1) |> Enum.join(", ")
 
-            Input: #{inspect(unquote(module))}.#{unquote(function_name)}(#{shrunk_params})
+          message = """
+          Spectest failed (after #{metadata.successful_runs} successful runs)
 
-            #{Exception.format(:error, metadata.shrunk_failure.exception)}
-            """
-          problem =
-            [message: message,
-             expr: unquote(Macro.escape(spec))
-            ]
+          Input: #{inspect(unquote(module))}.#{unquote(function_name)}(#{shrunk_params})
+
+          #{Exception.format(:error, metadata.shrunk_failure.exception)}
+          """
+
+          problem = [message: message, expr: unquote(Macro.escape(spec))]
 
           reraise ExUnit.AssertionError, problem, metadata.shrunk_failure.stacktrace
-        {:ok, _} -> :ok
+
+        {:ok, _} ->
+          :ok
       end
     end
   end

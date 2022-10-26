@@ -22,11 +22,11 @@ defmodule TypeCheck.DefaultOverrides.Registry do
   @type spec() :: [{match_pattern(), guards(), body()}]
 
   @type start_option() ::
-  {:keys, keys()}
-  | {:name, registry()}
-  | {:partitions, pos_integer()}
-  | {:listeners, [atom()]}
-  | {:meta, [{meta_key(), meta_value()}]}
+          {:keys, keys()}
+          | {:name, registry()}
+          | {:partitions, pos_integer()}
+          | {:listeners, [atom()]}
+          | {:meta, [{meta_key(), meta_value()}]}
 
   @type value() :: term()
 end

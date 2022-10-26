@@ -7,7 +7,7 @@ defmodule TypeCheck.Builtin.Any do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(_, param) do
-      quote generated: :true, location: :keep do
+      quote generated: true, location: :keep do
         {:ok, [], unquote(param)}
       end
     end
@@ -24,7 +24,8 @@ defmodule TypeCheck.Builtin.Any do
     defimpl TypeCheck.Protocols.ToStreamData do
       def to_gen(_s) do
         StreamData.term()
-        |> StreamData.scale(fn size -> trunc(:math.log(size + 1)) end) # Usually we don't need that large terms for an  'any', as no checks will be performed on it anyway.
+        # Usually we don't need that large terms for an  'any', as no checks will be performed on it anyway.
+        |> StreamData.scale(fn size -> trunc(:math.log(size + 1)) end)
       end
     end
   end

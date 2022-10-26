@@ -29,10 +29,11 @@ defmodule TypeCheck.Builtin.Lazy do
         s.arguments
         |> Enum.map(&TypeCheck.Protocols.Inspect.inspect(&1, opts))
         |> Inspect.Algebra.fold_doc(fn doc, acc ->
-        Inspect.Algebra.concat([doc, ",", acc])
+          Inspect.Algebra.concat([doc, ",", acc])
         end)
-        # |> Enum.map(&to_string/1)
-        # |> Enum.join(", ")
+
+      # |> Enum.map(&to_string/1)
+      # |> Enum.join(", ")
 
       "lazy("
       |> Inspect.Algebra.concat("#{inspect(s.module)}.#{s.function}(")
@@ -51,7 +52,8 @@ defmodule TypeCheck.Builtin.Lazy do
           s
           |> TypeCheck.Builtin.Lazy.lazily_expand_type()
           |> TypeCheck.Protocols.ToStreamData.to_gen()
-          |> StreamData.scale(fn size -> trunc(:math.log(size + 1)) end) # Since we assume that `lazy` is used for recursive types.
+          # Since we assume that `lazy` is used for recursive types.
+          |> StreamData.scale(fn size -> trunc(:math.log(size + 1)) end)
         end)
       end
     end

@@ -25,13 +25,13 @@ defmodule TypeCheck.DefaultOverrides.Calendar.ISO do
   @type! second() :: 0..59
 
   @type! weekday() ::
-  :monday
-  | :tuesday
-  | :wednesday
-  | :thursday
-  | :friday
-  | :saturday
-  | :sunday
+           :monday
+           | :tuesday
+           | :wednesday
+           | :thursday
+           | :friday
+           | :saturday
+           | :sunday
 
   @type! year() :: -9999..9999
 

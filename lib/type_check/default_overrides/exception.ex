@@ -11,12 +11,12 @@ defmodule TypeCheck.DefaultOverrides.Exception do
   @type! stacktrace() :: [stacktrace_entry()]
 
   @type! stacktrace_entry() ::
-  {module(), atom(), arity_or_args(), location()}
-  | {(... -> any()), arity_or_args(), location()}
+           {module(), atom(), arity_or_args(), location()}
+           | {(... -> any()), arity_or_args(), location()}
 
   @type! t() :: %{
-    :__struct__ => module(),
-    :__exception__ => true,
-    optional(atom()) => any()
-  }
+           :__struct__ => module(),
+           :__exception__ => true,
+           optional(atom()) => any()
+         }
 end

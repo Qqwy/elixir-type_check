@@ -19,6 +19,7 @@ defmodule TypeCheck.OptionsTest do
 
     test "overrides are respected by the macros" do
       assert OverrideExample.times_two(42) == 84
+
       assert_raise(TypeCheck.TypeError, fn ->
         OverrideExample.times_two("a beautiful string")
       end)
@@ -44,16 +45,16 @@ defmodule TypeCheck.OptionsTest do
   defp mfa_or_capture_gen(mfa) do
     [mfa, capture_from_mfa(mfa)]
     |> Enum.map(&StreamData.constant/1)
-    |> StreamData.one_of
+    |> StreamData.one_of()
   end
 
   # Ensure original and override have same arity
   defp mfa_override_gen() do
-    {StreamData.atom(:alias), StreamData.atom(:alphanumeric), StreamData.atom(:alias), StreamData.atom(:alphanumeric), StreamData.integer(0..255)}
+    {StreamData.atom(:alias), StreamData.atom(:alphanumeric), StreamData.atom(:alias),
+     StreamData.atom(:alphanumeric), StreamData.integer(0..255)}
     |> StreamData.map(fn {m1, f1, m2, f2, a} ->
       {{m1, f1, a}, {m2, f2, a}}
     end)
-
   end
 
   defp capture_from_mfa({m, f, a}) do
@@ -64,61 +65,77 @@ defmodule TypeCheck.OptionsTest do
     import StreamData, only: [], warn: false
     import ExUnit.CaptureIO
 
-	  test "works on TypeCheck.conforms" do
-      output =  capture_io(fn ->
-        Code.eval_quoted(
-          quote do
-            require TypeCheck
-            import TypeCheck.Builtin
-            TypeCheck.conforms(42, integer(), debug: true)
-          end)
-      end)
-      assert "TypeCheck.conforms(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
+    test "works on TypeCheck.conforms" do
+      output =
+        capture_io(fn ->
+          Code.eval_quoted(
+            quote do
+              require TypeCheck
+              import TypeCheck.Builtin
+              TypeCheck.conforms(42, integer(), debug: true)
+            end
+          )
+        end)
+
+      assert "TypeCheck.conforms(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <>
+               _rest = output
     end
 
-	  test "works on TypeCheck.conforms?" do
-      output =  capture_io(fn ->
-        Code.eval_quoted(
-          quote do
-            require TypeCheck
-            import TypeCheck.Builtin
-            TypeCheck.conforms?(42, integer(), debug: true)
-          end)
-      end)
-      assert "TypeCheck.conforms?(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
+    test "works on TypeCheck.conforms?" do
+      output =
+        capture_io(fn ->
+          Code.eval_quoted(
+            quote do
+              require TypeCheck
+              import TypeCheck.Builtin
+              TypeCheck.conforms?(42, integer(), debug: true)
+            end
+          )
+        end)
+
+      assert "TypeCheck.conforms?(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <>
+               _rest = output
     end
 
-	  test "works on TypeCheck.conforms!" do
-      output =  capture_io(fn ->
-        Code.eval_quoted(
-          quote do
-            require TypeCheck
-            import TypeCheck.Builtin
-            TypeCheck.conforms!(42, integer(), debug: true)
-          end)
-      end)
-      assert "TypeCheck.conforms!(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
+    test "works on TypeCheck.conforms!" do
+      output =
+        capture_io(fn ->
+          Code.eval_quoted(
+            quote do
+              require TypeCheck
+              import TypeCheck.Builtin
+              TypeCheck.conforms!(42, integer(), debug: true)
+            end
+          )
+        end)
+
+      assert "TypeCheck.conforms!(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <>
+               _rest = output
     end
 
-	  test "works on TypeCheck.dynamic_conforms" do
-      output =  capture_io(fn ->
-        import TypeCheck.Builtin
-        TypeCheck.dynamic_conforms(42, integer(), debug: true)
-      end)
-      assert "TypeCheck.dynamic_conforms(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <> _rest = output
+    test "works on TypeCheck.dynamic_conforms" do
+      output =
+        capture_io(fn ->
+          import TypeCheck.Builtin
+          TypeCheck.dynamic_conforms(42, integer(), debug: true)
+        end)
+
+      assert "TypeCheck.dynamic_conforms(42, #TypeCheck.Type< integer() >, [debug: true]) generated:\n----------------\n" <>
+               _rest = output
     end
 
     test "works on @spec!" do
-      output = capture_io(fn ->
-        defmodule TypeCheckDebugSpec do
-          use TypeCheck, debug: true
+      output =
+        capture_io(fn ->
+          defmodule TypeCheckDebugSpec do
+            use TypeCheck, debug: true
 
-          @spec! foo(integer()) :: binary()
-          def foo(val) do
-            to_string(val)
+            @spec! foo(integer()) :: binary()
+            def foo(val) do
+              to_string(val)
+            end
           end
-        end
-      end)
+        end)
 
       assert "TypeCheck.Macros @spec generated:\n----------------\n" <> _rest = output
     end
@@ -146,7 +163,6 @@ defmodule TypeCheck.OptionsTest do
           false
         end
       end
-
 
       assert false == EnableRuntimeChecksExample2.broken(42)
     end

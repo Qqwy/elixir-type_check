@@ -13,7 +13,7 @@ defmodule TypeCheck.Builtin.Atom do
 
   defimpl TypeCheck.Protocols.ToCheck do
     def to_check(s, param) do
-      quote generated: :true, location: :keep do
+      quote generated: true, location: :keep do
         case unquote(param) do
           x when is_atom(x) ->
             {:ok, [], x}

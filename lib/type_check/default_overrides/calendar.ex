@@ -19,35 +19,34 @@ defmodule TypeCheck.DefaultOverrides.Calendar do
     end
   end
 
-
   @type! date() :: %{
-    optional(any()) => any(),
-    :calendar => calendar(),
-    :year => year(),
-    :month => month(),
-    :day => day()
-  }
+           optional(any()) => any(),
+           :calendar => calendar(),
+           :year => year(),
+           :month => month(),
+           :day => day()
+         }
 
   @type! datetime() :: %{
-    optional(any()) => any(),
-    :calendar => calendar(),
-    :year => year(),
-    :month => month(),
-    :day => day(),
-    :hour => hour(),
-    :minute => minute(),
-    :second => second(),
-    :microsecond => microsecond(),
-    :time_zone => time_zone(),
-    :zone_abbr => zone_abbr(),
-    :utc_offset => utc_offset(),
-    :std_offset => std_offset()
-  }
+           optional(any()) => any(),
+           :calendar => calendar(),
+           :year => year(),
+           :month => month(),
+           :day => day(),
+           :hour => hour(),
+           :minute => minute(),
+           :second => second(),
+           :microsecond => microsecond(),
+           :time_zone => time_zone(),
+           :zone_abbr => zone_abbr(),
+           :utc_offset => utc_offset(),
+           :std_offset => std_offset()
+         }
 
   @type! day() :: pos_integer()
 
   @type! day_fraction() ::
-  {parts_in_day :: non_neg_integer(), parts_per_day :: pos_integer()}
+           {parts_in_day :: non_neg_integer(), parts_per_day :: pos_integer()}
 
   @type! day_of_era() :: {day :: non_neg_integer(), era()}
 
@@ -68,28 +67,28 @@ defmodule TypeCheck.DefaultOverrides.Calendar do
   @type! month() :: pos_integer()
 
   @type! naive_datetime() :: %{
-    optional(any()) => any(),
-    :calendar => calendar(),
-    :year => year(),
-    :month => month(),
-    :day => day(),
-    :hour => hour(),
-    :minute => minute(),
-    :second => second(),
-    :microsecond => microsecond()
-  }
+           optional(any()) => any(),
+           :calendar => calendar(),
+           :year => year(),
+           :month => month(),
+           :day => day(),
+           :hour => hour(),
+           :minute => minute(),
+           :second => second(),
+           :microsecond => microsecond()
+         }
 
   @type! second() :: non_neg_integer()
 
   @type! std_offset() :: integer()
 
   @type! time() :: %{
-    optional(any()) => any(),
-    :hour => hour(),
-    :minute => minute(),
-    :second => second(),
-    :microsecond => microsecond()
-  }
+           optional(any()) => any(),
+           :hour => hour(),
+           :minute => minute(),
+           :second => second(),
+           :microsecond => microsecond()
+         }
 
   @type! time_zone() :: String.t()
 

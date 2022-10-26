@@ -11,11 +11,11 @@ defmodule TypeCheck.Builtin.LazyTest do
     if Version.compare(System.version(), "1.12.0") == :lt do
       assert res == "#TypeCheck.Type< lazy(TypeCheck.Builtin.range(%Range{first: 1, last: 5}) >"
     else
-      assert res == "#TypeCheck.Type< lazy(TypeCheck.Builtin.range(%Range{first: 1, last: 5, step: 1}) >"
+      assert res ==
+               "#TypeCheck.Type< lazy(TypeCheck.Builtin.range(%Range{first: 1, last: 5, step: 1}) >"
     end
 
     res = inspect(TypeCheck.Type.build(lazy(42)))
     assert res == "#TypeCheck.Type< lazy(TypeCheck.Builtin.literal(42) >"
   end
-
 end

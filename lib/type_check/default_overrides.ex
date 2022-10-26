@@ -102,6 +102,7 @@ defmodule TypeCheck.DefaultOverrides do
 
   defp build_overrides(module) do
     replacement_module = Elixir.Module.concat(__MODULE__, module)
+
     replacement_module.__type_check__(:types)
     |> Elixir.Enum.map(fn {type, arity} ->
       orig = {Elixir.Module.concat(Elixir, module), type, arity}
@@ -112,6 +113,7 @@ defmodule TypeCheck.DefaultOverrides do
 
   defp build_erlang_overrides(module) do
     replacement_module = Elixir.Module.concat(__MODULE__, module)
+
     replacement_module.__type_check__(:types)
     |> Elixir.Enum.map(fn {type, arity} ->
       erlang_module = semimodule_to_erlang_module(module)
@@ -126,7 +128,7 @@ defmodule TypeCheck.DefaultOverrides do
     "Erlang." <> name = Atom.to_string(semimodule)
 
     name
-    |> String.downcase
-    |> String.to_existing_atom
+    |> String.downcase()
+    |> String.to_existing_atom()
   end
 end

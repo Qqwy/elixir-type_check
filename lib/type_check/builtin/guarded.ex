@@ -8,8 +8,11 @@ defmodule TypeCheck.Builtin.Guarded do
     Macro.escape(term)
   end
 
-  @type! t() :: %TypeCheck.Builtin.Guarded{type: TypeCheck.Type.t(), guard: ast(), original_module: module() | nil}
-
+  @type! t() :: %TypeCheck.Builtin.Guarded{
+           type: TypeCheck.Type.t(),
+           guard: ast(),
+           original_module: module() | nil
+         }
 
   defimpl TypeCheck.Protocols.Escape do
     def escape(s) do
@@ -122,15 +125,14 @@ defmodule TypeCheck.Builtin.Guarded do
   end
 
   defimpl TypeCheck.Protocols.Inspect do
-
     @map_with_single_required_key_type %{
       __struct__: TypeCheck.Builtin.Guarded,
-      guard: {:>=, [context: TypeCheck.Builtin, import: Kernel],
-              [
-                {:map_size, [context: TypeCheck.Builtin, import: Kernel],
-                 [{:map, [], nil}]},
-                1
-              ]},
+      guard:
+        {:>=, [context: TypeCheck.Builtin, import: Kernel],
+         [
+           {:map_size, [context: TypeCheck.Builtin, import: Kernel], [{:map, [], nil}]},
+           1
+         ]},
       type: %{
         __struct__: TypeCheck.Builtin.NamedType,
         local: true,
@@ -141,7 +143,7 @@ defmodule TypeCheck.Builtin.Guarded do
           value_type: %{__struct__: TypeCheck.Builtin.Boolean}
         }
       }
-}
+    }
     def inspect(s = @map_with_single_required_key_type, opts) do
       key_inspect = TypeCheck.Protocols.Inspect.inspect(s.type.type.key_type, opts)
       value_inspect = TypeCheck.Protocols.Inspect.inspect(s.type.type.value_type, opts)
@@ -149,11 +151,15 @@ defmodule TypeCheck.Builtin.Guarded do
     end
 
     def inspect(s, opts) do
-      ("(" |> Inspect.Algebra.color(:builtin_type, opts))
+      "("
+      |> Inspect.Algebra.color(:builtin_type, opts)
       |> Inspect.Algebra.concat(TypeCheck.Protocols.Inspect.inspect(s.type, opts))
       |> Inspect.Algebra.glue("when" |> Inspect.Algebra.color(:builtin_type, opts))
-      |> Inspect.Algebra.glue(Macro.to_string(s.guard) |> Inspect.Algebra.color(:builtin_type, opts))
-      |> Inspect.Algebra.concat(")"|> Inspect.Algebra.color(:builtin_type, opts))
+      |> Inspect.Algebra.glue(
+        Macro.to_string(s.guard)
+        |> Inspect.Algebra.color(:builtin_type, opts)
+      )
+      |> Inspect.Algebra.concat(")" |> Inspect.Algebra.color(:builtin_type, opts))
       |> Inspect.Algebra.group()
     end
   end
