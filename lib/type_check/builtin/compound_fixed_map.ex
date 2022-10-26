@@ -9,7 +9,11 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
   defstruct [:fixed, :flexible]
 
   use TypeCheck
-  @type! t :: %__MODULE__{fixed: TypeCheck.Builtin.FixedMap.t(), flexible: TypeCheck.Builtin.Map.t()}
+
+  @type! t :: %__MODULE__{
+    fixed: TypeCheck.Builtin.FixedMap.t(),
+    flexible: TypeCheck.Builtin.Map.t() | TypeCheck.Builtin.OptionalFixedMap.t()
+  }
 
   @type! problem_tuple ::
   {t(), :not_a_map, %{}, any()}
@@ -62,11 +66,23 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
       import Inspect.Algebra, only: [color: 3, concat: 1, container_doc: 6, group: 1, break: 1]
       fixed_keypairs_str = container_doc("", s.fixed.keypairs, "", opts, &to_map_kv(&1, &2), separator: color(",", :map, opts), break: :strict)
 
-      flexible_key_str = TypeCheck.Protocols.Inspect.inspect(s.flexible.key_type, opts)
-      flexible_val_str = TypeCheck.Protocols.Inspect.inspect(s.flexible.value_type, opts)
-      flexible_str = concat([color("optional(", :map, opts), flexible_key_str, color(") => ", :map, opts), flexible_val_str])
+      flexible_str =
+        case s.flexible do
+          %TypeCheck.Builtin.Map{} = flexible ->
+            flexible_key_str = TypeCheck.Protocols.Inspect.inspect(flexible.key_type, opts)
+            flexible_val_str = TypeCheck.Protocols.Inspect.inspect(flexible.value_type, opts)
+            concat([color("optional(", :map, opts), flexible_key_str, color(") => ", :map, opts), flexible_val_str])
+          %TypeCheck.Builtin.OptionalFixedMap{} = flexible ->
+            for {key, value_type} <- flexible.keypairs do
+              flexible_key_str = TypeCheck.Protocols.Inspect.inspect(key, opts)
+              flexible_val_str = TypeCheck.Protocols.Inspect.inspect(value_type, opts)
+              concat([color("optional(", :map, opts), flexible_key_str, color(") => ", :map, opts), flexible_val_str])
+            end
+            |> Enum.intersperse(color(", ", :map, opts))
+            |> concat()
+        end
 
-      concat([color("%{", :map, opts), break(""), group(concat([flexible_str, color(", ", :map, opts), fixed_keypairs_str])), color("}", :map, opts)])
+      concat([color("%{", :map, opts), group(concat([fixed_keypairs_str, color(", ", :map, opts), flexible_str])), color("}", :map, opts)])
       |> color(:map, opts)
     end
 

@@ -38,7 +38,7 @@ defmodule TypeCheck.BuiltinTest do
         %{a: 1, b: integer()}
       end => TypeCheck.Builtin.FixedMap,
       quote do
-        %{optional(number()) => boolean(), a: 1, b: integer()}
+        %{optional(:foo) => boolean(), optional(:bar) => boolean(), a: 1, b: integer()}
       end => TypeCheck.Builtin.CompoundFixedMap,
       quote do
         {1, float()}
