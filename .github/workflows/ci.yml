@@ -47,6 +47,7 @@ jobs:
         run: |
           mix deps.get
           mix deps.compile
+      - run: mix format --check-formatted
       - run: mix compile
       # - run: mix test # Testing is already done as part of the next task:
       - run: mix coveralls.github --trace
