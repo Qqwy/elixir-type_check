@@ -30,10 +30,12 @@ defmodule TypeCheck.Internals.Helper do
 
   So, we emulate it here.
   """
-  def fetch_alias(env, single_atom) do
-    if Version.compare(System.version(), "1.13.0") == :lt do
+  if Version.compare(System.version(), "1.13.0") == :lt do
+    def fetch_alias(env, single_atom) do
       Keyword.fetch(env.aliases, :"Elixir.#{single_atom}")
-    else
+    end
+  else
+    def fetch_alias(env, single_atom) do
       Macro.Env.fetch_alias(env, single_atom)
     end
   end
