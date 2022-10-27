@@ -11,11 +11,23 @@ defmodule TypeCheck.Internals.PreExpander do
     |> Macro.expand(env)
     |> TypeCheck.Internals.Overrides.rewrite_if_override(Map.get(options, :overrides, []), env)
     |> case do
-      ast = {{:., _, [{:__aliases__, _, module_alias}, unqualified_type]}, meta, args} ->
+      ast =
+          {{:., outer_meta, [{:__aliases__, alias_meta, module_alias}, unqualified_type]}, meta,
+           args} ->
         if Module.concat(module_alias) == env.module do
           {unqualified_type, meta, args}
         else
-          ast
+          with [single_atom] <- module_alias,
+               {:ok, alias_target} <- Macro.Env.fetch_alias(env, single_atom) do
+            new_ast =
+              {{:., outer_meta, [{:__aliases__, alias_meta, [alias_target]}, unqualified_type]},
+               meta, args}
+
+            rewrite(new_ast, env, options)
+          else
+            _ ->
+              ast
+          end
         end
 
       ast = {:lazy_explicit, meta, args} ->
