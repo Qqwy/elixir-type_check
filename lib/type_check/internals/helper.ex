@@ -23,4 +23,20 @@ defmodule TypeCheck.Internals.Helper do
 
     names
   end
+
+  @doc """
+  `Macro.Env.fetch_alias/2` was only introduced in Elixir v1.13
+  but we need its functionality also on earlier versions.
+
+  So, we emulate it here.
+  """
+  if Version.compare(System.version(), "1.13.0") == :lt do
+    def fetch_alias(env, single_atom) do
+      Keyword.fetch(env.aliases, :"Elixir.#{single_atom}")
+    end
+  else
+    def fetch_alias(env, single_atom) do
+      Macro.Env.fetch_alias(env, single_atom)
+    end
+  end
 end

@@ -135,4 +135,8 @@ defmodule TypeCheckTest do
 
     assert_raise(TypeCheck.TypeError, fn -> MapKeySyntaxExample.example(10) end)
   end
+
+  test "Aliases are resolved when using remote types (regression test for #160)" do
+    assert AliasesExample.Example.hydrate(%AliasesExample.Example{name: "Wilterton"})
+  end
 end

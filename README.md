@@ -206,6 +206,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.13.1 -
+  - Fixes:
+    - Fixes issues with aliases to remote types not being followed. (c.f. #160)
 - 0.13.0 - 
   - Additions:
     - Support for maps with multiple optional atom keys. Thank you very much, @dvic! (c.f. #165)
