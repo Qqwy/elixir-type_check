@@ -18,7 +18,7 @@ defmodule TypeCheck.Internals.PreExpander do
           {unqualified_type, meta, args}
         else
           with [single_atom] <- module_alias,
-               {:ok, alias_target} <- Macro.Env.fetch_alias(env, single_atom) do
+               {:ok, alias_target} <- TypeCheck.Internals.Helper.fetch_alias(env, single_atom) do
             new_ast =
               {{:., outer_meta, [{:__aliases__, alias_meta, [alias_target]}, unqualified_type]},
                meta, args}
