@@ -206,6 +206,10 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.13.2 -
+  - Fixes:
+    - Fixes issue when unions are used as type arguments in remote types. Than you very much, @dvic! (c.f. #164).
+
 - 0.13.1 -
   - Fixes:
     - Fixes issues with aliases to remote types not being followed. (c.f. #160)
