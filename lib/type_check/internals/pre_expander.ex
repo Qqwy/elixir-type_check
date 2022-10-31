@@ -14,8 +14,10 @@ defmodule TypeCheck.Internals.PreExpander do
       ast =
           {{:., outer_meta, [{:__aliases__, alias_meta, module_alias}, unqualified_type]}, meta,
            args} ->
+        rewritten_args = Enum.map(args, &rewrite(&1, env, options))
+
         if Module.concat(module_alias) == env.module do
-          {unqualified_type, meta, args}
+          {unqualified_type, meta, rewritten_args}
         else
           with [single_atom] <- module_alias,
                {:ok, alias_target} <- TypeCheck.Internals.Helper.fetch_alias(env, single_atom) do
@@ -26,7 +28,7 @@ defmodule TypeCheck.Internals.PreExpander do
             rewrite(new_ast, env, options)
           else
             _ ->
-              ast
+              put_elem(ast, 2, rewritten_args)
           end
         end
 
