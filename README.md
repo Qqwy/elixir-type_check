@@ -206,6 +206,9 @@ Details:
 - [ ] Per-module or even per-spec settings to turn on/off, configure formatter, etc.
 
 ### Changelog
+- 0.13.3 -
+  - Fixes:
+    - Ensures that TypeCheck can be used in Erlang-style modules (that do not start with 'Elixir.') (c.f. #174).
 - 0.13.2 -
   - Fixes:
     - Fixes issue when unions are used as type arguments in remote types. Than you very much, @dvic! (c.f. #164).
