@@ -39,4 +39,33 @@ defmodule TypeCheck.Internals.Helper do
       Macro.Env.fetch_alias(env, single_atom)
     end
   end
+
+  @doc """
+  Module.split/1 raises on non-Elixir module names.
+  (atoms or binaries that do not start with `Elixir.')
+
+  This is a safe variant to allow TypeCheck to be used in modules
+  that do not follow this convention (like `:my_module_name`),
+  which is sometimes done to for instance expose
+  an Erlang-ergonomic interface to an Elixir library.
+  c.f. [#174](https://github.com/Qqwy/elixir-type_check/issues/174)
+  """
+  @spec module_split_safe(module | String.t()) :: [String.t(), ...]
+  def module_split_safe(module)
+
+  def module_split_safe(module) when is_atom(module) do
+    module_split_safe(Atom.to_string(module), _original = module)
+  end
+
+  def module_split_safe(module) when is_binary(module) do
+    module_split_safe(module, _original = module)
+  end
+
+  defp module_split_safe("Elixir." <> name, _original) do
+    String.split(name, ".")
+  end
+
+  defp module_split_safe(_module, original) do
+    original
+  end
 end

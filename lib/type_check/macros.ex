@@ -623,7 +623,7 @@ defmodule TypeCheck.Macros do
     pretty_module_name = Keyword.get(overridden_modules, module_name, module_name)
 
     pretty_module_name =
-      case Module.split(pretty_module_name) do
+      case TypeCheck.Internals.Helper.module_split_safe(pretty_module_name) do
         ["TypeCheck", "DefaultOverrides" | rest] ->
           Module.concat(rest)
 
