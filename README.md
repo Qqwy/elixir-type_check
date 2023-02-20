@@ -375,6 +375,8 @@ end
 
 The documentation can be found at [https://hexdocs.pm/type_check](https://hexdocs.pm/type_check).
 
+Marten Wijnja's _ElixirConf EU 2022_ presentation "TypeCheck Effortless Runtime Type Checking" is viewable [here](https://www.youtube.com/watch?v=7ykfO2tBwYw).
+
 ### Formatter
 
 TypeCheck exports a couple of macros that you might want to use without parentheses. To make `mix format` respect this setting, add `import_deps: [:type_check]` to your `.formatter.exs` file.
