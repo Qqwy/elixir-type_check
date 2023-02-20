@@ -366,7 +366,7 @@ by adding `type_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:type_check, "~> 0.12.1"},
+    {:type_check, "~> 0.13.3"},
     # To allow spectesting and property-testing data generators (optional):
     {:stream_data, "~> 0.5.0", only: :test}, 
   ]
@@ -374,6 +374,8 @@ end
 ```
 
 The documentation can be found at [https://hexdocs.pm/type_check](https://hexdocs.pm/type_check).
+
+Marten Wijnja's _ElixirConf EU 2022_ presentation "TypeCheck: Effortless Runtime Type Checking" is viewable [here](https://www.youtube.com/watch?v=7ykfO2tBwYw).
 
 ### Formatter
 
