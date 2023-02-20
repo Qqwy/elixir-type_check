@@ -1,4 +1,8 @@
 ### Changelog
+- 0.13.4 -
+  - No code changes, but two small improvements to the documentation:
+    - Changelog has been split off from the README file.
+    - A link to Marten's ElixirConf EU 2022 talk about TypeCheck has been added.
 - 0.13.3 -
   - Fixes:
     - Ensures that TypeCheck can be used in Erlang-style modules (that do not start with 'Elixir.') (c.f. #174).

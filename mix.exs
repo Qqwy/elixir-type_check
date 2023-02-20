@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.13.3",
+      version: "0.13.4",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -54,7 +54,7 @@ defmodule TypeCheck.MixProject do
   defp package do
     [
       name: :type_check,
-      files: ["lib", "mix.exs", "README*", "LICENSE", "Comparing TypeCheck and Norm.md"],
+      files: ["lib", "mix.exs", "README*", "CHANGELOG*", "LICENSE", "Comparing TypeCheck and Norm.md"],
       maintainers: ["Wiebe-Marten Wijnja/Qqwy"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url}
@@ -82,6 +82,7 @@ defmodule TypeCheck.MixProject do
       logo: "media/type_check_logo_icon_flat_small.svg",
       extras: [
         "README.md": [title: "Guide/Readme"],
+        "CHANGELOG.md": [title: "Changelog"],
         "Type-checking and spec-testing with TypeCheck.md": [title: "Introducing TypeCheck"],
         "Comparing TypeCheck and Elixir Typespecs.md": [title: "Comparison to Plain Typespecs"],
         "Comparing TypeCheck and Norm.md": []
