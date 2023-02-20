@@ -375,7 +375,7 @@ end
 
 The documentation can be found at [https://hexdocs.pm/type_check](https://hexdocs.pm/type_check).
 
-Marten Wijnja's _ElixirConf EU 2022_ presentation "TypeCheck Effortless Runtime Type Checking" is viewable [here](https://www.youtube.com/watch?v=7ykfO2tBwYw).
+Marten Wijnja's _ElixirConf EU 2022_ presentation "TypeCheck: Effortless Runtime Type Checking" is viewable [here](https://www.youtube.com/watch?v=7ykfO2tBwYw).
 
 ### Formatter
 
