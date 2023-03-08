@@ -39,7 +39,7 @@ defmodule TypeCheck.Builtin.FixedMapTest do
              )
   end
 
-  test "returns error for maps with superflous keys" do
+  test "returns error for maps with superfluous keys" do
     assert {:error, %TypeCheck.TypeError{raw: {_, :superfluous_keys, %{keys: [:foo]}, _}}} =
              TypeCheck.conforms(%{foo: "bar", key: "hello"}, %{key: String.t()})
   end
