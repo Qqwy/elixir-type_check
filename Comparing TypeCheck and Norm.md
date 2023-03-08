@@ -129,7 +129,7 @@ end
 
 #### Error messages
 
-Norm does not particulary focus on readable error messages (although that might change in the future).
+Norm does not particularly focus on readable error messages (although that might change in the future).
 
 TypeCheck heavily focuses on creating humanly-readable error-messages when a value does not type-check,
 creating a deeply nested error message indicating the cause of a top-level error (see the main README for some examples of this). 

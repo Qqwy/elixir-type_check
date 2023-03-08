@@ -5,7 +5,7 @@ defmodule TypeCheck.Builtin.FixedList do
   On failure returns a problem tuple with:
     - `:not_a_list` if the value is not a list
     - `:different_length` if the value is a list but not of equal size.
-    - `:element_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:index` to indicate what and where the problem occured.
+    - `:element_error` if one of the elements does not match. The extra information contains in this case `:problem` and `:index` to indicate what and where the problem occurred.
   """
 
   defstruct [:element_types]
