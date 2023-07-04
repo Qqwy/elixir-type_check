@@ -297,7 +297,7 @@ defmodule TypeCheck do
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message
-      "At (for doctest at) lib/type_check.ex:298:
+      "At (for doctest at) lib/type_check.ex:295:
           `20` is not the same value as `42`."
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
