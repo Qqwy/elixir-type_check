@@ -18,10 +18,10 @@ defmodule TypeCheck.Builtin.NamedTypeTest do
   test "Attempting to use a nested named type in a guard raises a CompileError" do
     import ExUnit.CaptureIO
 
-    capture_io(:stderr, fn ->
+    error = capture_io(:stderr, fn ->
       assert_raise(
         CompileError,
-        ~r"lib/type_check/spec.ex:30: undefined function hidden/0",
+        # ~r"lib/type_check/spec.ex:30: undefined function hidden/0",
         fn ->
           defmodule BadExample do
             use TypeCheck
@@ -37,6 +37,11 @@ defmodule TypeCheck.Builtin.NamedTypeTest do
         end
       )
     end)
+    if Version.compare(System.version() , "1.15.0") == :lt do
+      assert error =~ ~r"lib/type_check/spec.ex:30: undefined function hidden/0"
+    else
+      assert error =~ ~r"undefined variable \"hidden\""
+    end
   end
 
   test "Using a local named type works" do
