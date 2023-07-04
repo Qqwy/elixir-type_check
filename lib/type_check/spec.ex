@@ -107,12 +107,12 @@ defmodule TypeCheck.Spec do
   c.f. `lookup/3`.
 
       iex(1)> defmodule Example3 do
-      ...(2)>   use TypeCheck
-      ...(3)>   @spec! greeter(name :: binary()) :: binary()
-      ...(4)>   def greeter(name), do: "Hello, \#{name}!"
-      ...(5)> end
-      ...(6)>
-      ...(7)> TypeCheck.Spec.defined?(Example3, :greeter, 1)
+      iex(2)>   use TypeCheck
+      iex(3)>   @spec! greeter(name :: binary()) :: binary()
+      iex(4)>   def greeter(name), do: "Hello, \#{name}!"
+      iex(5)> end
+      iex(6)>
+      iex(7)> TypeCheck.Spec.defined?(Example3, :greeter, 1)
       true
       ...(8)> TypeCheck.Spec.defined?(Example3, :nonexistent, 0)
       false
