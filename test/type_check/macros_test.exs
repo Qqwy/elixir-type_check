@@ -179,19 +179,37 @@ defmodule TypeCheck.MacrosTest do
     end
   end
 
-  test "Using a struct-type before `defstruct` fails with a descriptive CompileError" do
-    assert_raise(
-      CompileError,
-      ~r"Could not look up default fields for struct type",
-      fn ->
-        defmodule Problematic do
-          use TypeCheck
+  # Elixir v1.15.0 and above raises an ArgumentError in this case
+  if Version.compare(System.version(), "1.15.0") == :lt do
+    test "Using a struct-type before `defstruct` fails with a descriptive CompileError" do
+      assert_raise(
+        CompileError,
+        ~r"Could not look up default fields for struct type",
+        fn ->
+          defmodule Problematic do
+            use TypeCheck
 
-          @type! t :: %__MODULE__{name: String.t()}
-          defstruct [:name]
+            @type! t :: %__MODULE__{name: String.t()}
+            defstruct [:name]
+          end
         end
-      end
-    )
+      )
+    end
+  else
+    test "Using a struct-type before `defstruct` fails with a descriptive ArgumentError" do
+      assert_raise(
+        ArgumentError,
+        ~r"cannot access struct TypeCheck.MacrosTest.Problematic",
+        fn ->
+          defmodule Problematic do
+            use TypeCheck
+
+            @type! t :: %__MODULE__{name: String.t()}
+            defstruct [:name]
+          end
+        end
+      )
+    end
   end
 
   test "Specs for struct types don't truncate fields (regression-test for https://github.com/Qqwy/elixir-type_check/issues/78)" do
