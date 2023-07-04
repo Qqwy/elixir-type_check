@@ -114,7 +114,7 @@ defmodule TypeCheck.Spec do
       iex(6)>
       iex(7)> TypeCheck.Spec.defined?(Example3, :greeter, 1)
       true
-      ...(8)> TypeCheck.Spec.defined?(Example3, :nonexistent, 0)
+      iex(8)> TypeCheck.Spec.defined?(Example3, :nonexistent, 0)
       false
   """
   def defined?(module, function, arity) do
