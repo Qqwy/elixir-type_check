@@ -136,11 +136,25 @@ defmodule TypeCheck do
         end
 
       _other ->
+        type_require =
+          if __CALLER__.module == TypeCheck.Type do
+            :ok
+          else
+            quote do: require(TypeCheck.Type)
+          end
+
+        builtin_import =
+          if __CALLER__.module == TypeCheck.Builtin do
+            :ok
+          else
+            quote do: import(TypeCheck.Builtin)
+          end
+
         quote generated: true, location: :keep do
           use TypeCheck.Macros, unquote(options)
           require TypeCheck
-          require TypeCheck.Type
-          import TypeCheck.Builtin
+          unquote(type_require)
+          unquote(builtin_import)
           :ok
         end
     end

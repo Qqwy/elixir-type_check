@@ -362,7 +362,10 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.Function`
   """
   if_recompiling? do
-    @spec! function(param_types :: list(TypeCheck.Type.t()), return_type :: TypeCheck.Type.t()) ::
+    @spec! function(
+             param_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t()),
+             return_type :: TypeCheck.Type.t()
+           ) ::
              TypeCheck.Builtin.Function.t()
   end
 
@@ -628,7 +631,8 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Tuple`
   """
   if_recompiling? do
-    @spec! fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
+    @spec! fixed_tuple(types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
+             TypeCheck.Builtin.FixedTuple.t()
   end
 
   def fixed_tuple(list_of_element_types)
@@ -644,7 +648,8 @@ defmodule TypeCheck.Builtin do
   end
 
   if_recompiling? do
-    @spec! do_fixed_tuple(types :: list(TypeCheck.Type.t())) :: TypeCheck.Builtin.FixedTuple.t()
+    @spec! do_fixed_tuple(types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
+             TypeCheck.Builtin.FixedTuple.t()
   end
 
   defp do_fixed_tuple(element_types_list) do
@@ -664,7 +669,7 @@ defmodule TypeCheck.Builtin do
   For instance, `tuple(3)` is represented as `{any(), any(), any()}`.
   """
   if_recompiling? do
-    @spec! tuple(size :: non_neg_integer()) :: TypeCheck.Builtin.FixedTuple.t()
+    @spec! tuple(size :: TypeCheck.Builtin.NonNegInteger.t()) :: TypeCheck.Builtin.FixedTuple.t()
   end
 
   def tuple(0), do: fixed_tuple([])
@@ -711,7 +716,7 @@ defmodule TypeCheck.Builtin do
   C.f. `TypeCheck.Builtin.Literal`
   """
   if_recompiling? do
-    @spec! literal(a :: term()) :: TypeCheck.Builtin.Literal.t()
+    @spec! literal(a :: TypeCheck.Builtin.Any.t()) :: TypeCheck.Builtin.Literal.t()
   end
 
   def literal(value) do
@@ -745,7 +750,7 @@ defmodule TypeCheck.Builtin do
   c.f. `one_of/2`.
   """
   if_recompiling? do
-    @spec! one_of(types :: list(TypeCheck.Type.t())) :: TypeCheck.Type.t()
+    @spec! one_of(types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) :: TypeCheck.Type.t()
   end
 
   def one_of(list_of_possibilities)
@@ -949,9 +954,10 @@ defmodule TypeCheck.Builtin do
 
   if_recompiling? do
     @spec fancy_map(
-            fixed_kvs :: list({term(), TypeCheck.Type.t()}),
-            required_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()}),
-            optional_kvs :: list({TypeCheck.Type.t(), TypeCheck.Type.t()})
+            fixed_kvs ::
+              TypeCheck.Builtin.List.t({TypeCheck.Builtin.Any.t(), TypeCheck.Type.t()}),
+            required_kvs :: TypeCheck.Builtin.List.t({TypeCheck.Type.t(), TypeCheck.Type.t()}),
+            optional_kvs :: TypeCheck.Builtin.List.t({TypeCheck.Type.t(), TypeCheck.Type.t()})
           ) ::
             TypeCheck.Builtin.CompoundFixedMap.t()
             | TypeCheck.Builtin.FixedMap.t()
@@ -1057,7 +1063,7 @@ defmodule TypeCheck.Builtin do
   and is thus represented as `[any()]` instead.
   """
   if_recompiling? do
-    @spec! fixed_list(element_types :: list(TypeCheck.Type.t())) ::
+    @spec! fixed_list(element_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
              TypeCheck.Builtin.FixedList.t()
   end
 
@@ -1074,7 +1080,7 @@ defmodule TypeCheck.Builtin do
   end
 
   if_recompiling? do
-    @spec! do_fixed_list(element_types :: list(TypeCheck.Type.t())) ::
+    @spec! do_fixed_list(element_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
              TypeCheck.Builtin.FixedList.t()
   end
 
@@ -1092,7 +1098,7 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.SizedBitstring`.
   """
   if_recompiling? do
-    @spec! sized_bitstring(prefix_size :: non_neg_integer()) ::
+    @spec! sized_bitstring(prefix_size :: TypeCheck.Builtin.NonNegInteger.t()) ::
              TypeCheck.Builtin.SizedBitstring.t()
   end
 
@@ -1134,7 +1140,10 @@ defmodule TypeCheck.Builtin do
   c.f. `TypeCheck.Builtin.SizedBitstring`.
   """
   if_recompiling? do
-    @spec! sized_bitstring(prefix_size :: non_neg_integer(), unit_size :: nil | 1..256) ::
+    @spec! sized_bitstring(
+             prefix_size :: TypeCheck.Builtin.NonNegInteger.t(),
+             unit_size :: nil | 1..256
+           ) ::
              TypeCheck.Builtin.SizedBitstring.t()
   end
 
@@ -1195,8 +1204,8 @@ defmodule TypeCheck.Builtin do
   if_recompiling? do
     @spec! guarded_by(
              type :: TypeCheck.Type.t(),
-             ast :: term(),
-             original_module :: module() | nil
+             ast :: TypeCheck.Builtin.Any.t(),
+             original_module :: TypeCheck.Builtin.Atom.t() | nil
            ) :: TypeCheck.Builtin.Guarded.t()
   end
 
@@ -1534,7 +1543,8 @@ defmodule TypeCheck.Builtin do
   because this would not respect the `@enforce_keys` option that might be given to structs.
   """
   if_recompiling? do
-    @spec! impl(protocol_name :: module()) :: TypeCheck.Builtin.ImplementsProtocol.t()
+    @spec! impl(protocol_name :: TypeCheck.Builtin.Atom.t()) ::
+             TypeCheck.Builtin.ImplementsProtocol.t()
   end
 
   def impl(protocol_name) when is_atom(protocol_name) do
