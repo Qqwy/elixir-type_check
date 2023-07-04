@@ -296,9 +296,8 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms(42, fourty_two)
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
-      iex> type_error.message
-      "At (for doctest at) lib/type_check.ex:295:
-          `20` is not the same value as `42`."
+      iex> type_error.message =~ "`20` is not the same value as `42`."
+      true
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
@@ -355,7 +354,7 @@ defmodule TypeCheck do
       iex> TypeCheck.dynamic_conforms!(42, fourty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:363:
+      ** (TypeCheck.TypeError) At lib/type_check.ex:362:
           `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()

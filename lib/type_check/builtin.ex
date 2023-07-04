@@ -363,10 +363,10 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec function(
-             param_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t()),
-             return_type :: TypeCheck.Type.t()
-           ) ::
-             TypeCheck.Builtin.Function.t()
+            param_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t()),
+            return_type :: TypeCheck.Type.t()
+          ) ::
+            TypeCheck.Builtin.Function.t()
   end
 
   def function(param_types, return_type) do
@@ -576,7 +576,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec maybe_improper_list(element :: TypeCheck.Type.t(), terminator :: TypeCheck.Type.t()) ::
-             TypeCheck.Builtin.MaybeImproperList.t()
+            TypeCheck.Builtin.MaybeImproperList.t()
   end
 
   def maybe_improper_list(element_type, terminator_type) do
@@ -593,7 +593,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec keyword(a :: TypeCheck.Type.t()) ::
-             TypeCheck.Builtin.List.t(TypeCheck.Builtin.FixedTuple.t())
+            TypeCheck.Builtin.List.t(TypeCheck.Builtin.FixedTuple.t())
   end
 
   def keyword(t) do
@@ -632,7 +632,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec fixed_tuple(types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
-             TypeCheck.Builtin.FixedTuple.t()
+            TypeCheck.Builtin.FixedTuple.t()
   end
 
   def fixed_tuple(list_of_element_types)
@@ -649,7 +649,7 @@ defmodule TypeCheck.Builtin do
 
   if_recompiling? do
     @spec do_fixed_tuple(types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
-             TypeCheck.Builtin.FixedTuple.t()
+            TypeCheck.Builtin.FixedTuple.t()
   end
 
   defp do_fixed_tuple(element_types_list) do
@@ -864,7 +864,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec map(key_type :: TypeCheck.Type.t(), value_type :: TypeCheck.Type.t()) ::
-             TypeCheck.Builtin.Map.t()
+            TypeCheck.Builtin.Map.t()
   end
 
   def map(key_type, value_type) do
@@ -1064,7 +1064,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec fixed_list(element_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
-             TypeCheck.Builtin.FixedList.t()
+            TypeCheck.Builtin.FixedList.t()
   end
 
   def fixed_list(element_types)
@@ -1081,7 +1081,7 @@ defmodule TypeCheck.Builtin do
 
   if_recompiling? do
     @spec do_fixed_list(element_types :: TypeCheck.Builtin.List.t(TypeCheck.Type.t())) ::
-             TypeCheck.Builtin.FixedList.t()
+            TypeCheck.Builtin.FixedList.t()
   end
 
   defp do_fixed_list(element_types) do
@@ -1099,7 +1099,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec sized_bitstring(prefix_size :: TypeCheck.Builtin.NonNegInteger.t()) ::
-             TypeCheck.Builtin.SizedBitstring.t()
+            TypeCheck.Builtin.SizedBitstring.t()
   end
 
   def sized_bitstring(size) do
@@ -1141,10 +1141,10 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec sized_bitstring(
-             prefix_size :: TypeCheck.Builtin.NonNegInteger.t(),
-             unit_size :: nil | 1..256
-           ) ::
-             TypeCheck.Builtin.SizedBitstring.t()
+            prefix_size :: TypeCheck.Builtin.NonNegInteger.t(),
+            unit_size :: nil | 1..256
+          ) ::
+            TypeCheck.Builtin.SizedBitstring.t()
   end
 
   def sized_bitstring(prefix_size, unit_size) do
@@ -1203,10 +1203,10 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec guarded_by(
-             type :: TypeCheck.Type.t(),
-             ast :: TypeCheck.Builtin.Any.t(),
-             original_module :: TypeCheck.Builtin.Atom.t() | nil
-           ) :: TypeCheck.Builtin.Guarded.t()
+            type :: TypeCheck.Type.t(),
+            ast :: TypeCheck.Builtin.Any.t(),
+            original_module :: TypeCheck.Builtin.Atom.t() | nil
+          ) :: TypeCheck.Builtin.Guarded.t()
   end
 
   def guarded_by(type, guard_ast, module \\ nil) do
@@ -1544,7 +1544,7 @@ defmodule TypeCheck.Builtin do
   """
   if_recompiling? do
     @spec impl(protocol_name :: TypeCheck.Builtin.Atom.t()) ::
-             TypeCheck.Builtin.ImplementsProtocol.t()
+            TypeCheck.Builtin.ImplementsProtocol.t()
   end
 
   def impl(protocol_name) when is_atom(protocol_name) do

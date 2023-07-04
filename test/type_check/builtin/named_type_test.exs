@@ -17,7 +17,7 @@ defmodule TypeCheck.Builtin.NamedTypeTest do
 
   # In v1.15, multiple compile error messages might be shown to the user at once
   # which means this test had to change.
-  if Version.compare(System.version() , "1.15.0") == :lt do
+  if Version.compare(System.version(), "1.15.0") == :lt do
     test "Attempting to use a nested named type in a guard raises a CompileError with a descriptive exception message" do
       import ExUnit.CaptureIO
 
@@ -45,25 +45,25 @@ defmodule TypeCheck.Builtin.NamedTypeTest do
     test "Attempting to use a nested named type in a guard raises a CompileError with a descriptive message in stderr" do
       import ExUnit.CaptureIO
 
-      stderr_output = capture_io(:stderr, fn ->
-        assert_raise(
-          CompileError,
-          fn ->
-            defmodule BadExample do
-              use TypeCheck
+      stderr_output =
+        capture_io(:stderr, fn ->
+          assert_raise(
+            CompileError,
+            fn ->
+              defmodule BadExample do
+                use TypeCheck
 
-              @opaque! nested() :: hidden :: binary()
-              @type! known :: (%{a: number(), b: nested()} when is_binary(hidden))
+                @opaque! nested() :: hidden :: binary()
+                @type! known :: (%{a: number(), b: nested()} when is_binary(hidden))
 
-              @spec! example(known()) :: known()
-              def example(val) do
-                val
+                @spec! example(known()) :: known()
+                def example(val) do
+                  val
+                end
               end
             end
-          end
-        )
-      end)
-
+          )
+        end)
 
       assert stderr_output =~ ~r"undefined variable \"hidden\""
     end
