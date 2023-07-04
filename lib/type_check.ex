@@ -144,10 +144,14 @@ defmodule TypeCheck do
           end
 
         builtin_import =
-          if __CALLER__.module == TypeCheck.Builtin do
-            :ok
-          else
-            quote do: import(TypeCheck.Builtin)
+          case __CALLER__.module do
+            TypeCheck.Builtin.BootstrapFix ->
+              :ok
+            TypeCheck.Builtin ->
+              quote do: import(TypeCheck.Builtin.BootstrapFix, only: [])
+            _ ->
+              quote do: import(TypeCheck.Builtin)
+
           end
 
         quote generated: true, location: :keep do

@@ -21,6 +21,23 @@ defmodule TypeCheck.Internals.Bootstrap.Macros do
     end
   end
 
+  defmacro if_recompiling_builtin?(kwargs) do
+    doblock =
+      kwargs[:do] ||
+      quote generated: true, location: :keep do
+    end
+
+    elseblock =
+      kwargs[:else] ||
+      quote generated: true, location: :keep do
+    end
+
+    case __CALLER__.module do
+      TypeCheck.Builtin -> doblock
+      _ -> elseblock
+    end
+  end
+
   defmacro recompile(module, filename) do
     quote do
       # Compatible with Elixir 1.9:
