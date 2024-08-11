@@ -979,16 +979,6 @@ defmodule TypeCheck.Builtin do
     required_map(required_key_type, value_type)
   end
 
-  defp required_map(required_key_type, value_type) do
-    guard =
-      quote do
-        map_size(unquote(Macro.var(:map, nil))) >= 1
-      end
-
-    named_type(:map, map(required_key_type, value_type))
-    |> guarded_by(guard)
-  end
-
   def fancy_map(fixed_keypairs, [], optionals) do
     fixed = fixed_map(fixed_keypairs)
 
@@ -1021,6 +1011,16 @@ defmodule TypeCheck.Builtin do
     build_struct(TypeCheck.Builtin.CompoundFixedMap)
     |> Map.put(:fixed, fixed)
     |> Map.put(:flexible, flexible)
+  end
+
+  defp required_map(required_key_type, value_type) do
+    guard =
+      quote do
+        map_size(unquote(Macro.var(:map, nil))) >= 1
+      end
+
+    named_type(:map, map(required_key_type, value_type))
+    |> guarded_by(guard)
   end
 
   defp raise_unsupported_map_error do
