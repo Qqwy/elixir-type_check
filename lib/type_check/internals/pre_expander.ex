@@ -89,7 +89,7 @@ defmodule TypeCheck.Internals.PreExpander do
 
       [{:->, _, args}] ->
         case args do
-          [[{:..., _, module}], return_type] when is_atom(module) ->
+          [[{:..., _, module}], return_type] when is_atom(module) or module == [] ->
             quote generated: true, location: :keep do
               TypeCheck.Builtin.function(unquote(rewrite(return_type, env, options)))
             end
