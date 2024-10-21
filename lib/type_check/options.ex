@@ -166,7 +166,7 @@ defmodule TypeCheck.Options do
 
     if arity_k != arity_v do
       raise TypeCheck.CompileError,
-            "Error while parsing TypeCheck overides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
+            "Error while parsing TypeCheck overrides: override #{inspect(override)} does not have same arity as original type #{inspect(original)}."
     else
       {
         {module_k, function_k, arity_k},
@@ -188,7 +188,7 @@ defmodule TypeCheck.Options do
 
       _other ->
         raise TypeCheck.CompileError,
-              "Error while parsing TypeCheck overides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
+              "Error while parsing TypeCheck overrides: #{inspect(fun)} is not an external function of the format `&Module.function/arity`!"
     end
   end
 
@@ -199,6 +199,6 @@ defmodule TypeCheck.Options do
 
   defp ensure_external_function!(fun) do
     raise TypeCheck.CompileError,
-          "Error while parsing TypeCheck overides: #{inspect(fun)} is not a function!"
+          "Error while parsing TypeCheck overrides: #{inspect(fun)} is not a function!"
   end
 end
