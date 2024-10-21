@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.13.5",
+      version: "0.13.6",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -79,7 +79,9 @@ defmodule TypeCheck.MixProject do
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:benchee, "~> 1.0", only: :bench},
       {:excoveralls, "~> 0.10", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      # Dependency of excoveralls (only required on OTP < 25!):
+      {:castore, "~> 1.0"}
     ]
   end
 
