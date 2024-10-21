@@ -930,7 +930,7 @@ defmodule TypeCheck.Builtin do
     end)
 
     build_struct(TypeCheck.Builtin.FixedMap)
-    |> Map.put(:keypairs, Enum.into(keywords, []))
+    |> Map.put(:keypairs, Enum.sort(keywords))
   end
 
   @doc typekind: :extension
