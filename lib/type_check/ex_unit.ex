@@ -166,7 +166,7 @@ defmodule TypeCheck.ExUnit do
           body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, generator_options)
 
           test_name =
-            ExUnit.Case.register_test(env, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [
+            ExUnit.Case.register_test(env.module, env.file, env.line, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [
               :spectest
             ])
 
