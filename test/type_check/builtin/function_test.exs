@@ -5,7 +5,7 @@ defmodule TypeCheck.Builtin.FunctionTest do
   use TypeCheck
 
   test "Recognizes arity-0 function syntax" do
-    function_type = TypeCheck.Type.build((() -> integer()))
+    function_type = TypeCheck.Type.build((-> integer()))
     assert inspect(function_type) == "#TypeCheck.Type< ( -> integer()) >"
   end
 

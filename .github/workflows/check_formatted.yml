@@ -1,0 +1,28 @@
+name: mix format --check-formatted
+on: push
+jobs:
+  check_formatted:
+    runs-on: ubuntu-latest
+    name: Mix format --check-formatted
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '25.x'
+          elixir-version: 'v1.15.x'
+      - uses: actions/cache@v3
+        id: mix-cache
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-format-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-format-
+      - if: steps.mix-cache.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+          mix deps.compile
+      - run: mix format --check-formatted

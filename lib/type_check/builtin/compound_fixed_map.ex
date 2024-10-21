@@ -135,7 +135,7 @@ defmodule TypeCheck.Builtin.CompoundFixedMap do
     end
 
     defp non_module_atom?(val) do
-      is_atom(val) and !match?('Elixir.' ++ _, Atom.to_charlist(val))
+      is_atom(val) and !match?(~c"Elixir." ++ _, Atom.to_charlist(val))
     end
   end
 

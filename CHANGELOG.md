@@ -1,4 +1,7 @@
 ### Changelog
+- 0.13.5 -
+  - Support for Elixir v1.15.x. Thank you so much for your guidance and help, @josevalim!  (c.f. #185, #186)
+    - This required turning off part of TypeCheck's self-usage ('dogfooding'). This change should be temporary and will be re-introduced in a future version (c.f. #187).
 - 0.13.4 -
   - No code changes, but two small improvements to the documentation:
     - Changelog has been split off from the README file.

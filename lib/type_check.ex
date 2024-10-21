@@ -136,11 +136,25 @@ defmodule TypeCheck do
         end
 
       _other ->
+        type_require =
+          if __CALLER__.module == TypeCheck.Type do
+            :ok
+          else
+            quote do: require(TypeCheck.Type)
+          end
+
+        builtin_import =
+          if __CALLER__.module == TypeCheck.Builtin do
+            :ok
+          else
+            quote do: import(TypeCheck.Builtin)
+          end
+
         quote generated: true, location: :keep do
           use TypeCheck.Macros, unquote(options)
           require TypeCheck
-          require TypeCheck.Type
-          import TypeCheck.Builtin
+          unquote(type_require)
+          unquote(builtin_import)
           :ok
         end
     end
@@ -281,10 +295,9 @@ defmodule TypeCheck do
       iex> forty_two = TypeCheck.Type.build(42)
       iex> TypeCheck.dynamic_conforms(42, forty_two)
       {:ok, 42}
-      iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, forty_two)
-      iex> type_error.message
-      "At (for doctest at) lib/type_check.ex:281:
-          `20` is not the same value as `42`."
+      iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
+      iex> type_error.message =~ "`20` is not the same value as `42`."
+      true
   """
   @spec dynamic_conforms(value, TypeCheck.Type.t()) ::
           {:ok, value} | {:error, TypeCheck.TypeError.t()}
@@ -340,8 +353,8 @@ defmodule TypeCheck do
       iex> forty_two = TypeCheck.Type.build(42)
       iex> TypeCheck.dynamic_conforms!(42, forty_two)
       42
-      iex> TypeCheck.dynamic_conforms!(20, forty_two)
-      ** (TypeCheck.TypeError) At lib/type_check.ex:349:
+      iex> TypeCheck.dynamic_conforms!(20, fourty_two)
+      ** (TypeCheck.TypeError) At lib/type_check.ex:362:
           `20` is not the same value as `42`.
   """
   @spec dynamic_conforms!(value, TypeCheck.Type.t()) :: value | no_return()
