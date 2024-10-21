@@ -796,9 +796,7 @@ defmodule TypeCheck.Builtin do
     @spec range(range :: Range.t()) :: TypeCheck.Builtin.Range.t()
   end
 
-  def range(range = _lower.._higher) do
-    # %TypeCheck.Builtin.Range{range: range}
-
+  def range(range = %Range{}) do
     build_struct(TypeCheck.Builtin.Range)
     |> Map.put(:range, range)
   end
