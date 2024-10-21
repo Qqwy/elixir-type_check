@@ -1,4 +1,9 @@
 ### Changelog
+- 0.13.6 -
+  - Support for Elixir v1.17.x:
+    - Fix an oversight in the pre-expander now that there was a slight change to the Elixir AST format. Thank you, @skwerlman! (c.f. #190)
+    - Fixing a bunch of compile-time warnings. Amongst them, a reordering of split function heads (Thank you, @ulfurinn! c.f. #191)
+  - Fixing some documentation typos, Thank you, @kianmeng! (c.f. #179)
 - 0.13.5 -
   - Support for Elixir v1.15.x. Thank you so much for your guidance and help, @josevalim!  (c.f. #185, #186)
     - This required turning off part of TypeCheck's self-usage ('dogfooding'). This change should be temporary and will be re-introduced in a future version (c.f. #187).
