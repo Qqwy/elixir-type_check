@@ -935,7 +935,7 @@ defmodule TypeCheck.Builtin do
 
   @doc typekind: :extension
   @doc """
-  Allows constructing map types containing a combination of fixed, required and optional keys (and their associatied type-values)
+  Allows constructing map types containing a combination of fixed, required and optional keys (and their associated type-values)
 
   Desugaring of most ways of map syntaxes.
 
@@ -1277,7 +1277,7 @@ defmodule TypeCheck.Builtin do
   runtime, the compiler is not able to optimize the type-checking code.
 
   Thus, you should only use it when necessary, since it will be slower
-  than when using the inner type direcly.
+  than when using the inner type directly.
 
 
   ### In builtin typespecs
@@ -1552,7 +1552,7 @@ defmodule TypeCheck.Builtin do
     |> Map.put(:protocol, protocol_name)
   end
 
-  # Reason we cannot dirctly use %module{}
+  # Reason we cannot directly use %module{}
   # is because then we'd create circular dependencies.
   defp build_struct(module) do
     Macro.struct!(module, __ENV__)

@@ -292,8 +292,8 @@ defmodule TypeCheck do
   Use `dynamic_conforms` only when you cannot use the normal `conforms/2`,
   for instance when you're only able to construct the type to check against at runtime.
 
-      iex> fourty_two = TypeCheck.Type.build(42)
-      iex> TypeCheck.dynamic_conforms(42, fourty_two)
+      iex> forty_two = TypeCheck.Type.build(42)
+      iex> TypeCheck.dynamic_conforms(42, forty_two)
       {:ok, 42}
       iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
       iex> type_error.message =~ "`20` is not the same value as `42`."
@@ -331,10 +331,10 @@ defmodule TypeCheck do
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
 
 
-      iex> fourty_two = TypeCheck.Type.build(42)
-      iex> TypeCheck.dynamic_conforms?(42, fourty_two)
+      iex> forty_two = TypeCheck.Type.build(42)
+      iex> TypeCheck.dynamic_conforms?(42, forty_two)
       true
-      iex> TypeCheck.dynamic_conforms?(20, fourty_two)
+      iex> TypeCheck.dynamic_conforms?(20, forty_two)
       false
   """
   @spec dynamic_conforms?(value, TypeCheck.Type.t()) :: boolean
@@ -350,8 +350,8 @@ defmodule TypeCheck do
 
   The same features and restrictions apply to this function as to `dynamic_conforms/2`.
 
-      iex> fourty_two = TypeCheck.Type.build(42)
-      iex> TypeCheck.dynamic_conforms!(42, fourty_two)
+      iex> forty_two = TypeCheck.Type.build(42)
+      iex> TypeCheck.dynamic_conforms!(42, forty_two)
       42
       iex> TypeCheck.dynamic_conforms!(20, fourty_two)
       ** (TypeCheck.TypeError) At lib/type_check.ex:362:
