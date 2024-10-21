@@ -114,71 +114,81 @@ defmodule TypeCheck.ExUnit do
   For the list of options supported by StreamData, see `StreamData.check_all/3`.
 
   """
-  if Code.ensure_loaded?(StreamData) do
-    defmacro spectest(module, options \\ []) do
-      do_spectest(module, options, __CALLER__)
-    end
-  else
+  if !Code.ensure_loaded?(StreamData) do
     defmacro spectest(_module, _options \\ []) do
       raise ArgumentError, """
       `spectest/2` depends on the optional library `:stream_data`.
       To use this functionality, add `:stream_data` to your application's deps.
       """
     end
-  end
+  else
+    defmacro spectest(module, options \\ []) do
+      do_spectest(module, options, __CALLER__)
+    end
 
-  defp do_spectest(module, options, caller) do
-    req =
-      if is_atom(Macro.expand(module, caller)) do
-        quote generated: true, location: :keep do
-          require unquote(module)
-        end
-      end
-
-    tests =
-      quote generated: true, location: :keep, bind_quoted: [module: module, options: options] do
-        initial_seed =
-          case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
-            seed when is_integer(seed) ->
-              seed
-
-            other ->
-              raise ArgumentError,
-                    "expected :initial_seed to be an integer, got: #{inspect(other)}"
-          end
-
-        generator_options =
-          case options[:generator] do
-            nil -> []
-            StreamData -> []
-            {StreamData, opts} when is_list(opts) -> opts
-          end
-
-        generator_options =
-          generator_options ++ [initial_seed: Macro.escape({0, 0, initial_seed})]
-
-        env = __ENV__
-        exposed_specs = module.__type_check__(:specs)
-        specs = (options[:only] || exposed_specs) -- (options[:except] || [])
-
-        for {name, arity} <- specs do
-          spec = TypeCheck.Spec.lookup!(module, name, arity)
-          body = TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, generator_options)
-
-          test_name =
-            ExUnit.Case.register_test(env.module, env.file, env.line, :spectest, "#{TypeCheck.Inspect.inspect(spec)}", [
-              :spectest
-            ])
-
-          def unquote(test_name)(_) do
-            unquote(body)
+    @doc false
+    defp do_spectest(module, options, caller) do
+      req =
+        if is_atom(Macro.expand(module, caller)) do
+          quote generated: true, location: :keep do
+            require unquote(module)
           end
         end
-      end
 
-    quote generated: true, location: :keep do
-      unquote(req)
-      unquote(tests)
+      tests =
+        quote generated: true, location: :keep, bind_quoted: [module: module, options: options] do
+          initial_seed =
+            case Keyword.get(options, :initial_seed, ExUnit.configuration()[:seed]) do
+              seed when is_integer(seed) ->
+                seed
+
+              other ->
+                raise ArgumentError,
+                      "expected :initial_seed to be an integer, got: #{inspect(other)}"
+            end
+
+          generator_options =
+            case options[:generator] do
+              nil -> []
+              StreamData -> []
+              {StreamData, opts} when is_list(opts) -> opts
+            end
+
+          generator_options =
+            generator_options ++ [initial_seed: Macro.escape({0, 0, initial_seed})]
+
+          env = __ENV__
+          exposed_specs = module.__type_check__(:specs)
+          specs = (options[:only] || exposed_specs) -- (options[:except] || [])
+
+          for {name, arity} <- specs do
+            spec = TypeCheck.Spec.lookup!(module, name, arity)
+
+            body =
+              TypeCheck.ExUnit.__build_spectest__(module, name, arity, spec, generator_options)
+
+            test_name =
+              ExUnit.Case.register_test(
+                env.module,
+                env.file,
+                env.line,
+                :spectest,
+                "#{TypeCheck.Inspect.inspect(spec)}",
+                [
+                  :spectest
+                ]
+              )
+
+            def unquote(test_name)(_) do
+              unquote(body)
+            end
+          end
+        end
+
+      quote generated: true, location: :keep do
+        unquote(req)
+        unquote(tests)
+      end
     end
   end
 

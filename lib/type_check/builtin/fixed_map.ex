@@ -169,7 +169,8 @@ defmodule TypeCheck.Builtin.FixedMap do
           # by implementing the TypeCheck Inspect protocol:
           TypeCheck.Protocols.Inspect.inspect(map, %Inspect.Opts{
             opts
-            | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2, custom_options: [sort_maps: true]
+            | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2,
+              custom_options: [sort_maps: true]
           })
 
         _ ->
@@ -177,7 +178,8 @@ defmodule TypeCheck.Builtin.FixedMap do
           # by implementing the TypeCheck Inspect protocol:
           TypeCheck.Protocols.Inspect.inspect(map, %Inspect.Opts{
             opts
-            | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2, custom_options: [sort_maps: true]
+            | inspect_fun: &TypeCheck.Protocols.Inspect.inspect/2,
+              custom_options: [sort_maps: true]
           })
       end
     end

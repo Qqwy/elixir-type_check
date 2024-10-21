@@ -433,11 +433,13 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
   end
 
   defp inspect_type_opts() do
-    color_opts = if IO.ANSI.enabled?() do
-      [reset_color: :red, syntax_colors: [reset: :red] ++ TypeCheck.Inspect.default_colors()]
-    else
-      []
-    end
+    color_opts =
+      if IO.ANSI.enabled?() do
+        [reset_color: :red, syntax_colors: [reset: :red] ++ TypeCheck.Inspect.default_colors()]
+      else
+        []
+      end
+
     [custom_options: [sort_maps: true]] ++ color_opts
   end
 end
