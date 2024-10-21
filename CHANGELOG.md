@@ -1,4 +1,8 @@
 ### Changelog
+- 0.13.7 -
+  - Fixes: (c.f. #195)
+    - Fixing new compiler warnings (stricter checks, deprecation warnings) of Elixir v1.16/v1.17
+    - Ensuring map order shown in most output is sorted, esp. when creating `fixed_map/1`s (including structs). This ensures output of inspect(my_type) and type error formatting should be identical between OTP <= 25 and OTP 26+
 - 0.13.6 -
   - Support for Elixir v1.17.x:
     - Fix an oversight in the pre-expander now that there was a slight change to the Elixir AST format. Thank you, @skwerlman! (c.f. #190)
