@@ -79,8 +79,9 @@ defmodule TypeCheck.MixProject do
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:benchee, "~> 1.0", only: :bench},
       {:excoveralls, "~> 0.10", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
-      {:castore, "~> 1.0"} # <- Dependency of excoveralls required on OTP < 25
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      # Dependency of excoveralls (only required on OTP < 25!):
+      {:castore, "~> 1.0"}
     ]
   end
 
