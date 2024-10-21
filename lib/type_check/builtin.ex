@@ -268,8 +268,8 @@ defmodule TypeCheck.Builtin do
 
   c.f. `list/1` and `char/0`
 
-      iex> TypeCheck.conforms!('hello world', charlist())
-      'hello world'
+      iex> TypeCheck.conforms!(~c'hello world', charlist())
+      ~c'hello world'
       iex> TypeCheck.conforms!("hello world", charlist())
       ** (TypeCheck.TypeError) `"hello world"` does not check against `list(0..1114111)`. Reason:
             `"hello world"` is not a list.
