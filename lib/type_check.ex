@@ -295,7 +295,7 @@ defmodule TypeCheck do
       iex> forty_two = TypeCheck.Type.build(42)
       iex> TypeCheck.dynamic_conforms(42, forty_two)
       {:ok, 42}
-      iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, fourty_two)
+      iex> {:error, type_error} = TypeCheck.dynamic_conforms(20, forty_two)
       iex> type_error.message =~ "`20` is not the same value as `42`."
       true
   """
@@ -353,7 +353,7 @@ defmodule TypeCheck do
       iex> forty_two = TypeCheck.Type.build(42)
       iex> TypeCheck.dynamic_conforms!(42, forty_two)
       42
-      iex> TypeCheck.dynamic_conforms!(20, fourty_two)
+      iex> TypeCheck.dynamic_conforms!(20, forty_two)
       ** (TypeCheck.TypeError) At lib/type_check.ex:362:
           `20` is not the same value as `42`.
   """
