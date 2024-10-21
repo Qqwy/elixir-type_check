@@ -268,8 +268,8 @@ defmodule TypeCheck.Builtin do
 
   c.f. `list/1` and `char/0`
 
-      iex> TypeCheck.conforms!('hello world', charlist())
-      'hello world'
+      iex> TypeCheck.conforms!(~c'hello world', charlist())
+      ~c'hello world'
       iex> TypeCheck.conforms!("hello world", charlist())
       ** (TypeCheck.TypeError) `"hello world"` does not check against `list(0..1114111)`. Reason:
             `"hello world"` is not a list.
@@ -796,9 +796,7 @@ defmodule TypeCheck.Builtin do
     @spec range(range :: Range.t()) :: TypeCheck.Builtin.Range.t()
   end
 
-  def range(range = _lower.._higher) do
-    # %TypeCheck.Builtin.Range{range: range}
-
+  def range(range = %Range{}) do
     build_struct(TypeCheck.Builtin.Range)
     |> Map.put(:range, range)
   end
@@ -930,7 +928,7 @@ defmodule TypeCheck.Builtin do
     end)
 
     build_struct(TypeCheck.Builtin.FixedMap)
-    |> Map.put(:keypairs, Enum.into(keywords, []))
+    |> Map.put(:keypairs, Enum.sort(keywords))
   end
 
   @doc typekind: :extension

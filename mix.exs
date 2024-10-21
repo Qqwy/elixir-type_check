@@ -6,7 +6,7 @@ defmodule TypeCheck.MixProject do
   def project do
     [
       app: :type_check,
-      version: "0.13.6",
+      version: "0.13.7",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -72,7 +72,7 @@ defmodule TypeCheck.MixProject do
   defp deps do
     [
       # Used for spectesting and property-tests in general:
-      {:stream_data, "~> 0.5.0", optional: true},
+      {:stream_data, "~> 1.0", optional: true},
       {:credo, "~> 1.5", runtime: false, optional: true},
 
       # For documentation purposes:

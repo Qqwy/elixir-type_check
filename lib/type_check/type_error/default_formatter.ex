@@ -429,14 +429,17 @@ defmodule TypeCheck.TypeError.DefaultFormatter do
         []
       end
 
-    [limit: 5] ++ color_opts
+    [limit: 5, custom_options: [sort_maps: true]] ++ color_opts
   end
 
   defp inspect_type_opts() do
-    if IO.ANSI.enabled?() do
-      [reset_color: :red, syntax_colors: [reset: :red] ++ TypeCheck.Inspect.default_colors()]
-    else
-      []
-    end
+    color_opts =
+      if IO.ANSI.enabled?() do
+        [reset_color: :red, syntax_colors: [reset: :red] ++ TypeCheck.Inspect.default_colors()]
+      else
+        []
+      end
+
+    [custom_options: [sort_maps: true]] ++ color_opts
   end
 end
