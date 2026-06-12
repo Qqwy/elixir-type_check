@@ -7,7 +7,6 @@ defmodule TypeCheck.DefaultOverrides.Regex do
              %Elixir.Regex{
                opts: binary(),
                re_pattern: term(),
-               re_version: term(),
                source: binary()
              },
              &TypeCheck.DefaultOverrides.Regex.regex_gen/0
